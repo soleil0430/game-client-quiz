@@ -24,7 +24,8 @@
   .nav a { text-decoration: none; }
   .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
     padding: 4px 12px; font-size: .8rem; font-weight: 800; }
-  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  .kicker { color: var(--muted); font-size: .85rem; font-weight: 800; margin: 0 0 2px; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 0 0 6px; letter-spacing: -.02em; }
   h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
   h3 { font-size: 1.1rem; font-weight: 800; margin: 34px 0 10px; padding-top: 4px; border-top: 2px solid var(--line); }
   article h3:first-of-type { margin-top: 26px; }
@@ -60,8 +61,9 @@
 </head>
 <body>
 <main>
-<div class="nav"><a href="../index.html#library">← 도서관</a><a href="04.html" class="badge">그래픽스·렌더링 목차</a></div>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="04.html">그래픽스·렌더링 목차 →</a></div>
 <article class="card">
+<p class="kicker">그래픽스·렌더링</p>
 <h1>드로우 콜과 배칭</h1>
 <p class="lead">드로우 콜은 GPU가 아니라 CPU 비용이다. 기법마다 줄이는 대상이 다르다</p>
 <p>삼각형이 몇 만 개도 안 되는데 프레임이 안 나오는 씬이 있다. 대개 드로우 콜이 많아 CPU에서 막힌 경우다. 호출마다 CPU가 상태를 세팅하고 드라이버를 거치기 때문이다.</p>

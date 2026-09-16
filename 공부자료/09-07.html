@@ -24,7 +24,8 @@
   .nav a { text-decoration: none; }
   .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
     padding: 4px 12px; font-size: .8rem; font-weight: 800; }
-  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  .kicker { color: var(--muted); font-size: .85rem; font-weight: 800; margin: 0 0 2px; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 0 0 6px; letter-spacing: -.02em; }
   h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
   h3 { font-size: 1.1rem; font-weight: 800; margin: 34px 0 10px; padding-top: 4px; border-top: 2px solid var(--line); }
   article h3:first-of-type { margin-top: 26px; }
@@ -60,8 +61,9 @@
 </head>
 <body>
 <main>
-<div class="nav"><a href="../index.html#library">← 도서관</a><a href="09.html" class="badge">네트워크 목차</a></div>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="09.html">네트워크 목차 →</a></div>
 <article class="card">
+<p class="kicker">네트워크</p>
 <h1>보안</h1>
 <p class="lead">클라이언트가 보낸 값은 전부 사용자가 적어 넣은 값이다. 판정은 서버가 한다</p>
 <p>클라이언트가 "골드 100을 받았다"고 말하면 서버가 그대로 적어 주는 게임이 있다. 그러면 메모리 수정 도구 하나로 경제가 무너진다. 보안 설계는 이 말을 믿지 않는 데서 시작한다.</p>

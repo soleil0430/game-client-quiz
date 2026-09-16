@@ -24,7 +24,8 @@
   .nav a { text-decoration: none; }
   .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
     padding: 4px 12px; font-size: .8rem; font-weight: 800; }
-  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  .kicker { color: var(--muted); font-size: .85rem; font-weight: 800; margin: 0 0 2px; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 0 0 6px; letter-spacing: -.02em; }
   h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
   h3 { font-size: 1.1rem; font-weight: 800; margin: 34px 0 10px; padding-top: 4px; border-top: 2px solid var(--line); }
   article h3:first-of-type { margin-top: 26px; }
@@ -60,8 +61,9 @@
 </head>
 <body>
 <main>
-<div class="nav"><a href="../index.html#library">← 도서관</a><a href="02.html" class="badge">Unity 엔진 목차</a></div>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="02.html">Unity 엔진 목차 →</a></div>
 <article class="card">
+<p class="kicker">Unity 엔진</p>
 <h1>생명주기와 스크립팅</h1>
 <p class="lead">엔진이 내 함수를 언제 부르는지 알면 초기화·물리·파괴에서 나는 버그가 대부분 사라진다</p>
 <p>Start에서 매니저를 찾았는데 null이 나온다. 물리를 Update에 뒀더니 기기마다 점프 높이가 다르다. 둘 다 엔진이 언제 부르는지를 모르면 생기는 버그다. </p><h3>한 프레임 안에서 내 함수가 불리는 순서</h3><p>Unity 스크립트에는 main이 없다. 게임 루프는 엔진이 들고 있고 내 함수는 엔진이 부르는 <strong>콜백</strong>이다. 언제 몇 번 불리는가가 그대로 설계 제약이 된다. </p><svg viewBox="0 0 640 228" width="100%" role="img" aria-label="Unity 생명주기 호출 순서 도식">

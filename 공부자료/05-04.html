@@ -24,7 +24,8 @@
   .nav a { text-decoration: none; }
   .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
     padding: 4px 12px; font-size: .8rem; font-weight: 800; }
-  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  .kicker { color: var(--muted); font-size: .85rem; font-weight: 800; margin: 0 0 2px; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 0 0 6px; letter-spacing: -.02em; }
   h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
   h3 { font-size: 1.1rem; font-weight: 800; margin: 34px 0 10px; padding-top: 4px; border-top: 2px solid var(--line); }
   article h3:first-of-type { margin-top: 26px; }
@@ -60,8 +61,9 @@
 </head>
 <body>
 <main>
-<div class="nav"><a href="../index.html#library">← 도서관</a><a href="05.html" class="badge">게임 수학·물리 목차</a></div>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="05.html">게임 수학·물리 목차 →</a></div>
 <article class="card">
+<p class="kicker">게임 수학·물리</p>
 <h1>보간</h1>
 <p class="lead">Lerp는 비율만 준다. 등속·감쇠·가감속 중 무엇이 필요한지 정하고 고른다</p>
 <p><code>pos = Vector3.Lerp(pos, target, 0.1f);</code>를 매 프레임 부르는 코드는 흔하다. 그런데 30fps 기기와 60fps 기기에서 속도가 다르게 보인다. 왜 그런지 모르면 고칠 수도 없다.</p>

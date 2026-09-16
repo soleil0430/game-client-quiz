@@ -24,7 +24,8 @@
   .nav a { text-decoration: none; }
   .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
     padding: 4px 12px; font-size: .8rem; font-weight: 800; }
-  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  .kicker { color: var(--muted); font-size: .85rem; font-weight: 800; margin: 0 0 2px; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 0 0 6px; letter-spacing: -.02em; }
   h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
   h3 { font-size: 1.1rem; font-weight: 800; margin: 34px 0 10px; padding-top: 4px; border-top: 2px solid var(--line); }
   article h3:first-of-type { margin-top: 26px; }
@@ -60,8 +61,9 @@
 </head>
 <body>
 <main>
-<div class="nav"><a href="../index.html#library">← 도서관</a><a href="04.html" class="badge">그래픽스·렌더링 목차</a></div>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="04.html">그래픽스·렌더링 목차 →</a></div>
 <article class="card">
+<p class="kicker">그래픽스·렌더링</p>
 <h1>텍스처</h1>
 <p class="lead">텍스처는 메모리와 대역폭을 함께 먹는다. 포맷·크기·밉맵이 그 양을 정한다</p>
 <p>모바일에서 앱이 메모리로 죽을 때 1순위 용의자가 텍스처다. 변을 두 배로 키우면 메모리는 네 배가 되기 때문이다. 포맷을 잘못 고르면 그 네 배가 또 네 배가 된다.</p>

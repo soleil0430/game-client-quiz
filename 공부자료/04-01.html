@@ -24,7 +24,8 @@
   .nav a { text-decoration: none; }
   .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
     padding: 4px 12px; font-size: .8rem; font-weight: 800; }
-  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  .kicker { color: var(--muted); font-size: .85rem; font-weight: 800; margin: 0 0 2px; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 0 0 6px; letter-spacing: -.02em; }
   h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
   h3 { font-size: 1.1rem; font-weight: 800; margin: 34px 0 10px; padding-top: 4px; border-top: 2px solid var(--line); }
   article h3:first-of-type { margin-top: 26px; }
@@ -60,8 +61,9 @@
 </head>
 <body>
 <main>
-<div class="nav"><a href="../index.html#library">← 도서관</a><a href="04.html" class="badge">그래픽스·렌더링 목차</a></div>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="04.html">그래픽스·렌더링 목차 →</a></div>
 <article class="card">
+<p class="kicker">그래픽스·렌더링</p>
 <h1>렌더링 파이프라인</h1>
 <p class="lead">렌더링은 CPU가 그릴 목록을 만들고 GPU가 칠하는 분업이다. 이 순서는 뒤집히지 않는다</p>
 <p>프레임이 느릴 때 어디를 고칠지는 이 순서가 정해 준다. 정점이 문제인지 픽셀이 문제인지 가르려면 단계를 알아야 한다. 큐브 하나가 화면에 찍히는 길을 따라가 본다.</p>

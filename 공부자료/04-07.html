@@ -24,7 +24,8 @@
   .nav a { text-decoration: none; }
   .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
     padding: 4px 12px; font-size: .8rem; font-weight: 800; }
-  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  .kicker { color: var(--muted); font-size: .85rem; font-weight: 800; margin: 0 0 2px; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 0 0 6px; letter-spacing: -.02em; }
   h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
   h3 { font-size: 1.1rem; font-weight: 800; margin: 34px 0 10px; padding-top: 4px; border-top: 2px solid var(--line); }
   article h3:first-of-type { margin-top: 26px; }
@@ -60,8 +61,9 @@
 </head>
 <body>
 <main>
-<div class="nav"><a href="../index.html#library">← 도서관</a><a href="04.html" class="badge">그래픽스·렌더링 목차</a></div>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="04.html">그래픽스·렌더링 목차 →</a></div>
 <article class="card">
+<p class="kicker">그래픽스·렌더링</p>
 <h1>Unity 렌더 파이프라인과 셰이더</h1>
 <p class="lead">URP는 C#으로 짠 렌더 파이프라인이다. 확장은 Renderer Feature, 비용은 배리언트다</p>
 <p>Built-in용으로 짠 조명 셰이더를 URP 프로젝트에 넣으면 분홍색이 된다. 프레임을 그리는 순서와 셰이더 규약이 통째로 바뀌었기 때문이다. 무엇이 어디로 옮겨졌는지부터 잡아야 전환 비용이 보인다.</p>

@@ -24,7 +24,8 @@
   .nav a { text-decoration: none; }
   .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
     padding: 4px 12px; font-size: .8rem; font-weight: 800; }
-  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  .kicker { color: var(--muted); font-size: .85rem; font-weight: 800; margin: 0 0 2px; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 0 0 6px; letter-spacing: -.02em; }
   h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
   h3 { font-size: 1.1rem; font-weight: 800; margin: 34px 0 10px; padding-top: 4px; border-top: 2px solid var(--line); }
   article h3:first-of-type { margin-top: 26px; }
@@ -60,8 +61,9 @@
 </head>
 <body>
 <main>
-<div class="nav"><a href="../index.html#library">← 도서관</a><a href="08.html" class="badge">운영체제·동시성 목차</a></div>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="08.html">운영체제·동시성 목차 →</a></div>
 <article class="card">
+<p class="kicker">운영체제·동시성</p>
 <h1>비동기</h1>
 <p class="lead">async는 스레드를 만들지 않는다. 기다리는 동안 스레드를 놓아주는 장치다</p>
 <p>다운로드가 끝날 때까지 프로그레스 바가 멈춰 있다. 기다리는 동안 스레드를 붙잡고 있어서다. 그 시간에 스레드를 놓아주면 같은 1초 동안 화면이 계속 돈다.</p>

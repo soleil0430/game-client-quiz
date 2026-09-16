@@ -24,7 +24,8 @@
   .nav a { text-decoration: none; }
   .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
     padding: 4px 12px; font-size: .8rem; font-weight: 800; }
-  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  .kicker { color: var(--muted); font-size: .85rem; font-weight: 800; margin: 0 0 2px; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 0 0 6px; letter-spacing: -.02em; }
   h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
   h3 { font-size: 1.1rem; font-weight: 800; margin: 34px 0 10px; padding-top: 4px; border-top: 2px solid var(--line); }
   article h3:first-of-type { margin-top: 26px; }
@@ -60,8 +61,9 @@
 </head>
 <body>
 <main>
-<div class="nav"><a href="../index.html#library">← 도서관</a><a href="01.html" class="badge">C# 언어 목차</a></div>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="01.html">C# 언어 목차 →</a></div>
 <article class="card">
+<p class="kicker">C# 언어</p>
 <h1>예외 처리</h1>
 <p class="lead">스택 추적은 throw 자리에서 채워지고 catch는 하나만 골라 실행된다</p>
 <p>라이브 빌드 로그에 찍힌 스택 추적이 <code>catch</code> 줄부터 시작한다. 진짜 원인이 있던 위치는 지워졌다. <code>throw ex;</code> 한 줄이 한 일이다. </p><h3>스택 추적은 throw가 실행되는 자리에서 채워진다</h3><p>예외는 '여기서는 더 못 한다'를 호출 스택 위로 올려 보내는 장치다. 예외가 던져지면 런타임은 현재 메서드에 맞는 <code>catch</code>를 찾는다. 없으면 자신을 부른 메서드로 올라가며 계속 찾는다. </p><svg viewBox="0 0 640 190" width="100%" role="img" aria-label="예외가 호출 스택을 타고 올라가며 맞는 catch를 찾는 모습"><rect x="150" y="128" width="280" height="44" fill="currentColor" fill-opacity="0.08" stroke="currentColor"/><text x="290" y="155" fill="currentColor" font-size="13" text-anchor="middle">Parse() · 여기서 throw</text><line x1="290" y1="128" x2="290" y2="104" stroke="currentColor"/><polyline points="285,112 290,104 295,112" fill="none" stroke="currentColor"/><rect x="150" y="72" width="280" height="44" fill="none" stroke="currentColor"/><text x="290" y="99" fill="currentColor" font-size="13" text-anchor="middle">Load() · 맞는 catch가 있다</text><line x1="290" y1="72" x2="290" y2="48" stroke="currentColor" stroke-dasharray="5 4"/><polyline points="285,56 290,48 295,56" fill="none" stroke="currentColor"/><rect x="150" y="16" width="280" height="44" fill="none" stroke="currentColor"/><text x="290" y="43" fill="currentColor" font-size="13" text-anchor="middle">Start() · 여기까지 오지 않는다</text><text x="446" y="100" fill="currentColor" font-size="13">맞는 catch를 만날 때까지</text><text x="446" y="122" fill="currentColor" font-size="13">한 칸씩 올라간다</text><text x="446" y="40" fill="currentColor" font-size="13">끝까지 못 찾으면</text><text x="446" y="62" fill="currentColor" font-size="13">그 스레드가 죽는다</text><text x="8" y="155" fill="currentColor" font-size="13">스택 추적은</text><text x="8" y="177" fill="currentColor" font-size="13">이 지점에서 채워진다</text></svg><p>여기서 중요한 사실 하나가 나온다. <code>StackTrace</code>는 예외 객체를 만들 때가 아니라 <strong><code>throw</code> 문이 실행되는 지점에서</strong> 채워진다. </p><p>그래서 <code>throw;</code>는 잡은 예외를 원래 스택 추적째로 다시 올린다. <code>throw ex;</code>는 그 줄이 새 출발점이 되어 진짜 원인의 위치를 지운다. 로그만 보고 디버깅하는 라이브 빌드에서는 이 차이가 크다. </p><p>원인을 감싸 올리고 싶으면 새 예외를 만든다. <code>throw new XxxException(message, ex)</code>로 <code>InnerException</code>에 원본을 담는다. </p><h3>catch는 위에서부터 하나만 고른다</h3><p><code>catch</code> 절은 위에서부터 차례로 검사한다. 타입이 맞는 <strong>첫 하나만</strong> 실행된다. 여러 개가 연달아 실행되는 일은 없다. </p><p>그래서 파생 예외를 위에, <code>Exception</code> 같은 기반 예외를 아래에 적는다. 순서를 뒤집으면 아래 절이 영원히 도달할 수 없어 컴파일 오류가 난다. </p><p>재던지기와 감싸 올리기를 한 메서드에 모은 코드다: </p><pre><code>static void Load(string path)

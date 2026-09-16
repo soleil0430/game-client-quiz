@@ -24,7 +24,8 @@
   .nav a { text-decoration: none; }
   .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
     padding: 4px 12px; font-size: .8rem; font-weight: 800; }
-  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  .kicker { color: var(--muted); font-size: .85rem; font-weight: 800; margin: 0 0 2px; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 0 0 6px; letter-spacing: -.02em; }
   h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
   h3 { font-size: 1.1rem; font-weight: 800; margin: 34px 0 10px; padding-top: 4px; border-top: 2px solid var(--line); }
   article h3:first-of-type { margin-top: 26px; }
@@ -60,8 +61,9 @@
 </head>
 <body>
 <main>
-<div class="nav"><a href="../index.html#library">← 도서관</a><a href="07.html" class="badge">자료구조·알고리즘 목차</a></div>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="07.html">자료구조·알고리즘 목차 →</a></div>
 <article class="card">
+<p class="kicker">자료구조·알고리즘</p>
 <h1>스택·큐·우선순위 큐</h1>
 <p class="lead">꺼내는 순서 규칙 하나가 자료구조를 가른다. 기능을 줄인 대가로 모두 O(1)이다</p>
 <p>UI 팝업은 언제나 맨 위 것부터 닫혀야 한다. 스폰 대기열은 먼저 신청한 유닛이 먼저 나와야 한다. 이 순서를 자료구조가 지켜 주지 않으면 매번 손으로 인덱스를 관리하게 된다. </p>

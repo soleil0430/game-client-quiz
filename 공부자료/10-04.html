@@ -24,7 +24,8 @@
   .nav a { text-decoration: none; }
   .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
     padding: 4px 12px; font-size: .8rem; font-weight: 800; }
-  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  .kicker { color: var(--muted); font-size: .85rem; font-weight: 800; margin: 0 0 2px; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 0 0 6px; letter-spacing: -.02em; }
   h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
   h3 { font-size: 1.1rem; font-weight: 800; margin: 34px 0 10px; padding-top: 4px; border-top: 2px solid var(--line); }
   article h3:first-of-type { margin-top: 26px; }
@@ -60,8 +61,9 @@
 </head>
 <body>
 <main>
-<div class="nav"><a href="../index.html#library">← 도서관</a><a href="10.html" class="badge">C++ 기초 목차</a></div>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="10.html">C++ 기초 목차 →</a></div>
 <article class="card">
+<p class="kicker">C++ 기초</p>
 <h1>STL</h1>
 <p class="lead">메모리가 이어졌는지, 정렬을 유지하는지 두 축으로 컨테이너를 고른다</p>
 <p>List를 쓰듯 vector에 계속 넣다가 원소를 가리키던 포인터가 죽는 일이 있다. C#에서는 겪지 않는 일이다. STL 컨테이너는 이름이 아니라 <strong>메모리 배치</strong>로 골라야 한다.</p>

@@ -24,7 +24,8 @@
   .nav a { text-decoration: none; }
   .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
     padding: 4px 12px; font-size: .8rem; font-weight: 800; }
-  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  .kicker { color: var(--muted); font-size: .85rem; font-weight: 800; margin: 0 0 2px; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 0 0 6px; letter-spacing: -.02em; }
   h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
   h3 { font-size: 1.1rem; font-weight: 800; margin: 34px 0 10px; padding-top: 4px; border-top: 2px solid var(--line); }
   article h3:first-of-type { margin-top: 26px; }
@@ -60,8 +61,9 @@
 </head>
 <body>
 <main>
-<div class="nav"><a href="../index.html#library">← 도서관</a><a href="04.html" class="badge">그래픽스·렌더링 목차</a></div>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="04.html">그래픽스·렌더링 목차 →</a></div>
 <article class="card">
+<p class="kicker">그래픽스·렌더링</p>
 <h1>디버깅과 설계</h1>
 <p class="lead">안 보이는 물체는 추측하지 않는다. 드로우 콜 유무로 후보를 반으로 자른다</p>
 <p>물체가 안 보일 때 후보를 하나씩 찍어 보면 반나절이 간다. 카메라·레이어·셰이더·노멀까지 후보가 너무 많다. 원인이 CPU 쪽인지 GPU 쪽인지부터 가르면 절반이 날아간다.</p>

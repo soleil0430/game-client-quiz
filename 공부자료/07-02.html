@@ -24,7 +24,8 @@
   .nav a { text-decoration: none; }
   .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
     padding: 4px 12px; font-size: .8rem; font-weight: 800; }
-  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  .kicker { color: var(--muted); font-size: .85rem; font-weight: 800; margin: 0 0 2px; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 0 0 6px; letter-spacing: -.02em; }
   h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
   h3 { font-size: 1.1rem; font-weight: 800; margin: 34px 0 10px; padding-top: 4px; border-top: 2px solid var(--line); }
   article h3:first-of-type { margin-top: 26px; }
@@ -60,8 +61,9 @@
 </head>
 <body>
 <main>
-<div class="nav"><a href="../index.html#library">← 도서관</a><a href="07.html" class="badge">자료구조·알고리즘 목차</a></div>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="07.html">자료구조·알고리즘 목차 →</a></div>
 <article class="card">
+<p class="kicker">자료구조·알고리즘</p>
 <h1>배열과 리스트</h1>
 <p class="lead">연속으로 놓느냐 흩어 놓느냐가 접근 비용과 캐시 적중률을 함께 가른다</p>
 <p>인벤토리 목록을 매 프레임 훑는데 프레임이 튄다. 원소 수는 같은데 <code>List</code>를 쓸 때와 <code>LinkedList</code>를 쓸 때가 다르다. 차이는 <strong>원소를 메모리에 어떻게 놓느냐</strong> 하나에서 온다. </p>

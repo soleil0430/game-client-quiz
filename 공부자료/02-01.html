@@ -24,7 +24,8 @@
   .nav a { text-decoration: none; }
   .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
     padding: 4px 12px; font-size: .8rem; font-weight: 800; }
-  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  .kicker { color: var(--muted); font-size: .85rem; font-weight: 800; margin: 0 0 2px; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 0 0 6px; letter-spacing: -.02em; }
   h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
   h3 { font-size: 1.1rem; font-weight: 800; margin: 34px 0 10px; padding-top: 4px; border-top: 2px solid var(--line); }
   article h3:first-of-type { margin-top: 26px; }
@@ -60,8 +61,9 @@
 </head>
 <body>
 <main>
-<div class="nav"><a href="../index.html#library">← 도서관</a><a href="02.html" class="badge">Unity 엔진 목차</a></div>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="02.html">Unity 엔진 목차 →</a></div>
 <article class="card">
+<p class="kicker">Unity 엔진</p>
 <h1>기본 구조</h1>
 <p class="lead">GameObject는 빈 그릇이고 기능은 컴포넌트가 맡는다. 프리팹과 레이어가 그 규칙 위에 얹힌다</p>
 <p>"날면서 부서지는 적"을 상속으로 만들면 조합마다 새 클래스가 생긴다. 나는 적, 부서지는 적, 둘 다인 적이 전부 따로다. Unity는 이 폭발을 막으려고 상속 대신 합성을 쓴다. </p><h3>적 조합이 늘어도 클래스는 늘지 않는다</h3><p>GameObject 자체에는 기능이 없다. 눈에 보이게 하려면 Renderer를, 밀려나게 하려면 Rigidbody를 붙인다. 이렇게 붙이는 부품 하나하나가 <strong>컴포넌트</strong>다. </p><svg viewBox="0 0 640 170" width="100%" role="img" aria-label="GameObject 그릇 안에 Transform과 다른 컴포넌트가 들어 있는 도식">

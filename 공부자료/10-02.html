@@ -24,7 +24,8 @@
   .nav a { text-decoration: none; }
   .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
     padding: 4px 12px; font-size: .8rem; font-weight: 800; }
-  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  .kicker { color: var(--muted); font-size: .85rem; font-weight: 800; margin: 0 0 2px; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 0 0 6px; letter-spacing: -.02em; }
   h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
   h3 { font-size: 1.1rem; font-weight: 800; margin: 34px 0 10px; padding-top: 4px; border-top: 2px solid var(--line); }
   article h3:first-of-type { margin-top: 26px; }
@@ -60,8 +61,9 @@
 </head>
 <body>
 <main>
-<div class="nav"><a href="../index.html#library">← 도서관</a><a href="10.html" class="badge">C++ 기초 목차</a></div>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="10.html">C++ 기초 목차 →</a></div>
 <article class="card">
+<p class="kicker">C++ 기초</p>
 <h1>메모리와 포인터</h1>
 <p class="lead">GC가 없으니 소유권을 코드에 적는다. RAII와 unique_ptr이 그 문법이다</p>
 <p>C#에서는 이 객체를 누가 책임지는지 코드에 적을 일이 거의 없다. 가비지 컬렉션(GC)이 걷어 가기 때문이다. C++에는 그 담당자가 없어 <strong>소유권과 수명을 코드로 적는다</strong>.</p>

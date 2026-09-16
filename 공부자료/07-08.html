@@ -24,7 +24,8 @@
   .nav a { text-decoration: none; }
   .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
     padding: 4px 12px; font-size: .8rem; font-weight: 800; }
-  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  .kicker { color: var(--muted); font-size: .85rem; font-weight: 800; margin: 0 0 2px; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 0 0 6px; letter-spacing: -.02em; }
   h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
   h3 { font-size: 1.1rem; font-weight: 800; margin: 34px 0 10px; padding-top: 4px; border-top: 2px solid var(--line); }
   article h3:first-of-type { margin-top: 26px; }
@@ -60,8 +61,9 @@
 </head>
 <body>
 <main>
-<div class="nav"><a href="../index.html#library">← 도서관</a><a href="07.html" class="badge">자료구조·알고리즘 목차</a></div>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="07.html">자료구조·알고리즘 목차 →</a></div>
 <article class="card">
+<p class="kicker">자료구조·알고리즘</p>
 <h1>공간 분할</h1>
 <p class="lead">n제곱 비교를 없애는 구조다. 그리드·쿼드트리·BVH는 약점이 서로 다르다</p>
 <p>유닛 1,000마리가 서로 주변을 살피면 비교가 50만 번이다. 정작 필요한 이웃은 몇 마리뿐이다. 공간을 미리 칸으로 나눠 두면 후보가 주변 밀도만큼으로 준다. </p>

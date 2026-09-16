@@ -24,7 +24,8 @@
   .nav a { text-decoration: none; }
   .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
     padding: 4px 12px; font-size: .8rem; font-weight: 800; }
-  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  .kicker { color: var(--muted); font-size: .85rem; font-weight: 800; margin: 0 0 2px; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 0 0 6px; letter-spacing: -.02em; }
   h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
   h3 { font-size: 1.1rem; font-weight: 800; margin: 34px 0 10px; padding-top: 4px; border-top: 2px solid var(--line); }
   article h3:first-of-type { margin-top: 26px; }
@@ -60,8 +61,9 @@
 </head>
 <body>
 <main>
-<div class="nav"><a href="../index.html#library">← 도서관</a><a href="07.html" class="badge">자료구조·알고리즘 목차</a></div>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="07.html">자료구조·알고리즘 목차 →</a></div>
 <article class="card">
+<p class="kicker">자료구조·알고리즘</p>
 <h1>정렬과 탐색</h1>
 <p class="lead">정렬은 최악·추가 공간·안정성으로 고른다. 정렬해 두면 탐색이 O(log N)이다</p>
 <p>랭킹 100만 명에서 특정 점수 구간만 뽑아야 한다. 정렬 없이 하면 질의마다 전체를 훑는다. 한 번 정렬해 두면 그 뒤의 탐색이 스무 번으로 끝난다. </p>

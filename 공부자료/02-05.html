@@ -24,7 +24,8 @@
   .nav a { text-decoration: none; }
   .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
     padding: 4px 12px; font-size: .8rem; font-weight: 800; }
-  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  .kicker { color: var(--muted); font-size: .85rem; font-weight: 800; margin: 0 0 2px; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 0 0 6px; letter-spacing: -.02em; }
   h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
   h3 { font-size: 1.1rem; font-weight: 800; margin: 34px 0 10px; padding-top: 4px; border-top: 2px solid var(--line); }
   article h3:first-of-type { margin-top: 26px; }
@@ -60,8 +61,9 @@
 </head>
 <body>
 <main>
-<div class="nav"><a href="../index.html#library">← 도서관</a><a href="02.html" class="badge">Unity 엔진 목차</a></div>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="02.html">Unity 엔진 목차 →</a></div>
 <article class="card">
+<p class="kicker">Unity 엔진</p>
 <h1>에셋과 리소스 관리</h1>
 <p class="lead">에셋은 기기 메모리보다 크다. 무엇을 언제 올리고 내리는지가 세 방식으로 갈린다</p>
 <p>모바일 게임의 에셋 전체는 기기 메모리보다 크다. 다 올리면 죽고 필요할 때마다 올리면 로딩이 길어진다. 지금 필요한 것만 올리고 나머지를 어떻게 미루는가가 문제다. </p><h3>Resources 폴더가 빌드와 구동을 무겁게 하는 이유</h3><p>Resources 폴더는 참조 여부와 상관없이 폴더 안 전부가 빌드에 들어간다. 안 쓰는 에셋까지 용량을 먹는다. 시작할 때 전체 목록을 인덱싱하느라 구동도 늦어진다. </p><p>문서는 에셋이 1만 개면 저사양 모바일에서 수 초가 걸린다고 적고 있다. 그래서 로드 방식은 아래 셋 중에서 고른다. </p><table><thead><tr><th>기준</th><th>Resources</th><th>AssetBundle</th><th>Addressables</th></tr></thead><tbody><tr><td>빌드 포함</td><td>폴더 전부</td><td>번들로 묶은 것만</td><td>그룹으로 묶은 것만</td></tr><tr><td>로드</td><td>경로 문자열</td><td>번들을 열고 이름으로</td><td>주소로 비동기</td></tr><tr><td>원격 배포</td><td>불가</td><td>직접 구현</td><td>기본 지원</td></tr><tr><td>의존성·해제</td><td>직접</td><td>직접</td><td>참조 카운트</td></tr></tbody></table><p>AssetBundle은 에셋을 묶은 아카이브 파일이다. Addressables는 그 위에 주소 체계와 참조 카운트 관리를 얹은 상위 시스템이다. </p><h3>공유 텍스처가 번들 열 개에 복사되는 문제</h3><p>번들을 직접 다루면 <strong>중복</strong>을 만난다. 어느 번들에도 지정하지 않은 의존 에셋은 그것을 참조하는 번들마다 복사본으로 들어간다. 공유 텍스처가 번들 열 개에 들어가면 용량도 메모리도 열 배다. </p><svg viewBox="0 0 640 236" width="100%" role="img" aria-label="공유 텍스처가 번들마다 복사되는 경우와 공통 번들로 뗀 경우를 비교한 도식">

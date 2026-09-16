@@ -24,7 +24,8 @@
   .nav a { text-decoration: none; }
   .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
     padding: 4px 12px; font-size: .8rem; font-weight: 800; }
-  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  .kicker { color: var(--muted); font-size: .85rem; font-weight: 800; margin: 0 0 2px; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 0 0 6px; letter-spacing: -.02em; }
   h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
   h3 { font-size: 1.1rem; font-weight: 800; margin: 34px 0 10px; padding-top: 4px; border-top: 2px solid var(--line); }
   article h3:first-of-type { margin-top: 26px; }
@@ -60,8 +61,9 @@
 </head>
 <body>
 <main>
-<div class="nav"><a href="../index.html#library">← 도서관</a><a href="09.html" class="badge">네트워크 목차</a></div>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="09.html">네트워크 목차 →</a></div>
 <article class="card">
+<p class="kicker">네트워크</p>
 <h1>소켓과 HTTP</h1>
 <p class="lead">소켓은 연결을 열어 두고 HTTP는 매번 새로 묻는다. 게임은 용도로 나눈다</p>
 <p>HTTP로만 통신하면 서버가 먼저 말을 걸 수 없다. 클라이언트가 묻지 않는 한 대전 상대가 잡혔다는 사실도 전할 방법이 없다. 소켓과 HTTP를 어디에 쓸지는 여기서 갈린다.</p>

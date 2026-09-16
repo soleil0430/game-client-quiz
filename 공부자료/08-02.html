@@ -24,7 +24,8 @@
   .nav a { text-decoration: none; }
   .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
     padding: 4px 12px; font-size: .8rem; font-weight: 800; }
-  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  .kicker { color: var(--muted); font-size: .85rem; font-weight: 800; margin: 0 0 2px; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 0 0 6px; letter-spacing: -.02em; }
   h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
   h3 { font-size: 1.1rem; font-weight: 800; margin: 34px 0 10px; padding-top: 4px; border-top: 2px solid var(--line); }
   article h3:first-of-type { margin-top: 26px; }
@@ -60,8 +61,9 @@
 </head>
 <body>
 <main>
-<div class="nav"><a href="../index.html#library">← 도서관</a><a href="08.html" class="badge">운영체제·동시성 목차</a></div>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="08.html">운영체제·동시성 목차 →</a></div>
 <article class="card">
+<p class="kicker">운영체제·동시성</p>
 <h1>메모리 구조</h1>
 <p class="lead">네 구역은 수명이 달라서 나뉜다. 스택은 함수가 끝나면 걷히고 힙은 놓을 때까지 남는다</p>
 <p>크래시 로그에 StackOverflow와 OutOfMemory는 다르게 찍힌다. 어느 구역이 터졌는지 모르면 고칠 자리를 못 찾는다. 프로세스 메모리는 수명이 다른 네 구역으로 나뉘어 있다.</p>

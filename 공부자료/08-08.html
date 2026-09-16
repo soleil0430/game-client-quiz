@@ -24,7 +24,8 @@
   .nav a { text-decoration: none; }
   .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
     padding: 4px 12px; font-size: .8rem; font-weight: 800; }
-  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  .kicker { color: var(--muted); font-size: .85rem; font-weight: 800; margin: 0 0 2px; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 0 0 6px; letter-spacing: -.02em; }
   h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
   h3 { font-size: 1.1rem; font-weight: 800; margin: 34px 0 10px; padding-top: 4px; border-top: 2px solid var(--line); }
   article h3:first-of-type { margin-top: 26px; }
@@ -60,8 +61,9 @@
 </head>
 <body>
 <main>
-<div class="nav"><a href="../index.html#library">← 도서관</a><a href="08.html" class="badge">운영체제·동시성 목차</a></div>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="08.html">운영체제·동시성 목차 →</a></div>
 <article class="card">
+<p class="kicker">운영체제·동시성</p>
 <h1>Unity와 멀티스레딩</h1>
 <p class="lead">순수 계산은 워커나 Job으로 넘기고, 엔진을 만지는 호출은 메인 스레드에 남긴다</p>
 <p>경로 탐색 한 번에 프레임이 30ms씩 튄다. 계산을 다른 스레드로 넘기면 될 것 같은데, 거기서 Transform을 만지면 예외가 난다. 무엇을 넘기고 무엇을 남기는지가 규칙의 전부다.</p>

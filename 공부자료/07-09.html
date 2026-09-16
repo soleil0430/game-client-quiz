@@ -24,7 +24,8 @@
   .nav a { text-decoration: none; }
   .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
     padding: 4px 12px; font-size: .8rem; font-weight: 800; }
-  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  .kicker { color: var(--muted); font-size: .85rem; font-weight: 800; margin: 0 0 2px; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 0 0 6px; letter-spacing: -.02em; }
   h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
   h3 { font-size: 1.1rem; font-weight: 800; margin: 34px 0 10px; padding-top: 4px; border-top: 2px solid var(--line); }
   article h3:first-of-type { margin-top: 26px; }
@@ -60,8 +61,9 @@
 </head>
 <body>
 <main>
-<div class="nav"><a href="../index.html#library">← 도서관</a><a href="07.html" class="badge">자료구조·알고리즘 목차</a></div>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="07.html">자료구조·알고리즘 목차 →</a></div>
 <article class="card">
+<p class="kicker">자료구조·알고리즘</p>
 <h1>풀이 기법</h1>
 <p class="lead">재귀·DP·그리디·비트 연산은 언제 성립하는지가 핵심이다. 조건과 반례로 외운다</p>
 <p>면접에서 "DP로 풀면 됩니다"라고 답하면 다음 질문이 온다. "왜 DP가 되나요?" 기법은 이름이 아니라 <strong>성립 조건</strong>을 알아야 쓸 수 있다. </p>

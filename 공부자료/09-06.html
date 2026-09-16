@@ -24,7 +24,8 @@
   .nav a { text-decoration: none; }
   .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
     padding: 4px 12px; font-size: .8rem; font-weight: 800; }
-  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  .kicker { color: var(--muted); font-size: .85rem; font-weight: 800; margin: 0 0 2px; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 0 0 6px; letter-spacing: -.02em; }
   h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
   h3 { font-size: 1.1rem; font-weight: 800; margin: 34px 0 10px; padding-top: 4px; border-top: 2px solid var(--line); }
   article h3:first-of-type { margin-top: 26px; }
@@ -60,8 +61,9 @@
 </head>
 <body>
 <main>
-<div class="nav"><a href="../index.html#library">← 도서관</a><a href="09.html" class="badge">네트워크 목차</a></div>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="09.html">네트워크 목차 →</a></div>
 <article class="card">
+<p class="kicker">네트워크</p>
 <h1>클라이언트-서버 신뢰성</h1>
 <p class="lead">응답이 없다고 처리가 안 된 건 아니다. 멱등 키로 중복 지급을 막는다</p>
 <p>구매 요청을 보냈는데 응답이 오지 않았다. 여기서 그냥 다시 보내면 결제가 두 번 될 수 있다. 신뢰성 설계는 이 한 장면에서 시작한다.</p>

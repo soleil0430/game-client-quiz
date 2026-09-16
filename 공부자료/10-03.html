@@ -24,7 +24,8 @@
   .nav a { text-decoration: none; }
   .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
     padding: 4px 12px; font-size: .8rem; font-weight: 800; }
-  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  .kicker { color: var(--muted); font-size: .85rem; font-weight: 800; margin: 0 0 2px; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 0 0 6px; letter-spacing: -.02em; }
   h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
   h3 { font-size: 1.1rem; font-weight: 800; margin: 34px 0 10px; padding-top: 4px; border-top: 2px solid var(--line); }
   article h3:first-of-type { margin-top: 26px; }
@@ -60,8 +61,9 @@
 </head>
 <body>
 <main>
-<div class="nav"><a href="../index.html#library">← 도서관</a><a href="10.html" class="badge">C++ 기초 목차</a></div>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="10.html">C++ 기초 목차 →</a></div>
 <article class="card">
+<p class="kicker">C++ 기초</p>
 <h1>현대 C++</h1>
 <p class="lead">값 복사가 기본이라 이동이 필요하다. 템플릿은 타입마다 코드를 찍어낸다</p>
 <p>C#에서 대입은 참조 하나를 복사하는 일이다. C++에서 벡터를 값으로 넘기면 원소 전부가 복사된다. C++11 이후 기능 대부분이 이 차이에서 나왔다.</p>

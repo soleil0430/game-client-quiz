@@ -24,7 +24,8 @@
   .nav a { text-decoration: none; }
   .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
     padding: 4px 12px; font-size: .8rem; font-weight: 800; }
-  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  .kicker { color: var(--muted); font-size: .85rem; font-weight: 800; margin: 0 0 2px; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 0 0 6px; letter-spacing: -.02em; }
   h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
   h3 { font-size: 1.1rem; font-weight: 800; margin: 34px 0 10px; padding-top: 4px; border-top: 2px solid var(--line); }
   article h3:first-of-type { margin-top: 26px; }
@@ -60,8 +61,9 @@
 </head>
 <body>
 <main>
-<div class="nav"><a href="../index.html#library">← 도서관</a><a href="08.html" class="badge">운영체제·동시성 목차</a></div>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="08.html">운영체제·동시성 목차 →</a></div>
 <article class="card">
+<p class="kicker">운영체제·동시성</p>
 <h1>가상 메모리</h1>
 <p class="lead">프로세스마다 가짜 주소를 주고 필요한 페이지만 올린다. 모바일 메모리 크래시의 배경이다</p>
 <p>테스트 기기에서 멀쩡하던 빌드가 구형 단말에서만 죽는다. 로그에는 원인이 거의 안 남는다. 운영체제가 메모리를 어떻게 빌려주고 언제 뺏는지 알아야 이 죽음이 읽힌다.</p>

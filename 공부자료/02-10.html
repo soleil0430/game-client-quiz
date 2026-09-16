@@ -24,7 +24,8 @@
   .nav a { text-decoration: none; }
   .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
     padding: 4px 12px; font-size: .8rem; font-weight: 800; }
-  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  .kicker { color: var(--muted); font-size: .85rem; font-weight: 800; margin: 0 0 2px; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 0 0 6px; letter-spacing: -.02em; }
   h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
   h3 { font-size: 1.1rem; font-weight: 800; margin: 34px 0 10px; padding-top: 4px; border-top: 2px solid var(--line); }
   article h3:first-of-type { margin-top: 26px; }
@@ -60,8 +61,9 @@
 </head>
 <body>
 <main>
-<div class="nav"><a href="../index.html#library">← 도서관</a><a href="02.html" class="badge">Unity 엔진 목차</a></div>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="02.html">Unity 엔진 목차 →</a></div>
 <article class="card">
+<p class="kicker">Unity 엔진</p>
 <h1>빌드와 플랫폼</h1>
 <p class="lead">빌드 용량은 텍스처에서 갈리고, 설치 실패는 대개 ARM64와 API 레벨에서 갈린다</p>
 <p>용량이 큰 앱은 설치 화면에서 사람을 잃는다. 스토어는 App Bundle 크기에 상한을 둬, 넘기면 올리지도 못한다. 그래서 빌드 줄이기는 취향이 아니라 지표 문제다.</p> <h3>무엇부터 줄일지는 감이 아니라 빌드 리포트가 정한다</h3> <p>빌드 직후 Editor.log에 에셋 종류별 용량이 남는다. 그걸 보고 큰 것부터 손댄다. 효과 순서는 대개 아래와 같다.</p> <table><thead><tr><th>항목</th><th>방법</th><th>보통 효과</th></tr></thead><tbody><tr><td>텍스처</td><td>ASTC 등 플랫폼 압축, Max Size 하향, 밉맵과 알파 정리</td><td>가장 크다</td></tr><tr><td>오디오</td><td>BGM은 Vorbis와 Streaming, 짧은 효과음은 ADPCM</td><td>크다</td></tr><tr><td>코드</td><td>Managed Stripping Level 상향, 안 쓰는 패키지 제거</td><td>중간</td></tr><tr><td>배포 구조</td><td>Addressables로 빼서 나중에 내려받기</td><td>초기 용량만 준다</td></tr></tbody></table> <p>텍스처가 1등인 이유는 압축 포맷 하나로 몇 배가 갈리기 때문이다. 같은 2048 크기라도 무압축 RGBA32는 16MB, ASTC 6x6은 1MB 수준이다.</p> <p>코드 쪽 Managed Stripping은 진입점에서 도달 가능한 코드만 남긴다. 리플렉션으로만 부르는 타입은 도달 불가로 보여 같이 지워진다. 이걸 막는 것이 link.xml이다.</p> <h3>Resources 폴더는 참조가 없어도 전부 들어간다</h3> <p><strong>Resources 폴더 안의 에셋은 아무도 참조하지 않아도 빌드에 들어간다.</strong> 앱 시작 시 인덱스를 만드느라 기동도 느려진다.</p> <p>필요한 것만 그때 불러오려면 Addressables를 쓴다. 초기 설치 용량을 줄이고 나머지는 나중에 내려받는 구조다.</p> <p>반대로 주석이나 변수 이름을 줄이는 것은 용량과 무관하다. 컴파일 결과에 남지 않기 때문이다.</p> <h3>설치가 안 되면 ARM64와 Target API부터 본다</h3> <p>ARMv7은 32비트, ARM64는 64비트 명령어 집합이다. 구글 플레이는 2019년 8월부터 64비트 지원을 요구해, ARMv7만 올리면 등록이 거부된다.</p> <p><strong>ARM64는 IL2CPP 백엔드에서만 빌드된다.</strong> Mono로 두면 Player Settings에서 ARM64 체크박스 자체가 비활성이다.</p> <p>최신 기기에 설치가 안 된다는 문제는 대개 둘 중 하나다. ARM64가 빠졌거나, Target API Level이 스토어 요구치보다 낮다.</p> <svg viewBox="0 0 640 180" width="100%" role="img" aria-label="APK 하나에는 두 아키텍처가 모두 들어가 그대로 설치되고, App Bundle은 스토어가 기기에 맞는 한 벌만 내려보낸다">

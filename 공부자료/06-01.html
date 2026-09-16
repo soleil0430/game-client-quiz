@@ -24,7 +24,8 @@
   .nav a { text-decoration: none; }
   .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
     padding: 4px 12px; font-size: .8rem; font-weight: 800; }
-  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  .kicker { color: var(--muted); font-size: .85rem; font-weight: 800; margin: 0 0 2px; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 0 0 6px; letter-spacing: -.02em; }
   h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
   h3 { font-size: 1.1rem; font-weight: 800; margin: 34px 0 10px; padding-top: 4px; border-top: 2px solid var(--line); }
   article h3:first-of-type { margin-top: 26px; }
@@ -60,8 +61,9 @@
 </head>
 <body>
 <main>
-<div class="nav"><a href="../index.html#library">← 도서관</a><a href="06.html" class="badge">설계·아키텍처 목차</a></div>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="06.html">설계·아키텍처 목차 →</a></div>
 <article class="card">
+<p class="kicker">설계·아키텍처</p>
 <h1>객체지향</h1>
 <p class="lead">데이터와 규칙을 한 클래스에 묶고, 바뀔 자리는 인터페이스로 열어 둔다</p>
 <p>방어력 계산 규칙이 바뀌면, 절차지향 코드는 그 데이터를 만지는 함수를 전부 찾아야 한다. 플레이어와 몬스터와 파괴물이 각자 계산하고 있으면 한 곳만 빠뜨려도 버그다.</p>
