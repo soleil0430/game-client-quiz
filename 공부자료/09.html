@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>네트워크 · 공부 자료</title>
+<style>
+  :root { --bg:#f7f7f5; --card:#fff; --text:#1f2328; --muted:#656d76; --line:#d0d7de; --accent:#2f6feb; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#0d1117; --card:#161b22; --text:#e6edf3; --muted:#8d96a0; --line:#30363d; --accent:#4493f8; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.75 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; }
+  main { max-width: 720px; margin: 0 auto; padding: 24px 16px 64px; }
+  a { color: var(--accent); }
+  h1 { font-size: 1.5rem; margin: 8px 0 4px; }
+  h2 { font-size: 1.25rem; margin: 0 0 4px; scroll-margin-top: 16px; }
+  h3 { font-size: 1.02rem; margin: 22px 0 6px; }
+  p, ul, ol { margin: 8px 0; }
+  li { margin: 4px 0; }
+  .muted { color: var(--muted); font-size: .9rem; }
+  .toc { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px 20px; margin: 16px 0 24px; }
+  .toc ol { margin: 6px 0 0; padding-left: 20px; }
+  article { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+  .lead { color: var(--muted); margin: 0 0 8px; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .92em; background: color-mix(in srgb, var(--line) 45%, transparent); padding: 1px 5px; border-radius: 4px; }
+  pre { background: color-mix(in srgb, var(--line) 30%, transparent); padding: 12px 14px; border-radius: 10px; overflow-x: auto; }
+  pre code { background: none; padding: 0; line-height: 1.6; }
+  table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; }
+  th, td { border: 1px solid var(--line); padding: 6px 10px; text-align: left; }
+  .refs { border-top: 1px solid var(--line); margin-top: 20px; padding-top: 12px; }
+  footer { color: var(--muted); font-size: .85rem; margin-top: 32px; }
+</style>
+</head>
+<body>
+<main>
+  <p><a href="../index.html">← 퀴즈로 돌아가기</a></p>
+  <h1>네트워크 공부 자료</h1>
+  <p class="muted">면접 퀴즈에서 나온 개념을 소주제별로 정리했다. 근거가 된 질문 목록은 질문은행 09-네트워크.md에 있다.</p>
+  <nav class="toc"><strong>목차</strong><ol>
+    <li><a href="#계층-모델">계층 모델</a></li>
+    <li><a href="#TCP와-UDP">TCP와 UDP</a></li>
+    <li><a href="#소켓과-HTTP">소켓과 HTTP</a></li>
+    <li><a href="#멀티플레이-구조">멀티플레이 구조</a></li>
+    <li><a href="#동기화-기법">동기화 기법</a></li>
+    <li><a href="#클라이언트-서버-신뢰성">클라이언트-서버 신뢰성</a></li>
+    <li><a href="#보안">보안</a></li>
+  </ol></nav>
+  <article>
+    <h2 id="계층-모델">계층 모델</h2>
+    <p class="lead">계층을 나눈 이유부터 계층별 역할과 데이터 단위, 게임 패킷이 앉는 자리까지 잡는다</p>
+    <h3>핵심 개념</h3><p>네트워크를 계층으로 나눈 이유는 <strong>관심사 분리</strong>다. 게임 클라이언트가 소켓에 "이 바이트를 저 주소로 보내라"고 넘기면, 그 아래에서 Wi-Fi를 쓰는지 LTE를 쓰는지, 중간에 라우터를 몇 개 거치는지는 게임 코드가 알 필요가 없다. 한 계층의 구현을 갈아 끼워도 위아래가 영향을 받지 않고, 계층마다 표준과 장비를 따로 만들 수 있다는 것이 계층 분리의 값어치다.</p><table><thead><tr><th>OSI 7계층</th><th>TCP/IP 4계층</th><th>데이터 단위</th><th>게임에서 닿는 곳</th></tr></thead><tbody><tr><td>응용·표현·세션</td><td>응용</td><td>메시지</td><td>직접 정한 패킷 구조, HTTP, JSON·Protobuf</td></tr><tr><td>전송</td><td>전송</td><td>세그먼트(TCP)·데이터그램(UDP)</td><td>소켓 API, 포트 번호, 소켓 옵션</td></tr><tr><td>네트워크</td><td>인터넷</td><td>패킷</td><td>IP 주소, 라우터, MTU</td></tr><tr><td>데이터링크·물리</td><td>네트워크 접근</td><td>프레임·비트</td><td>MAC 주소, 이더넷·Wi-Fi</td></tr></tbody></table><p>단위 이름이 계층마다 바뀌는 것은 <strong>캡슐화</strong> 때문이다. 위에서 내려온 데이터에 계층마다 자기 헤더를 붙여 아래로 보내고, 받는 쪽은 반대로 헤더를 떼며 위로 올린다. 그래서 계층을 나눈 대가로 전송량은 오히려 늘어난다. 위치 값 16바이트를 UDP로 보내도 IP 헤더 20바이트와 UDP 헤더 8바이트가 더 붙는다. 작은 패킷을 초당 수십 번 뿌리는 게임에서 헤더가 본문보다 커지는 일이 흔한 이유고, 여러 갱신을 한 패킷에 묶어 보내는 이유이기도 하다.</p><p>세션 계층은 통신의 시작·유지·종료와 대화 단위를 관리하는 자리다. 다만 실제 인터넷 구현은 TCP/IP 4계층을 따르고 OSI의 응용·표현·세션이 응용 계층 하나로 합쳐지므로, 세션 관리는 보통 응용 계층 코드(로그인 세션, 토큰 만료, 재접속 처리)가 직접 한다.</p><p>계층을 나눠 보면 장애 원인을 좁힐 수 있다는 것이 실무에서의 쓸모다. 핑은 가는데 접속이 안 되면 네트워크 계층까지는 살아 있으니 포트·방화벽·서버 프로세스(전송·응용 계층)를 보고, 특정 통신사에서만 끊기면 회선 쪽을 의심하는 식으로 나눠 들어간다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>OSI 7계층과 계층을 나눈 이유</strong> — 아래부터 물리·데이터링크·네트워크·전송·세션·표현·응용이다. 나눈 이유는 관심사를 분리해 한 계층의 구현이 바뀌어도 다른 계층이 영향을 받지 않게 하고, 계층별로 표준과 장비를 따로 발전시킬 수 있게 하기 위해서다.</li><li><strong>TCP/IP 4계층과의 대응</strong> — 응용·표현·세션이 응용 계층으로, 물리·데이터링크가 네트워크 접근 계층으로 합쳐지고 전송과 네트워크(인터넷)는 그대로 대응한다. 실제 구현과 표준 문서는 TCP/IP를 따르고 OSI는 개념을 설명할 때 쓰는 참조 모델이다.</li><li><strong>계층별 데이터 단위</strong> — 전송 계층은 세그먼트(UDP는 데이터그램), 네트워크 계층은 패킷, 데이터링크는 프레임, 물리는 비트다. 캡슐화로 헤더가 붙으면서 이름이 바뀐다.</li><li><strong>게임 클라이언트는 어느 계층을 다루나</strong> — 응용 계층에서 패킷 구조와 직렬화 방식을 정하고, 전송 계층은 TCP냐 UDP냐와 소켓 옵션 수준에서 고른다. 그 아래는 OS와 네트워크 장비의 몫이라 코드로 손대지 않는다.</li></ul><h3>흔한 오해</h3><ul><li><strong>계층을 나누면 전송 효율이 좋아진다</strong> — 계층마다 헤더가 붙어 전송량은 늘어난다. 얻는 것은 표준화와 교체 용이성이지 대역폭이 아니다.</li><li><strong>라우터가 TCP 연결을 관리한다</strong> — 라우터는 네트워크 계층에서 IP를 보고 경로를 정한다. TCP 연결 상태는 양 끝 호스트의 OS가 들고 있다.</li><li><strong>OSI 7계층이 실제 인터넷 구조다</strong> — 실제로 돌아가는 것은 TCP/IP 스택이다. OSI는 설명과 비교에 쓰는 모델이라 세션·표현 계층에 딱 맞는 구현이 따로 있지 않다.</li><li><strong>UDP의 전송 단위도 세그먼트다</strong> — UDP는 데이터그램이라고 부른다. 세그먼트는 연결과 순서를 전제한 TCP 쪽 용어다.</li></ul>
+    <div class="refs"><strong>참고 자료</strong><ul><li><a href="https://www.rfc-editor.org/rfc/rfc1122" target="_blank" rel="noopener">RFC 1122 – Requirements for Internet Hosts: Communication Layers</a></li><li><a href="https://developer.mozilla.org/ko/docs/Learn_web_development/Howto/Web_mechanics/How_does_the_Internet_work" target="_blank" rel="noopener">MDN – 인터넷은 어떻게 동작하는가?</a></li><li><a href="https://www.rfc-editor.org/rfc/rfc9293.html" target="_blank" rel="noopener">RFC 9293 – Transmission Control Protocol (TCP)</a></li></ul></div>
+  </article>
+  <article>
+    <h2 id="TCP와-UDP">TCP와 UDP</h2>
+    <p class="lead">무엇을 기다리느라 느려지는지 알면 게임의 어느 데이터에 무엇을 쓸지 고를 수 있다</p>
+    <h3>핵심 개념</h3><p>TCP와 UDP의 차이는 무엇을 보장하느냐보다 <strong>보장을 위해 무엇을 기다리느냐</strong>로 보면 정리된다. TCP는 바이트마다 순서 번호를 붙이고 받은 쪽이 ACK로 확인하며, 확인이 없으면 재전송한다. 순서까지 보장하므로 중간 한 조각이 빠지면 뒤에 이미 도착한 데이터도 응용으로 올라가지 못한다(head-of-line blocking). TCP에서 튀는 지연은 회선이 느려서가 아니라 <strong>빠진 조각을 기다리느라</strong> 생긴다.</p><p>UDP는 그 장치가 전부 없다. 주소만 적어 던지고 도착 여부도 순서도 중복 제거도 하지 않는 대신 지나간 값을 기다리지 않는다. 그래서 선택 기준은 '이 데이터가 늦게 도착해도 쓸모가 있는가'가 된다.</p><table><thead><tr><th>게임 데이터</th><th>고르는 쪽</th><th>이유</th></tr></thead><tbody><tr><td>캐릭터 위치·입력(초당 20~60회)</td><td>UDP</td><td>다음 값이 곧 오므로 잃은 값을 기다리는 것이 손해다</td></tr><tr><td>스킬 사용 확정, 아이템 획득, 채팅</td><td>TCP·UDP 신뢰 채널</td><td>놓치면 다음 패킷이 대신해 주지 못한다</td></tr><tr><td>로그인·결제·랭킹 조회</td><td>TCP(HTTPS)</td><td>유실이 허용되지 않고 빈도가 낮아 지연이 문제되지 않는다</td></tr></tbody></table><p>그래서 실시간 게임은 UDP를 깔고 <strong>필요한 만큼만 신뢰성을 직접 얹는다</strong>. 패킷마다 시퀀스 번호를 붙이고 ACK를 받으며, 제때 ACK가 없으면 재전송하고, 중복은 버리고 순서는 수신 버퍼에서 맞춘다. 모든 패킷에 이 규칙을 걸면 TCP를 다시 만든 꼴이라, 중요한 메시지만 신뢰 채널로 보내는 선택적 신뢰성이 실무 형태다.</p><p>TCP를 쓸 때 게임이 반드시 손대는 옵션이 네이글 알고리즘이다. 네이글은 앞서 보낸 데이터의 ACK가 올 때까지 작은 데이터를 모아 두었다가 묶어 보내 패킷 수를 줄인다. 대역폭에는 좋지만 입력 같은 작은 메시지가 수십 ms 늦게 나가므로 .NET에서는 <code>NoDelay</code>로 끈다. 꺼지는 것은 <strong>모아 보내기뿐</strong>이고 재전송과 순서 보장은 그대로 남는다.</p><pre><code>using System.Net.Sockets;
+
+public static class RealtimeSocket
+{
+    public static TcpClient ConnectForGame(string host, int port)
+    {
+        var client = new TcpClient();
+        client.Connect(host, port);
+        client.NoDelay = true;   // 네이글 끄기: 작은 입력 패킷을 모으지 않고 바로 내보낸다
+        return client;
+    }
+}</code></pre><p>패킷 크기는 MTU(한 번에 보낼 수 있는 상한, 이더넷은 보통 1500바이트)에 맞춘다. 넘으면 조각으로 나뉘는데 UDP는 조각 하나만 잃어도 원래 패킷 전체를 못 쓴다. 게임 패킷을 헤더 포함 1200바이트 안팎으로 맞추는 이유다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>TCP와 UDP의 차이와 게임에서의 선택 기준</strong> — TCP는 연결·순서·재전송을 보장하느라 손실이 나면 뒤 데이터가 밀리고, UDP는 보장이 없는 대신 기다리지 않는다. 최신 값만 의미 있는 위치·입력은 UDP, 유실이 안 되는 거래와 인증은 TCP나 HTTPS로 나눠 쓴다.</li><li><strong>3-way handshake와 2-way가 안 되는 이유</strong> — 클라이언트 SYN, 서버 SYN+ACK, 클라이언트 ACK다. 양쪽이 각자의 초기 순서 번호를 보내고 그것이 상대에게 닿았음을 확인해야 해서 세 번이 필요하다. 두 번이면 서버는 자기 순서 번호가 전달됐는지 알 수 없다.</li><li><strong>4-way handshake와 TIME_WAIT</strong> — FIN과 ACK를 양쪽이 주고받아 네 번 오간다. 먼저 닫은 쪽이 마지막 ACK 유실과 늦게 오는 패킷에 대비해 TIME_WAIT으로 머문다. 서버에 TIME_WAIT이 쌓이면 서버가 먼저 끊는 구조가 아닌지 의심한다.</li><li><strong>흐름 제어와 혼잡 제어</strong> — 흐름 제어는 수신자 버퍼에, 혼잡 제어는 중간 네트워크 상태에 맞춰 전송량을 조절한다. 실제 전송량은 두 윈도 중 작은 쪽으로 정해지고, 혼잡 제어는 손실을 혼잡 신호로 읽어 전송률을 낮춘다.</li><li><strong>상대가 갑자기 꺼졌을 때 알아채는 법</strong> — 비정상 종료에는 FIN이 오지 않아 다음 송신 전까지 알 수 없다. 응용에서 몇 초 주기로 하트비트를 주고받고 연속 몇 회 응답이 없으면 끊긴 것으로 처리한다. TCP keep-alive는 기본 주기가 분 단위라 게임에는 느리다.</li></ul><h3>흔한 오해</h3><ul><li><strong>UDP는 언제나 TCP보다 빠르다</strong> — 손실이 없으면 크게 다르지 않다. UDP의 이점은 잃은 패킷을 기다리지 않아 지연이 튀지 않는 것이지 회선이 빨라지는 것이 아니다.</li><li><strong>TCP_NODELAY를 켜면 신뢰성이 사라진다</strong> — 꺼지는 것은 작은 패킷 모아 보내기뿐이고 재전송·순서 보장은 그대로 동작한다.</li><li><strong>TIME_WAIT은 서버에 생긴다</strong> — 먼저 close한 쪽에 생긴다.</li><li><strong>Connected 속성으로 연결 상태를 알 수 있다</strong> — 마지막 통신 시점의 값이라 현재를 보장하지 않는다. 지금 살아 있는지는 하트비트로만 알 수 있다.</li></ul>
+    <div class="refs"><strong>참고 자료</strong><ul><li><a href="https://www.rfc-editor.org/rfc/rfc9293.html" target="_blank" rel="noopener">RFC 9293 – Transmission Control Protocol (TCP)</a></li><li><a href="https://www.rfc-editor.org/rfc/rfc768.html" target="_blank" rel="noopener">RFC 768 – User Datagram Protocol</a></li><li><a href="https://learn.microsoft.com/ko-kr/dotnet/api/system.net.sockets.socket.nodelay" target="_blank" rel="noopener">Microsoft Learn – Socket.NoDelay 속성(네이글 알고리즘)</a></li></ul></div>
+  </article>
+  <article>
+    <h2 id="소켓과-HTTP">소켓과 HTTP</h2>
+    <p class="lead">소켓·포트·HTTP·TLS가 각각 무엇을 맡는지 알고 메타 통신과 인게임 통신을 나눈다</p>
+    <h3>핵심 개념</h3><p>포트는 <strong>어느 프로세스에 줄지 고르는 16비트 번호</strong>(0~65535)이고, 소켓은 IP와 포트를 묶은 <strong>통신 종단점</strong>이자 OS가 관리하는 자원이다. 서버는 리스닝 소켓 하나로 연결을 받고 연결마다 별도 소켓을 만든다. 각 연결은 출발지·목적지의 IP와 포트 네 값으로 구분돼 한 포트에서 섞이지 않는다.</p><p>HTTP는 그 위에 얹힌 요청-응답 규약이다. <strong>무상태</strong>라 이전 요청을 기억하지 않고 <strong>비연결</strong>이라 응답이 끝나면 대화가 끝난다. 로그인 상태는 쿠키 속 세션 ID나 액세스 토큰으로 매번 알려 주고, 연결 비용은 keep-alive로 줄인다. 무상태 덕분에 어느 서버가 받아도 처리가 같아 증설이 쉽다.</p><table><thead><tr><th>버전</th><th>핵심 변화</th><th>남는 문제</th></tr></thead><tbody><tr><td>HTTP/1.1</td><td>keep-alive로 연결 재사용</td><td>응답이 앞 요청 순서에 묶인다</td></tr><tr><td>HTTP/2</td><td>바이너리 프레이밍, 멀티플렉싱, 헤더 압축</td><td>TCP 위라 한 패킷을 잃으면 모든 스트림이 밀린다</td></tr><tr><td>HTTP/3</td><td>UDP 기반 QUIC, 빠른 연결</td><td>환경에 따라 UDP가 막히기도 한다</td></tr></tbody></table><p>HTTPS는 여기에 TLS를 끼운다. 공개키는 안전하게 키를 나눌 수 있지만 느려서 인증서 검증과 세션 키 합의까지만 쓰고, <strong>이후 데이터는 빠른 대칭키로 암호화</strong>한다. 보호 범위가 전송 구간뿐이라 기기 안의 조작은 막지 못한다.</p><p>게임에서는 용도로 나눈다. 로그인·상점·랭킹처럼 빈도가 낮은 메타 통신은 REST(HTTPS)로, 초당 여러 번 오가는 인게임 통신은 연결을 유지하는 소켓으로 간다. RPC는 원격 호출을 함수처럼 감싸는 방식이라 둘 위에 모두 얹는다.</p><pre><code>using System.Collections;
+using UnityEngine;
+using UnityEngine.Networking;
+
+public class RankingApi : MonoBehaviour
+{
+    public IEnumerator GetRanking(string url)
+    {
+        using (UnityWebRequest req = UnityWebRequest.Get(url))
+        {
+            yield return req.SendWebRequest();   // 프레임을 막지 않고 기다린다
+
+            if (req.result != UnityWebRequest.Result.Success)
+            {
+                Debug.LogError(req.error);
+                yield break;
+            }
+            Debug.Log(req.downloadHandler.text);
+        }
+    }
+}</code></pre><p>직렬화도 같은 저울이다. JSON은 읽기 쉬워 디버깅이 편한 대신 크고 느리며, Protobuf·FlatBuffers 같은 바이너리는 작고 빠른 대신 스키마 관리가 따른다. 어느 쪽이든 필드를 더하고 뺄 때 구버전 클라이언트가 어떻게 동작할지 미리 정해 둔다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>소켓과 포트의 차이</strong> — 포트는 프로세스를 구분하는 번호고, 소켓은 IP와 포트로 식별되는 통신 종단점이다. 연결은 네 값의 조합으로 구분되므로 서버는 포트 하나로 여러 연결을 다룬다.</li><li><strong>HTTP와 HTTPS의 차이, TLS 핸드셰이크</strong> — 핸드셰이크에서 인증서로 서버 신원을 확인하고 공개키로 세션 키를 합의한 뒤 본 통신은 대칭키로 암호화한다. 보호되는 것은 전송 구간뿐이다.</li><li><strong>HTTP의 무상태를 어떻게 보완하나</strong> — 세션 ID 쿠키나 액세스 토큰을 요청마다 실어 보낸다. 상태가 필요하면 서버 메모리 대신 별도 저장소에 둔다.</li><li><strong>URL 입력부터 화면까지</strong> — DNS 조회로 IP를 얻고, TCP 3-way handshake와 TLS 핸드셰이크를 거쳐 HTTP 요청을 보내고, 응답 HTML을 파싱하며 부족한 리소스를 추가로 받아 그린다.</li><li><strong>Unity에서 HTTP API 호출</strong> — <code>UnityWebRequest.Get</code>·<code>Post</code>로 요청을 만들고 <code>SendWebRequest</code>를 코루틴이나 await로 기다린다. 본문은 <code>downloadHandler.text</code>에서 읽고, 네이티브 자원을 쥐므로 <code>using</code>으로 정리한다.</li></ul><h3>흔한 오해</h3><ul><li><strong>HTTPS를 쓰면 치트를 막을 수 있다</strong> — 전송 구간만 보호한다. 변조된 클라이언트가 보내는 값은 서버 검증으로만 걸러진다.</li><li><strong>공개키가 대칭키보다 빠르다</strong> — 반대다. 느린 공개키는 키 합의에만 쓴다.</li><li><strong>UnityWebRequest는 error가 비어 있으면 성공이다</strong> — 성공 판정은 <code>result</code>가 <code>Result.Success</code>인지로 한다.</li><li><strong>실시간 대전도 REST로 처리하면 된다</strong> — 요청마다 왕복이 필요해 맞지 않는다. 서버가 먼저 보내는 메시지도 소켓으로 받는다.</li></ul>
+    <div class="refs"><strong>참고 자료</strong><ul><li><a href="https://learn.microsoft.com/ko-kr/dotnet/fundamentals/networking/sockets/socket-services" target="_blank" rel="noopener">Microsoft Learn – 소켓을 사용하여 TCP를 통해 데이터 보내기 및 받기</a></li><li><a href="https://developer.mozilla.org/ko/docs/Web/HTTP/Guides/Overview" target="_blank" rel="noopener">MDN – HTTP 개요</a></li><li><a href="https://developer.mozilla.org/ko/docs/Web/HTTP/Guides/Evolution_of_HTTP" target="_blank" rel="noopener">MDN – HTTP의 진화</a></li><li><a href="https://docs.unity3d.com/ScriptReference/Networking.UnityWebRequest.html" target="_blank" rel="noopener">Unity 스크립팅 API – UnityWebRequest</a></li></ul></div>
+  </article>
+  <article>
+    <h2 id="멀티플레이-구조">멀티플레이 구조</h2>
+    <p class="lead">판정 권한을 어디에 두느냐로 구조가 갈린다. 비용·공정성·지연을 놓고 고른다</p>
+    <h3>핵심 개념</h3><p>멀티플레이 구조를 고르는 일은 결국 <strong>권한(authority)을 누구에게 두느냐</strong>를 고르는 일이다. 권한은 "무엇이 진짜인지 정하는 쪽"이라는 뜻이다. 맞았는지, 아이템을 먹었는지, 지금 어디 서 있는지를 판정하는 주체가 어디냐에 따라 비용·공정성·지연이 한꺼번에 따라온다.</p><table><thead><tr><th>방식</th><th>판정 주체</th><th>서버 비용</th><th>치트 내성</th><th>약점</th></tr></thead><tbody><tr><td>데디케이티드 서버</td><td>전용 서버</td><td>상시 발생</td><td>강함</td><td>운영·지역별 서버 배치 비용</td></tr><tr><td>리슨 서버(호스트)</td><td>플레이어 한 명의 기기</td><td>없음</td><td>약함</td><td>호스트가 유리하고, 나가면 호스트 이전이 필요</td></tr><tr><td>P2P</td><td>각 클라이언트</td><td>없음</td><td>약함</td><td>인원이 늘면 연결 수가 급증, 검증 주체가 없음</td></tr><tr><td>릴레이</td><td>여전히 호스트·클라이언트</td><td>중계 비용만</td><td>달라지지 않음</td><td>중계를 거쳐 지연이 늘어남</td></tr></tbody></table><p>릴레이가 따로 있는 이유는 NAT 때문이다. 대부분의 플레이어는 공유기 뒤 사설 IP를 쓰므로 밖에서 바로 연결할 수 없다. 홀 펀칭으로 뚫거나, 안 되면 중계 서버가 패킷을 옮겨 준다. 여기서 중요한 것은 <strong>릴레이는 전달만 하고 게임 판정을 하지 않는다</strong>는 점이다. 그래서 릴레이를 붙여도 호스트 방식의 치트 취약점은 그대로다. Unity의 Relay·Lobby 서비스가 이 역할을 한다.</p><p>서버 권한 구조에서 클라이언트는 입력을 보내고 서버는 상태를 돌려준다. 문제는 대역폭이다. 모든 오브젝트의 모든 값을 매 틱 보내면 인원과 오브젝트 수의 곱만큼 트래픽이 늘어난다. 그래서 관심 영역(AOI)으로 화면 밖·먼 거리 오브젝트는 주기를 늘리거나 아예 빼고, 바뀐 값만 보내는 델타 전송을 함께 쓴다. 전송 빈도를 낮추면 생기는 끊김은 받는 쪽에서 보간과 예측으로 메우므로, 초당 60회 전송이 반드시 부드러운 화면을 뜻하지는 않는다.</p><pre><code>public static class ReplicationRate
+{
+    public const float NoSend = -1f;
+
+    // 관심 영역(AOI): 보는 사람과의 거리에 따라 상태 전송 주기를 벌린다
+    public static float SendInterval(float distanceToViewer)
+    {
+        if (distanceToViewer &lt; 20f) return 1f / 20f;   // 눈앞: 초당 20회
+        if (distanceToViewer &lt; 60f) return 1f / 5f;    // 중거리: 초당 5회
+        return NoSend;                                 // 그 밖: 보내지 않는다
+    }
+}</code></pre><p>서버를 C#으로 만들면 패킷 정의·수치 계산식·데이터 모델을 클라이언트와 같은 코드로 공유할 수 있다. 규칙이 어긋날 일이 줄고 시뮬레이션 결과를 맞추기도 쉽다. 다만 C#에도 GC가 있어 서버에서는 할당을 줄이는 작업이 필요하고, 서버 로직은 Unity 엔진 없이 .NET 콘솔 프로그램으로 돌리는 것이 보통이다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>데디케이티드·호스트·P2P·릴레이의 차이</strong> — 판정을 전용 서버가 하면 데디케이티드, 플레이어 한 명의 기기가 겸하면 리슨 서버, 각자 나눠 가지면 P2P다. 릴레이는 판정 구조가 아니라 NAT를 우회하는 전달 경로다. 공정성과 보안이 중요하면 데디케이티드, 비용이 중요하고 소규모 협동이면 호스트 방식을 고른다.</li><li><strong>호스트 방식의 장단점</strong> — 서버 운영비가 들지 않고 호스트는 지연이 거의 없다. 대신 모두가 호스트의 회선과 기기 성능에 묶이고, 호스트가 유리해지며, 나가면 호스트 이전이 필요하고, 판정 권한이 플레이어 기기에 있어 조작에 약하다.</li><li><strong>권한과 리플리케이션 빈도</strong> — 판정 대상 상태는 서버가 쥐고 클라이언트는 입력만 보낸다. 전송은 거리·중요도에 따라 주기를 나누고(AOI), 바뀐 값만 델타로 보내며, 빈 구간은 수신 측 보간·예측으로 채운다.</li><li><strong>서버를 C#으로 두면 무엇이 좋은가</strong> — 패킷과 규칙 코드를 클라이언트와 공유해 불일치를 줄일 수 있다. 언어와 무관하게 클라이언트가 보낸 값은 서버가 반드시 검증한다는 전제는 같다.</li></ul><h3>흔한 오해</h3><ul><li><strong>릴레이 서버를 쓰면 치트가 막힌다</strong> — 릴레이는 패킷을 옮길 뿐 판정하지 않는다. 검증은 권한을 가진 쪽에서만 일어난다.</li><li><strong>P2P는 서버를 거치지 않으니 항상 빠르다</strong> — 직접 연결이 되면 유리하지만 NAT 때문에 연결 자체가 안 되는 경우가 많고, 인원이 늘면 각자 모두에게 보내느라 상향 대역폭이 먼저 터진다.</li><li><strong>호스트 방식은 서버가 없는 구조다</strong> — 서버가 없는 것이 아니라 플레이어 기기가 서버를 겸하는 것이다. 권한은 여전히 한 곳에 있고, 그 한 곳이 신뢰할 수 없는 기기라는 점이 다르다.</li><li><strong>전송 빈도를 올리면 동기화가 정확해진다</strong> — 대역폭과 서버 부하가 먼저 한계에 닿는다. 정확도는 빈도보다 권한 구조와 보정 방식에서 나온다.</li></ul>
+    <div class="refs"><strong>참고 자료</strong><ul><li><a href="https://docs.unity3d.com/Packages/com.unity.netcode.gameobjects@3.0/manual/terms-concepts/network-topologies.html" target="_blank" rel="noopener">Unity Netcode for GameObjects – Network topologies</a></li><li><a href="https://docs.unity3d.com/Manual/multiplayer.html" target="_blank" rel="noopener">Unity 매뉴얼 – Multiplayer</a></li><li><a href="https://www.gabrielgambetta.com/client-server-game-architecture.html" target="_blank" rel="noopener">Gabriel Gambetta – Fast-Paced Multiplayer (Part I): Client-Server Game Architecture</a></li></ul></div>
+  </article>
+  <article>
+    <h2 id="동기화-기법">동기화 기법</h2>
+    <p class="lead">입력을 맞출지 상태를 맞출지가 갈림길이다. 장르에 맞는 기법을 고르는 기준을 잡는다</p>
+    <h3>핵심 개념</h3><p>동기화는 <strong>내 화면과 상대 화면 사이에 늘 왕복 시간만큼의 과거가 끼어 있다</strong>는 사실에서 출발한다. 대응은 둘이다. <strong>입력을 맞춰</strong> 각자 같은 시뮬레이션을 돌리거나(락스텝·롤백), <strong>상태를 맞춰</strong> 빈틈을 예측으로 메운다.</p><table><thead><tr><th>기법</th><th>보내는 것</th><th>맞는 장르</th><th>왜 맞나 / 대가</th></tr></thead><tbody><tr><td>락스텝</td><td>입력·명령</td><td>RTS, 유닛 많은 전략</td><td>유닛이 수백이어도 트래픽이 유닛 수와 무관 / 결정론 필요, 가장 느린 참가자만큼 입력 지연</td></tr><tr><td>롤백</td><td>입력 + 예측</td><td>격투, 2~4인 대전</td><td>내 입력이 지연 없이 반영된다 / 상태 스냅숏과 재시뮬레이션 비용</td></tr><tr><td>클라이언트 예측 + 서버 보정</td><td>입력과 권위 상태</td><td>FPS, 액션 MMO</td><td>서버가 판정해 치트에 강하고 조작은 즉시 반응 / 예측이 빗나가면 위치가 튄다</td></tr><tr><td>데드 레커닝·보간</td><td>위치·속도</td><td>원격 오브젝트 표시, 레이싱</td><td>전송 빈도를 낮춰도 끊기지 않는다 / 급한 방향 전환에서 오차가 커진다</td></tr></tbody></table><p><strong>락스텝</strong>은 입력만 보내고 모두가 같은 시뮬레이션을 돌린다. 유닛 수백 개의 위치를 보내지 않아도 되니 RTS처럼 개체가 많은 장르에 맞는다. 대신 모든 기기의 결과가 한 비트도 달라선 안 돼 고정소수점을 쓰고 난수 시드와 순회 순서를 고정한다. 한 번 갈라지면(desync) 복구가 어려워 상태 체크섬을 주기적으로 비교한다.</p><p><strong>롤백</strong>은 그 대기를 없앤 락스텝이다. 상대 입력을 예측해 진행하다 실제 입력이 다르면 그 프레임으로 되감아 현재까지 다시 돌린다. 상태를 통째로 저장·복원할 수 있고 재시뮬이 싸야 하므로, 참가자가 둘이고 1~2프레임 지연도 크게 느껴지는 격투 장르가 조건에 맞는다.</p><p><strong>클라이언트 예측과 서버 보정</strong>은 권위 서버를 둔 채 반응성을 사는 방법이다. 입력을 즉시 로컬에 적용하고, 서버 상태가 오면 그 시점에 맞춘 뒤 서버가 못 본 입력만 다시 돌린다(reconciliation).</p><pre><code>using System.Collections.Generic;
+using UnityEngine;
+
+public class PredictedMover : MonoBehaviour
+{
+    struct Cmd { public uint Seq; public Vector3 Move; }
+
+    readonly List&lt;Cmd&gt; _pending = new List&lt;Cmd&gt;();   // 서버가 아직 확인하지 않은 입력
+    uint _seq;
+
+    public void Push(Vector3 move)                  // 보내면서 먼저 내 화면에 적용
+    {
+        _pending.Add(new Cmd { Seq = ++_seq, Move = move });
+        transform.position += move;
+    }
+
+    public void OnServerState(Vector3 pos, uint ackSeq)
+    {
+        _pending.RemoveAll(c =&gt; c.Seq &lt;= ackSeq);   // 서버가 처리한 입력은 버리고
+        foreach (var c in _pending) pos += c.Move;  // 못 본 입력만 다시 적용
+        transform.position = pos;
+    }
+}</code></pre><p><strong>데드 레커닝</strong>은 남의 캐릭터를 그릴 때 쓴다. 받은 위치와 속도로 다음 위치를 추정해 패킷 사이를 메우고, 새 값이 오면 순간이동 대신 짧은 시간에 수렴시킨다. 손실을 전제해 상태는 델타보다 최신 값을 통째로 보낸다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>데드 레커닝이란</strong> — 받은 위치와 속도로 원격 오브젝트의 다음 위치를 추정해 갱신 사이를 메우는 기법이다. 전송 빈도를 낮춰도 부드럽다.</li><li><strong>락스텝은 어떤 장르에 맞나, 유닛 수백 개는 어떻게 동기화하나</strong> — 입력만 주고받고 각자 같은 시뮬레이션을 돌리므로 상태가 많은 RTS에 맞는다. 모든 기기의 결과가 같아야 해 고정소수점과 시드·순회 순서 고정이 필요하다.</li><li><strong>클라이언트 예측과 서버 보정</strong> — 입력에 순서 번호를 붙여 보내고 즉시 로컬에 적용한 뒤, 서버 상태가 오면 그 시점에 맞추고 남은 입력을 다시 적용한다. 판정 권한은 서버에 남는다.</li><li><strong>롤백 지연 보상</strong> — 상대 입력을 예측해 진행하고, 다르면 되감아 재시뮬레이션한다. 입력 지연이 없어 격투에 쓰지만 스냅숏 저장과 재계산 비용이 든다.</li></ul><h3>흔한 오해</h3><ul><li><strong>데드 레커닝은 서버가 과거로 되감는 것이다</strong> — 되감기는 히트스캔 슈터가 쓰는 서버 측 지연 보상이고, 데드 레커닝은 받은 값으로 앞을 추정하는 것이다. 같은 입력을 같은 턴에 쓰는 것은 락스텝이다.</li><li><strong>클라이언트 예측은 클라이언트에 판정을 맡기는 것이다</strong> — 미리 그려 볼 뿐 판정은 서버가 하고, 결과가 다르면 클라이언트가 맞춰진다.</li><li><strong>보간만 켜면 지연이 해결된다</strong> — 보간은 받은 값 사이를 채우느라 한 틱만큼 과거를 보여 준다. 내 캐릭터는 예측으로 메운다.</li></ul>
+    <div class="refs"><strong>참고 자료</strong><ul><li><a href="https://www.gabrielgambetta.com/client-side-prediction-server-reconciliation.html" target="_blank" rel="noopener">Gabriel Gambetta – Fast-Paced Multiplayer (Part II): Client-Side Prediction and Server Reconciliation</a></li><li><a href="https://www.gabrielgambetta.com/lag-compensation.html" target="_blank" rel="noopener">Gabriel Gambetta – Fast-Paced Multiplayer: Lag Compensation</a></li><li><a href="https://docs.unity3d.com/Packages/com.unity.netcode@1.3/manual/intro-to-prediction.html" target="_blank" rel="noopener">Unity Netcode for Entities – Introduction to prediction</a></li><li><a href="https://docs.unity3d.com/Packages/com.unity.netcode.gameobjects@3.0/manual/learn/lagandpacketloss.html" target="_blank" rel="noopener">Unity Netcode for GameObjects – Understanding latency</a></li></ul></div>
+  </article>
+  <article>
+    <h2 id="클라이언트-서버-신뢰성">클라이언트-서버 신뢰성</h2>
+    <p class="lead">끊긴 요청이 두 번 반영되지 않게 멱등 키를 붙이고, 재시도는 백오프로 늦춘다</p>
+    <h3>핵심 개념</h3><p>응답이 오지 않았다는 것은 <strong>서버가 처리하지 않았다는 뜻이 아니다</strong>. 요청이 닿기 전에 끊겼을 수도, 처리는 끝났는데 응답만 사라졌을 수도 있고 클라이언트는 둘을 구분하지 못한다. 그래서 "타임아웃이니 다시 보낸다"는 "구매가 두 번 처리될 수 있다"와 같은 말이다.</p><p>해결은 <strong>멱등성</strong>이다. 같은 요청을 여러 번 보내도 결과가 한 번 보낸 것과 같아지는 성질로, 요청마다 고유 키(요청 ID)를 붙이고 서버가 그 키로 처리 기록을 남겨 만든다. 같은 키가 또 오면 저장된 결과를 그대로 돌려준다. 조건이 둘이다. <strong>재시도해도 키가 같아야 한다</strong>. 보낼 때마다 새 GUID를 만들면 서버 눈에는 다른 구매다. <strong>재화 반영과 키 기록은 한 트랜잭션이어야 한다</strong>. 나누면 재화는 들어갔는데 키가 없는 순간이 생기고, 그때 재시도가 오면 두 번 지급된다. 인앱 결제는 스토어 영수증이 그대로 키가 된다.</p><p>앱이 응답을 기다리다 강제 종료된 경우도 같은 장치로 푼다. 키를 보내기 전에 저장해 두고, 다시 켰을 때 미완료 키가 남아 있으면 같은 키로 재전송한다. 로그인 직후 재화와 인벤토리를 서버에서 통째로 받아 맞추면 더 확실하다.</p><pre><code>using System.Collections;
+using UnityEngine;
+using UnityEngine.Networking;
+
+public class PurchaseClient : MonoBehaviour
+{
+    public IEnumerator Buy(string url, string body)
+    {
+        // 키는 한 번만 만들어 저장한다. 앱이 죽어도 남아야 같은 요청이 된다
+        string id = PlayerPrefs.GetString("pendingBuy", "");
+        if (id == "")
+        {
+            id = System.Guid.NewGuid().ToString();
+            PlayerPrefs.SetString("pendingBuy", id);
+            PlayerPrefs.Save();
+        }
+        for (int n = 0; n &lt; 5; n++)
+        {
+            using (var req = UnityWebRequest.Post(url, body, "application/json"))
+            {
+                req.SetRequestHeader("Idempotency-Key", id);  // 서버는 이 키로 중복을 가른다
+                yield return req.SendWebRequest();
+                if (req.result == UnityWebRequest.Result.Success) { PlayerPrefs.DeleteKey("pendingBuy"); yield break; }
+                if (req.responseCode &gt;= 400 &amp;&amp; req.responseCode &lt; 500) yield break;
+            }
+            yield return new WaitForSeconds(Mathf.Pow(2f, n) + Random.Range(0f, 1f)); // 백오프+지터
+        }
+    }
+}</code></pre><p>재시도 간격도 설계 대상이다. 모든 기기가 같은 간격으로 즉시 재시도하면 복구 중인 서버에 요청이 몰려 다시 쓰러지고, 서버 쪽에서는 공격 트래픽과 구분되지 않아 차단될 수 있다. 실패할 때마다 간격을 배로 늘리고(지수 백오프) 기기마다 다른 무작위 지연(지터)을 더한다. 타임아웃과 5xx만 다시 보내고, 4xx는 답이 같으니 멈춘다.</p><p>서버가 먼저 보내는 알림은 연결이 살아 있어야 받는다. 소켓이나 WebSocket을 열어 두고 수신 루프에서 읽고, HTTP만 쓴다면 폴링으로 흉내 낸다. 수신은 별도 스레드에서 돌므로 받은 데이터는 큐에 넣고 메인 스레드 <code>Update</code>에서 꺼낸다. 다른 스레드에서 Unity API를 부르면 예외가 난다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>응답 전에 끊긴 요청을 한 번만 처리하려면</strong> — 요청마다 멱등 키를 붙이고 서버가 키와 결과를 함께 기록한다. 같은 키가 오면 처리 없이 이전 결과를 돌려주고, 결과 반영과 키 기록은 한 트랜잭션으로 묶는다.</li><li><strong>응답을 기다리다 앱이 죽었다면</strong> — 재실행 때 남은 미완료 키로 같은 요청을 다시 보내거나 결과를 조회하고, 로그인 직후 서버 상태를 받아 화면을 맞춘다.</li><li><strong>즉시 재시도가 왜 위험한가</strong> — 복구 시점에 요청이 몰려 서버를 다시 쓰러뜨리고 공격으로 오인돼 차단될 수 있다. 지수 백오프와 지터, 최대 횟수를 함께 둔다.</li><li><strong>재화 계산을 클라이언트에 두면</strong> — 왕복이 없어 즉시 반응하지만 메모리와 패킷 조작에 뚫린다. 연출만 먼저 보여 주고 값은 서버 응답으로 덮어쓴다.</li></ul><h3>흔한 오해</h3><ul><li><strong>타임아웃이 났으니 서버는 처리하지 않았다</strong> — 처리는 끝나고 응답만 사라진 경우와 구분되지 않는다. 재시도가 아니라 중복 반영을 막아야 한다.</li><li><strong>클라이언트에서 중복 전송만 막으면 된다</strong> — 앱 재설치, 기기 변경, 다중 접속에서 무너진다. 중복을 막는 책임은 기록을 가진 서버에 있다.</li><li><strong>TCP를 쓰니 중복은 없다</strong> — TCP는 한 연결 안의 순서와 유실만 책임진다. 끊긴 뒤 다시 보낸 요청은 서버에 새 요청으로 보인다.</li></ul>
+    <div class="refs"><strong>참고 자료</strong><ul><li><a href="https://learn.microsoft.com/ko-kr/azure/architecture/patterns/retry" target="_blank" rel="noopener">Microsoft Learn – 다시 시도 패턴(Retry pattern)</a></li><li><a href="https://learn.microsoft.com/ko-kr/azure/architecture/patterns/idempotent-consumer" target="_blank" rel="noopener">Microsoft Learn – Idempotent 소비자 패턴</a></li><li><a href="https://learn.microsoft.com/ko-kr/dotnet/architecture/microservices/implement-resilient-applications/implement-retries-exponential-backoff" target="_blank" rel="noopener">Microsoft Learn – 지수 백오프를 사용하여 재시도 구현</a></li><li><a href="https://docs.unity3d.com/Manual/web-request.html" target="_blank" rel="noopener">Unity 매뉴얼 – Interacting with web servers(UnityWebRequest)</a></li></ul></div>
+  </article>
+  <article>
+    <h2 id="보안">보안</h2>
+    <p class="lead">클라이언트는 신뢰 대상이 아니다. 판정은 서버가 하고 입력은 서버가 검증한다</p>
+    <h3>핵심 개념</h3><p>보안 설계의 출발점은 <strong>신뢰 경계</strong>를 긋는 일이다. 클라이언트 바이너리, 메모리, 세이브 파일, 오가는 패킷은 모두 사용자 기기 안에 있어 값을 바꾸고 가로채는 것을 막을 방법이 없다. 서버가 믿을 수 있는 것은 자신이 계산한 값과 자신이 발급한 토큰뿐이고, 클라이언트가 보낸 값은 전부 <strong>사용자가 임의로 적어 넣은 값</strong>으로 취급해야 한다.</p><p>그래서 판정의 자리를 옮긴다. 피해량, 재화 증감, 드랍, 쿨다운, 이동 가능 여부처럼 결과를 정하는 계산은 서버가 하고, 클라이언트는 "무엇을 했다"가 아니라 <strong>"무엇을 하려 한다"</strong>만 보낸다. "몬스터를 잡았으니 골드 100을 달라"가 아니라 "스킬 3을 12번 몬스터에게 썼다"를 보내고 골드는 서버가 정해 통보한다. 이것이 서버 권위(authority)다.</p><pre><code>using System.Collections.Generic;
+
+public class Player  { public float Attack; public double LastUseTime; }
+public class Monster { public int Hp; }
+
+public class CombatServer
+{
+    readonly Dictionary&lt;int, Player&gt; _players = new Dictionary&lt;int, Player&gt;();
+    readonly Dictionary&lt;int, Monster&gt; _monsters = new Dictionary&lt;int, Monster&gt;();
+    const double Cooldown = 1.5;
+
+    // playerId는 로그인 토큰에서 꺼낸 값이다. 패킷 안의 id를 쓰면 남의 계정이 조작된다
+    public int UseSkill(int playerId, int targetId, double serverNow)
+    {
+        if (!_players.TryGetValue(playerId, out Player p)) return 0;
+        if (!_monsters.TryGetValue(targetId, out Monster m) || m.Hp &lt;= 0) return 0;
+        if (serverNow - p.LastUseTime &lt; Cooldown) return 0;   // 시각은 서버 시계로 잰다
+        int damage = (int)(p.Attack * 1.5f);                  // 피해량도 서버가 계산한다
+        m.Hp -= damage;
+        p.LastUseTime = serverNow;
+        return damage;
+    }
+}</code></pre><p>의도만 받아도 그 값을 그대로 믿지는 않는다. 좌표가 맵 안인지, 직전 위치와의 거리가 경과 시간 대비 최대 속도를 넘지 않는지, 쿨다운이 지났는지, 그 아이템을 가졌는지, 대상이 살아 있는지를 서버가 확인한다. 기준 시각은 서버 시계다. 클라이언트가 보낸 시각으로 쿨다운을 재면 그 값을 고쳐 무한 연타가 된다. 다만 지연 보상 탓에 서버도 클라이언트 말을 어느 정도 받아들일 수밖에 없어, 실무는 허용 오차 안이면 받아들이고 벗어나면 보정하거나 거절하고 기록을 남긴다. 획득량과 승률 통계로 사후에 걸러 내는 것이 마지막 방어선이다.</p><p>통신 보안은 다른 문제를 푼다. TLS(HTTPS, WSS)는 인증서로 상대가 진짜 그 서버인지 확인하고 공개키로 대칭키를 합의한 뒤 본문은 값싼 대칭키로 암호화한다. 이렇게 막는 것은 <strong>도청과 중간 변조, 서버 위장</strong>이고, 공용 와이파이에서 로그인 토큰이 새는 사고가 여기 해당한다. 반대로 <strong>사용자가 조작한 클라이언트는 막지 못한다</strong>. 암호화가 기기 안에서 풀리기 때문이다. 같은 이유로 앱에 심은 비밀키는 공개된 값으로 봐야 한다. 신원은 서버가 발급한 수명 짧은 토큰에서 꺼내 쓰고 요청 본문의 userId로 권한을 판단하지 않는다. 결제도 클라이언트의 "성공했다"는 말이 아니라 영수증을 서버가 스토어에 직접 확인한 뒤 재화를 지급한다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>치트와 패킷 변조를 어떻게 막나</strong> — 클라이언트를 신뢰 대상에서 빼는 것이 먼저다. 판정과 재화 계산은 서버가 하고, 입력은 범위와 쿨다운, 이동 거리, 소유 여부로 검증한다. 난독화는 보조 수단이다.</li><li><strong>클라이언트는 무엇을 믿으면 안 되나</strong> — 보내온 결과값, 시각, 신원, 로컬 저장 데이터 전부다. 신원은 로그인 토큰에서 꺼내고, 세이브 파일은 원본이 아니라 캐시로 다룬다.</li><li><strong>민감한 데이터의 통신 보안은</strong> — 전 구간을 TLS 1.2 이상으로 암호화하고 버전과 암호 그룹은 OS 기본값에 맡긴다. 인증서 검증을 끄지 않고, 토큰은 수명을 짧게 둔다.</li></ul><h3>흔한 오해</h3><ul><li><strong>통신을 암호화하면 치트가 막힌다</strong> — TLS는 중간자의 도청과 변조를 막을 뿐이다. 변조된 클라이언트는 정상 연결로 조작된 값을 보내므로 검증이 없으면 통과한다.</li><li><strong>난독화와 패킷 암호화로 충분하다</strong> — 복호화 키가 클라이언트 안에 있으니 시간이 걸릴 뿐 열린다. 인증서 피닝을 포함해 모두 분석 비용을 올릴 뿐 서버 판정을 대신하지 못한다.</li><li><strong>클라이언트가 검사하니 서버는 안 봐도 된다</strong> — 클라이언트 검사는 사용자 경험용이다. 같은 검사를 서버가 다시 해야 방어가 된다.</li><li><strong>쿨다운은 클라이언트가 보낸 시각으로 재면 된다</strong> — 조작 가능한 값이다. 서버 시계와 서버가 기록한 마지막 사용 시각으로만 판단한다.</li></ul>
+    <div class="refs"><strong>참고 자료</strong><ul><li><a href="https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Security_Cheat_Sheet.html" target="_blank" rel="noopener">OWASP – Transport Layer Security Cheat Sheet</a></li><li><a href="https://learn.microsoft.com/ko-kr/dotnet/core/extensions/sslstream-best-practices" target="_blank" rel="noopener">Microsoft Learn – TLS/SSL 모범 사례(.NET)</a></li><li><a href="https://developer.mozilla.org/ko/docs/Glossary/TLS" target="_blank" rel="noopener">MDN – 전송 계층 보안(TLS)</a></li></ul></div>
+  </article>
+  <footer>정리 글은 Claude가 썼다. 틀린 내용이 있을 수 있으니 중요한 내용은 아래 참고 자료 원문으로 확인한다.</footer>
+</main>
+</body>
+</html>

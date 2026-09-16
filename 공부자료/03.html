@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>최적화·메모리 · 공부 자료</title>
+<style>
+  :root { --bg:#f7f7f5; --card:#fff; --text:#1f2328; --muted:#656d76; --line:#d0d7de; --accent:#2f6feb; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#0d1117; --card:#161b22; --text:#e6edf3; --muted:#8d96a0; --line:#30363d; --accent:#4493f8; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.75 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; }
+  main { max-width: 720px; margin: 0 auto; padding: 24px 16px 64px; }
+  a { color: var(--accent); }
+  h1 { font-size: 1.5rem; margin: 8px 0 4px; }
+  h2 { font-size: 1.25rem; margin: 0 0 4px; scroll-margin-top: 16px; }
+  h3 { font-size: 1.02rem; margin: 22px 0 6px; }
+  p, ul, ol { margin: 8px 0; }
+  li { margin: 4px 0; }
+  .muted { color: var(--muted); font-size: .9rem; }
+  .toc { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px 20px; margin: 16px 0 24px; }
+  .toc ol { margin: 6px 0 0; padding-left: 20px; }
+  article { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+  .lead { color: var(--muted); margin: 0 0 8px; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .92em; background: color-mix(in srgb, var(--line) 45%, transparent); padding: 1px 5px; border-radius: 4px; }
+  pre { background: color-mix(in srgb, var(--line) 30%, transparent); padding: 12px 14px; border-radius: 10px; overflow-x: auto; }
+  pre code { background: none; padding: 0; line-height: 1.6; }
+  table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; }
+  th, td { border: 1px solid var(--line); padding: 6px 10px; text-align: left; }
+  .refs { border-top: 1px solid var(--line); margin-top: 20px; padding-top: 12px; }
+  footer { color: var(--muted); font-size: .85rem; margin-top: 32px; }
+</style>
+</head>
+<body>
+<main>
+  <p><a href="../index.html">← 퀴즈로 돌아가기</a></p>
+  <h1>최적화·메모리 공부 자료</h1>
+  <p class="muted">면접 퀴즈에서 나온 개념을 소주제별로 정리했다. 근거가 된 질문 목록은 질문은행 03-최적화-메모리.md에 있다.</p>
+  <nav class="toc"><strong>목차</strong><ol>
+    <li><a href="#접근법">접근법</a></li>
+    <li><a href="#프로파일링과-병목-진단">프로파일링과 병목 진단</a></li>
+    <li><a href="#CPU-쪽-최적화">CPU 쪽 최적화</a></li>
+    <li><a href="#메모리와-GC">메모리와 GC</a></li>
+    <li><a href="#캐시-친화와-데이터-지향">캐시 친화와 데이터 지향</a></li>
+    <li><a href="#모바일과-상황형-질문">모바일과 상황형 질문</a></li>
+  </ol></nav>
+  <article>
+    <h2 id="접근법">접근법</h2>
+    <p class="lead">감으로 고치지 않는다. 측정해서 병목을 찾고, 고치고, 다시 재는 순환이 최적화의 기본이다</p>
+    <h3>핵심 개념</h3><p>최적화의 목표는 코드를 무조건 빠르게 만드는 것이 아니라 <strong>정해진 프레임 예산 안에 들어오게</strong> 하는 것이다. 60fps는 한 프레임에 16.7ms, 30fps는 33.3ms를 쓴다. 이 예산을 CPU와 GPU가 나눠 쓰므로 목표 기기와 목표 프레임을 정하지 않으면 무엇이 문제인지도 정의할 수 없다.</p><table><thead><tr><th>목표 프레임</th><th>한 프레임 예산</th><th>의미</th></tr></thead><tbody><tr><td>60fps</td><td>16.7ms</td><td>로직·렌더 준비·GPU가 모두 이 안에 끝나야 한다</td></tr><tr><td>30fps</td><td>33.3ms</td><td>모바일에서 현실적인 기본 목표</td></tr><tr><td>스파이크</td><td>1프레임 &gt; 예산</td><td>평균이 좋아도 그 순간 끊김으로 보인다</td></tr></tbody></table><p>그래서 최적화는 측정에서 시작한다. 전체 시간의 1%를 쓰는 코드를 두 배 빠르게 만들어도 전체는 0.5%만 좋아진다. 반대로 40%를 먹는 항목을 절반으로 줄이면 20%가 돌아온다. 어디에 시간이 쓰이는지 모르는 상태에서 고치면 대개 앞쪽에 시간을 버린다.</p><p>실무의 순환은 이렇다. 목표를 수치로 정하고(기준 기기에서 30fps, 메모리 1.5GB 이하), 실기기 개발 빌드에서 측정하고, 가장 비싼 항목 하나를 고치고, 다시 측정해 실제로 좋아졌는지 확인한다. 한 번에 여러 곳을 고치면 무엇이 효과였는지 알 수 없어 다음 판단의 근거가 남지 않는다.</p><p>언제 하느냐는 <strong>나중에 되돌릴 수 있는 결정인지</strong>로 나눈다. 텍스처 해상도 규격, 데이터 구조, 풀링을 전제로 한 오브젝트 생명주기, 씬과 에셋 분할은 나중에 바꾸기 비싸므로 처음에 정한다. 특정 함수의 미세 튜닝은 측정해서 병목으로 드러난 뒤에 해도 늦지 않다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>최적화할 때 가장 먼저 무엇을 보나</strong> — 목표 기기와 목표 프레임을 정한 뒤 그 기기에 개발 빌드를 올려 프로파일러로 잰다. CPU와 GPU 중 어느 쪽이 한계인지부터 가르고, 가장 큰 항목 순으로 손댄다.</li><li><strong>최적화 경험을 말해 보라</strong> — 수치로 시작해 수치로 끝낸다. 어떤 기기에서 몇 ms였고, 프로파일러에서 무엇이 몇 ms를 먹고 있었고, 무엇을 바꿔 몇 ms가 됐는지 순서로 말한다.</li><li><strong>언제 최적화해야 하나</strong> — 되돌리기 비싼 구조적 결정은 처음에 정하고, 국소 튜닝은 측정 뒤로 미룬다. 대신 프로파일링은 개발 내내 주기적으로 해서 언제 나빠졌는지 알 수 있게 한다.</li><li><strong>시간이 촉박할 때</strong> — 근본 해결과 임시 완화를 나눈다. 당장은 효과 대비 비용이 큰 것(품질 설정, 해상도 스케일, 스파이크 분산)으로 막고, 원인은 기록해 두고 다음 일정에 고친다.</li></ul><h3>흔한 오해</h3><ul><li><strong>빌드 용량을 줄이면 프레임이 오른다</strong> — 용량은 다운로드·설치와 로딩 시간에 영향을 주지만, 한 프레임에 드는 계산량과 직접 연결되지 않는다.</li><li><strong>품질 설정을 낮추면 해결된다</strong> — GPU 부하가 병목일 때만 듣는다. 스크립트나 물리가 병목이면 그림자를 꺼도 프레임은 그대로다.</li><li><strong>코드를 보면 어디가 느린지 안다</strong> — 실제 병목은 대개 예상 밖에 있다. 측정 없이 고치면 전체의 1%짜리 코드를 다듬게 된다.</li><li><strong>최적화는 출시 직전에 몰아서 한다</strong> — 그때는 구조를 바꿀 수 없어 선택지가 품질 하향뿐이다.</li></ul>
+    <div class="refs"><strong>참고 자료</strong><ul><li><a href="https://docs.unity3d.com/Manual/analysis.html" target="_blank" rel="noopener">Unity 매뉴얼 – Optimization(분석과 디버깅)</a></li><li><a href="https://docs.unity3d.com/Manual/Profiler.html" target="_blank" rel="noopener">Unity 매뉴얼 – The Profiler window</a></li><li><a href="https://docs.unity3d.com/Manual/OptimizingGraphicsPerformance.html" target="_blank" rel="noopener">Unity 매뉴얼 – Optimizing graphics performance</a></li></ul></div>
+  </article>
+  <article>
+    <h2 id="프로파일링과-병목-진단">프로파일링과 병목 진단</h2>
+    <p class="lead">에디터 수치를 믿지 말고 실기기 개발 빌드에서 재며, CPU와 GPU 중 어디가 한계인지 가른다</p>
+    <h3>핵심 개념</h3><p>한 프레임은 CPU와 GPU가 파이프라인으로 나눠 처리한다. CPU는 스크립트·물리·애니메이션·UI를 돌리고 렌더 명령을 준비하며, GPU는 그 명령대로 실제로 픽셀을 칠한다. <strong>둘 중 느린 쪽이 프레임 시간을 정한다</strong>. 그래서 진단의 첫 단계는 어느 쪽이 한계인지 가르는 것이다.</p><p>가장 싼 실험은 렌더 해상도를 절반으로 낮추는 것이다. 해상도는 칠해야 할 픽셀 수만 바꾸므로, 이때 프레임이 크게 오르면 픽셀 셰이더 처리량이나 오버드로가 병목(필 레이트)이라는 뜻이다. 거의 변화가 없으면 CPU나 정점 처리 쪽을 본다. 프로파일러에서 <code>Gfx.WaitForPresent</code>처럼 CPU가 GPU를 기다리는 항목이 크면 GPU 부하 또는 수직 동기화 대기를 의심한다.</p><p>측정 환경이 결과를 좌우한다. 에디터는 에디터 자체의 오버헤드가 섞이고 PC의 CPU·GPU 특성이 기기와 달라 절대 수치를 믿을 수 없다. Development Build로 빌드해 Autoconnect Profiler로 실기기에 붙어서 재야 한다. Deep Profile은 모든 메서드에 계측을 붙여 호출 구조를 다 보여 주지만 그 계측 비용이 수치를 왜곡하므로, 범위를 좁힐 때만 쓰고 평소에는 필요한 구간에 <code>ProfilerMarker</code>를 직접 심는다.</p><pre><code>using Unity.Profiling;
+using UnityEngine;
+
+public class EnemyManager : MonoBehaviour
+{
+    static readonly ProfilerMarker s_TickMarker = new ProfilerMarker("EnemyManager.Tick");
+
+    void Update()
+    {
+        using (s_TickMarker.Auto())
+        {
+            Tick(Time.deltaTime);
+        }
+    }
+
+    void Tick(float dt) { }
+}</code></pre><p>증상도 두 가지로 나눠 본다. 평소에 느린 것(지속 저하)은 매 프레임 도는 비용을 줄이는 문제고, 특정 지점에서 한 번 크게 튀는 것(스파이크)은 그 순간에 몰린 작업의 문제다. 스파이크의 흔한 원인은 처음 쓰이는 셰이더 컴파일, 동기 에셋 로드, 대량 Instantiate, 큰 GC, 한 프레임에 몰린 초기화다. 프로파일러에서 튄 프레임을 직접 골라 무엇이 시간을 먹었는지 보고, 미리 로드·워밍업하거나 여러 프레임에 나눠 처리한다.</p><p>CPU 쪽 세부 원인은 Transform 계층에서도 온다. 부모 Transform이 바뀌면 자식들의 월드 행렬이 더럽혀졌다고 표시되고 다시 계산되므로, 자식이 많고 깊은 계층을 자주 움직이면 비용이 커진다. 렌더 명령 단위로 무엇이 그려지는지는 Frame Debugger에서 드로우 콜 하나씩 확인한다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>CPU 병목인지 GPU 병목인지 어떻게 가리나</strong> — 해상도를 낮춰 보고 프레임이 크게 오르면 GPU의 픽셀 처리 쪽을 의심한다. 그다음 프로파일러의 CPU·GPU 모듈과 Frame Debugger로 드로우 콜과 셰이더 비용을 확인해 확정한다.</li><li><strong>모바일은 어떻게 프로파일링하나</strong> — Development Build로 실기기에 올려 Autoconnect Profiler로 붙어서 잰다. 에디터 수치는 경향만 보고, Deep Profile은 범위를 좁힐 때만 쓴다.</li><li><strong>특정 지점에서 크게 끊긴다면</strong> — 튄 프레임을 프로파일러에서 집어 그 순간 무엇이 실행됐는지 본다. 셰이더 워밍업, 비동기 로드, 생성 분산으로 그 순간의 작업을 앞당기거나 나눠 편다.</li></ul><h3>흔한 오해</h3><ul><li><strong>에디터 프로파일러 수치면 충분하다</strong> — 에디터 오버헤드와 하드웨어 차이 때문에 절대 수치가 다르다. 기기에서 병목 순서가 뒤집히는 일도 흔하다.</li><li><strong>Deep Profile이 가장 정확하다</strong> — 계측 비용이 커서 수치 자체가 왜곡된다. 어디를 볼지 좁히는 용도다.</li><li><strong>스크립트 파일이 많아서 끊긴다</strong> — 파일 수는 컴파일 시간과 관계있을 뿐 런타임 프레임과는 무관하다.</li><li><strong>프레임이 일정하면 최적화가 끝났다</strong> — 평균이 좋아도 스파이크 한 번이 체감 품질을 깎는다. 최대 프레임 시간도 같이 본다.</li></ul>
+    <div class="refs"><strong>참고 자료</strong><ul><li><a href="https://docs.unity3d.com/Manual/Profiler.html" target="_blank" rel="noopener">Unity 매뉴얼 – The Profiler window</a></li><li><a href="https://docs.unity3d.com/Manual/profiler-profiling-applications.html" target="_blank" rel="noopener">Unity 매뉴얼 – Collecting performance data</a></li><li><a href="https://docs.unity3d.com/Manual/FrameDebugger.html" target="_blank" rel="noopener">Unity 매뉴얼 – Frame Debugger</a></li><li><a href="https://docs.unity3d.com/Manual/ProfilerMemory.html" target="_blank" rel="noopener">Unity 매뉴얼 – Memory Profiler module</a></li></ul></div>
+  </article>
+  <article>
+    <h2 id="CPU-쪽-최적화">CPU 쪽 최적화</h2>
+    <p class="lead">매 프레임 도는 코드의 탐색·호출 비용을 참조 캐싱과 매니저 일괄 처리로 걷어낸다</p>
+    <h3>핵심 개념</h3><p>매 프레임 도는 코드에서 비싼 것은 대개 계산이 아니라 <strong>찾는 비용과 넘나드는 비용</strong>이다. <code>GetComponent&lt;T&gt;()</code>는 그 게임오브젝트의 컴포넌트 목록을 훑어 타입이 맞는 것을 찾는 네이티브 호출이고, <code>GameObject.Find</code>는 씬 전체의 오브젝트를 훑으며 이름을 비교한다. 결과가 바뀌지 않는데 매 프레임 다시 찾는 것은 같은 답을 매번 새로 계산하는 셈이다.</p><p>그래서 참조는 한 번만 구해 필드에 담는다. 가장 싼 방법은 인스펙터로 미리 넣어 두거나 생성한 쪽에서 넘겨 주는 것이고, 그럴 수 없으면 <code>Awake</code>나 <code>Start</code>에서 한 번 찾아 캐싱한다. <code>GameObject.Find</code>는 비활성 오브젝트를 찾지 못한다는 제약도 있어, 공용 객체는 매니저에 등록·조회하는 방식이 더 안전하다.</p><pre><code>using System.Collections.Generic;
+using UnityEngine;
+
+public class Bullet : MonoBehaviour
+{
+    [SerializeField] float _speed = 20f;
+    Rigidbody _body;
+
+    void Awake()
+    {
+        _body = GetComponent&lt;Rigidbody&gt;();   // 매 프레임이 아니라 한 번만 찾는다
+    }
+
+    public void Tick(float dt)
+    {
+        _body.MovePosition(_body.position + transform.forward * (_speed * dt));
+    }
+}
+
+public class BulletManager : MonoBehaviour
+{
+    readonly List&lt;Bullet&gt; _bullets = new List&lt;Bullet&gt;(1024);
+
+    void Update()                              // Update는 매니저에 하나만 둔다
+    {
+        float dt = Time.deltaTime;
+        for (int i = 0; i &lt; _bullets.Count; i++)
+            _bullets[i].Tick(dt);
+    }
+}</code></pre><p>위에서 <code>Bullet</code>에 <code>Update</code>를 두지 않은 이유가 핵심이다. <code>Update</code>가 있는 스크립트는 개수만큼 엔진(C++)에서 스크립트(C#)로 넘어오는 호출이 발생하고, 이 경계 비용은 함수 본문이 비어 있어도 든다. 매니저 하나가 리스트를 순회하면 경계를 한 번만 넘고 데이터도 연속으로 놓여 캐시에 유리하다. 더 밀어붙이면 Job System과 Burst로 병렬화하거나, 매 프레임 볼 필요가 없는 대상은 여러 프레임에 나눠 처리한다.</p><p>UGUI의 Canvas 분리도 같은 이야기다. UGUI는 Canvas 단위로 자식 요소의 메시를 하나로 합쳐 그리기 때문에, 요소 하나가 바뀌면 그 Canvas 전체의 레이아웃과 배치를 다시 만든다. 매 프레임 바뀌는 타이머 텍스트가 정적인 HUD와 한 Canvas에 있으면 정적인 부분까지 매 프레임 재구성된다. 자주 바뀌는 요소를 별도 Canvas로 떼면 그 작은 Canvas만 다시 만든다. 다만 Canvas가 늘면 배칭이 나뉘어 드로우 콜이 늘 수 있으므로 <strong>갱신 빈도 기준</strong>으로 나눈다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>GetComponent를 캐싱하는 이유</strong> — 컴포넌트를 찾는 탐색 비용이 매 프레임 반복되기 때문이다. 참조가 바뀌지 않으면 Awake에서 한 번 받아 필드에 두고 재사용한다.</li><li><strong>GameObject.Find를 피하는 이유와 대안</strong> — 씬 전체를 훑고 이름을 비교해 오브젝트가 많을수록 느려지고 비활성 오브젝트는 찾지도 못한다. 인스펙터 주입이나 생성 시점 전달이 가장 싸고, 공용 객체는 매니저에 등록해 조회한다.</li><li><strong>같은 로직의 오브젝트가 수천 개일 때</strong> — 개별 Update를 없애고 매니저가 배열을 순회하며 일괄 처리한다. 그래도 모자라면 Job System과 Burst로 넘기거나 갱신 주기를 나눈다.</li><li><strong>Canvas를 왜 나누나</strong> — 요소 하나만 바뀌어도 그 Canvas 전체를 다시 구성하기 때문이다. 자주 바뀌는 UI를 분리해 재구성 범위를 줄이되, 드로우 콜이 늘지 않는 선에서 나눈다.</li></ul><h3>흔한 오해</h3><ul><li><strong>GetComponent는 내부에서 캐싱되니 매 프레임 불러도 된다</strong> — 호출할 때마다 컴포넌트 목록을 다시 찾는다.</li><li><strong>SendMessage가 간단해서 쓸 만하다</strong> — 문자열로 메서드를 찾아 호출하는 방식이라 직접 호출보다 훨씬 느리고 오타를 컴파일러가 잡아 주지도 못한다.</li><li><strong>빈 Update는 공짜다</strong> — 본문이 비어도 엔진이 호출 목록에 넣고 매 프레임 부른다. 안 쓰면 지운다.</li><li><strong>Canvas는 잘게 나눌수록 좋다</strong> — 나눌수록 배칭이 끊겨 드로우 콜이 늘어난다. 정적 UI와 동적 UI를 가르는 정도가 기준이다.</li></ul>
+    <div class="refs"><strong>참고 자료</strong><ul><li><a href="https://docs.unity3d.com/ScriptReference/GameObject.Find.html" target="_blank" rel="noopener">Unity 스크립팅 API – GameObject.Find</a></li><li><a href="https://docs.unity3d.com/Packages/com.unity.ugui@2.0/manual/UICanvas.html" target="_blank" rel="noopener">Unity uGUI 매뉴얼 – Canvas</a></li><li><a href="https://docs.unity3d.com/Manual/job-system.html" target="_blank" rel="noopener">Unity 매뉴얼 – Write multithreaded code with the job system</a></li></ul></div>
+  </article>
+  <article>
+    <h2 id="메모리와-GC">메모리와 GC</h2>
+    <p class="lead">Unity GC의 성질을 알고 할당 자체를 줄인다. 풀링과 NonAlloc API가 기본 도구다</p>
+    <h3>핵심 개념</h3><p>Unity의 메모리는 크게 둘이다. C# 객체(class 인스턴스, 배열, 문자열, 박싱된 값)가 올라가는 <strong>관리 힙</strong>과, 텍스처·메시 같은 에셋과 엔진이 쓰는 네이티브 메모리다. GC가 손대는 것은 앞쪽뿐이고, 뒤쪽은 참조를 놓고 <code>Resources.UnloadUnusedAssets</code>나 번들 언로드로 정리한다.</p><p>관리 힙을 도는 Unity 기본 GC(Boehm)는 두 가지 성질이 중요하다. 첫째, <strong>세대 구분이 없어</strong> 수집할 때 힙 전체를 훑는다. 둘째, <strong>객체를 옮기지 않아(non-compacting)</strong> 빈틈을 메워 주지 않고, 한 번 커진 힙은 대개 OS로 돌아가지 않아 최대 사용량이 그대로 남는다.</p><p>수집이 도는 동안에는 메인 스레드가 멈춘다. 2019 이후 Incremental GC를 켜면 표시(mark) 단계를 여러 프레임에 나눠 스파이크를 완화할 수 있지만 할당이 사라지지는 않는다. 근본 해법은 <strong>쓰레기를 만들지 않는 것</strong>이다.</p><pre><code>using UnityEngine;
+using UnityEngine.UI;
+
+public class HudAndScan : MonoBehaviour
+{
+    readonly RaycastHit[] _hits = new RaycastHit[8];   // 버퍼를 미리 잡아 재사용
+    [SerializeField] Text _label;
+    int _score;
+    int _shownScore = -1;
+
+    void Update()
+    {
+        // RaycastAll은 매번 새 배열을 반환한다. NonAlloc은 버퍼를 채운다
+        Physics.RaycastNonAlloc(transform.position, transform.forward, _hits, 50f);
+
+        if (_score != _shownScore)     // 값이 바뀔 때만 문자열을 만든다
+        {
+            _shownScore = _score;
+            _label.text = _shownScore.ToString();
+        }
+    }
+}</code></pre><p>자주 생기고 사라지는 오브젝트에는 풀링을 쓴다. <code>Instantiate</code>는 오브젝트와 컴포넌트를 새로 만들어 초기화하는 비용이 크고, 생성·파괴가 반복되면 할당과 GC가 따라붙는다. 풀은 미리 만든 것을 껐다 켜며 재사용해 이 비용을 없앤다. 대신 <strong>풀 크기만큼 메모리를 계속 점유</strong>하고, 재사용이라 <code>Awake</code>와 <code>Start</code>가 다시 불리지 않으므로 체력·속도·구독 같은 상태는 <code>OnEnable</code>에서 되돌려야 한다. 파티클은 꺼낼 때 <code>Clear()</code>로 잔상을 지우고 <code>Play()</code>한다.</p><p>누수는 대부분 <strong>참조가 남는 것</strong>이다. GC는 참조가 끊긴 객체만 회수하므로 <code>-=</code>로 해제하지 않은 이벤트 핸들러나 static 컬렉션에 남은 항목은 객체를 계속 살려 둔다. 구독은 <code>OnEnable</code>에서 걸고 <code>OnDisable</code>에서 푸는 짝을 지키고, 의심되면 Memory Profiler 스냅샷으로 누가 참조를 잡고 있는지 역추적한다. 텍스처는 압축 포맷과 Max Size가 메모리를 가장 크게 줄이고, 밉맵은 약 33%를 더 쓰며, Read/Write Enabled는 CPU 사본을 만들어 약 두 배가 된다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>왜 힙 할당을 줄이나</strong> — 할당이 쌓이면 GC가 돌고 그때 메인 스레드가 멈춰 프레임이 튄다. Incremental GC로 완화할 수는 있지만 근본은 매 프레임 할당을 0에 가깝게 만드는 것이라 NonAlloc API, 버퍼 재사용, 풀링을 쓴다.</li><li><strong>GC.Collect를 직접 부르나</strong> — 평소에는 부르지 않는다. 로딩 화면이나 씬 전환처럼 이미 멈춰 있는 구간에서 에셋 언로드와 함께 한 번 정리하는 정도가 타당하다.</li><li><strong>풀링의 단점은</strong> — 안 쓰는 객체까지 메모리를 계속 점유하고, 재사용이라 이전 상태가 남아 꺼낼 때 초기화가 필요하다. Awake와 Start가 다시 불리지 않는다는 점이 실수 지점이다.</li><li><strong>UniTask는 어떻게 할당을 없애나</strong> — 반환 타입을 struct로 만들어 객체 할당을 없애고, 완료를 통지하는 소스를 풀에서 꺼내 재사용한다. 실행도 PlayerLoop 위에서 돌아 스레드 전환이 없다.</li></ul><h3>흔한 오해</h3><ul><li><strong>GC가 알아서 하니 할당은 신경 쓸 필요 없다</strong> — 언제 도는지 못 고르는 것이 문제다. 전투 중에 돌면 그 프레임이 끊긴다.</li><li><strong>GC가 돌면 메모리가 OS로 반환된다</strong> — Boehm GC는 객체를 옮기지 않고 힙도 잘 반환하지 않아 최고 사용량이 유지된다.</li><li><strong>주기적으로 GC.Collect를 부르면 안정된다</strong> — 전체 수집을 강제해 그 자리에서 멈춤을 만든다. 플레이 중 호출은 끊김을 스스로 만드는 일이다.</li><li><strong>Read/Write Enabled를 켜면 메모리가 준다</strong> — 반대다. CPU 쪽 사본이 생겨 약 두 배가 된다. 픽셀을 읽어야 할 때만 켠다.</li><li><strong>빈 공간이 많으면 할당은 성공한다</strong> — 단편화되면 여유 총량이 넉넉해도 연속된 큰 블록을 못 잡아 실패한다. 큰 버퍼는 미리 잡아 재사용한다.</li></ul>
+    <div class="refs"><strong>참고 자료</strong><ul><li><a href="https://docs.unity3d.com/Manual/performance-garbage-collector.html" target="_blank" rel="noopener">Unity 매뉴얼 – Garbage collector overview</a></li><li><a href="https://docs.unity3d.com/Manual/performance-incremental-garbage-collection.html" target="_blank" rel="noopener">Unity 매뉴얼 – Garbage collection modes(증분 GC)</a></li><li><a href="https://docs.unity3d.com/ScriptReference/Pool.ObjectPool_1.html" target="_blank" rel="noopener">Unity 스크립팅 API – ObjectPool 클래스</a></li><li><a href="https://docs.unity3d.com/Manual/class-TextureImporter.html" target="_blank" rel="noopener">Unity 매뉴얼 – Texture Import Settings</a></li></ul></div>
+  </article>
+  <article>
+    <h2 id="캐시-친화와-데이터-지향">캐시 친화와 데이터 지향</h2>
+    <p class="lead">CPU는 캐시 라인 단위로 읽는다. 쓰는 순서대로 데이터를 연속 배치하면 같은 코드가 빨라진다</p>
+    <h3>핵심 개념</h3><p>CPU는 메인 메모리에서 값을 하나씩 읽지 않는다. 주소 주변을 <strong>캐시 라인(보통 64바이트) 단위로 통째로</strong> 가져온다. L1 접근이 몇 사이클인 데 비해 메인 메모리는 수백 사이클이 걸리므로, 이미 올라온 라인을 끝까지 쓰느냐 아니면 매번 새 라인을 불러오느냐가 실제 속도를 가른다.</p><p>배열과 연결 리스트의 차이가 여기서 나온다. 둘 다 순회는 O(n)이지만 배열은 원소가 연속으로 놓여 있어 한 번 올라온 라인 안에서 다음 원소를 바로 읽고, 하드웨어 프리페처도 다음 블록을 미리 당겨 온다. 연결 리스트는 노드가 힙 여기저기 흩어져 있어 다음 노드마다 캐시 미스가 나기 쉽다. 같은 이유로 C#의 <code>arr[i, j]</code> 다차원 배열은 마지막 인덱스가 연속이므로 <code>j</code>를 안쪽 루프에 둬야 메모리를 앞에서부터 차례로 읽는다.</p><p>구조체 배치도 캐시에 영향을 준다. 필드는 자기 크기의 배수 위치에 놓이도록 정렬되고, 그 사이를 패딩이 채운다.</p><table><thead><tr><th>선언 순서</th><th>실제 배치</th><th>크기</th></tr></thead><tbody><tr><td>byte a; long b; byte c;</td><td>a(1) + 패딩(7) + b(8) + c(1) + 패딩(7)</td><td>24바이트</td></tr><tr><td>long b; byte a; byte c;</td><td>b(8) + a(1) + c(1) + 패딩(6)</td><td>16바이트</td></tr></tbody></table><p>원소가 수만 개인 배열이면 이 8바이트 차이가 캐시에 들어가는 원소 수를 바꾼다. 더 나가면 필드를 묶는 방식 자체를 바꾼다. AoS(구조체의 배열)는 한 객체의 모든 필드를 함께 쓰는 처리에 좋고, SoA(배열들의 구조체)는 <strong>일부 필드만 훑는 루프</strong>에서 캐시 라인을 낭비 없이 채우고 SIMD도 태우기 쉽다.</p><pre><code>using UnityEngine;
+
+public struct ParticleAos            // AoS: 한 원소 안에 모든 필드가 붙어 있다
+{
+    public Vector3 Position;
+    public Vector3 Velocity;
+    public Color32 Color;
+    public float Lifetime;
+}
+
+public class ParticleBuffers         // SoA: 필드별로 배열을 나눈다
+{
+    public Vector3[] Positions;
+    public Vector3[] Velocities;
+    public Color32[] Colors;
+
+    public void Move(float dt)
+    {
+        for (int i = 0; i &lt; Positions.Length; i++)
+            Positions[i] += Velocities[i] * dt;   // 색과 수명은 읽지 않는다
+    }
+}</code></pre><p>데이터 지향 설계(DOD)는 이 판단을 앞에 두는 사고방식이다. 객체 단위로 먼저 나누는 대신 <strong>어떤 데이터를 어떤 순서로 훑는지</strong>를 정하고 로직을 거기에 맞춘다. Unity DOTS의 ECS는 같은 컴포넌트 조합을 가진 엔티티를 청크 단위 연속 메모리에 모아 이를 구현하고, Job System이 워커 스레드로 나눠 돌리며, Burst가 그 코드를 SIMD를 활용한 네이티브 코드로 컴파일한다.</p><p>할당자도 같은 맥락에서 고른다. <strong>풀 할당자</strong>는 같은 크기 블록을 재사용해 임의 순서 해제를 허용하면서 단편화를 막고, <strong>스택(선형) 할당자</strong>는 포인터를 앞으로 밀며 할당하고 표시해 둔 지점까지 되감아 한꺼번에 해제해 매우 싸지만 LIFO 순서만 가능하다. <strong>슬랩 할당자</strong>는 같은 타입의 객체를 위한 영역을 미리 잡아 두고 초기화된 조각을 꺼내 쓴다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>캐시를 잘 쓰려면</strong> — 함께 쓰는 데이터를 연속으로 두고 접근 순서와 메모리 순서를 맞춘다. 배열 순회를 기본으로 하고, 루프가 읽지 않는 필드는 다른 배열로 뺀다.</li><li><strong>연결 리스트가 배열보다 느린 이유</strong> — 노드가 흩어져 있어 다음 노드로 갈 때마다 캐시 미스가 난다. 복잡도는 같아도 메모리 접근 상수가 다르다.</li><li><strong>AoS와 SoA</strong> — 한 객체의 필드를 다 쓰면 AoS, 일부 필드만 대량으로 훑으면 SoA가 유리하다. 접근 패턴이 정한다.</li><li><strong>DOD와 DOTS의 관계</strong> — DOD는 데이터 배치를 먼저 정하는 사고방식이고, DOTS의 ECS·Job·Burst는 그것을 엔진 차원에서 구현한 도구다.</li></ul><h3>흔한 오해</h3><ul><li><strong>복잡도가 같으면 성능도 같다</strong> — O 표기는 상수를 버린다. 캐시 미스 한 번이 연산 수백 번 값이다.</li><li><strong>struct 크기는 필드 크기의 합이다</strong> — 정렬 때문에 패딩이 들어간다. 큰 필드부터 선언하면 줄어든다.</li><li><strong>SoA가 항상 빠르다</strong> — 한 원소의 모든 필드를 함께 읽는 처리에서는 오히려 여러 배열을 오가며 미스가 늘어난다.</li><li><strong>DOTS를 써야 DOD를 하는 것이다</strong> — 일반 MonoBehaviour에서도 배열 순회와 필드 분리로 같은 효과를 낸다.</li><li><strong>스택 할당자는 아무 순서로나 해제할 수 있다</strong> — 되감기 방식이라 LIFO만 가능하다. 임의 순서 해제가 필요하면 풀 할당자를 쓴다.</li></ul>
+    <div class="refs"><strong>참고 자료</strong><ul><li><a href="https://learn.microsoft.com/ko-kr/dotnet/csharp/language-reference/builtin-types/arrays" target="_blank" rel="noopener">Microsoft Learn – 배열 참조 형식(C# 다차원 배열)</a></li><li><a href="https://learn.microsoft.com/ko-kr/dotnet/api/system.runtime.interopservices.structlayoutattribute" target="_blank" rel="noopener">Microsoft Learn – StructLayoutAttribute 클래스</a></li><li><a href="https://docs.unity3d.com/Packages/com.unity.entities@1.4/manual/concepts-archetypes.html" target="_blank" rel="noopener">Unity Entities 매뉴얼 – Archetypes concepts</a></li><li><a href="https://unity.com/dots" target="_blank" rel="noopener">Unity – DOTS(Data-Oriented Technology Stack)</a></li></ul></div>
+  </article>
+  <article>
+    <h2 id="모바일과-상황형-질문">모바일과 상황형 질문</h2>
+    <p class="lead">모바일은 발열과 메모리 한도가 먼저 온다. 지속 가능한 부하로 낮추고 피크를 관리한다</p>
+    <h3>핵심 개념</h3><p>모바일은 PC와 병목이 다르다. CPU와 GPU가 같은 메모리 대역폭을 나눠 쓰고, 전력 예산이 작아 부하가 계속되면 <strong>발열로 클럭을 스스로 낮춘다(서멀 스로틀링)</strong>. 그래서 처음 2분의 프레임이 아니라 10분 뒤에도 유지되는 프레임이 진짜 성능이다. 최적화 기준도 피크가 아니라 지속 가능한 부하가 된다.</p><p>발열을 낮추는 방법은 결국 일을 덜 시키는 것이다. 목표 프레임을 고정해 남는 성능을 굳이 태우지 않고, 메뉴나 정지 화면에서는 프레임을 더 낮추며, 렌더 해상도와 오버드로·후처리·실시간 그림자를 줄인다. 반대로 매 프레임 <code>GC.Collect()</code>를 부르는 식의 처리는 CPU 일을 늘려 열을 더 낸다.</p><pre><code>using UnityEngine;
+
+public class MobilePerformanceSetup : MonoBehaviour
+{
+    void Start()
+    {
+        QualitySettings.vSyncCount = 0;       // 모바일에서 targetFrameRate가 먹도록 둔다
+        Application.targetFrameRate = 30;     // 60을 못 지키면 30 고정이 체감이 낫다
+        Time.fixedDeltaTime = 0.02f;          // 물리 호출 횟수를 늘리지 않는다
+    }
+}</code></pre><p>메모리는 프레임과 다른 방식으로 앱을 죽인다. iOS는 앱이 기기별 한도를 넘으면 예외 없이 프로세스를 종료하므로, 시간이 지날수록 늘고 메모리가 적은 구형 기기에 몰리는 크래시는 <strong>누수나 과다 사용에 의한 강제 종료</strong>부터 의심한다. 해제하지 않은 에셋 번들, 참조가 남아 내려가지 않는 텍스처, 끝없이 커지는 캐시가 단골이다. Memory Profiler로 시작 직후와 10분 뒤 스냅샷을 비교해 무엇이 늘었는지 본다.</p><p>시야가 갑자기 트이는 상황(언덕 위에서 화면 회전)은 <strong>한 순간에 보이는 대상이 폭증</strong>하는 문제다. 가려져 있던 오브젝트가 한꺼번에 보이면서 드로우 콜이 뛰고 메시·텍스처가 몰려 로드되며 메모리 피크가 생긴다. 오브젝트 수를 줄이지 않고 푸는 정공법은 LOD로 먼 것을 가벼운 메시로 바꾸고, Layer Cull Distances와 오클루전 컬링으로 그릴 대상을 줄이고, 임포스터와 스트리밍으로 동시에 올라오는 양을 나누는 것이다.</p><p>물리는 호출 횟수와 충돌 쌍이 비용이다. Fixed Timestep을 줄이면 <code>FixedUpdate</code>와 시뮬레이션이 초당 더 여러 번 돌아 부담이 커지므로 모바일에서는 오히려 0.02~0.033초로 늘린다. 레이어 충돌 매트릭스에서 필요 없는 조합을 끄고, Mesh Collider 대신 기본 도형을 쓰며, 움직일 콜라이더에는 Kinematic Rigidbody를 붙인다. Rigidbody 없는 콜라이더를 움직이면 정적 충돌 구조를 다시 만들어 비싸기 때문이다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>모바일에서 성능과 메모리를 어떻게 잡나</strong> — 목표 기기에서 지속 프레임과 메모리 상한을 먼저 정한다. 프레임은 목표치로 고정해 열을 아끼고, 메모리는 텍스처 포맷과 해상도, 번들 언로드로 상한 안에 유지한다.</li><li><strong>발열은 왜 낮추나</strong> — 발열이 심하면 OS가 클럭을 낮춰 프레임이 떨어지고 배터리와 사용자 경험도 나빠진다. 목표 프레임 고정, 해상도 스케일, 오버드로와 후처리 축소로 부하 총량을 줄인다.</li><li><strong>10분 뒤 크래시가 급증한다면</strong> — 메모리 누수나 과다 사용으로 OS가 앱을 종료하는 경우를 먼저 본다. 시간대별 메모리 스냅샷을 비교하고 기기의 메모리 경고 로그를 확인한다.</li><li><strong>물리 오브젝트가 많은 모바일 게임은</strong> — Fixed Timestep을 늘려 호출 횟수를 줄이고, 충돌 매트릭스로 불필요한 검사와 Mesh Collider를 걷어낸다. 움직이는 콜라이더에는 Kinematic Rigidbody를 붙인다.</li></ul><h3>흔한 오해</h3><ul><li><strong>GC.Collect로 메모리를 비우면 발열이 준다</strong> — 수집 자체가 CPU 작업이라 열과 끊김을 모두 늘린다.</li><li><strong>프레임은 높을수록 좋다</strong> — 모바일에서는 남는 프레임이 열과 배터리로 나가고 결국 스로틀링으로 돌아온다.</li><li><strong>Fixed Timestep을 촘촘하게 하면 최적화다</strong> — 물리 정확도는 오르지만 CPU 부담이 커진다. 모바일에서는 반대로 늘린다.</li><li><strong>시야가 트일 때는 안개를 걷거나 그림자 거리를 늘려 본다</strong> — 둘 다 그릴 양을 늘리는 방향이라 상황을 악화시킨다.</li><li><strong>크래시는 코드 예외 때문이다</strong> — OOM 종료는 스택 트레이스 없이 죽는 경우가 많아 로그만 봐서는 원인을 못 찾는다.</li></ul>
+    <div class="refs"><strong>참고 자료</strong><ul><li><a href="https://docs.unity3d.com/Manual/LevelOfDetail.html" target="_blank" rel="noopener">Unity 매뉴얼 – Level of Detail (LOD)</a></li><li><a href="https://docs.unity3d.com/Manual/OcclusionCulling.html" target="_blank" rel="noopener">Unity 매뉴얼 – Occlusion culling</a></li><li><a href="https://docs.unity3d.com/Manual/class-TimeManager.html" target="_blank" rel="noopener">Unity 매뉴얼 – Time 설정(Fixed Timestep)</a></li><li><a href="https://docs.unity3d.com/Manual/class-PhysicsManager.html" target="_blank" rel="noopener">Unity 매뉴얼 – Physics 설정</a></li></ul></div>
+  </article>
+  <footer>정리 글은 Claude가 썼다. 틀린 내용이 있을 수 있으니 중요한 내용은 아래 참고 자료 원문으로 확인한다.</footer>
+</main>
+</body>
+</html>

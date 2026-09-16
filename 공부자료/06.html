@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>설계·아키텍처 · 공부 자료</title>
+<style>
+  :root { --bg:#f7f7f5; --card:#fff; --text:#1f2328; --muted:#656d76; --line:#d0d7de; --accent:#2f6feb; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#0d1117; --card:#161b22; --text:#e6edf3; --muted:#8d96a0; --line:#30363d; --accent:#4493f8; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.75 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; }
+  main { max-width: 720px; margin: 0 auto; padding: 24px 16px 64px; }
+  a { color: var(--accent); }
+  h1 { font-size: 1.5rem; margin: 8px 0 4px; }
+  h2 { font-size: 1.25rem; margin: 0 0 4px; scroll-margin-top: 16px; }
+  h3 { font-size: 1.02rem; margin: 22px 0 6px; }
+  p, ul, ol { margin: 8px 0; }
+  li { margin: 4px 0; }
+  .muted { color: var(--muted); font-size: .9rem; }
+  .toc { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px 20px; margin: 16px 0 24px; }
+  .toc ol { margin: 6px 0 0; padding-left: 20px; }
+  article { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+  .lead { color: var(--muted); margin: 0 0 8px; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .92em; background: color-mix(in srgb, var(--line) 45%, transparent); padding: 1px 5px; border-radius: 4px; }
+  pre { background: color-mix(in srgb, var(--line) 30%, transparent); padding: 12px 14px; border-radius: 10px; overflow-x: auto; }
+  pre code { background: none; padding: 0; line-height: 1.6; }
+  table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; }
+  th, td { border: 1px solid var(--line); padding: 6px 10px; text-align: left; }
+  .refs { border-top: 1px solid var(--line); margin-top: 20px; padding-top: 12px; }
+  footer { color: var(--muted); font-size: .85rem; margin-top: 32px; }
+</style>
+</head>
+<body>
+<main>
+  <p><a href="../index.html">← 퀴즈로 돌아가기</a></p>
+  <h1>설계·아키텍처 공부 자료</h1>
+  <p class="muted">면접 퀴즈에서 나온 개념을 소주제별로 정리했다. 근거가 된 질문 목록은 질문은행 06-설계-아키텍처.md에 있다.</p>
+  <nav class="toc"><strong>목차</strong><ol>
+    <li><a href="#객체지향">객체지향</a></li>
+    <li><a href="#디자인-패턴">디자인 패턴</a></li>
+    <li><a href="#아키텍처">아키텍처</a></li>
+    <li><a href="#게임-시스템-설계">게임 시스템 설계</a></li>
+  </ol></nav>
+  <article>
+    <h2 id="객체지향">객체지향</h2>
+    <p class="lead">데이터와 책임을 객체로 묶는 이유를 알고, SOLID로 바뀔 자리를 미리 열어 둔다</p>
+    <h3>핵심 개념</h3><p>객체지향은 데이터와 그것을 다루는 코드를 묶어 <strong>무엇이 무엇을 책임지는지</strong>를 구조에 드러내는 방식이다. 절차지향은 데이터와 함수가 따로 놀아서 규칙이 바뀌면 그 데이터를 만지는 함수를 전부 찾아 고쳐야 한다. 대가는 클래스와 간접 호출이 늘어 읽기 힘들어지는 것이다.</p><table><thead><tr><th>특징</th><th>무엇이고 무엇을 얻나</th></tr></thead><tbody><tr><td>추상화</td><td>세부를 걷어내고 필요한 면만 남긴다. 구현이 바뀌어도 쓰는 쪽은 그대로다</td></tr><tr><td>캡슐화</td><td>상태를 감추고 공개 메서드로만 다루게 한다. 지킬 조건을 클래스가 스스로 지킨다</td></tr><tr><td>상속</td><td>부모의 멤버를 물려받아 특수화한다. 공통 동작이 한곳에 모인다</td></tr><tr><td>다형성</td><td>같은 호출이 실제 타입에 따라 다르게 돈다. 타입마다 분기하는 코드가 사라진다</td></tr></tbody></table><p>Unity에서는 <code>[SerializeField] private</code> 필드로 인스펙터 노출과 캡슐화를 같이 챙기는 것이 관례다. SOLID는 바뀔 자리를 미리 열어 두기 위한 다섯 지침이다.</p><table><thead><tr><th>원칙</th><th>뜻</th><th>게임에서</th></tr></thead><tbody><tr><td>SRP 단일 책임</td><td>바뀌어야 할 이유가 하나뿐</td><td>체력 계산과 체력바 연출을 분리</td></tr><tr><td>OCP 개방-폐쇄</td><td>확장에는 열리고 수정에는 닫힌다</td><td>새 무기는 분기 수정 없이 클래스 추가</td></tr><tr><td>LSP 리스코프 치환</td><td>자식이 부모 자리에 들어가도 동작</td><td>부모의 약속을 예외로 막지 않기</td></tr><tr><td>ISP 인터페이스 분리</td><td>안 쓰는 메서드를 떠안기지 않는다</td><td>공격 안 하는 것엔 공격 계약을 안 붙임</td></tr><tr><td>DIP 의존 역전</td><td>상위와 하위가 모두 추상화에 의존</td><td>전투 로직은 <code>IWeapon</code>만 안다</td></tr></tbody></table><p>OCP와 DIP는 같은 장치로 지켜진다. 분기를 고치는 대신 인터페이스를 두고 구현을 더하면 기존 코드는 손대지 않는다.</p><pre><code>public interface IWeapon { void Fire(Vector3 origin); }
+
+public class Attacker : MonoBehaviour
+{
+    private IWeapon weapon;  // 구체 타입이 아니라 계약에 의존
+
+    public void Equip(IWeapon w) =&gt; weapon = w;  // 구현은 밖에서 넣는다
+
+    private void Update() { if (Input.GetButtonDown("Fire1")) weapon?.Fire(transform.position); }
+}</code></pre><p>다형성은 두 갈래다. 오버로딩이나 제네릭처럼 컴파일 시점에 대상이 정해지면 정적, <code>virtual</code>과 <code>override</code>로 실행 중 실제 타입을 보고 정해지면 동적이다. 동적 쪽은 가상 함수 테이블을 거친다.</p><p>상속은 "~이다" 관계가 뚜렷하고 계층이 얕을 때만 쓸 만하다. 날기·헤엄치기를 상속으로 조합하면 <code>FlyingSwimmingEnemy</code> 같은 클래스가 불어난다. Unity의 <code>GameObject</code>와 컴포넌트가 컴포지션을 엔진 차원에서 구현한 것이다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>객체지향이란</strong> — 데이터와 규칙을 객체로 묶어 책임을 나누는 방식이다. 네 특징으로 설명하고, 얻는 것은 변경이 한곳에 갇히는 것이라고 덧붙인다.</li><li><strong>SOLID를 적용한 예</strong> — 무기가 늘 때마다 분기를 고치던 코드를 <code>IWeapon</code>으로 바꿔 새 무기가 클래스 추가만으로 끝나게 했다고 말한다. 원칙 이름보다 고친 코드 하나가 강하다.</li><li><strong>LSP를 어기는 코드</strong> — <code>Bird</code>를 상속한 <code>Penguin</code>이 <code>Fly()</code>에서 예외를 던지면 <code>Bird</code>를 믿고 쓰는 코드가 깨진다. "난다"를 별도 인터페이스로 뺀다고 답한다.</li><li><strong>상속과 컴포지션</strong> — 기본은 컴포지션이고, 모든 팝업이 공유하는 열기·닫기 흐름처럼 공통 동작이 뚜렷하고 계층이 얕을 때는 상속이 더 읽기 쉽다.</li><li><strong>결합도 낮추기</strong> — 구체 타입 대신 인터페이스에 의존하고, 참조는 밖에서 받고, 먼 시스템끼리는 이벤트로 알린다. 줄줄이 따라 고칠 곳을 없애는 것이 목적이다.</li></ul><h3>흔한 오해</h3><ul><li><strong>DIP는 호출 방향을 뒤집는 것</strong> — 방향이 아니라 의존 대상을 바꾸는 것이다. 인터페이스를 상위 쪽 필요에 맞춰 정의하고 하위가 구현한다.</li><li><strong>SRP는 클래스를 작게 쪼개라는 뜻</strong> — 개수를 세는 규칙이 아니다. 기준은 바뀌어야 할 이유이고, 모든 기능을 한 매니저에 모으는 것이 가장 크게 어긴 꼴이다.</li><li><strong>오버라이딩이 정적 다형성</strong> — 반대다. 오버로딩이 컴파일 시점, 오버라이딩이 실행 시점이다.</li><li><strong>자식이 부모와 다르게 동작하면 LSP 위반</strong> — 약속을 지키면서 구현을 바꾸는 것은 다형성의 목적이다. 위반은 약속을 깨뜨릴 때다.</li></ul>
+    <div class="refs"><strong>참고 자료</strong><ul><li><a href="https://learn.microsoft.com/ko-kr/dotnet/csharp/fundamentals/object-oriented/" target="_blank" rel="noopener">Microsoft Learn – 클래스, 구조체, 그리고 레코드(C#)</a></li><li><a href="https://learn.microsoft.com/ko-kr/dotnet/csharp/fundamentals/object-oriented/inheritance" target="_blank" rel="noopener">Microsoft Learn – 개체 지향 프로그래밍: 상속</a></li><li><a href="https://learn.microsoft.com/ko-kr/dotnet/csharp/fundamentals/object-oriented/polymorphism" target="_blank" rel="noopener">Microsoft Learn – 다형성</a></li><li><a href="https://learn.microsoft.com/ko-kr/dotnet/csharp/fundamentals/types/interfaces" target="_blank" rel="noopener">Microsoft Learn – 인터페이스: 여러 형식에 대한 동작 정의</a></li></ul></div>
+  </article>
+  <article>
+    <h2 id="디자인-패턴">디자인 패턴</h2>
+    <p class="lead">패턴을 생성·구조·행위로 나눠 대고, 게임에서 실제로 쓴 것을 코드로 말한다</p>
+    <h3>핵심 개념</h3><p>디자인 패턴은 자주 나오는 설계 문제의 <strong>이름 붙은 해결책</strong>이다. 이름을 대면 팀이 같은 그림을 떠올리지만, 문제가 없는데 꺼내면 클래스만 는다. GoF 분류는 <strong>만드는</strong> 생성, <strong>엮는</strong> 구조, <strong>주고받는</strong> 행위다.</p><table><thead><tr><th>갈래</th><th>패턴</th><th>정리</th></tr></thead><tbody><tr><td>생성</td><td>싱글톤</td><td>인스턴스를 하나로 제한, 전역 접근점</td></tr><tr><td>생성</td><td>팩토리 메서드</td><td>어떤 구체 타입을 만들지 감춤</td></tr><tr><td>생성</td><td>빌더</td><td>생성을 단계로 쪼갬</td></tr><tr><td>생성</td><td>프로토타입</td><td>원본을 복제해 찍어 냄</td></tr><tr><td>구조</td><td>어댑터</td><td>안 맞는 인터페이스를 맞춤</td></tr><tr><td>구조</td><td>퍼사드</td><td>하위 시스템을 한 창구로</td></tr><tr><td>구조</td><td>프록시</td><td>원본 대신 서서 접근 가로챔</td></tr><tr><td>구조</td><td>데코레이터</td><td>인터페이스 그대로 기능 덧씌움</td></tr><tr><td>행위</td><td>옵저버</td><td>알리면 관심 있는 쪽이 반응함</td></tr><tr><td>행위</td><td>상태</td><td>상태마다 클래스를 두고 위임</td></tr><tr><td>행위</td><td>전략</td><td>같은 목적의 알고리즘 교체</td></tr><tr><td>행위</td><td>커맨드</td><td>요청을 객체로 만들어 기록·취소</td></tr><tr><td>행위</td><td>널 오브젝트</td><td>빈 구현으로 널 검사를 줄임</td></tr><tr><td>기타</td><td>컴포넌트</td><td>부품으로 조합. Unity 구조</td></tr></tbody></table><p>추상 팩토리·플라이웨이트는 생성·구조, 템플릿 메서드는 행위다. 싱글톤은 <code>DontDestroyOnLoad</code>로 남긴 것이 씬을 다시 로드할 때 그 씬의 같은 매니저와 겹쳐 둘이 되므로 <code>Awake</code> 중복 처리가 핵심이다.</p><pre><code>public class SoundManager : MonoBehaviour
+{
+    public static SoundManager Instance { get; private set; }
+
+    private void Awake()
+    {
+        if (Instance != null &amp;&amp; Instance != this) { Destroy(gameObject); return; }
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
+    }
+}</code></pre><p>상태 패턴은 <code>Update</code>의 if-else 더미를 상태 객체로 나눈다. 진입·갱신·퇴장이 상태마다 모여, bool로 관리할 때 생기는 불가능한 조합을 막는다.</p><pre><code>public interface IState { void Enter(); void Tick(); void Exit(); }
+
+public class StateMachine
+{
+    private IState current;
+
+    public void Change(IState next) { current?.Exit(); current = next; current.Enter(); }
+    public void Tick() =&gt; current?.Tick();
+}</code></pre><p>옵저버는 C#에서 <code>event</code>가 곧 구현이다. 알리는 쪽이 누가 듣는지 모르니 반응을 추가해도 주체는 안 바뀐다. <code>OnEnable</code>에서 <code>+=</code>, <code>OnDisable</code>에서 <code>-=</code>로 짝을 맞춘다. 빠뜨리면 구독자를 붙들어 누수와 예외가 난다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>아는 패턴을 말해 보라</strong> — 세 갈래를 나누고 갈래마다 써 본 것을 든다. "보스 페이즈를 상태 패턴으로 나눴다"처럼 쓴 자리를 댄다.</li><li><strong>싱글톤의 문제와 대안</strong> — 전역 접근이라 결합이 커지고, 가짜 구현을 못 끼워 테스트가 막히며, 초기화 순서와 씬 수명이 걸린다. 대안은 주입이다.</li><li><strong>멀티스레드에서 하나임을 보장</strong> — 널 검사와 생성 사이에 다른 스레드가 끼어들 수 있으니 <code>lock</code>이나 <code>Lazy</code>에 맡긴다.</li><li><strong>전략과 의존성 주입의 차이</strong> — 전략은 알고리즘을 인터페이스 뒤로 빼는 설계, 주입은 구현을 누가 넣느냐는 기법이다. 층위가 달라 같이 쓴다.</li></ul><h3>흔한 오해</h3><ul><li><strong>싱글톤은 접근할 때마다 객체가 생긴다</strong> — 하나를 재사용하니 할당이 없다. 비용은 결합도와 테스트다.</li><li><strong><code>volatile</code>이면 인스턴스가 하나가 된다</strong> — 값이 보이게 할 뿐 생성이 한 번임은 보장하지 않는다.</li><li><strong>옵저버는 등록 순서대로 돈다</strong> — 기대면 안 된다. 순서가 중요하면 직접 호출로 푼다.</li><li><strong>C# <code>event</code>와 <code>UnityEvent</code>는 같다</strong> — <code>UnityEvent</code>는 인스펙터 연결 대신 무겁다.</li></ul>
+    <div class="refs"><strong>참고 자료</strong><ul><li><a href="https://gameprogrammingpatterns.com/contents.html" target="_blank" rel="noopener">Game Programming Patterns – 목차(패턴 전체 목록)</a></li><li><a href="https://unity.com/resources/level-up-your-code-with-game-programming-patterns" target="_blank" rel="noopener">Unity – Level up your code with game programming patterns(전자책)</a></li><li><a href="https://docs.unity3d.com/ScriptReference/Object.DontDestroyOnLoad.html" target="_blank" rel="noopener">Unity 스크립팅 API – Object.DontDestroyOnLoad</a></li><li><a href="https://learn.microsoft.com/ko-kr/dotnet/api/system.lazy-1" target="_blank" rel="noopener">Microsoft Learn – Lazy&lt;T&gt; 클래스(스레드 안전한 지연 초기화)</a></li></ul></div>
+  </article>
+  <article>
+    <h2 id="아키텍처">아키텍처</h2>
+    <p class="lead">시스템끼리 어떻게 찾고 부르는지를 정해, 다음 기능을 넣는 비용을 낮추는 일이다</p>
+    <h3>핵심 개념</h3><p>아키텍처의 목적은 멋진 그림이 아니라 <strong>다음 기능을 넣는 비용을 낮추는 것</strong>이다. 그 비용을 정하는 것은 대개 "시스템끼리 서로를 어떻게 찾고 부르는가" 하나다. 방식은 셋뿐이고 결합도와 흐름 추적을 맞바꾼다.</p><table><thead><tr><th>방식</th><th>결합도</th><th>흐름 추적</th><th>어디에 쓰나</th></tr></thead><tbody><tr><td>구체 클래스 직접 참조</td><td>높다</td><td>가장 쉽다</td><td>늘 붙어 다니는 관계</td></tr><tr><td>인터페이스 + 주입</td><td>중간</td><td>코드에 보인다</td><td>교체·테스트가 필요한 협력</td></tr><tr><td>이벤트·메시지 버스</td><td>낮다</td><td>어렵다</td><td>먼 시스템에 던지는 알림</td></tr></tbody></table><p>의존성 주입은 쓸 협력 객체를 스스로 만들지 않고 밖에서 받는 것이다. 컨테이너가 있어야 주입인 것이 아니라 생성자나 메서드 인자로 넘기기만 해도 주입이고, 인스펙터 연결도 넓게 보면 밖에서 넣어 주는 것이다. 인터페이스는 "무엇을 해 줄 수 있는가"라는 계약만 남기고 구현을 감춘다.</p><pre><code>public interface ISaveStore { void Save(string json); }
+
+public class ScoreService
+{
+    private readonly ISaveStore store;
+
+    public ScoreService(ISaveStore store) =&gt; this.store = store;  // 생성자 주입
+
+    public void Record(int score) =&gt; store.Save(score.ToString());
+}
+
+// MonoBehaviour는 생성자를 쓸 수 없어 초기화 메서드로 주입한다
+public class ScoreView : MonoBehaviour
+{
+    private ScoreService service;
+
+    public void Init(ScoreService service) =&gt; this.service = service;
+}</code></pre><p>이벤트 버스는 발행자가 누가 받는지 모른 채 던지므로 결합이 가장 느슨하다. 대신 이벤트가 이벤트를 부르는 연쇄, 구독 순서 의존, 해제 누락이 겹치면 원인을 찾기 어렵다. 전부 버스로 통신하면 호출 흐름이 코드에 남지 않으니, 가까운 관계는 주입으로 먼 시스템 알림은 버스로 나눈다.</p><p>UI에는 MVC 계열을 쓴다. 모델은 데이터와 규칙, 뷰는 표시와 입력 전달, 컨트롤러는 입력을 받아 모델을 고친다. 핵심은 <strong>모델이 뷰를 모르게</strong> 해서 화면을 갈아엎어도 규칙 코드를 안 건드리는 것이다. MVP는 뷰를 더 얇게 두고 프레젠터가 중개하며, MVVM은 바인딩으로 그 연결을 자동화한다. 대신 클래스가 늘어 작은 팝업에는 과하다.</p><p>ECS는 방향 자체가 다르다. 엔티티에 순수 데이터인 컴포넌트를 붙이고 로직은 시스템에 두며, 같은 컴포넌트를 가진 엔티티를 메모리에 촘촘히 모아 한 번에 훑는다. 캐시 적중률이 높고 일감을 나누기 쉬워 수만 개를 반복할 때 유리하다. 상속 기반 구조는 데이터와 로직이 객체마다 흩어져 있고 가상 호출을 탄다.</p><p>정의를 정확히 해 둘 것 셋. 프레임워크와 라이브러리는 <strong>누가 누구를 부르나</strong>로 갈린다. <code>Update</code>가 엔진에 의해 불리면 프레임워크, 내가 부르는 수학 유틸리티는 라이브러리다. 순수 함수는 같은 입력에 늘 같은 결과를 내고 부수 효과가 없어 테스트와 멀티스레드에 유리하다. Lua로 콘텐츠 규칙을 빼면 재심사 없이 고칠 수 있지만, 인터프리터 비용 때문에 매 프레임 도는 계산은 C#에 남긴다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>전 회사 아키텍처를 설명하라</strong> — 레이어를 나열하지 말고 "무엇이 자주 바뀌었고 그래서 어디를 갈아 끼울 수 있게 뒀는지"로 말한다. 콘텐츠 데이터, UI, 서버 통신 중 무엇이 가장 자주 바뀌었는지부터 꺼낸다.</li><li><strong>의존성 주입이 왜 필요한가</strong> — 구체 클래스를 직접 <code>new</code>하면 교체할 수 없고 테스트에서 가짜를 넣을 수 없다. 인터페이스로 계약만 남기면 서버 연동을 로컬 스텁으로 바꿔 끼우는 일이 호출부 수정 없이 된다.</li><li><strong>이벤트가 많아지면</strong> — 연쇄 호출과 구독 순서 의존으로 추적이 어려워지고 해제 누락이 누수로 이어진다. 이벤트의 범위를 정하고 중요한 흐름은 직접 호출로 남긴다고 답한다.</li><li><strong>레거시 리팩터링</strong> — 한 번에 갈아엎지 않는다. 바꿀 곳 주변에 재현 절차를 먼저 만들고, 인터페이스로 경계를 그은 뒤 그 안에서 조금씩 교체한다.</li></ul><h3>흔한 오해</h3><ul><li><strong>의존성 주입은 성능 최적화</strong> — 목적은 결합도를 낮추는 설계다. 오히려 간접 호출이 한 겹 는다.</li><li><strong>이벤트 버스를 쓰면 결합이 사라진다</strong> — 직접 참조가 없어질 뿐 메시지 형식이라는 계약이 남고, 디버깅 비용은 올라간다.</li><li><strong>뷰가 데이터를 직접 읽고 써도 MVC다</strong> — 그 순간 분리가 무너진다. 모델이 뷰를 모르게 하는 것이 목적이다.</li><li><strong>ECS로 바꾸면 무조건 빨라진다</strong> — 같은 처리를 대량 반복할 때 유리하다. 종류가 제각각인 소수 오브젝트는 이득이 적고 전환 비용이 크다.</li><li><strong>순수 함수는 <code>static</code> 함수다</strong> — 상관없다. 기준은 같은 입력에 같은 결과인지와 부수 효과가 없는지다.</li></ul>
+    <div class="refs"><strong>참고 자료</strong><ul><li><a href="https://learn.microsoft.com/ko-kr/dotnet/core/extensions/dependency-injection" target="_blank" rel="noopener">Microsoft Learn – 종속성 주입(.NET)</a></li><li><a href="https://learn.microsoft.com/ko-kr/dotnet/csharp/language-reference/keywords/event" target="_blank" rel="noopener">Microsoft Learn – &#x27;event&#x27; 키워드</a></li><li><a href="https://docs.unity3d.com/Manual/unity-events.html" target="_blank" rel="noopener">Unity 매뉴얼 – Inspector-configurable custom events(UnityEvent)</a></li><li><a href="https://docs.unity3d.com/Packages/com.unity.entities@1.3/manual/index.html" target="_blank" rel="noopener">Unity 매뉴얼 – Entities overview(ECS)</a></li></ul></div>
+  </article>
+  <article>
+    <h2 id="게임-시스템-설계">게임 시스템 설계</h2>
+    <p class="lead">요구와 제약을 먼저 묻고, 나중에 바꿔도 깨지지 않는 데이터 구조로 설계한다</p>
+    <h3>핵심 개념</h3><p>시스템 설계 질문은 정답을 맞히는 문제가 아니라 <strong>무엇을 먼저 물어보는지</strong>를 보는 문제다. "인벤토리를 설계하라"를 들으면 클래스부터 그리지 말고 제약을 확인한다. 칸 수가 정해져 있나, 같은 아이템이 겹쳐 쌓이나, 정렬·필터가 필요한가, 수량은 수십 개인가 수만 개인가, 서버가 최종 권한을 갖나. 이 답이 자료구조를 정한다. 칸이 고정이면 배열, 아이디로 찾는 일이 잦으면 딕셔너리를 함께 둔다.</p><p>스탯은 <strong>기본값과 보정 목록을 따로 두고 필요할 때 합산</strong>하는 것이 정석이다. 붙을 때 최종 수치에 더하고 풀릴 때 빼면 곱연산이나 상한이 섞이는 순간 원래 값으로 안 돌아온다. 목록으로 들고 있으면 순서가 달라도 결과가 같고 출처도 추적된다. 합산이 부담되면 캐시하고 목록이 바뀔 때만 다시 계산한다.</p><pre><code>public struct StatModifier { public float Add; public float Mul; }  // Mul 0.2f면 +20%
+
+public class Stats
+{
+    public float BaseAttack = 10f;
+
+    private readonly List&lt;StatModifier&gt; mods = new List&lt;StatModifier&gt;();
+    private float cached;
+    private bool dirty = true;
+
+    public void Add(StatModifier m)    { mods.Add(m);    dirty = true; }
+    public void Remove(StatModifier m) { mods.Remove(m); dirty = true; }
+
+    public float Attack
+    {
+        get
+        {
+            if (!dirty) return cached;
+            float add = 0f, mul = 1f;
+            foreach (var m in mods) { add += m.Add; mul += m.Mul; }
+            cached = (BaseAttack + add) * mul;
+            dirty = false;
+            return cached;
+        }
+    }
+}</code></pre><p>세이브는 <strong>저장 항목이 반드시 바뀐다</strong>는 전제로 설계한다. 파일에 스키마 버전을 넣고 읽을 때 버전에 맞춰 변환해 올리면, 기존 진행을 지키면서 구조를 바꿀 수 있다. 빠진 항목은 실패시키지 말고 기본값으로 채운다.</p><table><thead><tr><th>저장 위치</th><th>맞는 용도</th><th>주의</th></tr></thead><tbody><tr><td><code>PlayerPrefs</code></td><td>설정값처럼 작고 잃어도 되는 것</td><td>평문이라 변조가 쉽다</td></tr><tr><td>파일(JSON 등)</td><td>진행도 전체</td><td>버전 필드, 저장 중 종료 대비(임시 파일 후 교체)</td></tr><tr><td>서버</td><td>재화처럼 검증이 필요한 것</td><td>결과가 아니라 행동을 보내고 서버가 계산한다</td></tr></tbody></table><p>절차적 생성은 <strong>같은 시드와 규칙이면 항상 같은 결과</strong>가 나오게 만드는 것이 기본이다. 그러면 맵 전체 대신 시드 하나만 저장해도 복원된다. 청크마다 좌표에서 시드를 파생시키면 멀리 있는 지형을 버렸다 다시 만들어도 같은 모습이다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>인벤토리를 설계하라</strong> — 칸 제한과 스택 여부, 최대 아이템 수, 서버 검증 여부를 먼저 묻고 자료구조를 고른다. 그다음 데이터와 표시를 나눠 아이템이 바뀌면 UI가 바뀐 칸만 갱신하게 했다고 말한다.</li><li><strong>버프와 장비로 스탯이 계속 바뀐다면</strong> — 기본값은 그대로 두고 보정 목록을 합산해 최종값을 낸다. 순서에 무관하고 출처 추적이 되며, 캐시와 더티 플래그로 성능도 해결된다고 답한다.</li><li><strong>세이브·로드 설계</strong> — 포맷에 버전을 넣고 변환 단계를 둔다. 빠진 항목은 기본값, 저장 중 종료에 대비해 임시 파일에 쓴 뒤 교체, 중요한 값은 서버 검증이다.</li><li><strong>나중에 서버를 붙인다면</strong> — 규칙 계산을 UI와 분리해 순수 함수에 가깝게 두고 저장·조회를 인터페이스 하나로 감싼다. 구현만 서버 호출로 바꾸면 되고, 시간도 기기 시계 대신 서버 시간을 받게 통로를 모은다.</li><li><strong>업적·퀘스트 시스템</strong> — 조건을 코드가 아니라 데이터로 두고, 게임 쪽은 "적 처치" 같은 사건만 던진다. 진행 시스템이 그 사건으로 조건을 갱신하면 새 업적이 데이터 추가만으로 는다.</li></ul><h3>흔한 오해</h3><ul><li><strong>버프는 붙을 때 더하고 풀릴 때 빼면 된다</strong> — 곱연산이나 상한이 섞이면 원래 값으로 안 돌아와 수치가 새는 대표적 함정이다.</li><li><strong>세이브는 메모리 덤프가 빠르고 간단하다</strong> — 필드가 하나만 늘거나 순서가 바뀌어도 기존 파일이 전부 깨진다. 버전을 가진 명시적 포맷을 쓴다.</li><li><strong>절차적 맵은 시스템 시간을 시드로 쓰면 된다</strong> — 같은 맵을 두 번 만들 수 없어 복원과 버그 재현이 불가능해진다.</li><li><strong>로컬 저장을 서버로 그대로 옮기면 된다</strong> — 결과만 저장하던 구조는 서버가 검증할 근거가 없다. 계획이 있으면 처음부터 행동을 기록하고 규칙 계산을 한곳에 모은다.</li></ul>
+    <div class="refs"><strong>참고 자료</strong><ul><li><a href="https://docs.unity3d.com/Manual/class-ScriptableObject.html" target="_blank" rel="noopener">Unity 매뉴얼 – ScriptableObject</a></li><li><a href="https://docs.unity3d.com/ScriptReference/JsonUtility.html" target="_blank" rel="noopener">Unity 스크립팅 API – JsonUtility</a></li><li><a href="https://docs.unity3d.com/ScriptReference/Random.InitState.html" target="_blank" rel="noopener">Unity 스크립팅 API – Random.InitState(시드 고정)</a></li></ul></div>
+  </article>
+  <footer>정리 글은 Claude가 썼다. 틀린 내용이 있을 수 있으니 중요한 내용은 아래 참고 자료 원문으로 확인한다.</footer>
+</main>
+</body>
+</html>

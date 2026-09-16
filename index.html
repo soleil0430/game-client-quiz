@@ -93,6 +93,7 @@
   .choice b { color: var(--muted); margin-right: 8px; }
   .feedback { margin-top: 12px; padding: 12px 14px; border-radius: 10px; background: color-mix(in srgb, var(--line) 30%, transparent); }
   .feedback p { margin: 6px 0 0; }
+  .study { display: inline-block; margin-top: 4px; padding: 6px 12px; border: 1px solid var(--accent); border-radius: 999px; color: var(--accent); text-decoration: none; font-size: .9rem; }
   footer { color: var(--muted); font-size: .8rem; margin-top: 24px; }
   [hidden] { display: none !important; }
   @media (prefers-reduced-motion: reduce) { * { animation-duration: .01ms !important; animation-delay: 0s !important; } }
@@ -6368,6 +6369,14 @@ const format = (text) => String(text)
   .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
   .replace(/`([^`]+)`/g, "<code>$1</code>");
 
+// 공부 자료: 문제의 근거가 "03-최적화-메모리.md · 스크립트 최적화"면 공부자료/03.html#스크립트-최적화 를 연다
+const STUDY_READY = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10"];
+function studyUrl(q) {
+  const [file, subtopic] = q.source.split(" · ");
+  const num = file.slice(0, 2);
+  return STUDY_READY.includes(num) ? `공부자료/${num}.html#${encodeURIComponent(subtopic.replace(/ /g, "-"))}` : "";
+}
+
 // "2026-09-15 14:32:05" 형식의 현지 시각
 const now = () => new Date().toLocaleString("sv-SE");
 
@@ -6547,7 +6556,9 @@ function show() {
   $("feedback").hidden = !answered;
   if (answered) {
     const correct = chosen === q.answer;
-    $("feedback").innerHTML = `<strong class="${correct ? "ok" : "bad"}">${correct ? "정답입니다" : "오답입니다 · 목숨 -1"}</strong><p>${format(q.explanation)}</p>`;
+    const study = studyUrl(q);
+    $("feedback").innerHTML = `<strong class="${correct ? "ok" : "bad"}">${correct ? "정답입니다" : "오답입니다 · 목숨 -1"}</strong><p>${format(q.explanation)}</p>`
+      + (study ? `<p><a class="study" href="${study}" target="_blank" rel="noopener">📚 ${format(q.source.split(" · ")[1])} 공부 자료 보기</a></p>` : "");
   }
   $("next").textContent = !answered ? "제출" : state.run ? "다음" : "결과 보기";
   $("next").disabled = !answered && selected === null;

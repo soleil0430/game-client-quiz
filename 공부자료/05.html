@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>게임 수학·물리 · 공부 자료</title>
+<style>
+  :root { --bg:#f7f7f5; --card:#fff; --text:#1f2328; --muted:#656d76; --line:#d0d7de; --accent:#2f6feb; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#0d1117; --card:#161b22; --text:#e6edf3; --muted:#8d96a0; --line:#30363d; --accent:#4493f8; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.75 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; }
+  main { max-width: 720px; margin: 0 auto; padding: 24px 16px 64px; }
+  a { color: var(--accent); }
+  h1 { font-size: 1.5rem; margin: 8px 0 4px; }
+  h2 { font-size: 1.25rem; margin: 0 0 4px; scroll-margin-top: 16px; }
+  h3 { font-size: 1.02rem; margin: 22px 0 6px; }
+  p, ul, ol { margin: 8px 0; }
+  li { margin: 4px 0; }
+  .muted { color: var(--muted); font-size: .9rem; }
+  .toc { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px 20px; margin: 16px 0 24px; }
+  .toc ol { margin: 6px 0 0; padding-left: 20px; }
+  article { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+  .lead { color: var(--muted); margin: 0 0 8px; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .92em; background: color-mix(in srgb, var(--line) 45%, transparent); padding: 1px 5px; border-radius: 4px; }
+  pre { background: color-mix(in srgb, var(--line) 30%, transparent); padding: 12px 14px; border-radius: 10px; overflow-x: auto; }
+  pre code { background: none; padding: 0; line-height: 1.6; }
+  table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; }
+  th, td { border: 1px solid var(--line); padding: 6px 10px; text-align: left; }
+  .refs { border-top: 1px solid var(--line); margin-top: 20px; padding-top: 12px; }
+  footer { color: var(--muted); font-size: .85rem; margin-top: 32px; }
+</style>
+</head>
+<body>
+<main>
+  <p><a href="../index.html">← 퀴즈로 돌아가기</a></p>
+  <h1>게임 수학·물리 공부 자료</h1>
+  <p class="muted">면접 퀴즈에서 나온 개념을 소주제별로 정리했다. 근거가 된 질문 목록은 질문은행 05-게임수학-물리.md에 있다.</p>
+  <nav class="toc"><strong>목차</strong><ol>
+    <li><a href="#벡터">벡터</a></li>
+    <li><a href="#행렬과-좌표계">행렬과 좌표계</a></li>
+    <li><a href="#회전">회전</a></li>
+    <li><a href="#보간">보간</a></li>
+    <li><a href="#충돌과-교차-판정">충돌과 교차 판정</a></li>
+    <li><a href="#물리-시뮬레이션">물리 시뮬레이션</a></li>
+    <li><a href="#기초-수학">기초 수학</a></li>
+  </ol></nav>
+  <article>
+    <h2 id="벡터">벡터</h2>
+    <p class="lead">내적으로 각도와 앞뒤를, 외적으로 좌우와 법선을 얻는다. 거리는 제곱끼리 비교한다</p>
+    <h3>핵심 개념</h3><p>게임의 벡터 연산은 대부분 "두 벡터가 이루는 각"과 "한 벡터를 다른 방향으로 투영한 길이"에서 갈라져 나온다. 내적과 외적의 기하학적 의미만 잡으면 시야각 판정, 반사, 평면 거리, 면 법선이 모두 한 도구의 변형으로 보인다.</p><p><strong>내적</strong>은 두 길이의 곱에 사잇각의 코사인을 곱한 값이다. 둘 다 정규화돼 있으면 내적이 곧 코사인이라 값 하나로 각도를 읽는다. 0.5면 60도, 1이면 정면, 0이면 정확히 옆, 음수면 뒤쪽이다. 코사인은 0도에서 180도 구간에서 단조 감소하므로, 역코사인으로 각도를 구하는 대신 내적을 <code>cos(시야각/2)</code>와 바로 비교하면 결과가 같으면서 훨씬 싸다. 시야각 90도면 기준값이 약 0.707, 120도면 정확히 0.5다.</p><p>내적의 두 번째 얼굴은 <strong>투영</strong>이다. 정규화된 법선 N에 대해 <code>Dot(v, N) * N</code>이 v의 법선 방향 성분이고, 여기서 셋이 나온다. 한 번 빼면 <code>I - Dot(I, N) * N</code>으로 벽을 따라 미끄러지는 슬라이드 벡터, 두 배로 빼면 <code>I - 2 * Dot(I, N) * N</code>으로 법선 성분만 부호가 뒤집힌 반사 벡터가 된다. 평면 위 한 점 Q에 대한 <code>Abs(Dot(N, P - Q))</code>는 점과 평면의 최단 거리이고, 절댓값을 벗기면 부호가 앞뒤를 알려준다. 셋 다 N이 단위 길이여야 한다.</p><p><strong>외적</strong>은 두 벡터가 만드는 평면에 수직인 벡터를 준다. 방향은 회전 방향을, 길이는 평행사변형 넓이를 뜻한다. 삼각형 법선을 <code>(B - A)</code>와 <code>(C - A)</code>의 외적으로 구한 뒤 정규화하는 것도 길이가 삼각형 넓이의 두 배라서다. 순서를 바꾸면 부호가 뒤집혀 정점을 감는 방향이 앞뒷면을 정한다. Unity에서 <code>Cross(forward, toTarget).y</code>가 양수면 목표가 오른쪽인데, 정면 (0,0,1)과 오른쪽 (1,0,0)의 외적이 (0,1,0)인 것으로 확인된다.</p><p>길이에는 습관 둘이 따라붙는다. 입력 h, v로 <code>new Vector3(h, 0, v)</code>를 만들어 속도에 그대로 곱하면 대각선 길이가 약 1.41이라 41% 빨라지므로, 방향만 필요하면 정규화한다. 또 제곱근은 단조 증가라 대소 비교 결과를 바꾸지 않으니, 어느 적이 더 가까운지만 보면 될 때는 <code>sqrMagnitude</code>로 비교해 제곱근을 아낀다. 대신 사거리 같은 기준값도 제곱해야 한다.</p><pre><code>public class Sight : MonoBehaviour
+{
+    public float viewAngle = 90f;   // 시야각(도)
+    public float range = 10f;
+
+    public bool CanSee(Transform target)
+    {
+        Vector3 to = target.position - transform.position;
+        if (to.sqrMagnitude &gt; range * range) return false;         // 기준값도 제곱해서 비교
+        float cos = Vector3.Dot(transform.forward, to.normalized);
+        return cos &gt;= Mathf.Cos(viewAngle * 0.5f * Mathf.Deg2Rad); // 90도면 약 0.707
+    }
+
+    // 앞뒤는 내적, 좌우는 외적의 부호로 가른다
+    public bool IsOnRight(Transform target)
+        =&gt; Vector3.Cross(transform.forward, target.position - transform.position).y &gt; 0f;
+}</code></pre><h3>면접에서 이렇게 답한다</h3><ul><li><strong>내적이란? 어디에 쓰나</strong> — 두 벡터의 사잇각 코사인에 길이를 곱한 값이다. 정규화된 벡터끼리면 값이 곧 코사인이라 부호로 앞뒤를, 크기로 각도를 읽는다. 시야각 판정은 cos(시야각의 절반)과 비교해 역코사인 없이 처리한다.</li><li><strong>외적이란? 결과는 무엇을 뜻하나</strong> — 두 벡터가 이루는 평면에 수직인 벡터다. 방향은 회전 방향을, 길이는 평행사변형 넓이를 뜻해 삼각형 법선과 좌우 판정에 쓴다.</li><li><strong>벡터를 언제 정규화하나</strong> — 방향만 의미가 있고 길이가 결과에 섞이면 안 될 때다. 이동 입력을 정규화하지 않으면 대각선이 약 1.41배 빨라지고, 반사와 평면 거리 공식도 법선이 단위 길이라는 전제 위에 있다.</li><li><strong>거리 비교에 왜 sqrMagnitude를 쓰나</strong> — 제곱근은 단조 증가라 비교 결과를 바꾸지 않는데 계산은 비싸다. 매 프레임 많은 대상을 훑을 때 아끼고, 기준값은 미리 제곱해 둔다.</li></ul><h3>흔한 오해</h3><ul><li><strong>내적으로 좌우도 알 수 있다</strong> — 코사인은 왼쪽 30도와 오른쪽 30도에 같은 값을 준다. 좌우는 외적의 부호로 가른다.</li><li><strong>외적 결과가 곧 단위 법선이다</strong> — 길이가 넓이에 비례하므로 정규화해야 한다. 정점 셋이 거의 일직선이면 길이가 0에 가까워 불안정해진다.</li><li><strong>반사 벡터는 I - Dot(I, N) * N 이다</strong> — 그것은 벽을 따라 미끄러지는 성분이다. 반사는 법선 성분의 부호를 뒤집는 것이라 두 배로 빼야 한다.</li><li><strong>sqrMagnitude는 그냥 빠른 magnitude다</strong> — 값 자체가 다르다. 사거리 5와 비교하려면 25와 비교해야 한다.</li></ul>
+    <div class="refs"><strong>참고 자료</strong><ul><li><a href="https://docs.unity3d.com/ScriptReference/Vector3.Dot.html" target="_blank" rel="noopener">Unity 스크립팅 API – Vector3.Dot</a></li><li><a href="https://docs.unity3d.com/ScriptReference/Vector3.Cross.html" target="_blank" rel="noopener">Unity 스크립팅 API – Vector3.Cross</a></li><li><a href="https://docs.unity3d.com/ScriptReference/Vector3.Reflect.html" target="_blank" rel="noopener">Unity 스크립팅 API – Vector3.Reflect</a></li><li><a href="https://docs.unity3d.com/ScriptReference/Vector3-sqrMagnitude.html" target="_blank" rel="noopener">Unity 스크립팅 API – Vector3.sqrMagnitude</a></li></ul></div>
+  </article>
+  <article>
+    <h2 id="행렬과-좌표계">행렬과 좌표계</h2>
+    <p class="lead">여러 변환을 곱해 하나로 합치는 도구다. 곱하는 순서와 규약이 결과를 바꾼다</p>
+    <h3>핵심 개념</h3><p>변환 행렬은 <strong>좌표를 옮기는 규칙을 숫자 표에 적어 둔 것</strong>이다. 표로 적어 두면 여러 규칙을 미리 곱해 하나로 합쳐 정점 수만 개에 한 번만 적용할 수 있다. 3차원인데 4×4를 쓰는 이유는 <strong>이동</strong> 때문이다. 3×3은 원점을 반드시 원점으로 보내 평행 이동을 표현할 수 없고, 그러면 곱셈만으로 변환을 이어 붙일 수 없다. w를 더해 4×4(동차 좌표)로 만들면 원근 투영까지 곱 하나로 합쳐진다. 점은 w를 1, 방향 벡터는 0으로 둬 방향에 이동이 붙지 않게 하는데, Unity에서 <code>MultiplyPoint3x4</code>와 <code>MultiplyVector</code>가 나뉜 것이 이 구분이다.</p><p>곱하는 <strong>순서</strong>는 결과를 바꾼다. 행렬 곱에 교환법칙이 없어서다. 열 벡터 규약(v' = M × v)에서는 오른쪽부터 적용되므로 T × R × S가 "크기를 바꾸고, 회전하고, 옮긴다"가 된다. 크기 2배, Y축 90도, 이동 (10,0,0)을 점 (1,0,0)에 적용하면 T × R × S는 (10, 0, -2)를 주지만 뒤집은 S × R × T는 (0, 0, -22)를 준다. 이동을 먼저 하면 회전이 원점 기준으로 일어나기 때문이다.</p><p>완성된 행렬은 <strong>읽어낼</strong> 수도 있다. 이동은 마지막 열의 위 세 값이고, 왼쪽 위 3×3은 각 열의 길이가 그 축의 스케일, 그 길이로 나눈 방향이 회전된 축이다. Unity의 <code>Matrix4x4</code>도 이 규약을 쓴다고 문서에 명시돼 있다.</p><table><thead><tr><th>규약</th><th>적용</th><th>이동 성분</th><th>합성 순서</th></tr></thead><tbody><tr><td>열 벡터(Unity)</td><td>v' = M × v</td><td>마지막 열</td><td>T × R × S</td></tr><tr><td>행 벡터(DirectX 계열)</td><td>v' = v × M</td><td>마지막 행</td><td>S × R × T</td></tr></tbody></table><p><strong>좌표계</strong>는 무엇을 원점으로 보느냐의 차이다. <code>localPosition</code>은 부모 기준, <code>position</code>은 월드 기준이라, 부모가 (10,0,0)이고 회전·스케일이 기본값이면 로컬 (1,0,0)의 월드 좌표는 (11,0,0)이다. 부모에 회전이나 스케일이 있으면 더하기로는 안 되므로 <code>TransformPoint</code>와 <code>InverseTransformPoint</code>를 쓴다. 후자가 <strong>역행렬</strong>의 쓰임이고, 카메라 월드 변환을 뒤집은 것이 뷰 행렬이다. 정점은 오브젝트 → 월드 → 뷰 → 클립 공간 순으로 간 뒤 w로 나눠 NDC를 거쳐 화면 좌표가 된다. 셰이더의 MVP는 이 세 행렬을 미리 곱해 둔 것이다.</p><pre><code>// TRS는 T × R × S 순서로 행렬을 만든다
+Matrix4x4 m = Matrix4x4.TRS(new Vector3(10f, 0f, 0f), Quaternion.Euler(0f, 90f, 0f), Vector3.one * 2f);
+
+Vector3 p = m.MultiplyPoint3x4(new Vector3(1f, 0f, 0f)); // (10, 0, -2) : 이동이 적용된다
+Vector3 d = m.MultiplyVector(new Vector3(1f, 0f, 0f));   // (0, 0, -2)  : 방향에는 이동이 없다
+
+Vector3 t = m.GetColumn(3);                          // 마지막 열 = 이동 (10, 0, 0)
+float scaleX = ((Vector3)m.GetColumn(0)).magnitude;  // 열의 길이 = 스케일 2</code></pre><h3>면접에서 이렇게 답한다</h3><ul><li><strong>행렬 곱 순서가 왜 중요한가</strong> — 교환법칙이 없어 순서가 곧 적용 순서다. 열 벡터 규약에서는 오른쪽부터 적용되므로 T × R × S가 크기 → 회전 → 이동 순이고, 이동을 먼저 넣으면 회전이 원점 기준으로 일어나 엉뚱한 곳으로 간다.</li><li><strong>왜 4×4 동차 좌표를 쓰나</strong> — 3×3으로는 평행 이동을 표현할 수 없어 변환을 곱으로 이어 붙일 수 없다. w를 더하면 원근 투영까지 곱 하나에 담기고, 점은 w를 1, 방향은 0으로 둬 구분한다.</li><li><strong>로컬 좌표와 월드 좌표의 차이는</strong> — 기준 원점이 다르다. 부모에 회전이나 스케일이 있으면 단순 덧셈으로 변환되지 않으므로 TransformPoint와 InverseTransformPoint로 오간다.</li><li><strong>역행렬은 어디에 쓰나</strong> — 변환을 되돌릴 때다. 월드를 로컬로 가져오는 계산과 뷰 행렬이 대표적이고, 회전과 이동만 있으면 전치와 부호 반전으로 싸게 구한다.</li></ul><h3>흔한 오해</h3><ul><li><strong>이동과 회전은 순서를 바꿔도 결과가 같다</strong> — 위 예에서 (10, 0, -2)와 (0, 0, -22)로 갈린다.</li><li><strong>월드 좌표는 부모 position에 localPosition을 더한 값이다</strong> — 부모에 회전과 스케일이 없을 때만 우연히 맞는다.</li><li><strong>이동 성분은 마지막 행에 있다</strong> — 규약에 따라 다르다. Unity를 포함한 열 벡터 규약에서는 마지막 열이고, 섞으면 변환이 전치된 채로 계산된다.</li><li><strong>왼쪽 위 3×3은 곧 회전 행렬이다</strong> — 스케일이 섞여 있어 회전만 필요하면 각 열을 그 길이로 나눠 꺼낸다.</li></ul>
+    <div class="refs"><strong>참고 자료</strong><ul><li><a href="https://docs.unity3d.com/ScriptReference/Matrix4x4.html" target="_blank" rel="noopener">Unity 스크립팅 API – Matrix4x4(열 우선 규약)</a></li><li><a href="https://docs.unity3d.com/ScriptReference/Matrix4x4.TRS.html" target="_blank" rel="noopener">Unity 스크립팅 API – Matrix4x4.TRS</a></li><li><a href="https://docs.unity3d.com/Manual/class-Transform.html" target="_blank" rel="noopener">Unity 매뉴얼 – Transforms(부모 자식과 로컬·월드)</a></li><li><a href="https://docs.unity3d.com/Manual/SL-UnityShaderVariables.html" target="_blank" rel="noopener">Unity 매뉴얼 – Built-in shader variables reference(MVP 행렬)</a></li></ul></div>
+  </article>
+  <article>
+    <h2 id="회전">회전</h2>
+    <p class="lead">오일러 각은 읽기 쉽지만 짐벌 락이 있고, 쿼터니언은 축과 반각으로 회전을 담는다</p>
+    <h3>핵심 개념</h3><p>3차원 회전을 저장하는 방법은 오일러 각, 회전 행렬, 쿼터니언 셋이고, <strong>저장 크기, 합성 비용, 보간 품질, 특이점 유무</strong>에서 갈린다. 면접에서 묻는 것은 결국 "왜 내부는 쿼터니언인데 인스펙터는 오일러 각인가"다.</p><p><strong>오일러 각</strong>은 정해진 순서로 축을 차례차례 돌린 각도 셋이다. 읽고 쓰기 쉽고 값이 셋뿐이라 데이터가 작다. 문제는 순서 의존이다. Unity의 <code>Quaternion.Euler</code>는 Z, X, Y 순으로 적용하는데 순서가 다르면 같은 숫자라도 다른 방향을 가리킨다. 더 큰 문제가 <strong>짐벌 락</strong>이다. 가운데 축이 90도에 이르면 남은 두 축이 같은 방향을 향하게 되어, 서로 다른 축의 회전이 같은 결과를 내고 특정 방향으로 돌릴 수단이 사라진다. 회전 자유도 셋 중 하나를 잃는 것이다. 각도끼리 직선 보간을 하면 경로가 뒤틀리고, 359도에서 1도로 갈 때 뒤로 한 바퀴 돈다.</p><p><strong>쿼터니언</strong>은 값 네 개로 "어느 축을 중심으로 얼마나 도는가"를 한 번에 담는다. 단위 축 n을 중심으로 각 θ만큼 도는 회전은 x, y, z가 <code>n * sin(θ/2)</code>, w가 <code>cos(θ/2)</code>다. Y축 90도면 sin(45도)와 cos(45도)가 모두 약 0.7071이라 (0, 0.7071, 0, 0.7071)이 된다. 반각이 들어가는 이유는 회전을 적용할 때 쿼터니언을 앞뒤로 두 번 곱하는 구조라 각이 두 배가 되기 때문이다. 인스펙터 회전값은 셋인데 <code>rotation</code>에 w가 있는 것이 이 표현이고, 축과 각을 한 덩어리로 다루므로 축이 겹치는 상황이 없어 짐벌 락이 생기지 않는다. 길이가 1인 단위 쿼터니언만 회전을 뜻하고 q와 -q는 같은 회전이라, <code>Slerp</code>는 최단 경로를 고를 때 부호를 맞춰 본다.</p><p><strong>회전 행렬</strong>은 값이 아홉 개라 저장이 크고 곱을 반복하면 오차가 쌓여 직교성이 깨지지만, 정점에 바로 곱할 수 있다. 그래서 실무의 선택은 이렇게 갈린다. 사람이 입력하고 읽는 자리는 오일러 각, 누적하고 보간하는 내부 저장은 쿼터니언, 정점에 적용하는 마지막 단계는 행렬이다.</p><pre><code>void Aim(Transform target)
+{
+    // 축과 각으로 만든다. (x, y, z) = 축 * sin(θ/2), w = cos(θ/2)
+    Quaternion q = Quaternion.AngleAxis(90f, Vector3.up); // (0, 0.7071, 0, 0.7071)
+
+    // 오일러 각으로 만들어도 내부는 쿼터니언이다. 적용 순서는 Z → X → Y
+    transform.rotation = Quaternion.Euler(0f, 90f, 0f);
+
+    // 합성은 곱이고 오른쪽이 먼저 적용된다. 순서를 바꾸면 결과가 다르다
+    transform.rotation = q * transform.rotation;
+
+    // 목표를 바라보는 회전을 만들어 초당 180도 속도로 따라 돌린다
+    Quaternion look = Quaternion.LookRotation(target.position - transform.position, Vector3.up);
+    transform.rotation = Quaternion.RotateTowards(transform.rotation, look, 180f * Time.deltaTime);
+}</code></pre><h3>면접에서 이렇게 답한다</h3><ul><li><strong>오일러 각 대신 쿼터니언을 쓰는 이유는</strong> — 오일러 각은 축을 순서대로 쌓는 표현이라 특정 각도에서 축이 겹쳐 자유도를 잃고, 각도끼리 보간하면 경로가 뒤틀린다. 쿼터니언은 축과 각을 네 성분에 담아 그런 특이점이 없고 Slerp로 최단 경로 보간이 된다.</li><li><strong>짐벌 락이란</strong> — 오일러 각으로 순서대로 돌릴 때 가운데 축이 90도가 되면 남은 두 축이 같은 방향을 향해, 서로 다른 축의 회전이 같은 결과를 내는 현상이다. 회전 자유도 하나가 사라진다.</li><li><strong>인스펙터는 x, y, z인데 rotation에는 왜 w가 있나</strong> — 인스펙터가 보여주는 것은 사람이 읽기 쉬운 오일러 각이고 rotation은 내부 표현인 쿼터니언이다. 축에 sin(θ/2)를 곱한 셋과 cos(θ/2)인 w까지 있어야 축과 각을 함께 담는다.</li><li><strong>방향을 무엇으로 저장하겠나</strong> — 기획자가 만지는 데이터는 오일러 각으로 노출하고, 코드에서 누적하고 보간하는 값은 쿼터니언으로 들고 있는다. 정점에 적용하는 마지막 단계에서만 행렬로 바꾼다.</li></ul><h3>흔한 오해</h3><ul><li><strong>쿼터니언을 쓰면 짐벌 락이 사라진다</strong> — 짐벌 락은 오일러 각 표현의 성질이라 그 표현을 안 쓰는 것뿐이다. 중간에 <code>eulerAngles</code>로 읽어 고쳐 다시 넣으면 문제가 돌아온다.</li><li><strong>rotation.x에 각도를 넣으면 된다</strong> — rotation의 x는 축에 sin(θ/2)를 곱한 값이지 각도가 아니다. 각도를 넣으면 길이가 1이 아니게 되어 회전이 망가진다.</li><li><strong>eulerAngles를 더하면 안전하게 회전이 누적된다</strong> — eulerAngles는 쿼터니언에서 역산한 값이라 -90을 넣고 읽으면 270이 나오는 식이다. 누적은 쿼터니언 곱이나 <code>Transform.Rotate</code>로 한다.</li><li><strong>회전 곱은 순서를 바꿔도 된다</strong> — 행렬과 마찬가지로 교환법칙이 없어 yaw * pitch와 pitch * yaw는 다른 방향을 만든다.</li></ul>
+    <div class="refs"><strong>참고 자료</strong><ul><li><a href="https://docs.unity3d.com/2022.3/Documentation/Manual/QuaternionAndEulerRotationsInUnity.html" target="_blank" rel="noopener">Unity 매뉴얼 – Rotation and orientation in Unity</a></li><li><a href="https://docs.unity3d.com/ScriptReference/Quaternion.html" target="_blank" rel="noopener">Unity 스크립팅 API – Quaternion</a></li><li><a href="https://docs.unity3d.com/ScriptReference/Quaternion.AngleAxis.html" target="_blank" rel="noopener">Unity 스크립팅 API – Quaternion.AngleAxis</a></li><li><a href="https://docs.unity3d.com/ScriptReference/Quaternion.Euler.html" target="_blank" rel="noopener">Unity 스크립팅 API – Quaternion.Euler(적용 순서 ZXY)</a></li></ul></div>
+  </article>
+  <article>
+    <h2 id="보간">보간</h2>
+    <p class="lead">Lerp는 비율을 줄 뿐이다. 등속·감쇠·이징 중 무엇이 필요한지 정하고 고른다</p>
+    <h3>핵심 개념</h3><p><code>Lerp(a, b, t)</code>는 <code>a + (b - a) * t</code>로 두 값 사이의 중간값을 줄 뿐이고, Unity는 t를 0~1로 잘라 준다(자르지 않으려면 <code>LerpUnclamped</code>).</p><p>그 실수는 <code>pos = Vector3.Lerp(pos, target, 0.1f);</code>를 매 프레임 호출하는 코드다. 시작점 a에 <strong>현재 값을 다시 넣기</strong> 때문에 남은 거리의 10%씩 줄어드는 지수 감쇠가 된다. 남은 비율이 0.9의 프레임 수 제곱이라 1초 뒤 30fps에서는 약 4.2%가 남는데 60fps에서는 0.18%만 남는다. 기기마다 속도가 달라 보이고 목표에 정확히 도착하지도 않는다.</p><p>무엇으로 바꿀지는 <strong>원하는 움직임</strong>에 달렸다. 등속으로 가야 하면 <code>MoveTowards</code>다. 정규화한 방향으로 속도 × <code>Time.deltaTime</code>만큼 나아가되 남은 거리를 넘지 않게 잘라 준다. 감속이면 비율을 상수로 두지 말고 <code>1 - Mathf.Exp(-k * Time.deltaTime)</code>으로 계산해 프레임 독립으로 만든다. 반감기를 0.25초로 잡으면 k는 ln2 / 0.25 = 약 2.77이고, 30fps든 60fps든 0.25초 뒤 남은 거리가 절반이 된다. 속도의 연속성이 필요한 카메라 추적에는 <code>SmoothDamp</code>가 낫다.</p><p><strong>Lerp와 Slerp</strong>의 차이는 무엇을 일정하게 나누느냐다. Lerp는 직선으로 이어 성분을 비례 배분하고, Slerp는 두 벡터가 이루는 각을 고르게 나눠 구면 위의 호를 따라간다. 방향과 회전은 Slerp가 각속도와 길이를 유지해 자연스럽고, 위치나 색에는 더 싼 Lerp를 쓴다.</p><p><strong>이징</strong>은 값을 건드리는 것이 아니라 <strong>진행도 t 자체를 곡선으로 바꾸는 것</strong>이다. 0에서 1로 가는 t를 다른 모양으로 바꿔 넣으면 결과에 가감속이 생긴다. Unity에서는 <code>Mathf.SmoothStep</code>, <code>AnimationCurve</code>, <code>SmoothDamp</code>가 여기 해당하고, UI 연출은 ease-out이 잘 맞는다.</p><pre><code>public class Follower : MonoBehaviour
+{
+    public Transform target;
+    public float speed = 5f;        // 초속
+    public float stopDistance = 1f; // 이 거리에서 멈춘다
+    public float halfLife = 0.25f;  // 남은 거리가 절반이 되는 시간
+
+    // 등속으로 다가가다 거리 1.0에서 멈춘다.
+    // MoveTowards가 남은 거리를 넘지 않게 잘라 줘 경계에서 떨지 않는다
+    void Update()
+    {
+        Vector3 to = target.position - transform.position;
+        Vector3 goal = target.position - to.normalized * stopDistance;
+        transform.position = Vector3.MoveTowards(transform.position, goal, speed * Time.deltaTime);
+    }
+
+    // 감속하며 붙는 추적. 비율이 상수가 아니라 프레임레이트와 무관하다
+    public Vector3 Damp(Vector3 cur, Vector3 goal, float dt)
+        =&gt; Vector3.Lerp(cur, goal, 1f - Mathf.Exp(-Mathf.Log(2f) / halfLife * dt));
+}</code></pre><h3>면접에서 이렇게 답한다</h3><ul><li><strong>Lerp와 Slerp의 차이는</strong> — Lerp는 직선으로 이어 비례 배분하고, Slerp는 각을 고르게 나눠 호를 따라간다. 방향과 회전은 Slerp가 각속도를 유지해 자연스럽고, 위치나 색은 Lerp면 충분하다.</li><li><strong>매 프레임 Lerp(현재, 목표, t)의 문제는</strong> — 시작점에 현재 값을 다시 넣어 지수 감쇠가 되고, 프레임이 많을수록 빨리 붙어 기기마다 속도가 달라진다. 등속이면 MoveTowards, 감속이면 <code>1 - Exp(-k * deltaTime)</code>이다.</li><li><strong>이징이란</strong> — 진행도를 곡선으로 바꿔 가감속을 주는 기법이다. 값이 아니라 t를 바꾼다는 것이 핵심이고 Mathf.SmoothStep과 AnimationCurve가 그 예다.</li><li><strong>등속으로 가다 거리 1에서 멈추게 하라</strong> — 정규화한 방향으로 속도 × deltaTime만큼 나아가되, 한 프레임 이동량이 남은 거리를 넘으면 떨리므로 MoveTowards로 잘라 준다.</li></ul><h3>흔한 오해</h3><ul><li><strong>Lerp를 매 프레임 부르면 등속으로 간다</strong> — 지수적으로 느려지고, 1초 뒤 30fps는 4.2%, 60fps는 0.18%가 남는다.</li><li><strong>t에 Time.deltaTime을 넣으면 프레임 독립이 된다</strong> — t는 시간이 아니라 비율이라 그대로 넣어도 프레임 수에 따라 달라진다.</li><li><strong>Slerp가 항상 더 부드럽다</strong> — 위치 보간에는 과하고 비싸며, 두 벡터가 거의 같거나 정반대면 회전축이 불안정해진다.</li><li><strong>이징은 결과값에 곡선을 곱하는 것이다</strong> — 곡선을 씌우는 대상은 t다. 값에 곱하면 도착점이 달라진다.</li></ul>
+    <div class="refs"><strong>참고 자료</strong><ul><li><a href="https://docs.unity3d.com/ScriptReference/Vector3.Lerp.html" target="_blank" rel="noopener">Unity 스크립팅 API – Vector3.Lerp</a></li><li><a href="https://docs.unity3d.com/ScriptReference/Vector3.MoveTowards.html" target="_blank" rel="noopener">Unity 스크립팅 API – Vector3.MoveTowards</a></li><li><a href="https://docs.unity3d.com/ScriptReference/Vector3.SmoothDamp.html" target="_blank" rel="noopener">Unity 스크립팅 API – Vector3.SmoothDamp</a></li><li><a href="https://docs.unity3d.com/ScriptReference/Mathf.SmoothStep.html" target="_blank" rel="noopener">Unity 스크립팅 API – Mathf.SmoothStep</a></li></ul></div>
+  </article>
+  <article>
+    <h2 id="충돌과-교차-판정">충돌과 교차 판정</h2>
+    <p class="lead">싼 검사로 후보를 추리고 정밀 검사는 최소로. 제곱근과 나눗셈을 피해 식을 세운다</p>
+    <h3>핵심 개념</h3><p>충돌 판정의 목표는 "겹쳤는가"를 <strong>필요한 정밀도로, 가능한 한 적게</strong> 계산하는 것이다. n개의 모든 쌍을 보면 O(n²)이라 1,000개만 돼도 499,500쌍이다. 그래서 <strong>넓은 단계</strong>에서 AABB 겹침을 스윕 앤 프룬이나 공간 분할(그리드, BVH)로 훑어 후보 쌍만 남기고, <strong>좁은 단계</strong>에서 그 쌍만 실제 형상으로 검사해 접촉점과 파고든 깊이를 구한다.</p><p><strong>AABB</strong>는 x, y, z 모든 축에서 구간이 겹칠 때만 겹친 것이라, 한 축이라도 떨어져 있으면 즉시 끝나 매우 싸다. 분리축 정리의 가장 단순한 형태다. <strong>구와 구</strong>는 제곱근을 피해 <code>d2 &lt;= (ra + rb) * (ra + rb)</code>로 본다. <strong>캡슐과 구</strong>는 캡슐이 "선분에서 거리가 반지름 이하인 점들"이라, 구 중심을 선분에 투영한 매개변수를 0~1로 자른 뒤 그 점까지의 거리를 반지름 합과 비교한다.</p><p><strong>분리축 정리(SAT)</strong>는 볼록 도형 일반으로 가는 길이다. 둘이 떨어져 있으면 가르는 축이 반드시 존재하고, 그 축은 2차원에서는 변의 법선, 3차원에서는 면 법선과 모서리 외적 중에 있다. 후보 축마다 투영해 한 축이라도 구간이 안 겹치면 즉시 끝내고, 모두 겹칠 때만 충돌이며, 겹침의 최솟값이 밀어낼 방향과 깊이가 된다. <strong>점과 다각형</strong>은 반직선을 쏴 변과 만난 횟수가 홀수면 내부로 보면 오목까지 통한다.</p><p><strong>광선</strong> 계열은 O + tD를 도형의 식에 넣어 t를 푼다. 법선 N인 평면은 <code>t = Dot(N, Q - O) / Dot(N, D)</code>이고, 분모가 0이면 평면과 나란해 교차점이 없다. t가 음수면 광선 뒤쪽이라 걸러내고 분모의 부호로 앞뒷면을 나눈다. 구는 이차방정식이 되어 판별식이 음수면 안 만나고, 삼각형은 교차점을 무게중심 좌표로 안팎 판정한다.</p><p>마지막이 <strong>터널링</strong>이다. 일반 검사는 스텝마다의 위치만 보므로 한 스텝에 벽 두께보다 멀리 이동하면 겹치는 순간이 없어 통과한다. 이전 위치와 현재 위치 사이를 레이캐스트나 스윕으로 검사하거나 Collision Detection을 Continuous로 바꾸면 막는다. 상대 위치 dp, 상대 속도 dv인 두 물체가 <strong>가장 가까워지는 시각</strong>은 거리 제곱을 미분해 0으로 두면 <code>t = -Dot(dp, dv) / Dot(dv, dv)</code>다. 이 t를 한 프레임으로 자른 뒤 그때 거리를 반지름 합과 비교하면 스윕 판정이 된다.</p><pre><code>public class Projectile : MonoBehaviour
+{
+    public LayerMask hitMask;
+    public float radius = 0.1f;
+    Vector3 prev;
+
+    // 지난 프레임 위치와 지금 위치 사이를 쓸어 검사한다. 빨라도 뚫리지 않는다
+    void Update()
+    {
+        Vector3 delta = transform.position - prev;
+        float dist = delta.magnitude;
+        if (dist &gt; 0f &amp;&amp; Physics.SphereCast(prev, radius, delta / dist, out RaycastHit hit, dist, hitMask))
+            transform.position = hit.point;   // 스텝 도중 맞은 지점으로 되돌린다
+        prev = transform.position;
+    }
+}</code></pre><h3>면접에서 이렇게 답한다</h3><ul><li><strong>충돌 판정을 왜 두 단계로 나누나</strong> — 모든 쌍을 실제 형상으로 보면 O(n²)이라 감당이 안 된다. 넓은 단계에서 AABB와 공간 분할로 후보만 추리고, 좁은 단계에서 그 쌍만 정밀 검사한다.</li><li><strong>광선과 평면·구·삼각형의 교차는</strong> — O + tD를 도형의 식에 넣어 t를 푼다. 평면은 <code>Dot(N, Q - O) / Dot(N, D)</code>이고 분모가 0이면 나란해 만나지 않는다. 구는 판별식으로 걸러내고 삼각형은 무게중심 좌표로 판정한다.</li><li><strong>분리축 정리를 설명하라</strong> — 볼록한 둘이 떨어져 있으면 가르는 축이 반드시 있고 그 축은 면 법선과 모서리 외적 중에 있다. 한 축이라도 투영 구간이 안 겹치면 충돌이 아니고, 모두 겹치면 겹침이 가장 작은 축이 밀어낼 방향과 깊이가 된다.</li><li><strong>터널링은 어떻게 막나</strong> — 스텝 사이 경로를 레이캐스트나 스윕으로 검사하거나 Collision Detection을 Continuous로 바꾼다. 총알은 물리 바디 대신 레이캐스트로 처리하는 편이 싸다.</li></ul><h3>흔한 오해</h3><ul><li><strong>Fixed Timestep을 늘리면 터널링이 줄어든다</strong> — 반대다. 스텝이 드물어져 한 스텝 이동 거리가 커지므로 더 잘 뚫린다. 근본 해결은 스윕이나 CCD다.</li><li><strong>넓은 단계를 통과했으면 겹친 것이다</strong> — "겹칠 수도 있다"만 알려주는 보수적 검사라 좁은 단계가 필요하다.</li><li><strong>분리축 정리는 아무 도형에나 쓸 수 있다</strong> — 볼록 전용이라 오목한 형상은 볼록 조각으로 나눠야 한다.</li><li><strong>점 포함 판정은 모든 변의 같은 쪽인지 보면 된다</strong> — 볼록 다각형에서만 맞다. 오목에는 반직선 교차 횟수의 홀짝을 쓰되, 반직선이 꼭짓점을 지날 때 셀 규칙을 정해 둬야 한다.</li></ul>
+    <div class="refs"><strong>참고 자료</strong><ul><li><a href="https://docs.unity3d.com/Manual/CollidersOverview.html" target="_blank" rel="noopener">Unity 매뉴얼 – Introduction to collision</a></li><li><a href="https://docs.unity3d.com/Manual/ContinuousCollisionDetection.html" target="_blank" rel="noopener">Unity 매뉴얼 – Continuous collision detection (CCD)</a></li><li><a href="https://docs.unity3d.com/ScriptReference/Physics.Raycast.html" target="_blank" rel="noopener">Unity 스크립팅 API – Physics.Raycast</a></li><li><a href="https://docs.unity3d.com/ScriptReference/Physics.SphereCast.html" target="_blank" rel="noopener">Unity 스크립팅 API – Physics.SphereCast</a></li></ul></div>
+  </article>
+  <article>
+    <h2 id="물리-시뮬레이션">물리 시뮬레이션</h2>
+    <p class="lead">고정 간격과 세미 임플리싯 오일러가 왜 표준인지, 지터와 터널링은 어디서 오는지 안다</p>
+    <h3>핵심 개념</h3><p>물리 엔진의 한 스텝은 순서가 정해져 있다. 힘을 모아 가속도를 구하고, 속도와 위치를 <strong>적분</strong>하고, 충돌을 찾고(넓은 단계 → 좁은 단계), 접촉과 조인트를 솔버로 풀어 겹침과 속도를 고치고, 거의 멈춘 물체를 재운다. 이 중 물체를 실제로 옮기는 것은 적분이라, 적분 방식과 시간 간격이 시뮬레이션 전체의 안정성을 정한다.</p><p>가속도를 속도로, 속도를 위치로 옮기는 1차 적분에는 두 가지가 쓰인다. 비용은 같은데 결과가 다르다.</p><pre><code>Vector3 position, velocity, acceleration;
+
+void StepExplicit(float dt)       // 명시적 오일러: 옛 속도로 위치를 옮긴다
+{
+    position += velocity * dt;
+    velocity += acceleration * dt;
+}
+
+void StepSemiImplicit(float dt)   // 세미 임플리싯: 속도를 먼저 갱신해 새 속도로 옮긴다
+{
+    velocity += acceleration * dt;
+    position += velocity * dt;
+}</code></pre><p>명시적 오일러는 스프링·진자·궤도처럼 되돌리는 힘이 있는 계에서 매 스텝 에너지를 조금씩 더한다. 증상이 분명하다. 스프링에 매단 상자의 진폭이 서서히 커지다 화면 밖으로 날아가고, 공전하는 물체의 궤도가 점점 벌어진다. 세미 임플리싯은 갱신한 속도로 위치를 옮기는 덕에 에너지가 일정 범위 안에 갇혀, 오래 돌려도 진폭이 유지된다. 대부분의 게임 물리 엔진이 이 순서를 쓰는 이유다. 다만 둘 다 1차라 오차는 dt에 비례하고, dt가 커지면 같은 중력에서도 점프 높이가 달라진다.</p><p>그래서 물리는 <strong>고정 간격</strong>으로 돌린다. 렌더 프레임 간격은 기기와 상황에 따라 8ms에서 50ms까지 흔들린다. 그 값을 dt로 그대로 넣으면 같은 입력에도 점프 높이와 스프링 반응이 기기마다 달라지고, 로딩 직후처럼 dt가 크게 튄 프레임에서는 물체가 한 번에 멀리 이동해 벽을 뚫거나 겹침 해소가 폭주한다. Unity는 Time.fixedDeltaTime(기본 0.02초, 초당 50회) 간격으로 FixedUpdate와 물리 스텝을 돌리고 남는 시간을 누적하므로, 한 프레임에 스텝이 없을 수도 여러 번일 수도 있다. 계속 밀리면 따라잡느라 스텝이 늘고 그래서 더 느려지는 악순환에 빠지므로, Maximum Allowed Timestep으로 한 프레임에 소화할 상한을 둔다.</p><p>대신 화면이 떨린다. 물리가 50Hz인데 화면이 120Hz면 같은 위치가 두세 프레임 반복되다 툭 튄다. 이건 Rigidbody의 Interpolate(직전 두 물리 위치 사이를 그린다, 한 스텝 지연)나 Extrapolate(현재 속도로 앞을 예측한다)로 렌더 위치만 부드럽게 만드는 문제다. 입력은 Update에서 받아 두고 힘은 FixedUpdate에서 준다. Update마다 AddForce하면 프레임률이 곧 힘의 크기가 된다.</p><p>접촉은 겹친 뒤 고치는 방식이 기본이다. 좁은 단계가 접촉점·법선·침투 깊이를 주면 솔버가 반복을 돌며 접촉마다 충격량을 넣어 파고드는 상대 속도를 없애고, 남은 침투는 한 번에 밀지 않고 조금씩 민다. 한 번에 밀면 튀어 오르기 때문이다. 지터는 대개 솔버 반복이 모자라 중력과 접촉 반력이 매 스텝 싸우거나, 질량비가 큰 물체를 쌓거나 연결했거나, 콜라이더 스케일이 극단적이거나, 원점에서 아주 멀어 float 간격이 벌어진 탓이다. 빠른 물체가 얇은 벽을 뚫는 터널링은 fixedDeltaTime을 줄이기 전에 Collision Detection을 Continuous 계열로 바꾸는 편이 싸다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>물리를 고정 시간 간격으로 돌리는 이유</strong> — 적분 오차가 dt에 좌우되기 때문이다. 간격이 들쭉날쭉하면 점프 높이나 스프링이 기기마다 달라지고 큰 dt에서는 발산한다. 고정 간격은 결과를 안정시키고 재현할 수 있게 만든다.</li><li><strong>세미 임플리싯 오일러를 쓰는 이유</strong> — 속도를 먼저 갱신하고 그 속도로 위치를 옮기면 진동하는 계에서 에너지가 갇힌다. 순서만 뒤집은 명시적 오일러는 비용이 같은데도 에너지가 늘어 스프링이 점점 크게 흔들리다 발산한다.</li><li><strong>강체 시뮬레이터를 설계해 보라</strong> — 한 스텝을 힘 적용 → 적분 → 브로드 페이즈 → 내로 페이즈 → 제약 솔버 → 슬립으로 나눈다고 말한다. 접촉은 충격량 기반 솔버로 반복해 풀고, 남은 침투는 조금씩 밀어 되돌린다.</li><li><strong>지터를 해결한 경험</strong> — 원인부터 나눈다. 렌더만 떨리는지 시뮬레이션이 실제로 떨리는지 확인하고, 전자는 Rigidbody 보간으로, 후자는 솔버 반복·질량비·스케일·월드 원점 거리를 차례로 점검해 잡았다고 말한다.</li></ul><h3>흔한 오해</h3><ul><li><strong>FixedUpdate는 매 프레임 한 번 호출된다</strong> — 누적 시간에 따라 한 프레임에 0번일 수도 여러 번일 수도 있다. 여기에 이펙트 생성 같은 연출을 넣으면 프레임률에 따라 개수가 달라진다.</li><li><strong>고정 간격은 성능 때문에 쓴다</strong> — 목적은 안정성과 재현성이다. 오히려 간격을 줄이면 스텝 수가 늘어 CPU를 더 쓴다.</li><li><strong>떨리면 fixedDeltaTime부터 낮춘다</strong> — 화면만 떨리는 것이라면 Rigidbody 보간으로 거의 공짜로 해결된다. 간격부터 낮추면 부하만 늘고 원인은 남는다.</li><li><strong>적분 순서는 취향 차이다</strong> — 두 줄의 순서가 곧 안정성이다. 비용이 같은데 한쪽만 에너지가 발산한다.</li></ul>
+    <div class="refs"><strong>참고 자료</strong><ul><li><a href="https://docs.unity3d.com/Manual/fixed-updates.html" target="_blank" rel="noopener">Unity 매뉴얼 – Fixed updates</a></li><li><a href="https://docs.unity3d.com/Manual/rigidbody-interpolation.html" target="_blank" rel="noopener">Unity 매뉴얼 – Apply interpolation to a Rigidbody</a></li><li><a href="https://docs.unity3d.com/Manual/execution-order.html" target="_blank" rel="noopener">Unity 매뉴얼 – Event function execution order</a></li><li><a href="https://docs.unity3d.com/Manual/ContinuousCollisionDetection.html" target="_blank" rel="noopener">Unity 매뉴얼 – Continuous collision detection (CCD)</a></li></ul></div>
+  </article>
+  <article>
+    <h2 id="기초-수학">기초 수학</h2>
+    <p class="lead">삼각함수와 근의 공식을 게임 판정에 쓰고, float 오차가 만드는 증상까지 안다</p>
+    <h3>핵심 개념</h3><p>삼각함수는 각도와 방향을 오가는 환율이다. 단위원에서 각 θ인 점이 (cos θ, sin θ)이므로, 각도로 방향을 만들 때는 sin·cos를, 방향에서 각도를 되찾을 때는 atan2를 쓴다. Unity의 Mathf 삼각함수는 모두 라디안을 받고 돌려주므로, 도 단위와 섞을 때는 Mathf.Deg2Rad와 Mathf.Rad2Deg를 곱한다.</p><p>파형 변형은 네 숫자로 끝난다. <strong>A·sin(ω·t + φ) + c</strong>에서 A는 진폭, ω는 각속도라 주기가 2π/ω, φ는 위상, c는 중심이다. 밖에 곱한 수가 높이를, 안에 곱한 수가 빠르기를 바꾼다. 그래서 <code>Mathf.Sin(Time.time * 2f) * 3f</code>는 −3에서 3까지, 주기 2π/2 = π ≈ 3.14초로 오르내린다.</p><pre><code>float phase;   // Time.time 대신 누적하면 시작 시점과 일시정지를 제어할 수 있다
+
+void Update()
+{
+    phase += Time.deltaTime * speed;
+    transform.position = origin + Vector3.up * (Mathf.Sin(phase) * amplitude);
+}</code></pre><p>atan2가 atan보다 나은 이유는 정보량이다. <code>Mathf.Atan(y / x)</code>는 나누는 순간 두 성분의 부호가 섞여 −π/2~π/2만 돌려주고 (1, 1)과 (−1, −1)을 구분하지 못하며, x가 0이면 나눗셈부터 깨진다. <code>Mathf.Atan2(y, x)</code>는 둘을 따로 받아 사분면을 가려 −π~π 전 범위를 안전하게 돌려준다. 조준 방향, 조이스틱 각도, 미니맵 아이콘 회전이 모두 이 함수다. 두 각의 차이는 ±180도에서 뒤집히므로 <code>Mathf.DeltaAngle</code>로 구한다.</p><p>근의 공식은 광선과 구의 교차에서 그대로 나온다. 광선 위의 점을 구 방정식에 넣으면 거리 t에 대한 at² + bt + c = 0이 되고, 판별식 b² − 4ac의 부호가 곧 답이다. 음수면 실근이 없어 비껴가고, 0이면 접하고, 양수면 관통해 교차점이 둘이다. 그래서 판별식으로 대부분을 걸러낸 뒤 필요할 때만 제곱근을 계산한다. 두 근 중 작은 쪽이 앞쪽 교차점이고, 그 값이 음수면 광선 뒤라 버린다.</p><p><strong>부동소수점</strong>은 이 계산들이 딛고 선 바닥이다. float는 가수가 24비트뿐이라 유효 숫자가 7자리 남짓이고, 0.1처럼 2진수로 딱 떨어지지 않는 수는 근사값으로 저장된다. 0.1을 열 번 더한 값이 1.0과 <code>==</code>로 같지 않은 이유다. 더 중요한 성질은 <strong>값이 클수록 표현 간격이 벌어진다</strong>는 것이다.</p><table><thead><tr><th>원점에서의 거리</th><th>구분되는 최소 간격</th><th>보이는 증상</th></tr></thead><tbody><tr><td>1m</td><td>약 0.0000001m</td><td>문제 없다</td></tr><tr><td>100,000m</td><td>약 0.008m</td><td>멈춘 물체가 떨리고 카메라가 지글거린다</td></tr><tr><td>1,000,000m</td><td>약 0.06m</td><td>위치가 격자에 스냅되고 물리가 흔들린다</td></tr></tbody></table><p>증상별 대응은 이렇다. 넓은 월드에서 멀리 간 캐릭터가 떨리면 월드 원점을 주기적으로 옮겨(플로팅 오리진) 좌표를 0 근처로 되돌린다. 몇 시간 켜 둔 게임에서 Time.time으로 돌리던 sin 애니메이션이 끊기는 것도 같은 이유라, 시간을 누적하고 2π마다 되감는다. 크기가 다른 두 수를 빼면 유효 숫자가 날아가 판별식이 0에 가까운 스침 판정에서 결과가 튄다. 길이가 0에 가까운 벡터를 정규화하면 NaN이 나오고, NaN은 퍼지기만 해서 오브젝트가 화면에서 사라진다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>atan2는 어디에 쓰나</strong> — 방향 벡터를 각도로 바꿀 때 쓴다. y와 x를 따로 받아 사분면을 구분하므로 −π~π 전 범위를 돌려주고 x가 0이어도 안전하다. 캐릭터를 목표 쪽으로 돌릴 때 쓴다.</li><li><strong>근의 공식은 어디에 쓰나</strong> — 광선과 구의 교차가 대표적이다. 판별식의 부호로 비껴감·접함·관통을 가르고, 제곱근은 필요할 때만 계산한다고 말한다.</li><li><strong>sin 그래프를 설명하라</strong> — A·sin(ωt + φ) + c로 쓰고 A가 진폭, 주기가 2π/ω라고 말한다. 둥실 뜨는 아이템과 깜빡이는 UI가 그 예다.</li><li><strong>float 비교는 어떻게 하나</strong> — <code>==</code> 대신 차이의 절댓값을 허용 오차와 비교한다. 오차는 다루는 값의 크기에 맞춰 정하고, <code>Mathf.Epsilon</code>은 0 근처에서만 의미 있어 기준으로 쓰지 않는다.</li></ul><h3>흔한 오해</h3><ul><li><strong>Atan(y / x)로 충분하다</strong> — 나누는 순간 부호 정보가 합쳐져 사분면을 잃고 결과가 반 바퀴 틀어진다. x가 0이면 계산 자체가 깨진다.</li><li><strong>판별식이 음수면 교차점이 광선 뒤라는 뜻이다</strong> — 실근이 아예 없어 비껴간 것이다. 뒤에 있는 경우는 실근이 있으면서 t가 음수인 경우다.</li><li><strong>Mathf.Sin은 도(degree)를 받는다</strong> — 라디안이다. 도 값을 그대로 넣으면 입력이 57배 커져 주기가 그만큼 짧아진 것처럼 보인다.</li><li><strong>double을 쓰면 오차가 사라진다</strong> — 자릿수가 늘어 늦게 드러날 뿐 성질은 같다. Unity의 Transform과 물리 API는 float이라 결국 변환된다.</li></ul>
+    <div class="refs"><strong>참고 자료</strong><ul><li><a href="https://docs.unity3d.com/ScriptReference/Mathf.Atan2.html" target="_blank" rel="noopener">Unity 스크립팅 API – Mathf.Atan2</a></li><li><a href="https://docs.unity3d.com/ScriptReference/Mathf.Sin.html" target="_blank" rel="noopener">Unity 스크립팅 API – Mathf.Sin</a></li><li><a href="https://docs.unity3d.com/ScriptReference/Mathf.Approximately.html" target="_blank" rel="noopener">Unity 스크립팅 API – Mathf.Approximately</a></li><li><a href="https://learn.microsoft.com/ko-kr/dotnet/csharp/language-reference/builtin-types/floating-point-numeric-types" target="_blank" rel="noopener">Microsoft Learn – 부동 소수점 숫자 형식 (C# 참조)</a></li></ul></div>
+  </article>
+  <footer>정리 글은 Claude가 썼다. 틀린 내용이 있을 수 있으니 중요한 내용은 아래 참고 자료 원문으로 확인한다.</footer>
+</main>
+</body>
+</html>
