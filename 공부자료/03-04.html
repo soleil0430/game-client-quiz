@@ -66,7 +66,55 @@
 <p class="kicker">최적화·메모리</p>
 <h1>메모리와 GC</h1>
 <p class="lead">Unity GC는 힙 전체를 훑고 객체를 옮기지 않는다. 그래서 할당부터 줄인다</p>
-<p>가비지 컬렉션(GC)은 언제 돌지 우리가 고를 수 없다. 전투 중에 돌면 그 프레임에 메인 스레드가 멈춘다. 그래서 GC를 다루는 일은 곧 할당을 줄이는 일이다. </p><h3>관리 힙과 네이티브 메모리는 정리 방법이 다르다</h3> <p>Unity 메모리는 크게 둘이다. C# 객체가 올라가는 <strong>관리 힙</strong>, 그리고 텍스처·메시 같은 에셋이 쓰는 네이티브 메모리다. GC가 손대는 것은 앞쪽뿐이다. </p><p>관리 힙에는 class 인스턴스, 배열, 문자열, 박싱된 값이 들어간다. 네이티브 쪽은 참조를 놓고 <code>Resources.UnloadUnusedAssets</code>나 번들 언로드로 정리한다. </p><p>텍스처는 압축 포맷과 Max Size가 메모리를 가장 크게 줄인다. 밉맵은 약 33%를 더 쓴다. Read/Write Enabled를 켜면 CPU 사본이 생겨 약 두 배가 된다. </p><h3>힙 전체를 훑고, 빈틈은 메우지 않는다</h3> <p>Unity 기본 GC(Boehm)는 세대 구분이 없다. 수집할 때마다 힙 전체를 훑는다. 힙이 클수록 멈추는 시간이 길어진다. </p><p>객체를 옮기지도 않는다. 회수한 자리에 빈틈이 남고, 한 번 커진 힙은 대개 OS로 돌아가지 않는다. </p><svg viewBox="0 0 640 195" width="100%" role="img" aria-label="객체를 옮기지 않는 GC는 회수한 자리에 빈틈을 남겨 큰 배열이 들어갈 연속 공간이 없어진다"><text x="0" y="16" font-size="13" fill="currentColor">Unity 기본 GC는 살아남은 객체를 옮기지 않는다</text><text x="0" y="52" font-size="13" fill="currentColor">수집 전</text><rect x="100" y="36" width="70" height="24" fill="currentColor" fill-opacity="0.08" stroke="currentColor"/><rect x="176" y="36" width="50" height="24" fill="currentColor" fill-opacity="0.08" stroke="currentColor"/><rect x="232" y="36" width="60" height="24" fill="currentColor" fill-opacity="0.08" stroke="currentColor"/><rect x="298" y="36" width="80" height="24" fill="currentColor" fill-opacity="0.08" stroke="currentColor"/><rect x="384" y="36" width="60" height="24" fill="currentColor" fill-opacity="0.08" stroke="currentColor"/><rect x="450" y="36" width="90" height="24" fill="currentColor" fill-opacity="0.08" stroke="currentColor"/><text x="0" y="104" font-size="13" fill="currentColor">수집 후</text><rect x="100" y="88" width="70" height="24" fill="currentColor" fill-opacity="0.08" stroke="currentColor"/><rect x="176" y="88" width="50" height="24" fill="none" stroke="currentColor" stroke-dasharray="3 3"/><rect x="232" y="88" width="60" height="24" fill="currentColor" fill-opacity="0.08" stroke="currentColor"/><rect x="298" y="88" width="80" height="24" fill="none" stroke="currentColor" stroke-dasharray="3 3"/><rect x="384" y="88" width="60" height="24" fill="currentColor" fill-opacity="0.08" stroke="currentColor"/><rect x="450" y="88" width="90" height="24" fill="none" stroke="currentColor" stroke-dasharray="3 3"/><text x="550" y="104" font-size="13" fill="currentColor">빈틈</text><text x="0" y="156" font-size="13" fill="currentColor">새 배열</text><rect x="100" y="140" width="130" height="24" fill="none" stroke="currentColor"/><text x="112" y="157" font-size="13" fill="currentColor">연속 130 필요</text><text x="246" y="157" font-size="13" fill="currentColor">빈틈을 다 합치면 넉넉하다. 붙어 있지 않아 실패한다</text></svg><p>Incremental GC를 켜면 표시 단계를 여러 프레임에 나눠 스파이크를 완화한다. 할당이 사라지지는 않는다. 근본 해법은 쓰레기를 만들지 않는 것이다. </p><h3>할당을 만들지 않는 코드로 바꾼다</h3> <p>출발점은 매 프레임 새 배열과 새 문자열을 만들지 않는 것이다. NonAlloc API는 미리 잡아 둔 버퍼를 채운다. 값이 바뀔 때만 문자열을 만들면 UI 갱신 할당도 사라진다. </p><p>레이캐스트와 점수 표시에서 매 프레임 할당을 없앤 코드다: </p><pre><code>readonly RaycastHit[] _hits = new RaycastHit[8];   // 버퍼를 미리 잡아 재사용int _shownScore = -1;void Update(){// RaycastAll은 호출마다 새 배열을 만든다. NonAlloc은 이 버퍼를 채운다Physics.RaycastNonAlloc(transform.position, transform.forward, _hits, 50f);if (_score != _shownScore)        // 값이 바뀔 때만 문자열을 만든다{_shownScore = _score;_label.text = _shownScore.ToString();}}</code></pre><p>큰 버퍼는 특히 미리 잡아 두고 재사용한다. 단편화가 생기면 여유 총량이 넉넉해도 큰 블록 할당이 실패하기 때문이다. </p><h3>풀링과 누수는 둘 다 상태를 되돌리는 문제다</h3> <p>자주 생기고 사라지는 오브젝트에는 풀링을 쓴다. <code>Instantiate</code>는 오브젝트와 컴포넌트를 새로 만드는 비용이 크다. 풀은 미리 만든 것을 껐다 켜며 재사용한다. </p><p>대신 풀 크기만큼 메모리를 계속 점유한다. 꺼낸 객체는 <code>Awake</code>와 <code>Start</code>가 다시 불리지 않는다. 체력·속도·구독 같은 상태는 <code>OnEnable</code>에서 되돌린다. </p><p>누수는 대부분 참조가 남는 것이다. <code>-=</code>로 풀지 않은 이벤트 핸들러나 static 컬렉션에 남은 항목이 객체를 계속 살린다. 의심되면 Memory Profiler 스냅샷으로 누가 잡고 있는지 역추적한다. </p><h3>면접에서 이렇게 답한다</h3> <ul><li><strong>왜 힙 할당을 줄이나</strong> — 할당이 쌓이면 GC가 돌고 그때 메인 스레드가 멈춘다. Incremental GC로 완화해도 근본은 매 프레임 할당을 0에 가깝게 만드는 것이다. NonAlloc API, 버퍼 재사용, 풀링을 쓴다. </li><li><strong>GC.Collect를 직접 부르나</strong> — 평소에는 부르지 않는다. 로딩 화면이나 씬 전환처럼 이미 멈춰 있는 구간에서 에셋 언로드와 함께 한 번 정리하는 정도가 타당하다. </li><li><strong>풀링의 단점은</strong> — 안 쓰는 객체까지 메모리를 계속 점유한다. 재사용이라 이전 상태가 남아 꺼낼 때 초기화가 필요하다. Awake와 Start가 다시 불리지 않는 점이 실수 지점이다. </li><li><strong>UniTask는 어떻게 할당을 없애나</strong> — 반환 타입을 struct로 만들어 객체 할당을 없앤다. 완료를 알리는 소스는 풀에서 꺼내 재사용한다. 실행도 PlayerLoop 위에서 돌아 스레드 전환이 없다. </li></ul><h3>이런 오해를 한다</h3> <ul><li><strong>GC가 알아서 하니 할당은 신경 쓸 필요 없다</strong> — 언제 도는지 못 고르는 것이 문제다. 전투 중에 돌면 그 프레임이 끊긴다. </li><li><strong>GC가 돌면 메모리가 OS로 반환된다</strong> — Boehm GC는 객체를 옮기지 않고 힙도 잘 반환하지 않는다. 최고 사용량이 그대로 남는다. </li><li><strong>주기적으로 GC.Collect를 부르면 안정된다</strong> — 전체 수집을 강제해 그 자리에서 멈춤을 만든다. 플레이 중 호출은 끊김을 스스로 만드는 일이다. </li><li><strong>Read/Write Enabled를 켜면 메모리가 준다</strong> — 반대다. CPU 쪽 사본이 생겨 약 두 배가 된다. 픽셀을 읽어야 할 때만 켠다. </li><li><strong>빈 공간이 많으면 할당은 성공한다</strong> — 단편화되면 총량이 넉넉해도 연속된 큰 블록을 못 잡는다. </li></ul><h3>3줄 정리</h3> <ul><li>GC가 도는 순간 메인 스레드가 멈춘다. 할당부터 줄인다 </li><li>Boehm GC는 힙 전체를 훑고 객체를 옮기지 않는다 </li><li>NonAlloc·버퍼 재사용·풀링이 기본 도구. 풀은 상태를 되돌린다 </li></ul>
+<p>보스 패턴이 시작되는 순간 한 프레임이 툭 끊긴다. 프로파일러를 열어 그 프레임을 집으면 가비지 컬렉션(GC)이 들어와 있다. 언제 돌지는 우리가 고르지 못한다.</p>
+<p>GC를 다루는 일은 결국 할당을 줄이는 일이다.</p>
+<h3>관리 힙과 네이티브 메모리는 정리 방법이 다르다</h3>
+<p>Unity 메모리는 크게 둘로 나뉜다. C# 객체가 올라가는 <strong>관리 힙</strong>, 그리고 텍스처·메시 같은 에셋이 쓰는 네이티브 메모리다. GC가 손대는 쪽은 앞의 하나뿐이다.</p>
+<p>관리 힙에는 class 인스턴스, 배열, 문자열, 박싱된 값이 들어간다. 네이티브 쪽은 참조를 놓아 준 뒤 <code>Resources.UnloadUnusedAssets</code>나 번들 언로드로 치운다.</p>
+<p>네이티브 쪽에서 덩치가 제일 큰 것은 대개 텍스처다. 압축 포맷과 Max Size가 메모리를 가장 크게 줄인다. 밉맵은 약 33%를 더 쓰고, Read/Write Enabled를 켜면 CPU 사본이 생겨 두 배가 된다.</p>
+<h3>왜 한 번 커진 힙은 안 줄어드나</h3>
+<p>Unity 기본 GC(Boehm)에는 세대 구분이 없다. 수집할 때마다 힙 전체를 훑는다. 힙이 클수록 멈추는 시간도 길어진다.</p>
+<p>살아남은 객체를 옮기지도 않는다. 회수한 자리에 빈틈이 그대로 남고, 한 번 커진 힙은 대개 OS로 돌아가지 않는다.</p>
+<svg viewBox="0 0 640 195" width="100%" role="img" aria-label="객체를 옮기지 않는 GC는 회수한 자리에 빈틈을 남겨 큰 배열이 들어갈 연속 공간이 없어진다"><text x="0" y="16" font-size="13" fill="currentColor">Unity 기본 GC는 살아남은 객체를 옮기지 않는다</text><text x="0" y="52" font-size="13" fill="currentColor">수집 전</text><rect x="100" y="36" width="70" height="24" fill="currentColor" fill-opacity="0.08" stroke="currentColor"/><rect x="176" y="36" width="50" height="24" fill="currentColor" fill-opacity="0.08" stroke="currentColor"/><rect x="232" y="36" width="60" height="24" fill="currentColor" fill-opacity="0.08" stroke="currentColor"/><rect x="298" y="36" width="80" height="24" fill="currentColor" fill-opacity="0.08" stroke="currentColor"/><rect x="384" y="36" width="60" height="24" fill="currentColor" fill-opacity="0.08" stroke="currentColor"/><rect x="450" y="36" width="90" height="24" fill="currentColor" fill-opacity="0.08" stroke="currentColor"/><text x="0" y="104" font-size="13" fill="currentColor">수집 후</text><rect x="100" y="88" width="70" height="24" fill="currentColor" fill-opacity="0.08" stroke="currentColor"/><rect x="176" y="88" width="50" height="24" fill="none" stroke="currentColor" stroke-dasharray="3 3"/><rect x="232" y="88" width="60" height="24" fill="currentColor" fill-opacity="0.08" stroke="currentColor"/><rect x="298" y="88" width="80" height="24" fill="none" stroke="currentColor" stroke-dasharray="3 3"/><rect x="384" y="88" width="60" height="24" fill="currentColor" fill-opacity="0.08" stroke="currentColor"/><rect x="450" y="88" width="90" height="24" fill="none" stroke="currentColor" stroke-dasharray="3 3"/><text x="550" y="104" font-size="13" fill="currentColor">빈틈</text><text x="0" y="156" font-size="13" fill="currentColor">새 배열</text><rect x="100" y="140" width="130" height="24" fill="none" stroke="currentColor"/><text x="112" y="157" font-size="13" fill="currentColor">연속 130 필요</text><text x="246" y="157" font-size="13" fill="currentColor">빈틈을 다 합치면 넉넉하다. 붙어 있지 않아 실패한다</text></svg>
+<p>그림의 마지막 줄이 단편화다. 빈 조각을 다 합치면 넉넉한데, 붙어 있지 않아서 큰 배열 하나가 못 들어간다.</p>
+<p>그럼 Incremental GC를 켜면 끝인가? 표시 단계를 여러 프레임에 나눠 스파이크를 완화할 뿐이다. 할당 자체는 그대로 남는다.</p>
+<h3>할당을 만들지 않는 코드로 바꾼다</h3>
+<p>출발점은 매 프레임 새 배열과 새 문자열을 만들지 않는 것이다. NonAlloc API는 미리 잡아 둔 버퍼를 대신 채운다. 문자열은 값이 바뀔 때만 만들면 UI 갱신 할당도 같이 사라진다.</p>
+<p>레이캐스트와 점수 표시에서 매 프레임 할당을 걷어낸 코드다:</p>
+<pre><code>readonly RaycastHit[] _hits = new RaycastHit[8];   // 버퍼를 미리 잡아 재사용
+int _shownScore = -1;
+
+void Update()
+{
+    // RaycastAll은 호출마다 새 배열을 만든다. NonAlloc은 이 버퍼를 채운다
+    Physics.RaycastNonAlloc(transform.position, transform.forward, _hits, 50f);
+    if (_score != _shownScore)        // 값이 바뀔 때만 문자열을 만든다
+    {
+        _shownScore = _score;
+        _label.text = _shownScore.ToString();
+    }
+}</code></pre>
+<p>큰 버퍼일수록 미리 잡아 두고 재사용한다. 단편화가 생기면 여유 총량이 넉넉해도 큰 블록 하나를 못 잡기 때문이다.</p>
+<h3>풀링과 누수는 둘 다 상태를 되돌리는 문제다</h3>
+<p>자주 생기고 사라지는 오브젝트에는 풀링을 쓴다. <code>Instantiate</code>는 오브젝트와 컴포넌트를 통째로 새로 만든다. 풀은 미리 만들어 둔 것을 껐다 켜며 돌려 쓴다.</p>
+<p>공짜는 아니다. 풀 크기만큼 메모리를 계속 붙잡고 있고, 꺼낸 객체에는 <code>Awake</code>와 <code>Start</code>가 다시 불리지 않는다. 체력·속도·이벤트 구독 같은 상태는 <code>OnEnable</code>에서 직접 되돌린다.</p>
+<p>누수도 얼굴이 비슷하다. 대부분 참조가 남아서 생긴다. <code>-=</code>로 풀지 않은 이벤트 핸들러나 static 컬렉션에 남은 항목이 객체를 계속 살려 둔다.</p>
+<p>의심되면 Memory Profiler 스냅샷으로 누가 붙잡고 있는지 역추적한다.</p>
+<h3>면접에서 이렇게 답한다</h3>
+<ul><li><strong>왜 힙 할당을 줄이나</strong> — 할당이 쌓이면 GC가 돌고 그때 메인 스레드가 멈춘다고 말한다. Incremental GC로 완화해도 근본은 매 프레임 할당을 0에 가깝게 만드는 것이다. NonAlloc API, 버퍼 재사용, 풀링을 근거로 든다.</li>
+<li><strong>GC.Collect를 직접 부르나</strong> — 평소에는 부르지 않는다. 로딩 화면이나 씬 전환처럼 이미 멈춰 있는 구간에서 에셋 언로드와 함께 한 번 정리하는 정도가 타당하다.</li>
+<li><strong>풀링의 단점은</strong> — 안 쓰는 객체까지 메모리를 계속 점유한다. 재사용이라 이전 상태가 남아 꺼낼 때 초기화가 필요하다. Awake와 Start가 다시 불리지 않는 점을 실수 지점으로 짚는다.</li>
+<li><strong>UniTask는 어떻게 할당을 없애나</strong> — 반환 타입을 struct로 만들어 객체 할당을 없앤다. 완료를 알리는 소스는 풀에서 꺼내 재사용한다. 실행도 PlayerLoop 위에서 돌아 스레드 전환이 없다.</li></ul>
+<h3>이런 오해를 한다</h3>
+<ul><li><strong>“GC가 알아서 하니 할당은 신경 안 써도 된다”</strong> — 언제 도는지 못 고르는 것이 문제다. 보스 등장 프레임에 들어오면 그 순간이 끊긴다.</li>
+<li><strong>“GC가 돌면 메모리가 OS로 반환된다”</strong> — Boehm GC는 객체를 옮기지 않고 힙도 잘 반환하지 않는다. 최고 사용량이 그대로 남는다.</li>
+<li><strong>“주기적으로 GC.Collect를 부르면 안정된다”</strong> — 전체 수집을 강제해 그 자리에서 멈춤을 만든다. 플레이 중 호출은 끊김을 손수 만드는 일이다.</li>
+<li><strong>“Read/Write Enabled를 켜면 메모리가 준다”</strong> — 반대다. CPU 쪽 사본이 생겨 약 두 배가 된다. 픽셀을 읽어야 할 때만 켠다.</li>
+<li><strong>“빈 공간이 많으면 할당은 성공한다”</strong> — 단편화되면 총량이 넉넉해도 연속된 큰 블록을 못 잡는다.</li></ul>
+<h3>3줄 정리</h3>
+<ul><li>GC가 도는 순간 메인 스레드가 멈춘다. 할당부터 줄인다</li>
+<li>Boehm GC는 힙 전체를 훑고 객체를 옮기지 않는다</li>
+<li>NonAlloc·버퍼 재사용·풀링이 기본 도구. 풀은 상태를 되돌린다</li></ul>
 <div class="refs"><h2>참고 자료</h2><ul><li><a href="https://docs.unity3d.com/Manual/performance-garbage-collector.html" target="_blank" rel="noopener">Unity 매뉴얼 – Garbage collector overview</a></li><li><a href="https://docs.unity3d.com/Manual/performance-incremental-garbage-collection.html" target="_blank" rel="noopener">Unity 매뉴얼 – Garbage collection modes(증분 GC)</a></li><li><a href="https://docs.unity3d.com/ScriptReference/Pool.ObjectPool_1.html" target="_blank" rel="noopener">Unity 스크립팅 API – ObjectPool 클래스</a></li><li><a href="https://docs.unity3d.com/Manual/class-TextureImporter.html" target="_blank" rel="noopener">Unity 매뉴얼 – Texture Import Settings</a></li></ul></div>
 </article>
 <div class="pager"><a href="03-03.html">← CPU 쪽 최적화</a><a href="03-05.html">캐시 친화와 데이터 지향 →</a></div>

@@ -66,11 +66,13 @@
 <p class="kicker">자료구조·알고리즘</p>
 <h1>복잡도</h1>
 <p class="lead">N이 두 배가 될 때 비용이 몇 배로 자라는지만 말한다. 실제 시간은 프로파일러로 잰다</p>
-<p>유닛 100마리에서 멀쩡하던 충돌 검사가 1,000마리에서 프레임을 먹는다. 실기기에 올려 보고서야 알면 설계를 되돌리기 어렵다. 복잡도는 짜기 전에 이 결과를 예측하는 자다. </p>
+<p>유닛 100마리에서 멀쩡하던 충돌 검사가 1,000마리에서 프레임을 먹는다. 유닛은 10배가 됐는데 검사 비용은 100배가 됐다. 실기기에 올려 보고서야 알면 설계를 되돌리기 어렵다. </p>
+<p>복잡도는 짜기 전에 그 100배를 미리 보는 자다. </p>
 <h3>N이 두 배가 되면 비용은 몇 배가 되나</h3>
-<p>복잡도는 입력 크기 N이 커질 때 비용이 자라는 속도다. 연산 횟수가 자라는 속도가 시간 복잡도다. 추가로 쓰는 메모리가 자라는 속도가 공간 복잡도다. </p>
-<p>빅오 표기법은 가장 빨리 자라는 항만 남긴다. 3N&#178; + 100N + 5에서 N이 커지면 N&#178; 항이 나머지를 압도한다. 그래서 <strong>상수 배와 하위 항을 버리고</strong> O(N&#178;)로 쓴다. </p><svg viewBox="0 0 640 212" width="100%" role="img" aria-label="입력 크기가 커질 때 O(1), O(log N), O(N), O(N제곱)의 비용이 자라는 속도를 비교한 곡선 그래프"><line x1="60" y1="20" x2="60" y2="175" stroke="currentColor" fill="none"/><line x1="60" y1="175" x2="525" y2="175" stroke="currentColor" fill="none"/><text x="14" y="26" font-size="13" fill="currentColor">비용</text><text x="430" y="199" font-size="13" fill="currentColor">입력 크기 N</text><polyline points="60,168 520,166" stroke="currentColor" fill="none"/><text x="528" y="170" font-size="13" fill="currentColor">O(1)</text><polyline points="60,168 120,158 180,150 240,145 300,141 360,138 420,135 480,133 520,131" stroke="currentColor" fill="none"/><text x="528" y="135" font-size="13" fill="currentColor">O(log N)</text><polyline points="60,168 520,45" stroke="currentColor" fill="none"/><text x="528" y="49" font-size="13" fill="currentColor">O(N)</text><polyline points="60,168 167,159 275,134 382,94 435,66 480,37" stroke="currentColor" fill="none"/><text x="444" y="28" font-size="13" fill="currentColor">O(N&#178;)</text></svg>
-<p>곡선의 모양이 곧 위험도다. O(log N)이 낮게 깔리는 이유는 한 번 볼 때마다 후보가 절반으로 줄기 때문이다. 100만을 반씩 나누면 스무 번 만에 하나가 남는다. </p>
+<p>복잡도는 입력 크기 N이 커질 때 비용이 자라는 속도다. 연산 횟수가 자라는 속도가 시간 복잡도, 추가로 쓰는 메모리가 자라는 속도가 공간 복잡도다. </p>
+<p>빅오 표기법은 가장 빨리 자라는 항만 남긴다. 3N&#178; + 100N + 5에서 N이 백만이 되면 N&#178; 항 앞에서 나머지는 먼지다. 그래서 <strong>상수 배와 하위 항을 버리고</strong> O(N&#178;)로 쓴다. </p>
+<svg viewBox="0 0 640 212" width="100%" role="img" aria-label="입력 크기가 커질 때 O(1), O(log N), O(N), O(N제곱)의 비용이 자라는 속도를 비교한 곡선 그래프"><line x1="60" y1="20" x2="60" y2="175" stroke="currentColor" fill="none"/><line x1="60" y1="175" x2="525" y2="175" stroke="currentColor" fill="none"/><text x="14" y="26" font-size="13" fill="currentColor">비용</text><text x="430" y="199" font-size="13" fill="currentColor">입력 크기 N</text><polyline points="60,168 520,166" stroke="currentColor" fill="none"/><text x="528" y="170" font-size="13" fill="currentColor">O(1)</text><polyline points="60,168 120,158 180,150 240,145 300,141 360,138 420,135 480,133 520,131" stroke="currentColor" fill="none"/><text x="528" y="135" font-size="13" fill="currentColor">O(log N)</text><polyline points="60,168 520,45" stroke="currentColor" fill="none"/><text x="528" y="49" font-size="13" fill="currentColor">O(N)</text><polyline points="60,168 167,159 275,134 382,94 435,66 480,37" stroke="currentColor" fill="none"/><text x="444" y="28" font-size="13" fill="currentColor">O(N&#178;)</text></svg>
+<p>곡선 모양이 곧 위험도다. O(log N)이 바닥에 깔리는 이유는 한 번 볼 때마다 후보가 절반으로 줄기 때문이다. 100만을 반씩 자르면 스무 번 만에 하나가 남는다. </p>
 <table><thead><tr><th>복잡도 </th><th>N이 100만일 때 </th><th>대표 예 </th></tr></thead><tbody>
 <tr><td>O(1) </td><td>1 </td><td>배열 인덱스 접근, <code>Dictionary</code> 조회 </td></tr>
 <tr><td>O(log N) </td><td>20 </td><td>이진 탐색, 균형 트리 조회 </td></tr>
@@ -84,28 +86,29 @@
 for (int i = 0; i &lt; units.Count; i++)
     for (int j = i + 1; j &lt; units.Count; j++)   // 자기 뒤쪽만 본다
         CheckCollision(units[i], units[j]);</code></pre>
-<p>100마리면 4,950쌍이라 60fps에서도 버틴다. 1,000마리면 약 50만 쌍이 되어 한 프레임 예산 16.7ms를 넘긴다. 유닛이 10배일 때 비용은 100배가 된 것이다. </p>
-<p>여기서 필요한 것은 루프를 다듬는 일이 아니다. 격자나 쿼드트리로 공간을 나눠 가까운 것끼리만 비교하면 비교 횟수 자체가 준다. 이것이 복잡도를 낮추는 최적화다. </p>
+<p>100마리면 4,950쌍이라 60fps에서도 버틴다. 1,000마리면 약 50만 쌍이 되어 한 프레임 예산 16.7ms를 넘긴다. 유닛은 10배, 비용은 100배다. </p>
+<p>여기서 루프를 아무리 다듬어도 소용이 없다. 격자나 쿼드트리로 공간을 나눠 가까운 것끼리만 비교하면 비교 횟수 자체가 준다. 복잡도를 낮춘다는 말은 이런 뜻이다. </p>
 <h3>빅오가 같아도 실측은 갈린다</h3>
-<p>빅오는 증가 추세만 말한다. 상수 배와 하위 항을 버렸으므로, N이 작을 때는 복잡도가 나쁜 쪽이 더 빠를 수 있다. </p>
-<p>원소 네다섯 개짜리 목록이 그렇다. 해시 계산과 버킷 조회를 거치는 <code>Dictionary</code>보다 배열을 그냥 훑는 쪽이 빠른 경우가 흔하다. </p>
-<p>같은 O(N log N) 정렬끼리도 실측이 몇 배씩 갈린다. 캐시 지역성과 분기 예측이 다르기 때문이다. 복잡도는 <strong>설계를 고를 때 쓰는 자</strong>이고, 실제 성능은 프로파일러로 재는 값이다. </p>
+<p>빅오는 증가 추세만 말한다. 상수 배와 하위 항을 버렸으니, N이 작을 때는 복잡도가 나쁜 쪽이 이기기도 한다. </p>
+<p>원소 네다섯 개짜리 목록이 그렇다. 해시를 계산하고 버킷을 찾아가는 <code>Dictionary</code>보다 배열을 그냥 훑는 쪽이 빠르다. </p>
+<p>같은 O(N log N) 정렬끼리도 실측은 몇 배씩 갈린다. 캐시 지역성과 분기 예측이 다르기 때문이다. 복잡도는 <strong>설계를 고를 때 쓰는 자</strong>이고, 진짜 시간은 프로파일러로 재는 값이다. </p>
 <h3>가끔 비싼 연산은 나눠 갚는다</h3>
-<p>분할 상환 복잡도는 여러 번 호출한 비용을 평균 낸 값이다. <code>List&lt;T&gt;.Add</code>는 내부 배열이 꽉 찬 순간에만 O(N) 복사를 한다. </p>
-<p>그 복사는 용량이 두 배로 늘 때만 일어나 갈수록 드물어진다. 평균을 내면 <code>Add</code> 한 번은 O(1)이다. <strong>최악이 O(N)이라고 해서 평균까지 O(N)인 것은 아니다.</strong> </p>
+<p><code>List&lt;T&gt;.Add</code>는 내부 배열이 꽉 찬 순간에만 O(N) 복사를 한다. 그럼 <code>Add</code>의 복잡도는 O(N)인가. </p>
+<p>아니다. 그 복사는 용량이 두 배로 늘 때만 일어나 갈수록 드물어진다. 여러 번 호출한 비용을 평균 내면 <code>Add</code> 한 번은 O(1)이고, 이렇게 평균 낸 값을 분할 상환 복잡도라고 한다. </p>
+<p>최악이 O(N)이라고 평균까지 O(N)인 것은 아니다. </p>
 <h3>면접에서 이렇게 답한다</h3><ul>
-<li><strong>시간 복잡도와 공간 복잡도란</strong> — 입력이 커질 때 연산 횟수와 추가 메모리가 각각 얼마나 빨리 느는지를 나타낸 값이다. 빅오는 가장 빨리 자라는 항만 남긴다. 그래서 규모가 커졌을 때의 우열을 비교하는 데 쓴다. </li>
-<li><strong>O(1)이 항상 O(N&#178;)보다 빠른가</strong> — 아니다. 빅오는 상수 배를 버린 값이라 입력이 작으면 역전된다. 원소 몇 개짜리 컬렉션에서 해시 조회보다 선형 탐색이 빨랐던 적이 있어, 최종 판단은 실기기 프로파일링으로 한다. </li>
-<li><strong>시간과 공간 중 무엇을 택하나</strong> — 모바일은 메모리 한도가 먼저 걸린다. 미리 계산해 표로 캐시하기 전에, 그 표가 먹는 용량과 아끼는 프레임 시간을 같이 본다. </li></ul>
+<li><strong>시간 복잡도와 공간 복잡도란</strong> — 입력이 커질 때 연산 횟수와 추가 메모리가 각각 얼마나 빨리 느는지를 나타낸 값이다. 빅오는 가장 빨리 자라는 항만 남긴다. 그래서 규모가 커졌을 때의 우열을 가리는 데 쓴다고 정리한다. </li>
+<li><strong>O(1)이 항상 O(N&#178;)보다 빠른가</strong> — 아니다. 상수 배를 버린 값이라 입력이 작으면 순위가 뒤집힌다. 원소가 네다섯 개면 해시 계산 비용이 더 커서 선형 탐색이 이긴다고 예를 들고, 최종 판단은 실기기 프로파일링으로 한다고 덧붙인다. </li>
+<li><strong>시간과 공간 중 무엇을 택하나</strong> — 모바일은 메모리 한도가 먼저 걸린다. 미리 계산해 표로 캐시하기 전에 그 표가 먹는 용량과 아끼는 프레임 시간을 같이 본다고 답한다. </li></ul>
 <h3>이런 오해를 한다</h3><ul>
-<li><strong>빅오가 실행 시간을 알려 준다</strong> — 증가 추세만 말한다. 같은 O(N)짜리 두 코드의 실측이 10배 차이 나는 일은 흔하다. </li>
-<li><strong>복잡도가 같으면 성능도 같다</strong> — 메모리 접근 패턴이 다르면 캐시 적중률 때문에 몇 배씩 벌어진다. </li>
-<li><strong>상수 배는 무시해도 된다</strong> — 이론에서 버리는 것이지 코드에서 버리는 것이 아니다. 매 프레임 도는 루프의 2배는 그대로 2배 비용이다. </li>
-<li><strong>최악이 O(N)이면 평균도 O(N)이다</strong> — 동적 배열 확장처럼 드문 비용은 나눠 갚으면 O(1)이다. </li></ul>
+<li><strong>&ldquo;빅오를 보면 실행 시간을 안다&rdquo;</strong> — 나오는 것은 증가 추세뿐이다. 같은 O(N)짜리 두 코드의 실측이 10배 벌어지는 일은 흔하다. </li>
+<li><strong>&ldquo;복잡도가 같으면 성능도 같다&rdquo;</strong> — 메모리 접근 패턴이 다르면 캐시 적중률에서 몇 배가 갈린다. </li>
+<li><strong>&ldquo;상수 배는 무시해도 된다&rdquo;</strong> — 이론에서 버리는 것이지 코드에서 버리는 것이 아니다. 매 프레임 도는 루프의 2배는 그대로 2배 비용이다. </li>
+<li><strong>&ldquo;최악이 O(N)이면 평균도 O(N)&rdquo;</strong> — 동적 배열 확장처럼 드문 비용은 나눠 갚으면 O(1)이 된다. </li></ul>
 <h3>3줄 정리</h3><ul>
 <li>빅오는 N이 커질 때 비용이 자라는 속도만 말한다 </li>
-<li>O(N&#178;)는 N이 10배면 100배다. 구조를 바꿔야 준다 </li>
-<li>같은 복잡도끼리의 우열은 프로파일러로 가린다 </li></ul>
+<li>O(N&#178;)는 N이 10배면 100배다. 루프 말고 구조를 바꾼다 </li>
+<li>같은 복잡도끼리의 우열은 프로파일러가 가린다 </li></ul>
 <div class="refs"><h2>참고 자료</h2><ul><li><a href="https://learn.microsoft.com/ko-kr/dotnet/standard/collections/selecting-a-collection-class" target="_blank" rel="noopener">Microsoft Learn – 컬렉션 클래스 선택</a></li><li><a href="https://learn.microsoft.com/ko-kr/dotnet/api/system.collections.generic.dictionary-2" target="_blank" rel="noopener">Microsoft Learn – Dictionary&lt;TKey,TValue&gt; 클래스</a></li><li><a href="https://docs.unity3d.com/Manual/Profiler.html" target="_blank" rel="noopener">Unity 매뉴얼 – Unity Profiler</a></li></ul></div>
 </article>
 <div class="pager"><span></span><a href="07-02.html">배열과 리스트 →</a></div>

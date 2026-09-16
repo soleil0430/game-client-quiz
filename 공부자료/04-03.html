@@ -66,7 +66,8 @@
 <p class="kicker">그래픽스·렌더링</p>
 <h1>드로우 콜과 배칭</h1>
 <p class="lead">드로우 콜은 GPU가 아니라 CPU 비용이다. 기법마다 줄이는 대상이 다르다</p>
-<p>삼각형이 몇 만 개도 안 되는데 프레임이 안 나오는 씬이 있다. 대개 드로우 콜이 많아 CPU에서 막힌 경우다. 호출마다 CPU가 상태를 세팅하고 드라이버를 거치기 때문이다.</p>
+<p>삼각형이 다 합쳐 3만 개도 안 되는 씬인데 프레임이 안 나온다. GPU 사용률을 보니 한참 놀고 있다. 그럼 무엇이 프레임을 붙잡고 있나?</p>
+<p>이런 씬은 십중팔구 드로우 콜에서 막혀 있다. 호출마다 CPU가 상태를 세팅하고 드라이버를 거치기 때문이다.</p>
 <svg viewBox="0 0 640 170" width="100%" role="img" aria-label="머티리얼 순서에 따라 배치가 나뉘는 도식">
 <text x="10" y="26" font-size="12" fill="currentColor">같은 오브젝트 6개, 그리는 순서만 다르다</text>
 <text x="10" y="70" font-size="11" fill="currentColor">섞어 그리면</text>
@@ -104,11 +105,11 @@
 <text x="416" y="130" font-size="12" fill="currentColor">배치 2개 · SetPass 2회</text>
 </svg>
 <h3>Batches보다 SetPass calls를 먼저 본다</h3>
-<p>드로우 콜은 CPU가 그래픽스 API에 보내는 명령이다. 이 메시를 이 상태로 그리라는 뜻이다. 비싼 쪽은 GPU가 삼각형을 그리는 일이 아니라 <strong>호출마다 드는 CPU의 준비 비용</strong>이다.</p>
-<p>통계 창의 두 숫자는 뜻이 다르다. Batches는 GPU로 보낸 그리기 묶음의 수다. SetPass calls는 그 사이에 셰이더 패스와 렌더 스테이트를 바꾼 횟수다.</p>
-<p>상태 전환이 더 비싸므로 보통 SetPass calls를 먼저 본다. 위 그림처럼 같은 오브젝트라도 그리는 순서에 따라 이 값이 달라진다. 중간에 다른 머티리얼 하나가 끼면 배치가 나뉜다.</p>
+<p>드로우 콜은 CPU가 그래픽스 API에 보내는 명령이다. 이 메시를 이 상태로 그리라는 뜻이다. 비싼 쪽은 GPU가 삼각형을 칠하는 일이 아니라 <strong>호출마다 드는 CPU의 준비 비용</strong>이다.</p>
+<p>통계 창의 두 숫자는 뜻이 다르다. Batches는 GPU로 보낸 그리기 묶음의 수고, SetPass calls는 그 사이에 셰이더 패스와 렌더 스테이트를 바꾼 횟수다.</p>
+<p>상태 전환이 더 비싸니 보통 SetPass calls를 먼저 본다. 위 그림처럼 같은 오브젝트 여섯 개라도 그리는 순서에 따라 이 값이 달라진다. 중간에 다른 머티리얼 하나가 끼는 것만으로 배치가 나뉜다.</p>
 <h3>기법마다 줄이는 대상이 다르다</h3>
-<p>줄이는 방법은 층이 다르다. 머티리얼 종류를 줄이고, 호출을 합치고, 호출당 준비 비용을 낮춘다.</p>
+<p>줄이는 방법은 층이 다르다. 머티리얼 종류를 줄이는 것, 호출을 합치는 것, 호출당 준비 비용을 낮추는 것.</p>
 <table>
 <thead>
 <tr><th>기법</th>
@@ -140,8 +141,9 @@
 </tr>
 </tbody>
 </table>
+<p>표의 마지막 줄이 특히 헷갈린다. SRP Batcher가 깎는 것은 호출 수가 아니다.</p>
 <h3>renderer.material 한 줄이 배칭을 깬다</h3>
-<p>배칭을 깨는 가장 흔한 실수는 <code>renderer.material</code>에 접근하는 것이다. 처음 접근하는 순간 전용 복사본이 생겨 머티리얼이 달라진다. 복사본은 오브젝트를 파괴해도 남는다.</p>
+<p>배칭을 깨는 가장 흔한 실수는 <code>renderer.material</code>에 손대는 것이다. 처음 접근하는 순간 그 렌더러 전용 복사본이 생기면서 머티리얼이 달라진다. 복사본은 오브젝트를 파괴해도 남는다.</p>
 <p>피격 시 색만 바꾸고 싶다면 프로퍼티 블록을 쓴다:</p>
 <pre><code>static readonly int s_ColorId = Shader.PropertyToID("_BaseColor");
 readonly MaterialPropertyBlock _block = new MaterialPropertyBlock();
@@ -153,29 +155,27 @@ public void SetTint(Renderer r, Color color)
     _block.SetColor(s_ColorId, color);   // 바꿀 값만 덮어쓴 뒤
     r.SetPropertyBlock(_block);          // 렌더러에 다시 물린다
 }</code></pre>
-<h3>나무 100그루는 아틀라스부터 손댄다</h3>
-<p>메시도 머티리얼도 제각각인 나무 100그루가 있다고 하자. 먼저 텍스처를 아틀라스 한 장으로 합쳐 머티리얼을 하나로 만든다. 이것이 배칭과 인스턴싱의 전제다.</p>
-<p>그다음은 움직이는지로 갈린다. 움직이지 않으면 정적 배칭이나 메시 결합을 쓴다. 같은 메시가 반복되면 인스턴싱이 맞다.</p>
-<p>스프라이트 아틀라스도 같은 원리로 움직인다. 아틀라스는 배칭 단위이면서 로드 단위다. 같은 화면에 뜨는 UI끼리 묶어야 드로우 콜이 줄고, 안 쓰는 이미지가 메모리에 올라오지 않는다.</p>
-<p>모바일에서는 CPU가 약하고 드라이버 오버헤드가 커서 같은 호출 수라도 더 아프다. 특히 UI는 캔버스 리빌드에 더해 마스크로 배치가 쉽게 끊긴다. 자주 바뀌는 UI와 정적인 UI를 캔버스부터 나눈다.</p>
+<h3>나무 100그루가 있다면 어디부터 손대나</h3>
+<p>메시도 머티리얼도 제각각인 나무 100그루가 있다고 하자. 텍스처를 아틀라스 한 장으로 합쳐 머티리얼을 하나로 만드는 것이 먼저다.</p>
+<p>머티리얼 통일이 배칭과 인스턴싱의 전제다.</p>
+<p>그다음은 움직이는지로 갈린다. 움직이지 않으면 정적 배칭이나 메시 결합을 쓰고, 같은 메시가 반복되면 인스턴싱이 맞다.</p>
+<p>스프라이트 아틀라스도 같은 원리로 움직인다. 아틀라스는 배칭 단위이면서 동시에 로드 단위다. 상점 UI와 전투 UI를 한 아틀라스에 섞어 두면 전투 중에 상점 아이콘까지 따라 올라온다. 같은 화면에 뜨는 것끼리 묶는 이유다.</p>
+<p>모바일에서는 CPU가 약하고 드라이버 오버헤드가 커서 같은 호출 수라도 더 아프다. 특히 UI가 그렇다. 캔버스 리빌드에 더해 마스크로 배치가 쉽게 끊기니, 자주 바뀌는 UI와 정적인 UI를 캔버스부터 나눈다.</p>
 <h3>면접에서 이렇게 답한다</h3>
-<ul><li><strong>드로우 콜을 왜 줄이나</strong> — 호출마다 렌더 스테이트 설정과 드라이버 비용이 든다. 많아지면 GPU가 놀아도 CPU에서 프레임이 막힌다. 그래서 머티리얼을 통일하고 배칭과 인스턴싱으로 호출을 합친다.</li>
-<li><strong>정적 배칭과 동적 배칭</strong> — 정적 배칭은 움직이지 않는 메시를 미리 합치는 대신 메모리를 더 쓴다. 동적 배칭은 매 프레임 CPU에서 합쳐 메시가 크면 손해다.</li>
-<li><strong>SRP Batcher와 GPU 인스턴싱</strong> — SRP Batcher는 셰이더 배리언트만 같으면 머티리얼이 달라도 상태 설정 비용을 줄인다. 호출 수는 그대로다. 인스턴싱은 같은 메시와 머티리얼을 한 번에 그려 호출 수를 줄인다.</li>
-<li><strong>material과 sharedMaterial</strong> — <code>material</code>은 접근하는 순간 복사본을 만든다. 배칭을 깨고 정리 책임까지 남긴다.</li>
-</ul>
+<ul><li><strong>드로우 콜을 왜 줄이나</strong> — 호출마다 렌더 스테이트 설정과 드라이버 비용이 든다고 시작한다. 많아지면 GPU가 놀아도 CPU에서 프레임이 막힌다. 그래서 머티리얼을 통일하고 배칭과 인스턴싱으로 호출을 합친다고 이어 간다.</li>
+<li><strong>정적 배칭과 동적 배칭</strong> — 정적 배칭은 움직이지 않는 메시를 미리 합치는 대신 메모리를 더 쓴다. 동적 배칭은 매 프레임 CPU에서 합치므로 메시가 크면 오히려 손해다.</li>
+<li><strong>SRP Batcher와 GPU 인스턴싱</strong> — SRP Batcher는 셰이더 배리언트만 같으면 머티리얼이 달라도 상태 설정 비용을 줄이고, 호출 수는 그대로다. 인스턴싱은 같은 메시와 머티리얼을 한 번에 그려 호출 수 자체를 줄인다고 대비시킨다.</li>
+<li><strong>material과 sharedMaterial</strong> — <code>material</code>은 접근하는 순간 복사본을 만든다. 배칭을 깨고 정리 책임까지 남긴다고 짧게 답한다.</li></ul>
 <h3>이런 오해를 한다</h3>
-<ul><li><strong>드로우 콜은 GPU 부하다</strong> — 주된 비용은 CPU의 준비와 드라이버 호출이다. 삼각형이 적어도 호출이 많으면 느리다.</li>
-<li><strong>SRP Batcher를 켜면 드로우 콜이 준다</strong> — 줄어드는 것은 호출당 준비 비용이다. Batches는 그대로일 수 있다.</li>
-<li><strong>배칭은 켜면 항상 이득이다</strong> — 동적 배칭은 큰 메시에서 병합 비용이 더 든다. 정적 배칭은 메모리를 더 쓴다.</li>
-<li><strong>머티리얼만 같으면 한 번에 그려진다</strong> — 중간에 다른 머티리얼이 하나 끼는 것만으로 배치가 나뉜다.</li>
-<li><strong>MaterialPropertyBlock은 항상 공짜다</strong> — 인스턴싱과는 맞지만 URP의 SRP Batcher 호환은 깨진다.</li>
-</ul>
+<ul><li><strong>“드로우 콜은 GPU 부하다”</strong> — 주된 비용은 CPU의 준비와 드라이버 호출이다. 삼각형이 적어도 호출이 많으면 느리다.</li>
+<li><strong>“SRP Batcher를 켜면 드로우 콜이 준다”</strong> — 줄어드는 것은 호출당 준비 비용이다. Batches 숫자는 그대로일 수 있다.</li>
+<li><strong>“배칭은 켜면 항상 이득이다”</strong> — 동적 배칭은 큰 메시에서 병합 비용이 더 든다. 정적 배칭은 메모리를 더 쓴다.</li>
+<li><strong>“머티리얼만 같으면 한 번에 그려진다”</strong> — 중간에 다른 머티리얼이 하나 끼는 것만으로 배치가 나뉜다.</li>
+<li><strong>“MaterialPropertyBlock은 항상 공짜다”</strong> — 인스턴싱과는 맞지만 URP의 SRP Batcher 호환은 깨진다.</li></ul>
 <h3>3줄 정리</h3>
 <ul><li>드로우 콜의 비용은 CPU의 준비와 드라이버 호출</li>
 <li>배칭·인스턴싱은 호출 수, SRP Batcher는 준비 비용</li>
-<li>material에 접근하면 복사본이 생겨 배칭이 깨진다</li>
-</ul>
+<li>material에 접근하면 복사본이 생겨 배칭이 깨진다</li></ul>
 <div class="refs"><h2>참고 자료</h2><ul><li><a href="https://docs.unity3d.com/Manual/DrawCallBatching.html" target="_blank" rel="noopener">Unity 매뉴얼 – Introduction to static batching</a></li><li><a href="https://docs.unity3d.com/Manual/GPUInstancing.html" target="_blank" rel="noopener">Unity 매뉴얼 – Introduction to GPU instancing</a></li><li><a href="https://docs.unity3d.com/Manual/SRPBatcher.html" target="_blank" rel="noopener">Unity 매뉴얼 – Scriptable Render Pipeline Batcher</a></li><li><a href="https://docs.unity3d.com/Manual/RenderingStatistics.html" target="_blank" rel="noopener">Unity 매뉴얼 – Rendering Statistics window</a></li></ul></div>
 </article>
 <div class="pager"><a href="04-02.html">← 컬링과 가시성</a><a href="04-04.html">텍스처 →</a></div>

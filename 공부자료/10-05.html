@@ -66,9 +66,10 @@
 <p class="kicker">C++ 기초</p>
 <h1>컴파일과 링크</h1>
 <p class="lead">C++은 파일마다 따로 컴파일한다. 링크 오류는 정의가 없다는 뜻이다</p>
-<p>C#에서는 보지 못한 undefined reference라는 오류가 C++에서는 자주 나온다. 컴파일은 멀쩡히 끝났는데 빌드가 실패한다. 파일마다 따로 컴파일하고 마지막에 묶는 구조 때문이다.</p>
+<p>컴파일은 멀쩡히 끝났는데 빌드가 실패한다. 화면에는 undefined reference라는 처음 보는 줄이 떠 있다.</p>
+<p>C#에서는 볼 일이 없던 오류다. 파일마다 따로 컴파일하고 마지막에 묶는 구조 때문에 생긴다.</p>
 <h3>C#에 없는 헤더가 C++에 있는 이유</h3>
-<p>C#은 프로젝트를 통째로 컴파일해 어셈블리 하나를 만든다. C++은 <strong>파일 하나씩 따로 컴파일한 뒤 마지막에 묶는다</strong>. 헤더와 선언·정의 분리, 링크 오류가 모두 여기서 나온다.</p>
+<p>C#은 프로젝트를 통째로 컴파일해 어셈블리 하나를 만든다. C++은 <strong>파일 하나씩 따로 컴파일한 뒤 마지막에 묶는다</strong>. 헤더도, 선언과 정의를 나누는 일도, 링크 오류도 전부 여기서 나온다.</p>
 <svg viewBox="0 0 640 150" width="100%" role="img" aria-label="파일마다 목적 파일을 만들고 링커가 묶어 실행 파일이 되는 과정">
 <text x="6" y="16" font-size="12" fill="currentColor">전처리 + 컴파일 — 파일마다 따로</text>
 <rect x="6" y="26" width="116" height="32" fill="none" stroke="currentColor"/>
@@ -96,14 +97,14 @@
 <text x="550" y="70" font-size="12" fill="currentColor">game.exe</text>
 <text x="6" y="136" font-size="12" fill="currentColor">컴파일은 선언만 보고 통과한다. 정의를 찾는 일은 링커 몫이다</text>
 </svg>
-<p>순서는 전처리, 컴파일, 어셈블, 링크다. 전처리기가 include를 그 파일의 내용으로 치환해 번역 단위 하나를 만든다. 헤더는 컴파일되는 단위가 아니라 소스에 펼쳐지는 텍스트다.</p>
-<p>컴파일러는 번역 단위 하나만 보고 목적 파일을 만든다. 다른 파일에 있는 함수는 선언만 보이면 통과시키고 주소 자리는 비워 둔다. 링커가 그 빈자리를 실제 정의로 채운다.</p>
-<h3>오류 메시지만 보고 원인을 가른다</h3>
+<p>순서는 전처리, 컴파일, 어셈블, 링크다. 전처리기가 include를 그 파일의 내용으로 치환해 번역 단위 하나를 만든다. 헤더는 따로 컴파일되는 단위가 아니라 소스 위에 펼쳐지는 텍스트다.</p>
+<p>컴파일러는 번역 단위 하나만 보고 목적 파일을 만든다. 다른 파일에 있는 함수는 선언만 보이면 통과시키고 주소 자리는 비워 둔다. 그 빈자리를 실제 정의로 채우는 것이 링커다.</p>
+<h3>오류 메시지만 보고 범인을 가른다</h3>
 <p>타입이 안 맞거나 선언을 못 찾으면 컴파일 오류다. undefined reference나 unresolved external symbol은 링크 오류다. <strong>선언은 봤는데 정의가 어디에도 없다</strong>는 뜻이다.</p>
-<p>원인은 대개 셋 중 하나다. 해당 .cpp를 빌드 목록에 넣지 않았거나, 라이브러리를 링크하지 않았거나, 선언과 정의의 시그니처가 미묘하게 다르다. 이 순서로 확인한다.</p>
-<h3>네임 맹글링과 extern "C"</h3>
-<p>링커는 이름으로 짝을 맞춘다. 그런데 C++은 이름이 같고 매개변수만 다른 오버로딩을 허용한다. 그래서 컴파일러가 매개변수 타입과 네임스페이스를 섞어 고유한 심볼 이름을 만든다.</p>
-<p>이것이 네임 맹글링이다. 규칙이 표준이 아니라 컴파일러마다 다르다. 다른 컴파일러로 만든 C++ 라이브러리가 그냥은 링크되지 않는 이유가 이것이다.</p>
+<p>원인은 대개 셋 중 하나다. 해당 .cpp를 빌드 목록에 넣지 않았거나, 라이브러리를 링크하지 않았거나, 선언과 정의의 시그니처가 미묘하게 다르다. 이 순서로 확인하면 대부분 잡힌다.</p>
+<h3>함수 이름은 왜 그대로 남지 않나</h3>
+<p>링커는 이름으로 짝을 맞춘다. 그런데 C++은 이름이 같고 매개변수만 다른 오버로딩을 허용한다. 그래서 컴파일러가 매개변수 타입과 네임스페이스를 섞어 고유한 심볼 이름을 새로 만든다.</p>
+<p>이것이 네임 맹글링이다. 규칙이 표준이 아니라 컴파일러마다 다르다. 다른 컴파일러로 만든 C++ 라이브러리가 그냥은 링크되지 않는 이유가 여기 있다.</p>
 <p>Unity 네이티브 플러그인에서 C# 쪽이 찾을 이름을 고정하는 형태다:</p>
 <pre><code>// plugin.cpp — 구현은 C++이지만 이름은 C 방식으로 내보낸다
 extern "C" int AddDamage(int a, int b) { return a + b; }</code></pre>
@@ -111,28 +112,22 @@ extern "C" int AddDamage(int a, int b) { return a + b; }</code></pre>
 [DllImport("plugin", CallingConvention = CallingConvention.Cdecl)]
 static extern int AddDamage(int a, int b);</code></pre>
 <h3>호출 규약이 어긋나면 함수가 끝난 뒤에 죽는다</h3>
-<p>호출 규약은 인자를 어떤 순서로 놓고 스택은 누가 치우는지에 대한 약속이다. cdecl은 부른 쪽이 정리해 가변 인자 함수에 쓴다. stdcall은 불린 쪽이 정리하며 Win32 API가 쓴다.</p>
-<p>양쪽이 서로 다른 규약으로 알고 부르면 스택이 어긋난다. 함수가 끝난 뒤 엉뚱한 자리에서 죽어 원인을 찾기 어렵다. x64 Windows는 규약이 하나로 통일돼 대체로 문제가 없다.</p>
+<p>호출 규약은 인자를 어떤 순서로 놓고 스택은 누가 치우는지에 대한 약속이다. cdecl은 부른 쪽이 정리해 가변 인자 함수에 쓴다. stdcall은 불린 쪽이 정리하며 Win32 API가 이쪽이다.</p>
+<p>양쪽이 서로 다른 규약으로 알고 부르면 스택이 어긋난다. 크래시가 함수 안이 아니라 끝난 뒤 엉뚱한 자리에서 나서 원인 찾기가 고약하다. x64 Windows는 규약이 하나로 통일돼 대체로 이 문제가 없다.</p>
 <h3>면접에서 이렇게 답한다</h3>
-<ul>
-<li><strong>소스가 실행 파일이 되기까지</strong> — 전처리기가 include와 매크로를 펼쳐 번역 단위를 만들고, 컴파일러가 파일마다 목적 파일을 만든다. 링커가 목적 파일과 라이브러리를 묶어 심볼을 주소로 잇는다.</li>
-<li><strong>undefined reference가 나면</strong> — 링크 단계 오류이고 정의가 없다는 뜻이다. 해당 .cpp가 빌드에 들어갔는지, 라이브러리를 링크했는지, 시그니처가 같은지를 순서대로 본다.</li>
+<ul><li><strong>소스가 실행 파일이 되기까지</strong> — 전처리기가 include와 매크로를 펼쳐 번역 단위를 만들고, 컴파일러가 파일마다 목적 파일을 만든다. 링커가 목적 파일과 라이브러리를 묶어 심볼을 주소로 잇는다고 마무리한다.</li>
+<li><strong>undefined reference가 나면</strong> — 링크 단계 오류이고 정의가 없다는 뜻이다. 해당 .cpp가 빌드에 들어갔는지, 라이브러리를 링크했는지, 시그니처가 같은지를 순서대로 본다고 답한다.</li>
 <li><strong>네임 맹글링이란</strong> — 오버로딩을 허용하려고 컴파일러가 매개변수 타입을 섞어 고유 심볼 이름을 만드는 것이다. 규칙이 컴파일러마다 달라 C와 섞을 때는 extern "C"로 끈다.</li>
-<li><strong>호출 규약은 왜 맞춰야 하나</strong> — 인자 순서와 스택을 치우는 쪽이 다르면 호출 뒤 스택이 어긋나 원인을 찾기 어려운 크래시가 난다. 네이티브 플러그인에서 특히 본다.</li>
-</ul>
+<li><strong>호출 규약은 왜 맞춰야 하나</strong> — 인자 순서와 스택을 치우는 쪽이 다르면 호출 뒤 스택이 어긋나 원인을 찾기 어려운 크래시가 난다. 네이티브 플러그인에서 특히 본다고 예를 든다.</li></ul>
 <h3>이런 오해를 한다</h3>
-<ul>
-<li><strong>undefined reference는 컴파일 오류다</strong> — 컴파일은 선언만 보고 통과한다. 정의를 찾는 것은 링커라 링크 단계에서 난다.</li>
-<li><strong>C에서도 네임 맹글링이 일어난다</strong> — 오버로딩이 없어 이름이 거의 그대로 남는다. 그래서 C 라이브러리는 컴파일러가 달라도 링크된다.</li>
-<li><strong>extern "C"를 붙이면 C++ 기능을 못 쓴다</strong> — 바뀌는 것은 심볼 이름을 붙이는 방식뿐이다. 구현은 C++ 그대로다.</li>
-<li><strong>헤더에 함수 정의를 넣어도 된다</strong> — 여러 소스가 포함하면 중복 정의가 난다. inline을 붙이거나 정의를 .cpp로 옮긴다.</li>
-</ul>
+<ul><li><strong>“undefined reference는 컴파일 오류다”</strong> — 컴파일은 선언만 보고 통과한다. 정의를 찾는 것은 링커라 링크 단계에서 난다.</li>
+<li><strong>“C에서도 네임 맹글링이 일어난다”</strong> — 오버로딩이 없어 이름이 거의 그대로 남는다. 그래서 C 라이브러리는 컴파일러가 달라도 링크된다.</li>
+<li><strong>“extern "C"를 붙이면 C++ 기능을 못 쓴다”</strong> — 바뀌는 것은 심볼 이름을 붙이는 방식뿐이다. 구현은 C++ 그대로다.</li>
+<li><strong>“헤더에 함수 정의를 넣어도 된다”</strong> — 여러 소스가 포함하면 중복 정의가 난다. inline을 붙이거나 정의를 .cpp로 옮긴다.</li></ul>
 <h3>3줄 정리</h3>
-<ul>
-<li>C++은 파일마다 컴파일하고 링커가 묶는다</li>
+<ul><li>C++은 파일마다 컴파일하고 링커가 묶는다</li>
 <li>undefined reference는 정의가 없다는 뜻이다</li>
-<li>extern "C"는 이름만 C 방식으로 바꾼다</li>
-</ul>
+<li>extern "C"는 이름만 C 방식으로 바꾼다</li></ul>
 <div class="refs"><h2>참고 자료</h2><ul><li><a href="https://en.cppreference.com/w/cpp/language/translation_phases.html" target="_blank" rel="noopener">cppreference – Phases of translation</a></li><li><a href="https://en.cppreference.com/w/cpp/language/language_linkage.html" target="_blank" rel="noopener">cppreference – Language linkage(extern &quot;C&quot;)</a></li><li><a href="https://learn.microsoft.com/ko-kr/cpp/cpp/argument-passing-and-naming-conventions" target="_blank" rel="noopener">Microsoft Learn – 인수 전달 및 명명 규칙(호출 규약)</a></li><li><a href="https://docs.unity3d.com/Manual/plug-ins-native.html" target="_blank" rel="noopener">Unity 매뉴얼 – Native plug-ins</a></li></ul></div>
 </article>
 <div class="pager"><a href="10-04.html">← STL</a><span></span></div>

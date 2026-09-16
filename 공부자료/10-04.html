@@ -66,11 +66,12 @@
 <p class="kicker">C++ 기초</p>
 <h1>STL</h1>
 <p class="lead">메모리가 이어졌는지, 정렬을 유지하는지 두 축으로 컨테이너를 고른다</p>
-<p>List를 쓰듯 vector에 계속 넣다가 원소를 가리키던 포인터가 죽는 일이 있다. C#에서는 겪지 않는 일이다. STL 컨테이너는 이름이 아니라 <strong>메모리 배치</strong>로 골라야 한다.</p>
-<h3>vector는 재할당하면 포인터와 반복자가 죽는다</h3>
-<p>vector는 원소가 한 덩어리로 이어진 동적 배열이다. 인덱스 접근이 O(1)이고 캐시에 잘 맞는다. C#의 List와 쓰임이 같다.</p>
-<p>용량을 넘기면 1.5~2배 크기의 새 버퍼를 잡아 원소를 옮긴다. 이때 <strong>기존 포인터와 참조, 반복자가 모두 무효</strong>가 된다. 그래서 push_back은 평균 O(1)이되 개별 호출은 튄다.</p>
-<p>넣을 개수를 알면 미리 용량을 잡는다. 아래에서 reserve와 resize의 차이를 본다:</p>
+<p>List 쓰듯 vector에 계속 넣다가, 원소를 가리키던 포인터가 어느 순간 죽는다. C#에서는 겪지 않는 일이다.</p>
+<p>STL 컨테이너는 이름이 아니라 <strong>메모리 배치</strong>로 골라야 한다.</p>
+<h3>vector가 커지는 순간 포인터와 반복자가 죽는다</h3>
+<p>vector는 원소가 한 덩어리로 이어진 동적 배열이다. 인덱스 접근이 O(1)이고 캐시에도 잘 맞는다. 쓰임은 C#의 List와 같다.</p>
+<p>문제는 용량을 넘기는 순간이다. 1.5~2배 크기의 새 버퍼를 잡아 원소를 통째로 옮긴다. 그 순간 <strong>기존 포인터와 참조, 반복자가 전부 무효</strong>가 된다. push_back이 평균 O(1)이면서도 개별 호출은 튀는 이유다.</p>
+<p>넣을 개수를 알면 미리 용량을 잡아 둔다. 아래에서 reserve와 resize의 차이를 본다:</p>
 <pre><code>std::vector&lt;int&gt; v;
 v.reserve(1000);      // 용량만 확보한다. size는 여전히 0
 v.push_back(1);
@@ -86,32 +87,26 @@ v.resize(2000);       // 용량 1000을 넘는 순간 재할당
 </tbody></table>
 <h3>map은 트리, unordered_map은 해시</h3>
 <p>연관 컨테이너는 정렬을 유지하느냐로 갈린다. map은 보통 레드-블랙 트리라 키가 늘 정렬돼 있다. 탐색과 삽입, 삭제가 O(log n)이고 범위 질의를 할 수 있다.</p>
-<p>unordered_map은 해시 테이블이라 평균 O(1)이다. 대신 순회 순서가 정해져 있지 않고 해시가 한 버킷에 몰리면 최악 O(n)까지 떨어진다. C#의 Dictionary가 이쪽, SortedDictionary가 map 쪽이다.</p>
-<p>조회가 잦고 순서가 필요 없으면 unordered_map을 쓴다. 정렬이나 범위 탐색이 필요하면 map을 쓴다. 이름만 비슷한 둘을 여기서 가른다.</p>
+<p>unordered_map은 해시 테이블이라 평균 O(1)이다. 대신 순회 순서가 정해져 있지 않고, 해시가 한 버킷에 몰리면 최악 O(n)까지 떨어진다. C#의 Dictionary가 이쪽이고 SortedDictionary가 map 쪽이다.</p>
+<p>조회가 잦고 순서가 필요 없으면 unordered_map, 정렬이나 범위 탐색이 필요하면 map이다. 이름만 비슷한 둘은 여기서 갈린다.</p>
 <h3>정렬 함수도 메모리 배치를 따라간다</h3>
-<p>std::sort는 임의 접근 반복자를 요구한다. 그래서 vector와 배열에는 쓰지만 list에는 쓸 수 없다. 같은 값끼리의 원래 순서도 보장하지 않는다.</p>
-<p>list의 멤버 sort는 값을 옮기는 대신 노드 연결만 바꾼다. 그래서 안정 정렬이고 반복자도 그대로 유효하다. 같은 값의 순서를 지켜야 하면 stable_sort를 쓴다.</p>
-<p>넣는 방식도 하나 갈린다. emplace_back은 생성자 인자를 받아 컨테이너 안에서 바로 만든다. 아끼는 것은 임시 객체 한 번이라 이미 객체가 있으면 push_back과 차이가 거의 없다.</p>
+<p>std::sort는 임의 접근 반복자를 요구한다. vector와 배열에는 쓰지만 list에는 못 쓴다. 같은 값끼리의 원래 순서도 지켜 주지 않는다.</p>
+<p>list의 멤버 sort는 값을 옮기는 대신 노드 연결만 바꾼다. 그래서 안정 정렬이고 반복자도 그대로 살아 있다. 같은 값의 순서를 지켜야 하면 stable_sort를 쓴다.</p>
+<p>넣는 방식도 하나 갈린다. emplace_back은 생성자 인자를 받아 컨테이너 안에서 바로 만든다. 아끼는 것은 임시 객체 하나라, 이미 만들어 둔 객체를 넣을 때는 push_back과 차이가 거의 없다.</p>
 <h3>면접에서 이렇게 답한다</h3>
-<ul>
-<li><strong>vector는 어떻게 동작하나</strong> — 연속된 메모리를 쓰는 동적 배열이고 용량이 차면 더 큰 버퍼로 옮긴다. 추가는 평균 O(1)이지만 재할당이 일어나면 반복자와 포인터가 무효가 된다.</li>
+<ul><li><strong>vector는 어떻게 동작하나</strong> — 연속된 메모리를 쓰는 동적 배열이고 용량이 차면 더 큰 버퍼로 옮긴다. 추가는 평균 O(1)이지만 재할당이 일어나면 반복자와 포인터가 무효가 된다고 덧붙인다.</li>
 <li><strong>vector와 list 중 무엇을 쓰나</strong> — 대부분 vector를 기본으로 둔다. list는 위치를 찾으려면 노드를 따라가야 하고 캐시 미스가 많아 실제 측정에서 지는 경우가 흔하다.</li>
 <li><strong>map과 unordered_map의 차이는</strong> — map은 균형 이진 탐색 트리라 O(log n)이고 키 순서대로 순회한다. unordered_map은 평균 O(1)이지만 순서가 없고 충돌이 몰리면 최악 O(n)이다.</li>
-<li><strong>push_back과 emplace_back은</strong> — emplace_back은 생성자 인자를 받아 컨테이너 안에서 바로 만들어 임시 객체 하나를 아낀다. 이미 만들어진 객체를 넣을 때는 차이가 거의 없다.</li>
-</ul>
+<li><strong>push_back과 emplace_back은</strong> — emplace_back은 인자를 그대로 받아 컨테이너 자리에서 객체를 조립한다고 답한다. 아끼는 것은 임시 객체 하나라 이미 만들어 둔 객체를 넣을 때는 차이가 거의 없다.</li></ul>
 <h3>이런 오해를 한다</h3>
-<ul>
-<li><strong>중간 삽입이 많으면 list가 항상 유리하다</strong> — 삽입 지점을 찾는 비용과 캐시 미스를 빼먹은 비교다. 원소가 작고 많으면 vector가 빠른 경우가 많다.</li>
-<li><strong>reserve를 하면 그만큼 원소가 생긴다</strong> — reserve는 capacity만 늘리고 size는 그대로다. 원소까지 만들려면 resize다.</li>
-<li><strong>map은 해시로 찾는다</strong> — map은 트리라 O(log n)이다. unordered_map의 O(1)도 평균값이라 충돌이 몰리면 나빠진다.</li>
-<li><strong>std::sort는 안정 정렬이고 list에도 쓴다</strong> — 안정성을 보장하지 않고 임의 접근 반복자를 요구한다. list는 멤버 sort를 쓴다.</li>
-</ul>
+<ul><li><strong>“중간 삽입이 많으면 list가 항상 유리하다”</strong> — 삽입 지점을 찾는 비용과 캐시 미스를 빼먹은 비교다. 원소가 작고 많으면 vector가 빠른 경우가 많다.</li>
+<li><strong>“reserve를 하면 그만큼 원소가 생긴다”</strong> — reserve가 늘리는 것은 capacity뿐이고 size는 그대로다. 원소까지 만들려면 resize다.</li>
+<li><strong>“map은 해시로 찾는다”</strong> — map은 트리라 O(log n)이다. unordered_map의 O(1)도 평균값이라 충돌이 몰리면 나빠진다.</li>
+<li><strong>“std::sort는 안정 정렬이고 list에도 쓴다”</strong> — 안정성을 보장하지 않고 임의 접근 반복자를 요구한다. list는 멤버 sort를 쓴다.</li></ul>
 <h3>3줄 정리</h3>
-<ul>
-<li>vector 재할당은 포인터와 반복자를 죽인다</li>
+<ul><li>vector 재할당은 포인터와 반복자를 죽인다</li>
 <li>순서가 필요하면 map, 아니면 unordered_map</li>
-<li>std::sort는 불안정하고 list에는 못 쓴다</li>
-</ul>
+<li>std::sort는 불안정하고 list에는 못 쓴다</li></ul>
 <div class="refs"><h2>참고 자료</h2><ul><li><a href="https://en.cppreference.com/w/cpp/container/vector.html" target="_blank" rel="noopener">cppreference – std::vector</a></li><li><a href="https://en.cppreference.com/w/cpp/container/map.html" target="_blank" rel="noopener">cppreference – std::map</a></li><li><a href="https://en.cppreference.com/w/cpp/container/unordered_map.html" target="_blank" rel="noopener">cppreference – std::unordered_map</a></li><li><a href="https://en.cppreference.com/w/cpp/algorithm/sort.html" target="_blank" rel="noopener">cppreference – std::sort</a></li></ul></div>
 </article>
 <div class="pager"><a href="10-03.html">← 현대 C++</a><a href="10-05.html">컴파일과 링크 →</a></div>

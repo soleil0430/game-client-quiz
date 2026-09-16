@@ -66,14 +66,15 @@
 <p class="kicker">운영체제·동시성</p>
 <h1>Unity와 멀티스레딩</h1>
 <p class="lead">순수 계산은 워커나 Job으로 넘기고, 엔진을 만지는 호출은 메인 스레드에 남긴다</p>
-<p>경로 탐색 한 번에 프레임이 30ms씩 튄다. 계산을 다른 스레드로 넘기면 될 것 같은데, 거기서 Transform을 만지면 예외가 난다. 무엇을 넘기고 무엇을 남기는지가 규칙의 전부다.</p>
+<p>경로 탐색 한 번에 프레임이 30ms씩 튄다. 계산을 다른 스레드로 넘기면 될 것 같은데, 거기서 Transform을 만지면 예외가 난다. </p>
+<p>무엇을 넘기고 무엇을 남기는지가 규칙의 전부다. </p>
 <h3>엔진을 만지는 호출은 메인 스레드에만 남긴다</h3>
-<p>Transform, GameObject, UI 같은 대부분의 Unity API는 메인 스레드 전용이다. 다른 스레드에서 부르면 예외가 나거나 동작을 보장하지 못한다. 엔진 내부 상태가 단일 스레드 접근을 전제로 하기 때문이다.</p>
-<p>전부 락을 걸면 흔한 호출 하나가 그만큼 비싸진다. 그래서 난수 생성이나 경로 탐색, 데이터 파싱처럼 엔진을 안 건드리는 계산만 워커 스레드로 보낸다. 결과 값만 메인 스레드에서 반영한다.</p>
-<p>넘길 때는 <code>ConcurrentQueue</code>에 담아 <code>Update</code>에서 꺼낸다. Unity 2023 이후면 <code>Awaitable.MainThreadAsync</code>도 쓴다. 텍스처도 같아서 픽셀 계산은 백그라운드로 빼도 <code>SetPixels</code>와 <code>Apply</code>는 메인 스레드다.</p>
+<p>Transform, GameObject, UI 같은 대부분의 Unity API는 메인 스레드 전용이다. 다른 스레드에서 부르면 예외가 나거나 동작을 보장하지 못한다. 엔진 내부 상태가 단일 스레드 접근을 전제로 하기 때문이다. </p>
+<p>전부 락을 걸면 흔한 호출 하나가 그만큼 비싸진다. 난수 생성이나 경로 탐색, 데이터 파싱처럼 엔진을 안 건드리는 계산만 워커 스레드로 보내는 이유다. 결과 값만 메인 스레드에서 반영한다. </p>
+<p>넘길 때는 <code>ConcurrentQueue</code>에 담아 <code>Update</code>에서 꺼낸다. Unity 2023 이후면 <code>Awaitable.MainThreadAsync</code>도 쓴다. 텍스처도 같아서 픽셀 계산은 백그라운드로 빼도 <code>SetPixels</code>와 <code>Apply</code>는 메인 스레드다. </p>
 <h3>코루틴·직접 만든 스레드·Job System 중 무엇을 쓰나</h3>
-<p>코루틴은 <code>MonoBehaviour</code>가 매 프레임 한 칸씩 돌려 주는 반복자다. Unity API를 그대로 쓰지만 한 칸이 무거우면 그 프레임이 밀린다. <strong>일을 나눠 주는 장치이지 병렬로 만드는 장치가 아니다.</strong></p>
-<p>직접 만든 스레드는 병렬이지만 Unity API를 못 쓰고 수명 관리가 손에 남는다. Job System이 그 사이를 메운다. 엔진이 관리하는 워커 풀에 일을 올리고, 다룰 데이터를 값 형식과 네이티브 컨테이너로 제한한다.</p>
+<p>코루틴은 <code>MonoBehaviour</code>가 매 프레임 한 칸씩 돌려 주는 반복자다. Unity API를 그대로 쓰지만 한 칸이 무거우면 그 프레임이 밀린다. <strong>일을 나눠 주는 장치이지 병렬로 만드는 장치가 아니다.</strong> </p>
+<p>직접 만든 스레드는 병렬이지만 Unity API를 못 쓰고 수명 관리가 손에 남는다. Job System이 그 사이를 메운다. 엔진이 관리하는 워커 풀에 일을 올리고, 다룰 데이터를 값 형식과 네이티브 컨테이너로 제한한다. </p>
 <svg viewBox="0 0 640 200" width="100%" role="img" aria-label="메인 스레드가 Update에서 Job을 예약해 워커 셋이 구간을 나눠 돌고 Complete 뒤에 결과만 메인 스레드가 반영하는 흐름">
 <g fill="none" stroke="currentColor">
 <rect x="90" y="14" width="110" height="36" fill="currentColor" fill-opacity="0.08"/>
@@ -99,8 +100,8 @@
 <text x="300" y="188">Complete 뒤에야 결과를 읽는다</text>
 </g>
 </svg>
-<p>두 Job이 같은 컨테이너에 동시에 쓰려 하면 안전 시스템이 알려 준다. 그래서 락을 직접 걸 일이 없다.</p>
-<p>위치 갱신을 워커에 나눠 돌리고 결과만 메인 스레드에서 반영하는 모습:</p>
+<p>두 Job이 같은 컨테이너에 동시에 쓰려 하면 안전 시스템이 막고 알려 준다. 락을 직접 걸 일이 없다. </p>
+<p>위치 갱신을 워커에 나눠 돌리고 결과만 메인 스레드에서 반영하는 모습이다: </p>
 <pre><code>[BurstCompile]
 struct MoveJob : IJobParallelFor      // 인덱스별로 쪼개 워커들이 나눠 돈다
 {
@@ -115,29 +116,29 @@ job.Schedule(_p.Length, 64).Complete();   // 64개씩 나눠 돌리고 끝날 �
 for (int i = 0; i &lt; _p.Length; i++)
     _transforms[i].position = _p[i];      // Unity API는 메인 스레드에서</code></pre>
 <h3>NativeArray는 GC가 치워 주지 않는다</h3>
-<p><code>NativeArray</code>를 쓰는 이유는 관리 힙 밖이라서다. Job과 Burst는 관리 객체를 다룰 수 없고, 값이 이어 붙어 캐시 효율도 좋다. 대신 GC가 치워 주지 않아 <code>Dispose</code>가 필요하다.</p>
-<p>수명에 맞춰 <code>Allocator.Temp</code>·<code>TempJob</code>·<code>Persistent</code> 중에 고른다. Burst는 이 제한된 C# 부분집합을 LLVM으로 컴파일해 SIMD까지 쓴다.</p>
+<p><code>NativeArray</code>를 쓰는 이유는 관리 힙 밖이라서다. Job과 Burst는 관리 객체를 다룰 수 없고, 값이 이어 붙어 캐시 효율도 좋다. 대신 GC가 치워 주지 않아 <code>Dispose</code>가 필요하다. </p>
+<p>수명에 맞춰 <code>Allocator.Temp</code>·<code>TempJob</code>·<code>Persistent</code> 중에 고른다. Burst는 이 제한된 C# 부분집합을 LLVM으로 컴파일해 SIMD까지 쓴다. </p>
 <h3>면접에서 이렇게 답한다</h3>
 <ul>
-<li><strong>왜 다른 스레드에서 Unity API를 못 쓰나</strong> — 엔진 내부 상태가 단일 스레드 접근을 전제로 하기 때문이다. 전부 락을 걸면 흔한 호출 하나가 그만큼 비싸진다.</li>
-<li><strong>백그라운드 결과를 화면에 반영하려면</strong> — 계산만 워커 스레드에서 하고 결과 값만 넘긴다. <code>ConcurrentQueue</code>에 담아 <code>Update</code>에서 적용하거나 동기화 컨텍스트로 되돌린다.</li>
-<li><strong>코루틴과 스레드의 차이</strong> — 코루틴은 메인 스레드에서 매 프레임 이어 실행되는 반복자라 Unity API를 쓰지만 병렬이 아니다. 스레드는 병렬이지만 Unity API를 못 쓴다.</li>
-<li><strong>Job System은 어떻게 성능을 올리나</strong> — 워커 풀에 작업을 나눠 노는 코어를 쓴다. 데이터를 네이티브 컨테이너로 제한해 안전 시스템이 레이스를 잡아 준다. Burst를 붙이면 SIMD까지 써서 한 번 더 빨라진다.</li>
-<li><strong>멀티스레드 코드를 어떻게 디버깅했나</strong> — 안전 검사를 켜 둔 채 개발하고 로그에 스레드와 프레임 번호를 남겨 재현했다. 공유 상태를 줄이는 것이 근본 해결이었다.</li>
+<li><strong>왜 다른 스레드에서 Unity API를 못 쓰나</strong> — 엔진 내부 상태가 단일 스레드 접근을 전제로 하기 때문이다. 전부 락을 걸면 흔한 호출 하나가 그만큼 비싸진다는 이유까지 붙인다. </li>
+<li><strong>백그라운드 결과를 화면에 반영하려면</strong> — 계산만 워커 스레드에서 하고 결과 값만 넘긴다. <code>ConcurrentQueue</code>에 담아 <code>Update</code>에서 적용하거나 동기화 컨텍스트로 되돌린다. </li>
+<li><strong>코루틴과 스레드의 차이</strong> — 코루틴은 메인 스레드에서 매 프레임 이어 실행되는 반복자라 Unity API를 쓰지만 병렬이 아니다. 스레드는 병렬이지만 Unity API를 못 쓴다. </li>
+<li><strong>Job System은 어떻게 성능을 올리나</strong> — 워커 풀에 작업을 나눠 노는 코어를 쓴다. 데이터를 네이티브 컨테이너로 제한해 안전 시스템이 레이스를 잡아 준다. Burst를 붙이면 SIMD까지 써서 한 번 더 빨라진다. </li>
+<li><strong>멀티스레드 코드를 어떻게 디버깅하나</strong> — 안전 검사를 켜 둔 채 개발하고, 로그에 스레드 이름과 프레임 번호를 남겨 재현 조건을 좁힌다. 공유 상태를 줄이는 것이 근본 해결이라고 마무리한다. </li>
 </ul>
 <h3>이런 오해를 한다</h3>
 <ul>
-<li><strong>코루틴은 별도 스레드에서 돈다</strong> — 메인 스레드에서 나눠 실행될 뿐이다. 무거운 계산을 넣으면 프레임만 밀린다.</li>
-<li><strong>Job 안에서도 Unity API를 쓸 수 있다</strong> — 관리 객체와 Unity 오브젝트는 못 쓴다. 결과는 네이티브 컨테이너로 받는다.</li>
-<li><strong>NativeArray도 GC가 정리해 준다</strong> — 관리 힙 밖이라 <code>Dispose</code>를 빼먹으면 누수로 남는다.</li>
-<li><strong>Job이 도는 중에도 같은 배열을 읽으면 된다</strong> — 안전 시스템이 막는다. <code>Complete</code>로 기다리거나 읽기 전용으로 선언한다.</li>
-<li><strong>Burst를 붙이면 아무 코드나 빨라진다</strong> — 제한된 C# 부분집합만 다뤄서 관리 객체를 쓰는 코드에는 붙지 않는다.</li>
+<li><strong>&ldquo;코루틴은 별도 스레드에서 돈다&rdquo;</strong> — 메인 스레드에서 나눠 실행될 뿐이다. 무거운 계산을 넣으면 프레임만 밀린다. </li>
+<li><strong>&ldquo;Job 안에서도 Unity API를 쓸 수 있다&rdquo;</strong> — 관리 객체와 Unity 오브젝트는 못 쓴다. 결과는 네이티브 컨테이너로 받는다. </li>
+<li><strong>&ldquo;NativeArray도 GC가 정리해 준다&rdquo;</strong> — 관리 힙 밖이라 <code>Dispose</code>를 빼먹으면 누수로 남는다. </li>
+<li><strong>&ldquo;Job이 도는 중에도 같은 배열을 읽으면 된다&rdquo;</strong> — 안전 시스템이 막는다. <code>Complete</code>로 기다리거나 읽기 전용으로 선언한다. </li>
+<li><strong>&ldquo;Burst를 붙이면 아무 코드나 빨라진다&rdquo;</strong> — 제한된 C# 부분집합만 다뤄서 관리 객체를 쓰는 코드에는 붙지 않는다. </li>
 </ul>
 <h3>3줄 정리</h3>
 <ul>
-<li>순수 계산만 워커로 보내고 엔진 호출은 메인 스레드에 남긴다</li>
-<li>코루틴은 병렬이 아니고, 병렬이 필요하면 Job System이다</li>
-<li>NativeArray는 관리 힙 밖이라 Dispose를 직접 해야 한다</li>
+<li>순수 계산만 워커로 보내고 엔진 호출은 메인 스레드에 남긴다 </li>
+<li>코루틴은 병렬이 아니고, 병렬이 필요하면 Job System이다 </li>
+<li>NativeArray는 관리 힙 밖이라 Dispose를 직접 해야 한다 </li>
 </ul>
 <div class="refs"><h2>참고 자료</h2><ul><li><a href="https://docs.unity3d.com/Manual/job-system.html" target="_blank" rel="noopener">Unity 매뉴얼 – Write multithreaded code with the job system</a></li><li><a href="https://docs.unity3d.com/Manual/job-system-native-container.html" target="_blank" rel="noopener">Unity 매뉴얼 – Introduction to NativeContainer</a></li><li><a href="https://docs.unity3d.com/Manual/Coroutines.html" target="_blank" rel="noopener">Unity 매뉴얼 – Write and run coroutines</a></li><li><a href="https://docs.unity3d.com/Packages/com.unity.burst@1.8/manual/index.html" target="_blank" rel="noopener">Unity Burst 매뉴얼 – Burst compiler</a></li></ul></div>
 </article>
