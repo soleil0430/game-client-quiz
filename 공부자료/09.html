@@ -16,7 +16,8 @@
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--text);
-    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+    font: 450 17px/1.85 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  strong { font-weight: 800; }
   main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
   a { color: var(--blue-d); }
   .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
@@ -25,8 +26,12 @@
     padding: 4px 12px; font-size: .8rem; font-weight: 800; }
   h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
   h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
-  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
-  p, ul, ol { margin: 10px 0; }
+  h3 { font-size: 1.1rem; font-weight: 800; margin: 34px 0 10px; padding-top: 4px; border-top: 2px solid var(--line); }
+  article h3:first-of-type { margin-top: 26px; }
+  p, ul, ol { margin: 0 0 20px; }
+  h3 + p, h3 + ul { margin-top: 0; }
+  svg { display: block; width: 100%; max-width: 640px; height: auto; margin: 18px auto 22px; color: var(--muted); }
+  svg text { font: 600 13px -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; }
   li { margin: 5px 0; }
   .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
   .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
@@ -58,7 +63,7 @@
 <div class="nav"><a href="../index.html#library">← 도서관</a><span class="badge">네트워크</span></div>
 <h1>네트워크 공부 자료</h1>
 <p class="lead">글 7편. 근거가 된 질문 목록은 질문은행 09-네트워크.md에 있다.</p>
-<div class="list"><a href="09-01.html"><strong>계층 모델</strong><span>계층을 나눈 이유부터 계층별 역할과 데이터 단위, 게임 패킷이 앉는 자리까지 잡는다</span></a><a href="09-02.html"><strong>TCP와 UDP</strong><span>무엇을 기다리느라 느려지는지 알면 게임의 어느 데이터에 무엇을 쓸지 고를 수 있다</span></a><a href="09-03.html"><strong>소켓과 HTTP</strong><span>소켓·포트·HTTP·TLS가 각각 무엇을 맡는지 알고 메타 통신과 인게임 통신을 나눈다</span></a><a href="09-04.html"><strong>멀티플레이 구조</strong><span>판정 권한을 어디에 두느냐로 구조가 갈린다. 비용·공정성·지연을 놓고 고른다</span></a><a href="09-05.html"><strong>동기화 기법</strong><span>입력을 맞출지 상태를 맞출지가 갈림길이다. 장르에 맞는 기법을 고르는 기준을 잡는다</span></a><a href="09-06.html"><strong>클라이언트-서버 신뢰성</strong><span>끊긴 요청이 두 번 반영되지 않게 멱등 키를 붙이고, 재시도는 백오프로 늦춘다</span></a><a href="09-07.html"><strong>보안</strong><span>클라이언트는 신뢰 대상이 아니다. 판정은 서버가 하고 입력은 서버가 검증한다</span></a></div>
+<div class="list"><a href="09-01.html"><strong>계층 모델</strong><span>계층은 속도가 아니라 교체 가능성을 위해 나눈다. 대가는 층마다 붙는 헤더다</span></a><a href="09-02.html"><strong>TCP와 UDP</strong><span>TCP가 튀는 이유는 회선이 아니라 빠진 조각을 기다리기 때문이다</span></a><a href="09-03.html"><strong>소켓과 HTTP</strong><span>소켓은 연결을 열어 두고 HTTP는 매번 새로 묻는다. 게임은 용도로 나눈다</span></a><a href="09-04.html"><strong>멀티플레이 구조</strong><span>판정 권한을 어디 두느냐가 구조다. 비용·공정성·지연이 거기 딸려 온다</span></a><a href="09-05.html"><strong>동기화 기법</strong><span>입력을 맞출지 상태를 맞출지가 갈림길이다. 장르가 답을 정해 준다</span></a><a href="09-06.html"><strong>클라이언트-서버 신뢰성</strong><span>응답이 없다고 처리가 안 된 건 아니다. 멱등 키로 중복 지급을 막는다</span></a><a href="09-07.html"><strong>보안</strong><span>클라이언트가 보낸 값은 전부 사용자가 적어 넣은 값이다. 판정은 서버가 한다</span></a></div>
 </main>
 </body>
 </html>

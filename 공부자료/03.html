@@ -16,7 +16,8 @@
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--text);
-    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+    font: 450 17px/1.85 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  strong { font-weight: 800; }
   main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
   a { color: var(--blue-d); }
   .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
@@ -25,8 +26,12 @@
     padding: 4px 12px; font-size: .8rem; font-weight: 800; }
   h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
   h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
-  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
-  p, ul, ol { margin: 10px 0; }
+  h3 { font-size: 1.1rem; font-weight: 800; margin: 34px 0 10px; padding-top: 4px; border-top: 2px solid var(--line); }
+  article h3:first-of-type { margin-top: 26px; }
+  p, ul, ol { margin: 0 0 20px; }
+  h3 + p, h3 + ul { margin-top: 0; }
+  svg { display: block; width: 100%; max-width: 640px; height: auto; margin: 18px auto 22px; color: var(--muted); }
+  svg text { font: 600 13px -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; }
   li { margin: 5px 0; }
   .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
   .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
@@ -58,7 +63,7 @@
 <div class="nav"><a href="../index.html#library">← 도서관</a><span class="badge">최적화·메모리</span></div>
 <h1>최적화·메모리 공부 자료</h1>
 <p class="lead">글 6편. 근거가 된 질문 목록은 질문은행 03-최적화-메모리.md에 있다.</p>
-<div class="list"><a href="03-01.html"><strong>접근법</strong><span>감으로 고치지 않는다. 측정해서 병목을 찾고, 고치고, 다시 재는 순환이 최적화의 기본이다</span></a><a href="03-02.html"><strong>프로파일링과 병목 진단</strong><span>에디터 수치를 믿지 말고 실기기 개발 빌드에서 재며, CPU와 GPU 중 어디가 한계인지 가른다</span></a><a href="03-03.html"><strong>CPU 쪽 최적화</strong><span>매 프레임 도는 코드의 탐색·호출 비용을 참조 캐싱과 매니저 일괄 처리로 걷어낸다</span></a><a href="03-04.html"><strong>메모리와 GC</strong><span>Unity GC의 성질을 알고 할당 자체를 줄인다. 풀링과 NonAlloc API가 기본 도구다</span></a><a href="03-05.html"><strong>캐시 친화와 데이터 지향</strong><span>CPU는 캐시 라인 단위로 읽는다. 쓰는 순서대로 데이터를 연속 배치하면 같은 코드가 빨라진다</span></a><a href="03-06.html"><strong>모바일과 상황형 질문</strong><span>모바일은 발열과 메모리 한도가 먼저 온다. 지속 가능한 부하로 낮추고 피크를 관리한다</span></a></div>
+<div class="list"><a href="03-01.html"><strong>접근법</strong><span>최적화는 속도 경쟁이 아니라 프레임 예산 맞추기다. 재고, 하나 고치고, 다시 잰다</span></a><a href="03-02.html"><strong>프로파일링과 병목 진단</strong><span>CPU와 GPU 중 느린 쪽이 프레임 시간이다. 실기기 개발 빌드에서 가른다</span></a><a href="03-03.html"><strong>CPU 쪽 최적화</strong><span>매 프레임 드는 탐색 비용과 엔진 경계 비용을 캐싱과 매니저 순회로 걷어낸다</span></a><a href="03-04.html"><strong>메모리와 GC</strong><span>Unity GC는 힙 전체를 훑고 객체를 옮기지 않는다. 그래서 할당부터 줄인다</span></a><a href="03-05.html"><strong>캐시 친화와 데이터 지향</strong><span>CPU는 캐시 라인 64바이트를 통째로 읽는다. 훑는 순서대로 붙여 둔다</span></a><a href="03-06.html"><strong>모바일과 상황형 질문</strong><span>모바일은 발열과 메모리 한도가 먼저 온다. 10분 뒤 프레임이 진짜 성능이다</span></a></div>
 </main>
 </body>
 </html>

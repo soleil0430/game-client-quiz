@@ -16,7 +16,8 @@
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--text);
-    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+    font: 450 17px/1.85 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  strong { font-weight: 800; }
   main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
   a { color: var(--blue-d); }
   .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
@@ -25,8 +26,12 @@
     padding: 4px 12px; font-size: .8rem; font-weight: 800; }
   h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
   h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
-  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
-  p, ul, ol { margin: 10px 0; }
+  h3 { font-size: 1.1rem; font-weight: 800; margin: 34px 0 10px; padding-top: 4px; border-top: 2px solid var(--line); }
+  article h3:first-of-type { margin-top: 26px; }
+  p, ul, ol { margin: 0 0 20px; }
+  h3 + p, h3 + ul { margin-top: 0; }
+  svg { display: block; width: 100%; max-width: 640px; height: auto; margin: 18px auto 22px; color: var(--muted); }
+  svg text { font: 600 13px -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; }
   li { margin: 5px 0; }
   .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
   .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
@@ -58,8 +63,102 @@
 <div class="nav"><a href="../index.html#library">← 도서관</a><a href="04.html" class="badge">그래픽스·렌더링 목차</a></div>
 <article class="card">
 <h1>모바일 GPU와 그래픽스 API</h1>
-<p class="lead">타일 기반 GPU는 대역폭을 아끼는 대신 그린 화면을 중간에 되읽는 것을 싫어한다</p>
-<h3>핵심 개념</h3><p>모바일 기기에서 진짜 한계는 연산 능력보다 <strong>메모리 대역폭과 전력</strong>이다. 칩 바깥의 메인 메모리(DRAM)를 한 번 오가는 비용이 산술 연산 수십 번보다 비싸고, 그 비용이 그대로 발열과 배터리로 돌아온다. 모바일 GPU가 타일 기반 구조를 쓰는 이유가 여기 있다.</p><p>데스크톱의 즉시 모드 GPU(IMR)는 드로우 콜이 들어오면 곧바로 메인 메모리의 프레임버퍼에 그린다. 타일 기반 GPU는 먼저 한 프레임의 지오메트리를 모두 받아 화면 타일(예: 16×16, 32×32)마다 어떤 삼각형이 걸치는지 목록을 만들고(비닝), 그다음 타일 하나씩 칩 안의 빠른 메모리에서 색과 깊이를 처리한 뒤 <strong>끝난 타일의 결과만</strong> 메인 메모리에 쓴다. 깊이 버퍼와 MSAA 샘플은 타일 안에서 소비하고 버리므로 대역폭을 크게 아낀다.</p><table><thead><tr><th>주제</th><th>즉시 모드(데스크톱)</th><th>타일 기반(모바일)</th></tr></thead><tbody><tr><td>그리는 시점</td><td>드로우 콜이 오면 바로</td><td>지오메트리를 모은 뒤 타일 단위로</td></tr><tr><td>MSAA</td><td>메모리 대역폭 부담이 크다</td><td>타일 안에서 해소해 상대적으로 싸다</td></tr><tr><td>렌더 타깃 전환</td><td>비교적 가볍다</td><td>타일을 내보냈다 들여오는 비용이 붙는다</td></tr><tr><td>불리한 것</td><td>오버드로, 대역폭</td><td>디퍼드 G-버퍼, 풀스크린 블릿, 그랩 패스</td></tr></tbody></table><p>이 구조에서 나오는 실무 규칙이 몇 가지 있다. 첫째, 렌더 타깃을 중간에 바꾸거나 이미 그린 결과를 셰이더에서 되읽으면 타일 내용을 메인 메모리로 내보냈다가 다시 들여와야 한다. 포스트 프로세싱, 카메라 스택, URP의 Opaque Texture, Built-in의 GrabPass가 모두 여기에 걸린다. 둘째, 디퍼드가 불리한 것도 같은 이유다. G-버퍼 여러 장을 쓰고 다시 읽는 왕복이 타일 메모리에 담기 힘들다. 셋째, 프레임 시작에 화면을 제대로 클리어하는 편이 낫다. 클리어하지 않으면 GPU가 이전 내용을 타일로 불러와야 해서 오히려 비싸진다. 넷째, 알파 테스트(<code>clip</code>·<code>discard</code>)는 픽셀이 살아남을지 셰이더를 돌려야 알 수 있어 조기 깊이 판정을 무효화한다. 나뭇잎처럼 꼭 필요한 곳에만 쓴다.</p><p>그래픽스 API 쪽도 비슷하게 오버헤드 이야기다. OpenGL ES와 DX11은 상태 검증·동기화·메모리 관리를 드라이버가 알아서 해 줬고, 그 대가로 드로우 콜마다 CPU 비용이 붙고 렌더 명령을 한 스레드에서만 만들 수 있었다. Vulkan·DX12·Metal은 그 일을 앱이 직접 맡는 저수준 API다. 드라이버 오버헤드가 줄고 <strong>커맨드 버퍼를 여러 스레드에서 병렬로 기록</strong>할 수 있어, 드로우 콜이 많아 CPU가 병목인 씬에서 이득이 크다. 반대로 GPU가 병목이면 API를 바꿔도 프레임은 그대로다.</p><p>Unity에서는 Player Settings의 Graphics APIs 목록에서 고른다. Auto Graphics API를 끄고 순서를 직접 정하면 앞에 있는 것부터 시도한다. 안드로이드는 기기·드라이버 편차가 커서 Vulkan을 앞에 두되 OpenGL ES 3을 뒤에 남겨 두는 구성이 흔하다. iOS는 Metal만 쓴다. API를 바꾸면 셰이더가 그 API용으로 다시 컴파일되므로 빌드 시간과 배리언트 수에도 영향이 있다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>모바일 GPU와 데스크톱 GPU의 차이</strong> — 모바일은 대역폭과 전력이 한계라 화면을 타일로 쪼개 칩 안 메모리에서 그리고 끝난 타일만 내보낸다. 그래서 MSAA는 상대적으로 싸고, 렌더 타깃을 바꾸거나 그린 결과를 되읽는 동작이 비싸다.</li><li><strong>그래서 무엇을 피하나</strong> — 불필요한 풀스크린 패스, 카메라 스택 남발, 그랩 패스, 모바일 디퍼드를 줄인다. 프레임 시작 클리어는 생략하지 않고, 알파 테스트는 꼭 필요한 머티리얼에만 쓴다.</li><li><strong>Vulkan과 OpenGL ES 3 중 무엇을 쓰나</strong> — 드로우 콜이 많아 CPU가 병목이면 Vulkan이 유리하다. 다만 안드로이드는 드라이버 편차가 있어 대상 기기에서 실제로 재 보고 정하고, Graphics APIs 목록에 ES 3을 폴백으로 남겨 둔다.</li><li><strong>저수준 API가 빠른 이유</strong> — 드라이버가 하던 검증과 동기화를 앱이 맡아 드로우 콜당 CPU 비용이 줄고, 커맨드 버퍼를 여러 스레드에서 미리 기록할 수 있다. GPU 병목에는 도움이 되지 않는다는 점을 같이 말한다.</li></ul><h3>흔한 오해</h3><ul><li><strong>타일 기반은 드로우 콜이 오면 바로 그린다</strong> — 지오메트리를 먼저 모아 타일별 목록을 만든 뒤 타일 단위로 그린다. 바로 그리는 쪽이 즉시 모드다.</li><li><strong>모바일에서는 MSAA가 무조건 비싸다</strong> — 타일 안에서 해소되므로 상대적으로 싸다. 오히려 비싼 것은 풀스크린 후처리 계열이다.</li><li><strong>Vulkan으로 바꾸면 프레임이 오른다</strong> — CPU 드라이버 오버헤드가 병목일 때만 오른다. 픽셀 채우기나 셰이더가 병목이면 변화가 없다.</li><li><strong>저수준 API는 GPU 연산이 더 빠르다</strong> — GPU가 하는 계산은 같다. 달라지는 것은 명령을 준비하는 CPU 쪽이다.</li><li><strong>화면을 클리어하지 않으면 그만큼 아낀다</strong> — 타일 기반에서는 이전 프레임 내용을 타일로 불러와야 해서 오히려 손해다.</li></ul>
+<p class="lead">타일 기반 GPU는 대역폭을 아끼는 대신 그린 화면을 되읽는 것을 싫어한다</p>
+<p>데스크톱에서 멀쩡하던 후처리가 폰에서 프레임을 깎아 먹는 일이 있다. 모바일 GPU는 화면을 타일로 쪼개 칩 안에서 그리기 때문이다. 이 구조를 모르면 무엇이 왜 비싼지 설명이 안 된다.</p>
+<h3>모바일의 한계는 연산이 아니라 대역폭이다</h3>
+<p>모바일 기기에서 진짜 한계는 연산 능력이 아니다. <strong>메모리 대역폭과 전력</strong>이다. 칩 바깥의 메인 메모리를 한 번 오가는 비용이 산술 연산 수십 번보다 비싸다.</p>
+<p>그 비용은 그대로 발열과 배터리로 돌아온다. 발열이 오르면 기기가 클럭을 낮춰 프레임이 또 떨어진다. 모바일 GPU가 타일 기반 구조를 쓰는 이유가 여기 있다.</p>
+<h3>타일 기반은 모았다가 타일 하나씩 그린다</h3>
+<p>데스크톱의 즉시 모드 GPU는 드로우 콜이 들어오면 곧바로 메인 메모리의 프레임버퍼에 그린다. 타일 기반 GPU는 먼저 한 프레임의 지오메트리를 모두 받는다. 화면 타일마다 어떤 삼각형이 걸치는지 목록을 만든다.</p>
+<svg viewBox="0 0 640 200" width="100%" role="img" aria-label="타일 기반 GPU가 비닝하고 타일 단위로 그리는 순서">
+<rect x="10" y="58" width="104" height="50" fill="none" stroke="currentColor"/>
+<text x="62" y="80" font-size="11" fill="currentColor" text-anchor="middle">한 프레임의</text>
+<text x="62" y="96" font-size="11" fill="currentColor" text-anchor="middle">지오메트리 전부</text>
+<line x1="114" y1="83" x2="138" y2="83" stroke="currentColor"/>
+<polyline points="134,79 138,83 134,87" fill="none" stroke="currentColor"/>
+<rect x="142" y="42" width="34" height="28" fill="none" stroke="currentColor"/>
+<rect x="176" y="42" width="34" height="28" fill="none" stroke="currentColor"/>
+<rect x="210" y="42" width="34" height="28" fill="none" stroke="currentColor"/>
+<rect x="244" y="42" width="34" height="28" fill="none" stroke="currentColor"/>
+<rect x="142" y="70" width="34" height="28" fill="none" stroke="currentColor"/>
+<rect x="176" y="70" width="34" height="28" fill="currentColor" fill-opacity="0.08" stroke="currentColor"/>
+<rect x="210" y="70" width="34" height="28" fill="none" stroke="currentColor"/>
+<rect x="244" y="70" width="34" height="28" fill="none" stroke="currentColor"/>
+<rect x="142" y="98" width="34" height="28" fill="none" stroke="currentColor"/>
+<rect x="176" y="98" width="34" height="28" fill="none" stroke="currentColor"/>
+<rect x="210" y="98" width="34" height="28" fill="none" stroke="currentColor"/>
+<rect x="244" y="98" width="34" height="28" fill="none" stroke="currentColor"/>
+<text x="210" y="144" font-size="11" fill="currentColor" text-anchor="middle">타일별 삼각형 목록(비닝)</text>
+<line x1="278" y1="83" x2="302" y2="83" stroke="currentColor"/>
+<polyline points="298,79 302,83 298,87" fill="none" stroke="currentColor"/>
+<rect x="306" y="58" width="130" height="50" fill="currentColor" fill-opacity="0.08" stroke="currentColor"/>
+<text x="371" y="80" font-size="11" fill="currentColor" text-anchor="middle">칩 안 타일 메모리에서</text>
+<text x="371" y="96" font-size="11" fill="currentColor" text-anchor="middle">색·깊이를 한 타일씩</text>
+<line x1="436" y1="83" x2="460" y2="83" stroke="currentColor"/>
+<polyline points="456,79 460,83 456,87" fill="none" stroke="currentColor"/>
+<rect x="464" y="58" width="130" height="50" fill="none" stroke="currentColor"/>
+<text x="529" y="80" font-size="11" fill="currentColor" text-anchor="middle">끝난 타일만</text>
+<text x="529" y="96" font-size="11" fill="currentColor" text-anchor="middle">메인 메모리로</text>
+<line x1="529" y1="108" x2="529" y2="166" stroke="currentColor" stroke-dasharray="4 3"/>
+<line x1="529" y1="166" x2="371" y2="166" stroke="currentColor" stroke-dasharray="4 3"/>
+<line x1="371" y1="166" x2="371" y2="112" stroke="currentColor" stroke-dasharray="4 3"/>
+<polyline points="367,116 371,112 375,116" fill="none" stroke="currentColor"/>
+<text x="380" y="186" font-size="11" fill="currentColor">그린 결과를 되읽으면 타일을 내렸다 다시 올린다</text>
+</svg>
+<p>그다음 타일 하나씩 칩 안의 빠른 메모리에서 색과 깊이를 처리한다. 끝난 타일의 결과만 메인 메모리에 쓴다. 깊이 버퍼와 MSAA 샘플은 타일 안에서 소비하고 버리므로 대역폭을 크게 아낀다.</p>
+<table>
+<thead>
+<tr><th>주제</th>
+<th>즉시 모드(데스크톱)</th>
+<th>타일 기반(모바일)</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>그리는 시점</td>
+<td>드로우 콜이 오면 바로</td>
+<td>지오메트리를 모은 뒤 타일 단위로</td>
+</tr>
+<tr><td>MSAA</td>
+<td>메모리 대역폭 부담이 크다</td>
+<td>타일 안에서 해소해 상대적으로 싸다</td>
+</tr>
+<tr><td>렌더 타깃 전환</td>
+<td>비교적 가볍다</td>
+<td>타일을 내보냈다 들여오는 비용이 붙는다</td>
+</tr>
+<tr><td>불리한 것</td>
+<td>오버드로, 대역폭</td>
+<td>디퍼드 G-버퍼, 풀스크린 블릿, 그랩 패스</td>
+</tr>
+</tbody>
+</table>
+<h3>되읽기와 렌더 타깃 전환이 비싸진다</h3>
+<p>이 구조에서 실무 규칙 네 개가 나온다. 첫째, 렌더 타깃을 중간에 바꾸거나 그린 결과를 셰이더에서 되읽으면 손해다. 타일을 메인 메모리로 내보냈다가 다시 들여와야 한다.</p>
+<p>포스트 프로세싱, 카메라 스택, URP의 Opaque Texture, Built-in의 GrabPass가 모두 여기 걸린다.</p>
+<p>둘째, 디퍼드가 불리한 것도 같은 이유다. G-버퍼 여러 장을 쓰고 다시 읽는 왕복이 타일 메모리에 담기 힘들다.</p>
+<p>셋째, 프레임 시작에 화면을 제대로 클리어하는 편이 낫다. 클리어하지 않으면 GPU가 이전 내용을 타일로 불러와야 해서 오히려 비싸진다. 넷째, 알파 테스트는 조기 깊이 판정을 무효화하므로 나뭇잎처럼 꼭 필요한 곳에만 쓴다.</p>
+<h3>저수준 API는 CPU 쪽만 빨라진다</h3>
+<p>그래픽스 API 쪽도 같은 오버헤드 이야기다. OpenGL ES와 DX11은 상태 검증·동기화·메모리 관리를 드라이버가 알아서 해 줬다. 그 대가로 드로우 콜마다 CPU 비용이 붙고 렌더 명령을 한 스레드에서만 만들 수 있었다.</p>
+<p>Vulkan·DX12·Metal은 그 일을 앱이 직접 맡는 저수준 API다. 드라이버 오버헤드가 줄고 <strong>커맨드 버퍼를 여러 스레드에서 병렬로 기록</strong>할 수 있다. 드로우 콜이 많아 CPU가 병목인 씬에서 이득이 크다.</p>
+<p>반대로 GPU가 병목이면 API를 바꿔도 프레임은 그대로다. Unity에서는 Player Settings의 Graphics APIs 목록에서 고른다. 안드로이드는 기기 편차가 커서 Vulkan을 앞에 두되 OpenGL ES 3을 폴백으로 남기는 구성이 흔하다.</p>
+<h3>면접에서 이렇게 답한다</h3>
+<ul><li><strong>모바일 GPU와 데스크톱 GPU의 차이</strong> — 모바일은 대역폭과 전력이 한계라 화면을 타일로 쪼개 칩 안 메모리에서 그리고 끝난 타일만 내보낸다. 그래서 MSAA는 상대적으로 싸다. 렌더 타깃을 바꾸거나 그린 결과를 되읽는 동작이 비싸다.</li>
+<li><strong>그래서 무엇을 피하나</strong> — 불필요한 풀스크린 패스, 카메라 스택 남발, 그랩 패스, 모바일 디퍼드를 줄인다. 프레임 시작 클리어는 생략하지 않고, 알파 테스트는 꼭 필요한 머티리얼에만 쓴다.</li>
+<li><strong>Vulkan과 OpenGL ES 3 중 무엇을 쓰나</strong> — 드로우 콜이 많아 CPU가 병목이면 Vulkan이 유리하다. 다만 안드로이드는 드라이버 편차가 있어 대상 기기에서 실제로 재 보고 정한다. 목록에 ES 3을 폴백으로 남겨 둔다.</li>
+<li><strong>저수준 API가 빠른 이유</strong> — 드라이버가 하던 검증과 동기화를 앱이 맡아 드로우 콜당 CPU 비용이 준다. 커맨드 버퍼를 여러 스레드에서 미리 기록할 수도 있다. GPU 병목에는 도움이 되지 않는다는 점을 같이 말한다.</li>
+</ul>
+<h3>이런 오해를 한다</h3>
+<ul><li><strong>타일 기반은 드로우 콜이 오면 바로 그린다</strong> — 지오메트리를 먼저 모아 타일별 목록을 만든 뒤 타일 단위로 그린다. 바로 그리는 쪽이 즉시 모드다.</li>
+<li><strong>모바일에서는 MSAA가 무조건 비싸다</strong> — 타일 안에서 해소되므로 상대적으로 싸다. 오히려 비싼 것은 풀스크린 후처리 계열이다.</li>
+<li><strong>Vulkan으로 바꾸면 프레임이 오른다</strong> — CPU 드라이버 오버헤드가 병목일 때만 오른다. 픽셀 채우기나 셰이더가 병목이면 변화가 없다.</li>
+<li><strong>저수준 API는 GPU 연산이 더 빠르다</strong> — GPU가 하는 계산은 같다. 달라지는 것은 명령을 준비하는 CPU 쪽이다.</li>
+<li><strong>화면을 클리어하지 않으면 그만큼 아낀다</strong> — 타일 기반에서는 이전 프레임 내용을 타일로 불러와야 해서 오히려 손해다.</li>
+</ul>
+<h3>3줄 정리</h3>
+<ul><li>모바일의 한계는 연산이 아니라 대역폭과 전력</li>
+<li>타일 기반은 모아서 비닝한 뒤 타일 단위로 그린다</li>
+<li>저수준 API가 줄이는 것은 CPU 쪽 준비 비용뿐</li>
+</ul>
 <div class="refs"><h2>참고 자료</h2><ul><li><a href="https://docs.unity3d.com/Manual/GraphicsAPIs.html" target="_blank" rel="noopener">Unity 매뉴얼 – Graphics API support</a></li><li><a href="https://docs.unity3d.com/Manual/vulkan.html" target="_blank" rel="noopener">Unity 매뉴얼 – Vulkan</a></li><li><a href="https://docs.unity3d.com/Manual/OptimizingGraphicsPerformance.html" target="_blank" rel="noopener">Unity 매뉴얼 – Reduce rendering work on the CPU or GPU</a></li></ul></div>
 </article>
 <div class="pager"><a href="04-07.html">← Unity 렌더 파이프라인과 셰이더</a><a href="04-09.html">디버깅과 설계 →</a></div>

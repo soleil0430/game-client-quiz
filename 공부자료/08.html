@@ -16,7 +16,8 @@
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--text);
-    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+    font: 450 17px/1.85 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  strong { font-weight: 800; }
   main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
   a { color: var(--blue-d); }
   .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
@@ -25,8 +26,12 @@
     padding: 4px 12px; font-size: .8rem; font-weight: 800; }
   h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
   h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
-  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
-  p, ul, ol { margin: 10px 0; }
+  h3 { font-size: 1.1rem; font-weight: 800; margin: 34px 0 10px; padding-top: 4px; border-top: 2px solid var(--line); }
+  article h3:first-of-type { margin-top: 26px; }
+  p, ul, ol { margin: 0 0 20px; }
+  h3 + p, h3 + ul { margin-top: 0; }
+  svg { display: block; width: 100%; max-width: 640px; height: auto; margin: 18px auto 22px; color: var(--muted); }
+  svg text { font: 600 13px -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; }
   li { margin: 5px 0; }
   .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
   .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
@@ -58,7 +63,7 @@
 <div class="nav"><a href="../index.html#library">← 도서관</a><span class="badge">운영체제·동시성</span></div>
 <h1>운영체제·동시성 공부 자료</h1>
 <p class="lead">글 8편. 근거가 된 질문 목록은 질문은행 08-운영체제-동시성.md에 있다.</p>
-<div class="list"><a href="08-01.html"><strong>프로세스와 스레드</strong><span>프로세스는 자원의 울타리, 스레드는 그 안의 실행 흐름이다. 무엇을 공유하는지가 전부다</span></a><a href="08-02.html"><strong>메모리 구조</strong><span>코드·데이터·힙·스택이 무엇을 담고 언제 정리되는지 알면 크래시 로그가 읽힌다</span></a><a href="08-03.html"><strong>가상 메모리</strong><span>프로세스마다 가짜 주소를 주고 필요한 페이지만 올린다. 모바일 메모리 크래시의 배경이다</span></a><a href="08-04.html"><strong>스케줄링과 커널</strong><span>문맥 전환·시스템 콜·인터럽트는 모두 상태를 저장하고 돌아오는 값을 치른다</span></a><a href="08-05.html"><strong>컴퓨터 구조</strong><span>캐시 라인·엔디언·float 정밀도는 프레임 튐과 좌표 떨림으로 눈앞에 나타난다</span></a><a href="08-06.html"><strong>동기화</strong><span>공유 자원이 왜 깨지는지 알고 lock·Interlocked·CAS 중 상황에 맞는 것을 고른다</span></a><a href="08-07.html"><strong>비동기</strong><span>async/await는 스레드를 늘리는 장치가 아니라 기다리는 동안 스레드를 놓아주는 장치다</span></a><a href="08-08.html"><strong>Unity와 멀티스레딩</strong><span>무거운 계산은 워커 스레드나 Job으로 넘기고 Unity API 호출은 메인 스레드에 남긴다</span></a></div>
+<div class="list"><a href="08-01.html"><strong>프로세스와 스레드</strong><span>스레드는 힙을 공유하고 스택만 따로 쓴다. 싸게 주고받는 대신 같이 망가진다</span></a><a href="08-02.html"><strong>메모리 구조</strong><span>네 구역은 수명이 달라서 나뉜다. 스택은 함수가 끝나면 걷히고 힙은 놓을 때까지 남는다</span></a><a href="08-03.html"><strong>가상 메모리</strong><span>프로세스마다 가짜 주소를 주고 필요한 페이지만 올린다. 모바일 메모리 크래시의 배경이다</span></a><a href="08-04.html"><strong>스케줄링과 커널</strong><span>문맥 전환은 저장하고 복원하는 값을 치른다. 스레드를 늘린다고 빨라지지 않는다</span></a><a href="08-05.html"><strong>컴퓨터 구조</strong><span>속도는 연산 횟수가 아니라 메모리 접근 순서가 정한다. 캐시 라인 64바이트가 기준이다</span></a><a href="08-06.html"><strong>동기화</strong><span>count++는 세 단계라 중간에 끊긴다. lock·Interlocked·CAS 중 상황에 맞는 것을 고른다</span></a><a href="08-07.html"><strong>비동기</strong><span>async는 스레드를 만들지 않는다. 기다리는 동안 스레드를 놓아주는 장치다</span></a><a href="08-08.html"><strong>Unity와 멀티스레딩</strong><span>순수 계산은 워커나 Job으로 넘기고, 엔진을 만지는 호출은 메인 스레드에 남긴다</span></a></div>
 </main>
 </body>
 </html>

@@ -16,7 +16,8 @@
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--text);
-    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+    font: 450 17px/1.85 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  strong { font-weight: 800; }
   main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
   a { color: var(--blue-d); }
   .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
@@ -25,8 +26,12 @@
     padding: 4px 12px; font-size: .8rem; font-weight: 800; }
   h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
   h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
-  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
-  p, ul, ol { margin: 10px 0; }
+  h3 { font-size: 1.1rem; font-weight: 800; margin: 34px 0 10px; padding-top: 4px; border-top: 2px solid var(--line); }
+  article h3:first-of-type { margin-top: 26px; }
+  p, ul, ol { margin: 0 0 20px; }
+  h3 + p, h3 + ul { margin-top: 0; }
+  svg { display: block; width: 100%; max-width: 640px; height: auto; margin: 18px auto 22px; color: var(--muted); }
+  svg text { font: 600 13px -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; }
   li { margin: 5px 0; }
   .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
   .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
@@ -58,14 +63,47 @@
 <div class="nav"><a href="../index.html#library">← 도서관</a><a href="10.html" class="badge">C++ 기초 목차</a></div>
 <article class="card">
 <h1>현대 C++</h1>
-<p class="lead">값 복사가 기본이라 이동이 필요하고, 코드를 컴파일 타임에 찍어내는 것이 템플릿이다</p>
-<h3>핵심 개념</h3><p>C++11 이후 기능은 대부분 <strong>C++에서는 값 복사가 기본</strong>이라는 사실에서 출발한다. C#은 참조 형식이 기본이라 대입이 참조 하나를 복사하는 것이고 실제 데이터는 GC가 관리한다. C++에서 <code>std::vector&lt;Texture&gt;</code>를 값으로 넘기면 원소 전부가 복사된다. 곧 사라질 임시 객체까지 그렇게 복사하는 것이 아까워 나온 것이 이동 의미론이다.</p><p>구분의 기준은 <strong>값 범주</strong>다. 이름이 있어 주소를 얻을 수 있는 식이 l-value, 리터럴이나 함수가 값으로 돌려준 임시값처럼 이름 없이 곧 사라지는 식이 r-value다. 이동 생성자와 이동 대입 연산자는 <code>T&amp;&amp;</code>(r-value 참조)를 받아 원본이 들고 있던 버퍼 포인터를 그대로 가져오고 원본은 비워 둔다. 복사가 아니라 <strong>소유권 이전</strong>이라 원소가 몇 개든 비용이 같다.</p><p><code>std::move</code>는 이름과 달리 아무것도 옮기지 않는다. 대상을 r-value 참조로 <strong>캐스팅할 뿐</strong>이고 실제 이동은 그 결과로 선택된 이동 생성자가 한다. 함정은 이름이 붙은 <code>T&amp;&amp;</code> 변수 자체는 l-value라는 점이라, 다시 이동으로 넘기려면 <code>std::move</code>를 한 번 더 써야 한다. 이동된 원본은 <strong>유효하지만 값이 정해지지 않은 상태</strong>로 남고 소멸자는 그대로 불린다.</p><pre><code>std::vector&lt;int&gt; MakeData();
-
-std::vector&lt;int&gt; a = MakeData();      // 임시값이라 이동(또는 복사 생략)
+<p class="lead">값 복사가 기본이라 이동이 필요하다. 템플릿은 타입마다 코드를 찍어낸다</p>
+<p>C#에서 대입은 참조 하나를 복사하는 일이다. C++에서 벡터를 값으로 넘기면 원소 전부가 복사된다. C++11 이후 기능 대부분이 이 차이에서 나왔다.</p>
+<h3>C#은 참조를 대입하고 C++은 내용을 복사한다</h3>
+<p>곧 사라질 임시 객체까지 통째로 복사하는 것은 낭비다. 그래서 나온 것이 이동 의미론이다. 복사 대신 원본이 들고 있던 버퍼를 넘겨받는다.</p>
+<p>구분 기준은 값 범주다. 이름이 있어 주소를 얻을 수 있는 식이 l-value다. 리터럴이나 함수가 돌려준 임시값처럼 곧 사라지는 식이 r-value다.</p>
+<p>이동 생성자는 r-value 참조를 받아 버퍼 포인터만 가져오고 원본을 비운다. 복사가 아니라 <strong>소유권 이전</strong>이다. 그래서 원소가 몇 개든 비용이 같다.</p>
+<h3>std::move는 옮기지 않는다, 캐스트일 뿐이다</h3>
+<p>std::move는 대상을 r-value 참조로 바꾸는 캐스트다. 실제 이동은 그 결과로 선택된 이동 생성자가 한다. 이동 생성자가 없는 타입에 쓰면 조용히 복사된다.</p>
+<p>같은 줄에서 복사와 이동을 비교한 예다:</p>
+<pre><code>std::vector&lt;int&gt; a = MakeData();      // 임시값이라 이동 또는 복사 생략
 std::vector&lt;int&gt; b = a;               // 복사: 원소를 전부 옮겨 담는다
 std::vector&lt;int&gt; c = std::move(a);    // 이동: 버퍼 포인터만 가져온다
-// a는 여전히 유효하지만 내용은 보장되지 않는다. a.clear()로 되돌려 쓴다
-</code></pre><p>템플릿은 C#의 제네릭과 겉모습이 비슷하지만 만들어지는 시점이 다르다. 제네릭은 하나의 IL로 컴파일돼 런타임이 타입을 다루고, 템플릿은 <strong>쓰인 타입마다 컴파일러가 코드를 따로 찍어낸다</strong>(인스턴스화). 그래서 타입 안전하고 실행 중 형변환 비용이 없는 대신, 실행 파일이 커지고 컴파일이 느려지며 오류 메시지가 길고 읽기 어렵다. 인스턴스화 시점에 정의가 보여야 해서 보통 정의까지 헤더에 둔다.</p><p><code>inline</code>도 이름이 오해를 부른다. 원래 의도는 호출을 없애고 본문을 부르는 자리에 펼치라는 <strong>권고</strong>였지만 실제 인라인 여부는 컴파일러가 정하고 <code>inline</code> 없이도 한다. 표준에서 이 키워드의 뜻은 여러 번역 단위에 정의가 있어도 된다는 쪽에 가까워, 헤더에 함수 정의를 두고 여러 파일에서 포함해도 중복 정의 오류가 나지 않게 하는 역할이 더 크다. 인라인 자체는 짧은 함수에서 호출 비용을 없애 이득이지만, 본문이 크고 호출 지점이 많으면 코드가 불어나 명령어 캐시 적중률이 떨어져 오히려 느려질 수 있다.</p><p><strong>const 정확성</strong>은 C#에 대응이 거의 없다. 멤버 함수 뒤의 <code>const</code>는 멤버를 바꾸지 않겠다는 약속이라 <code>const</code> 객체나 <code>const&amp;</code>로 받은 객체에서도 부를 수 있고, 바꾸지 않는 코드가 문서처럼 드러나며 실수는 컴파일러가 잡는다. 캐시 값처럼 예외가 필요하면 <code>mutable</code>로 선언한다. <code>static</code>은 붙는 자리마다 뜻이 다르다. 전역 함수·변수에 붙으면 그 파일에서만 보이는 내부 연결이고(요즘은 익명 네임스페이스를 더 쓴다), 클래스 멤버면 클래스에 하나만 있고 <code>this</code>가 없으며, 함수 안 지역 변수면 처음 호출될 때 한 번 초기화돼 프로그램이 끝날 때까지 값을 유지한다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>이동 의미론은 무엇을 해결하나</strong> — C++은 값 복사가 기본이라 곧 사라질 임시 객체까지 내용을 통째로 복사하게 된다. 이동 생성자는 r-value 참조를 받아 원본의 버퍼 포인터만 가져오고 원본을 비워 두므로 원소 수와 무관하게 끝난다.</li><li><strong>std::move는 무엇을 하나</strong> — 옮기는 함수가 아니라 대상을 r-value 참조로 바꾸는 캐스트다. 그 덕에 이동 생성자가 선택될 뿐이고, 이동된 원본은 유효하지만 값이 정해지지 않은 상태로 남는다.</li><li><strong>템플릿의 장단점은</strong> — 타입마다 코드를 찍어내므로 타입 안전하고 실행 중 비용이 없지만 실행 파일이 커지고 컴파일이 느려진다. C# 제네릭과 달리 컴파일 타임에 결정되고 정의를 헤더에 둬야 한다는 점을 같이 말하면 차이가 분명해진다.</li><li><strong>const를 왜 붙이나</strong> — 바꾸지 않는다는 약속을 타입에 적어 두면 함수의 의도가 드러나고 실수는 컴파일러가 잡는다. const 객체에는 const 멤버 함수만 부를 수 있어, 처음부터 붙이지 않으면 나중에 한꺼번에 고치기 어렵다.</li></ul><h3>흔한 오해</h3><ul><li><strong>std::move가 실제로 데이터를 옮긴다</strong> — 캐스트일 뿐이다. 이동 생성자가 없는 타입에 쓰면 조용히 복사된다.</li><li><strong>이동된 객체는 못 쓰고 소멸자도 불리지 않는다</strong> — 유효하지만 값이 정해지지 않은 상태이고 소멸자는 그대로 불린다. 다시 쓰려면 대입이나 clear()로 상태를 정해 준다.</li><li><strong>이름 붙은 T&amp;&amp; 변수는 r-value다</strong> — 이름이 붙는 순간 l-value다. 계속 이동으로 넘기려면 std::move를 다시 써야 한다.</li><li><strong>inline을 붙이면 반드시 인라인되고 빨라진다</strong> — 강제가 아니라 권고이고, 본문이 크면 코드가 불어나 오히려 느려질 수 있다.</li><li><strong>템플릿은 런타임에 타입을 다루느라 느리다</strong> — C# 제네릭과 섞은 오해다. 컴파일 타임에 결정되어 실행 중 비용이 없고, 대신 빌드 시간과 코드 크기를 낸다.</li></ul>
+// a는 유효하지만 내용은 보장되지 않는다. a.clear()로 상태를 정해 준다</code></pre>
+<p>함정이 하나 있다. 이름이 붙은 r-value 참조 변수 자체는 l-value다. 다시 이동으로 넘기려면 std::move를 한 번 더 써야 한다.</p>
+<h3>템플릿은 제네릭과 달리 컴파일 타임에 찍어낸다</h3>
+<p>C# 제네릭은 하나의 IL로 컴파일되고 런타임이 타입을 다룬다. 템플릿은 쓰인 타입마다 컴파일러가 코드를 따로 찍어낸다. 이것을 인스턴스화라고 한다.</p>
+<p>그래서 타입 안전하고 실행 중 형변환 비용이 없다. 대신 실행 파일이 커지고 컴파일이 느려지며 오류 메시지가 길다. 인스턴스화 시점에 정의가 보여야 해서 정의까지 헤더에 둔다.</p>
+<h3>inline과 const, static은 이름과 실제가 다르다</h3>
+<p>inline은 강제가 아니라 권고다. 실제 인라인 여부는 컴파일러가 정하고 inline 없이도 한다. 표준에서 이 키워드의 뜻은 여러 파일에 정의가 있어도 된다는 쪽에 가깝다.</p>
+<p>const 정확성은 C#에 대응이 거의 없다. 멤버 함수 뒤의 const는 멤버를 바꾸지 않겠다는 약속이다. 덕분에 const 객체에서도 부를 수 있고 실수는 컴파일러가 잡는다.</p>
+<p>static은 붙는 자리마다 뜻이 다르다. 전역에 붙으면 그 파일에서만 보이고, 클래스 멤버면 클래스에 하나만 있다. 함수 안 지역 변수면 처음 호출될 때 한 번 초기화돼 끝까지 값을 유지한다.</p>
+<h3>면접에서 이렇게 답한다</h3>
+<ul>
+<li><strong>이동 의미론은 무엇을 해결하나</strong> — C++은 값 복사가 기본이라 곧 사라질 임시 객체까지 내용을 통째로 복사한다. 이동 생성자는 버퍼 포인터만 가져오므로 원소 수와 무관하게 끝난다.</li>
+<li><strong>std::move는 무엇을 하나</strong> — 옮기는 함수가 아니라 r-value 참조로 바꾸는 캐스트다. 그 덕에 이동 생성자가 선택되고, 원본은 유효하지만 값이 정해지지 않은 상태로 남는다.</li>
+<li><strong>템플릿의 장단점은</strong> — 타입마다 코드를 찍어내므로 타입 안전하고 실행 중 비용이 없다. 대신 실행 파일이 커지고 컴파일이 느려지며 정의를 헤더에 둬야 한다.</li>
+<li><strong>const를 왜 붙이나</strong> — 바꾸지 않는다는 약속을 타입에 적으면 의도가 드러나고 실수는 컴파일러가 잡는다. const 객체에는 const 멤버 함수만 부를 수 있다.</li>
+</ul>
+<h3>이런 오해를 한다</h3>
+<ul>
+<li><strong>std::move가 실제로 데이터를 옮긴다</strong> — 캐스트일 뿐이다. 이동 생성자가 없는 타입에 쓰면 조용히 복사된다.</li>
+<li><strong>이동된 객체는 못 쓰고 소멸자도 안 불린다</strong> — 유효하지만 값이 정해지지 않은 상태다. 소멸자는 그대로 불린다.</li>
+<li><strong>이름 붙은 r-value 참조 변수는 r-value다</strong> — 이름이 붙는 순간 l-value다. 계속 이동으로 넘기려면 std::move를 다시 쓴다.</li>
+<li><strong>템플릿은 런타임에 타입을 다뤄 느리다</strong> — C# 제네릭과 섞은 오해다. 컴파일 타임에 결정되고 대신 빌드 시간과 코드 크기를 낸다.</li>
+</ul>
+<h3>3줄 정리</h3>
+<ul>
+<li>C++은 값 복사가 기본이라 이동이 필요하다</li>
+<li>std::move는 캐스트고 이동은 생성자가 한다</li>
+<li>템플릿은 타입마다 코드를 찍어낸다</li>
+</ul>
 <div class="refs"><h2>참고 자료</h2><ul><li><a href="https://en.cppreference.com/w/cpp/language/value_category.html" target="_blank" rel="noopener">cppreference – Value categories</a></li><li><a href="https://en.cppreference.com/w/cpp/utility/move.html" target="_blank" rel="noopener">cppreference – std::move</a></li><li><a href="https://en.cppreference.com/w/cpp/language/inline.html" target="_blank" rel="noopener">cppreference – inline specifier</a></li><li><a href="https://en.cppreference.com/w/cpp/language/storage_duration.html" target="_blank" rel="noopener">cppreference – Storage class specifiers(static)</a></li></ul></div>
 </article>
 <div class="pager"><a href="10-02.html">← 메모리와 포인터</a><a href="10-04.html">STL →</a></div>

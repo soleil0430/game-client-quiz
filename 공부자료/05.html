@@ -16,7 +16,8 @@
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--text);
-    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+    font: 450 17px/1.85 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  strong { font-weight: 800; }
   main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
   a { color: var(--blue-d); }
   .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
@@ -25,8 +26,12 @@
     padding: 4px 12px; font-size: .8rem; font-weight: 800; }
   h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
   h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
-  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
-  p, ul, ol { margin: 10px 0; }
+  h3 { font-size: 1.1rem; font-weight: 800; margin: 34px 0 10px; padding-top: 4px; border-top: 2px solid var(--line); }
+  article h3:first-of-type { margin-top: 26px; }
+  p, ul, ol { margin: 0 0 20px; }
+  h3 + p, h3 + ul { margin-top: 0; }
+  svg { display: block; width: 100%; max-width: 640px; height: auto; margin: 18px auto 22px; color: var(--muted); }
+  svg text { font: 600 13px -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; }
   li { margin: 5px 0; }
   .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
   .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
@@ -58,7 +63,7 @@
 <div class="nav"><a href="../index.html#library">← 도서관</a><span class="badge">게임 수학·물리</span></div>
 <h1>게임 수학·물리 공부 자료</h1>
 <p class="lead">글 7편. 근거가 된 질문 목록은 질문은행 05-게임수학-물리.md에 있다.</p>
-<div class="list"><a href="05-01.html"><strong>벡터</strong><span>내적으로 각도와 앞뒤를, 외적으로 좌우와 법선을 얻는다. 거리는 제곱끼리 비교한다</span></a><a href="05-02.html"><strong>행렬과 좌표계</strong><span>여러 변환을 곱해 하나로 합치는 도구다. 곱하는 순서와 규약이 결과를 바꾼다</span></a><a href="05-03.html"><strong>회전</strong><span>오일러 각은 읽기 쉽지만 짐벌 락이 있고, 쿼터니언은 축과 반각으로 회전을 담는다</span></a><a href="05-04.html"><strong>보간</strong><span>Lerp는 비율을 줄 뿐이다. 등속·감쇠·이징 중 무엇이 필요한지 정하고 고른다</span></a><a href="05-05.html"><strong>충돌과 교차 판정</strong><span>싼 검사로 후보를 추리고 정밀 검사는 최소로. 제곱근과 나눗셈을 피해 식을 세운다</span></a><a href="05-06.html"><strong>물리 시뮬레이션</strong><span>고정 간격과 세미 임플리싯 오일러가 왜 표준인지, 지터와 터널링은 어디서 오는지 안다</span></a><a href="05-07.html"><strong>기초 수학</strong><span>삼각함수와 근의 공식을 게임 판정에 쓰고, float 오차가 만드는 증상까지 안다</span></a></div>
+<div class="list"><a href="05-01.html"><strong>벡터</strong><span>각도와 앞뒤는 내적, 좌우와 법선은 외적으로 얻는다. 거리는 제곱끼리 비교한다</span></a><a href="05-02.html"><strong>행렬과 좌표계</strong><span>여러 변환을 곱해 하나로 합치는 표다. 곱하는 순서와 규약이 결과를 바꾼다</span></a><a href="05-03.html"><strong>회전</strong><span>오일러 각은 축이 겹쳐 자유도를 잃는다. 쿼터니언은 축과 반각을 네 숫자에 담는다</span></a><a href="05-04.html"><strong>보간</strong><span>Lerp는 비율만 준다. 등속·감쇠·가감속 중 무엇이 필요한지 정하고 고른다</span></a><a href="05-05.html"><strong>충돌과 교차 판정</strong><span>싼 검사로 후보를 추리고 정밀 검사는 최소로. 제곱근과 나눗셈을 피해 식을 세운다</span></a><a href="05-06.html"><strong>물리 시뮬레이션</strong><span>적분 두 줄의 순서가 발산을 가르고, 고정 간격이 결과를 재현 가능하게 만든다</span></a><a href="05-07.html"><strong>기초 수학</strong><span>삼각함수와 근의 공식이 판정을 만들고, float 간격이 증상의 원인을 만든다</span></a></div>
 </main>
 </body>
 </html>

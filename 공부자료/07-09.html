@@ -16,7 +16,8 @@
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--text);
-    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+    font: 450 17px/1.85 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  strong { font-weight: 800; }
   main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
   a { color: var(--blue-d); }
   .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
@@ -25,8 +26,12 @@
     padding: 4px 12px; font-size: .8rem; font-weight: 800; }
   h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
   h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
-  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
-  p, ul, ol { margin: 10px 0; }
+  h3 { font-size: 1.1rem; font-weight: 800; margin: 34px 0 10px; padding-top: 4px; border-top: 2px solid var(--line); }
+  article h3:first-of-type { margin-top: 26px; }
+  p, ul, ol { margin: 0 0 20px; }
+  h3 + p, h3 + ul { margin-top: 0; }
+  svg { display: block; width: 100%; max-width: 640px; height: auto; margin: 18px auto 22px; color: var(--muted); }
+  svg text { font: 600 13px -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; }
   li { margin: 5px 0; }
   .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
   .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
@@ -58,28 +63,42 @@
 <div class="nav"><a href="../index.html#library">← 도서관</a><a href="07.html" class="badge">자료구조·알고리즘 목차</a></div>
 <article class="card">
 <h1>풀이 기법</h1>
-<p class="lead">재귀·DP·그리디·비트 연산은 각각 언제 성립하는지가 핵심이다. 조건과 반례로 외운다</p>
-<h3>핵심 개념</h3><p>풀이 기법 질문은 "무엇인가"보다 <strong>언제 성립하는가</strong>를 본다.</p><p><strong>재귀</strong>는 호출할 때마다 매개변수·지역 변수·복귀 주소가 스택 프레임으로 쌓인다. 깊이가 곧 메모리라 깊어지면 스택 오버플로가 난다. 재귀 호출이 함수의 마지막 동작이면(꼬리 호출) 돌아와서 할 일이 없으니 프레임을 재사용할 수 있는데, <code>return n * Fact(n - 1);</code>처럼 결과에 무언가를 더 하면 꼬리 호출이 아니다. C#과 .NET JIT은 이 최적화를 <strong>보장하지 않으므로</strong> 깊은 재귀는 반복문이나 <code>Stack&lt;T&gt;</code>로 바꾸는 편이 안전하다.</p><p><strong>동적 계획법</strong>은 두 조건이 모두 맞을 때만 쓴다. 같은 부분 문제가 여러 번 나오고(겹치는 부분 문제), 부분 문제의 최적해로 전체 최적해를 만들 수 있어야(최적 부분 구조) 한다. 메모이제이션은 시간을 공간과 맞바꾸는 것이다. 부분 문제가 겹치지 않으면 저장할 이유가 없고 그냥 <strong>분할 정복</strong>(나누고, 풀고, 합친다)이다.</p><p><strong>그리디</strong>는 지금의 최선이 전체 최선으로 이어질 때만 옳다. 동전이 1원·3원·4원뿐일 때 6원을 큰 것부터 집으면 4+1+1로 세 개지만 3+3이면 두 개다. 큰 단위가 작은 단위의 배수로 떨어지면 그리디가 최적해와 일치한다.</p><p><strong>비트 연산</strong>은 켜기 <code>x | (1 &lt;&lt; n)</code>, 끄기 <code>x &amp; ~(1 &lt;&lt; n)</code>, 뒤집기 <code>x ^ (1 &lt;&lt; n)</code>, 확인 <code>(x &gt;&gt; n) &amp; 1</code>이 한 묶음이다. 시프트가 2의 거듭제곱 곱셈을 대신하므로 8을 곱하려면 <code>x &lt;&lt; 3</code>이다. 단 int의 시프트 횟수는 하위 5비트만 쓰여 <code>x &lt;&lt; 32</code>는 제자리이고, 음수의 <code>&gt;&gt;</code>는 부호 비트를 채운다.</p><pre><code>using UnityEngine;
-
-public static class MaskExample
-{
-    // 비트 켜기·끄기·확인. Unity의 LayerMask가 이 규칙을 그대로 쓴다
-    public static int Build()
-    {
-        int enemy = LayerMask.NameToLayer("Enemy");
-        int water = LayerMask.NameToLayer("Water");
-
-        int mask = 0;
-        mask |= 1 &lt;&lt; enemy;                      // 켜기
-        mask |= 1 &lt;&lt; water;
-        mask &amp;= ~(1 &lt;&lt; water);                   // 끄기
-        mask ^= 1 &lt;&lt; water;                      // 뒤집기
-
-        bool hasEnemy = ((mask &gt;&gt; enemy) &amp; 1) == 1;   // 확인
-        Debug.Log(hasEnemy);
-        return mask;
-    }
-}</code></pre><p><strong>LRU 캐시</strong>는 조회와 갱신을 모두 O(1)로 만드는 게 핵심이다. 해시 맵만 쓰면 버릴 항목을 찾는 데, 리스트만 쓰면 키로 노드를 찾는 데 O(N)이 남는다. 둘을 겹쳐야 양쪽이 O(1)이 된다. C#이면 <code>Dictionary&lt;TKey, LinkedListNode&lt;TKey&gt;&gt;</code>로 노드를 찾고, <code>LinkedList&lt;TKey&gt;</code>로 최근 사용 순서를 유지해 앞으로 옮기거나 꼬리를 버리는 일을 링크 교체로 끝낸다. 텍스처·에셋 캐시가 이 구조다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>재귀는 콜 스택에서 어떻게 도나</strong> — 호출마다 매개변수·지역 변수·복귀 주소가 프레임으로 쌓이고 반환하며 걷힌다. 깊이가 곧 메모리라 한계를 넘으면 스택 오버플로다. 꼬리 호출은 프레임 재사용이 가능하지만 C#은 보장하지 않는다.</li><li><strong>동적 계획법의 적용 조건</strong> — 겹치는 부분 문제와 최적 부분 구조 두 가지다. 같은 계산이 반복되지 않으면 저장할 이유가 없고, 부분 최적해로 전체 최적해가 안 만들어지면 표를 채워도 답이 아니다.</li><li><strong>그리디와 DP를 어떻게 가르나</strong> — 반례를 찾아본다. 1·3·4원으로 6원을 만들 때 그리디는 세 개, 최적은 두 개라 깨진다. 반례가 없다고 볼 근거가 서면 그리디, 아니면 DP다.</li><li><strong>LRU 캐시 구현</strong> — 해시 맵과 이중 연결 리스트를 함께 쓴다. 맵으로 키에서 노드를 O(1)에 찾고, 리스트로 최근 사용 순서를 유지해 링크 교체만으로 앞으로 옮기거나 꼬리를 버린다.</li></ul><h3>흔한 오해</h3><ul><li><strong>C#도 꼬리 재귀를 최적화해 준다</strong> — IL에 꼬리 호출 명령은 있지만 JIT이 적용한다는 보장은 없다.</li><li><strong>호출 결과를 곱해 반환해도 꼬리 호출이다</strong> — 돌아와서 할 일이 남아 프레임을 재사용할 수 없다.</li><li><strong>메모이제이션은 공짜다</strong> — 시간을 줄이는 대신 표만큼 공간을 쓴다. 상태가 많으면 메모리가 먼저 터진다.</li><li><strong>Dictionary만으로 LRU를 O(1)에 만들 수 있다</strong> — 버릴 항목을 찾는 순서 정보가 없어 O(N)이 남는다.</li></ul>
+<p class="lead">재귀·DP·그리디·비트 연산은 언제 성립하는지가 핵심이다. 조건과 반례로 외운다</p>
+<p>면접에서 "DP로 풀면 됩니다"라고 답하면 다음 질문이 온다. "왜 DP가 되나요?" 기법은 이름이 아니라 <strong>성립 조건</strong>을 알아야 쓸 수 있다. </p>
+<h3>재귀는 깊이가 곧 메모리다</h3>
+<p>재귀는 호출할 때마다 매개변수·지역 변수·복귀 주소가 스택 프레임으로 쌓인다. 깊이가 그대로 메모리다. 깊어지면 스택 오버플로가 난다. </p>
+<p>재귀 호출이 함수의 마지막 동작이면 꼬리 호출이라 부른다. 돌아와서 할 일이 없으니 프레임을 재사용할 수 있다. <code>return n * Fact(n - 1);</code>처럼 결과에 무언가를 더 하면 꼬리 호출이 아니다. </p>
+<p>C#과 .NET JIT은 이 최적화를 <strong>보장하지 않는다</strong>. 그래서 깊은 재귀는 반복문이나 <code>Stack&lt;T&gt;</code>로 바꾸는 편이 안전하다. </p>
+<h3>DP는 조건 두 개, 그리디는 반례 하나</h3>
+<p>동적 계획법은 두 조건이 모두 맞을 때만 쓴다. 같은 부분 문제가 여러 번 나와야 하고, 부분 문제의 최적해로 전체 최적해를 만들 수 있어야 한다. </p>
+<p>메모이제이션은 시간을 공간과 맞바꾸는 것이다. 부분 문제가 겹치지 않으면 저장할 이유가 없다. 그때는 그냥 분할 정복이다. </p>
+<p>그리디는 지금의 최선이 전체 최선으로 이어질 때만 옳다. 동전이 1원·3원·4원뿐일 때 6원을 큰 것부터 집으면 4+1+1로 세 개다. 3+3이면 두 개다. </p>
+<p>그래서 그리디는 반례를 찾아보는 것으로 검증한다. 큰 단위가 작은 단위의 배수로 떨어지면 그리디가 최적해와 일치한다. </p>
+<h3>비트 연산 네 가지로 마스크를 다룬다</h3>
+<p>켜기·끄기·뒤집기·확인이 한 묶음이다. Unity의 LayerMask가 이 규칙을 그대로 쓴다: </p>
+<pre><code>int mask = 0;
+mask |= 1 &lt;&lt; enemy;                      // 켜기
+mask |= 1 &lt;&lt; water;
+mask &amp;= ~(1 &lt;&lt; water);                   // 끄기
+mask ^= 1 &lt;&lt; water;                      // 뒤집기
+bool hasEnemy = ((mask &gt;&gt; enemy) &amp; 1) == 1;   // 확인</code></pre>
+<p>시프트가 2의 거듭제곱 곱셈을 대신한다. 8을 곱하려면 <code>x &lt;&lt; 3</code>이다. 단 int의 시프트 횟수는 하위 5비트만 쓰여 <code>x &lt;&lt; 32</code>는 제자리이고, 음수의 <code>&gt;&gt;</code>는 부호 비트를 채운다. </p>
+<h3>LRU 캐시는 두 구조를 겹쳐야 O(1)이다</h3>
+<p>LRU 캐시의 핵심은 조회와 갱신을 모두 O(1)로 만드는 것이다. 해시 맵만 쓰면 버릴 항목을 찾는 데 O(N)이 남는다. 리스트만 쓰면 키로 노드를 찾는 데 O(N)이 남는다. </p><svg viewBox="0 0 640 208" width="100%" role="img" aria-label="해시 맵이 키에서 이중 연결 리스트의 노드를 바로 가리키고, 리스트는 가장 최근 사용부터 가장 오래된 것까지 순서를 유지하는 LRU 캐시 구조 그림"><text x="60" y="20" font-size="13" fill="currentColor">Dictionary는 키에서 노드를 바로 찾는다</text><text x="8" y="56" font-size="13" fill="currentColor">해시 맵</text><text x="8" y="132" font-size="13" fill="currentColor">리스트</text><rect x="60" y="36" width="100" height="28" fill="none" stroke="currentColor"/><text x="110" y="55" font-size="13" text-anchor="middle" fill="currentColor">키 A</text><line x1="110" y1="64" x2="110" y2="100" stroke="currentColor" fill="none"/><path d="M110,106 L105,98 L115,98 Z" fill="currentColor" stroke="none"/><rect x="60" y="110" width="100" height="34" fill="none" stroke="currentColor"/><text x="110" y="132" font-size="13" text-anchor="middle" fill="currentColor">A</text><rect x="200" y="36" width="100" height="28" fill="none" stroke="currentColor"/><text x="250" y="55" font-size="13" text-anchor="middle" fill="currentColor">키 B</text><line x1="250" y1="64" x2="250" y2="100" stroke="currentColor" fill="none"/><path d="M250,106 L245,98 L255,98 Z" fill="currentColor" stroke="none"/><rect x="200" y="110" width="100" height="34" fill="none" stroke="currentColor"/><text x="250" y="132" font-size="13" text-anchor="middle" fill="currentColor">B</text><rect x="340" y="36" width="100" height="28" fill="none" stroke="currentColor"/><text x="390" y="55" font-size="13" text-anchor="middle" fill="currentColor">키 C</text><line x1="390" y1="64" x2="390" y2="100" stroke="currentColor" fill="none"/><path d="M390,106 L385,98 L395,98 Z" fill="currentColor" stroke="none"/><rect x="340" y="110" width="100" height="34" fill="none" stroke="currentColor"/><text x="390" y="132" font-size="13" text-anchor="middle" fill="currentColor">C</text><rect x="480" y="36" width="100" height="28" fill="none" stroke="currentColor"/><text x="530" y="55" font-size="13" text-anchor="middle" fill="currentColor">키 D</text><line x1="530" y1="64" x2="530" y2="100" stroke="currentColor" fill="none"/><path d="M530,106 L525,98 L535,98 Z" fill="currentColor" stroke="none"/><rect x="480" y="110" width="100" height="34" fill="none" stroke="currentColor"/><text x="530" y="132" font-size="13" text-anchor="middle" fill="currentColor">D</text><line x1="166" y1="127" x2="194" y2="127" stroke="currentColor" fill="none"/><path d="M200,127 L192,122 L192,132 Z" fill="currentColor" stroke="none"/><path d="M160,127 L168,122 L168,132 Z" fill="currentColor" stroke="none"/><line x1="306" y1="127" x2="334" y2="127" stroke="currentColor" fill="none"/><path d="M340,127 L332,122 L332,132 Z" fill="currentColor" stroke="none"/><path d="M300,127 L308,122 L308,132 Z" fill="currentColor" stroke="none"/><line x1="446" y1="127" x2="474" y2="127" stroke="currentColor" fill="none"/><path d="M480,127 L472,122 L472,132 Z" fill="currentColor" stroke="none"/><path d="M440,127 L448,122 L448,132 Z" fill="currentColor" stroke="none"/><text x="60" y="166" font-size="13" fill="currentColor">가장 최근 사용</text><text x="480" y="166" font-size="13" fill="currentColor">가장 오래됨</text><text x="8" y="196" font-size="13" fill="currentColor">맵만 쓰면 버릴 항목을 못 찾고, 리스트만 쓰면 키를 못 찾는다</text></svg>
+<p>C#이면 <code>Dictionary&lt;TKey, LinkedListNode&lt;TKey&gt;&gt;</code>로 노드를 찾는다. <code>LinkedList&lt;TKey&gt;</code>로 최근 사용 순서를 유지한다. 앞으로 옮기거나 꼬리를 버리는 일이 링크 교체로 끝난다. 텍스처·에셋 캐시가 이 구조다. </p>
+<h3>면접에서 이렇게 답한다</h3><ul>
+<li><strong>재귀는 콜 스택에서 어떻게 도나</strong> — 호출마다 매개변수·지역 변수·복귀 주소가 프레임으로 쌓이고 반환하며 걷힌다. 깊이가 곧 메모리라 한계를 넘으면 스택 오버플로다. 꼬리 호출은 프레임 재사용이 가능하지만 C#은 보장하지 않는다. </li>
+<li><strong>그리디와 DP를 어떻게 가르나</strong> — 반례를 찾아본다. 1·3·4원으로 6원을 만들 때 그리디는 세 개, 최적은 두 개라 깨진다. 반례가 없다고 볼 근거가 서면 그리디, 아니면 DP다. </li>
+<li><strong>LRU 캐시 구현</strong> — 해시 맵과 이중 연결 리스트를 함께 쓴다. 맵으로 키에서 노드를 O(1)에 찾고, 리스트로 최근 사용 순서를 유지해 링크 교체만으로 앞으로 옮기거나 꼬리를 버린다. </li></ul>
+<h3>이런 오해를 한다</h3><ul>
+<li><strong>C#도 꼬리 재귀를 최적화해 준다</strong> — IL에 꼬리 호출 명령은 있지만 JIT이 적용한다는 보장은 없다. </li>
+<li><strong>호출 결과를 곱해 반환해도 꼬리 호출이다</strong> — 돌아와서 할 일이 남아 프레임을 재사용할 수 없다. </li>
+<li><strong>메모이제이션은 공짜다</strong> — 시간을 줄이는 대신 표만큼 공간을 쓴다. 상태가 많으면 메모리가 먼저 터진다. </li>
+<li><strong>Dictionary만으로 LRU를 O(1)에 만들 수 있다</strong> — 버릴 항목을 찾는 순서 정보가 없어 O(N)이 남는다. </li></ul>
+<h3>3줄 정리</h3><ul>
+<li>재귀는 깊이가 메모리다. C#은 꼬리 호출을 안 보장한다 </li>
+<li>DP는 조건 두 개, 그리디는 반례로 검증한다 </li>
+<li>LRU는 맵과 이중 연결 리스트를 겹쳐야 O(1)이다 </li></ul>
 <div class="refs"><h2>참고 자료</h2><ul><li><a href="https://learn.microsoft.com/ko-kr/dotnet/csharp/language-reference/operators/bitwise-and-shift-operators" target="_blank" rel="noopener">Microsoft Learn – 비트 및 시프트 연산자(C# 참조)</a></li><li><a href="https://learn.microsoft.com/ko-kr/dotnet/api/system.collections.generic.linkedlist-1" target="_blank" rel="noopener">Microsoft Learn – LinkedList 클래스(이중 연결 리스트)</a></li><li><a href="https://learn.microsoft.com/ko-kr/dotnet/api/system.collections.generic.dictionary-2" target="_blank" rel="noopener">Microsoft Learn – Dictionary 클래스(해시 테이블)</a></li></ul></div>
 </article>
 <div class="pager"><a href="07-08.html">← 공간 분할</a><a href="07-10.html">코딩 테스트와 실기 유형 →</a></div>

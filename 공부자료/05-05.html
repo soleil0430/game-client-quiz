@@ -16,7 +16,8 @@
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--text);
-    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+    font: 450 17px/1.85 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  strong { font-weight: 800; }
   main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
   a { color: var(--blue-d); }
   .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
@@ -25,8 +26,12 @@
     padding: 4px 12px; font-size: .8rem; font-weight: 800; }
   h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
   h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
-  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
-  p, ul, ol { margin: 10px 0; }
+  h3 { font-size: 1.1rem; font-weight: 800; margin: 34px 0 10px; padding-top: 4px; border-top: 2px solid var(--line); }
+  article h3:first-of-type { margin-top: 26px; }
+  p, ul, ol { margin: 0 0 20px; }
+  h3 + p, h3 + ul { margin-top: 0; }
+  svg { display: block; width: 100%; max-width: 640px; height: auto; margin: 18px auto 22px; color: var(--muted); }
+  svg text { font: 600 13px -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; }
   li { margin: 5px 0; }
   .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
   .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
@@ -59,22 +64,85 @@
 <article class="card">
 <h1>충돌과 교차 판정</h1>
 <p class="lead">싼 검사로 후보를 추리고 정밀 검사는 최소로. 제곱근과 나눗셈을 피해 식을 세운다</p>
-<h3>핵심 개념</h3><p>충돌 판정의 목표는 "겹쳤는가"를 <strong>필요한 정밀도로, 가능한 한 적게</strong> 계산하는 것이다. n개의 모든 쌍을 보면 O(n²)이라 1,000개만 돼도 499,500쌍이다. 그래서 <strong>넓은 단계</strong>에서 AABB 겹침을 스윕 앤 프룬이나 공간 분할(그리드, BVH)로 훑어 후보 쌍만 남기고, <strong>좁은 단계</strong>에서 그 쌍만 실제 형상으로 검사해 접촉점과 파고든 깊이를 구한다.</p><p><strong>AABB</strong>는 x, y, z 모든 축에서 구간이 겹칠 때만 겹친 것이라, 한 축이라도 떨어져 있으면 즉시 끝나 매우 싸다. 분리축 정리의 가장 단순한 형태다. <strong>구와 구</strong>는 제곱근을 피해 <code>d2 &lt;= (ra + rb) * (ra + rb)</code>로 본다. <strong>캡슐과 구</strong>는 캡슐이 "선분에서 거리가 반지름 이하인 점들"이라, 구 중심을 선분에 투영한 매개변수를 0~1로 자른 뒤 그 점까지의 거리를 반지름 합과 비교한다.</p><p><strong>분리축 정리(SAT)</strong>는 볼록 도형 일반으로 가는 길이다. 둘이 떨어져 있으면 가르는 축이 반드시 존재하고, 그 축은 2차원에서는 변의 법선, 3차원에서는 면 법선과 모서리 외적 중에 있다. 후보 축마다 투영해 한 축이라도 구간이 안 겹치면 즉시 끝내고, 모두 겹칠 때만 충돌이며, 겹침의 최솟값이 밀어낼 방향과 깊이가 된다. <strong>점과 다각형</strong>은 반직선을 쏴 변과 만난 횟수가 홀수면 내부로 보면 오목까지 통한다.</p><p><strong>광선</strong> 계열은 O + tD를 도형의 식에 넣어 t를 푼다. 법선 N인 평면은 <code>t = Dot(N, Q - O) / Dot(N, D)</code>이고, 분모가 0이면 평면과 나란해 교차점이 없다. t가 음수면 광선 뒤쪽이라 걸러내고 분모의 부호로 앞뒷면을 나눈다. 구는 이차방정식이 되어 판별식이 음수면 안 만나고, 삼각형은 교차점을 무게중심 좌표로 안팎 판정한다.</p><p>마지막이 <strong>터널링</strong>이다. 일반 검사는 스텝마다의 위치만 보므로 한 스텝에 벽 두께보다 멀리 이동하면 겹치는 순간이 없어 통과한다. 이전 위치와 현재 위치 사이를 레이캐스트나 스윕으로 검사하거나 Collision Detection을 Continuous로 바꾸면 막는다. 상대 위치 dp, 상대 속도 dv인 두 물체가 <strong>가장 가까워지는 시각</strong>은 거리 제곱을 미분해 0으로 두면 <code>t = -Dot(dp, dv) / Dot(dv, dv)</code>다. 이 t를 한 프레임으로 자른 뒤 그때 거리를 반지름 합과 비교하면 스윕 판정이 된다.</p><pre><code>public class Projectile : MonoBehaviour
-{
-    public LayerMask hitMask;
-    public float radius = 0.1f;
-    Vector3 prev;
+<p>적 1,000개가 서로 겹쳤는지 모두 확인하면 499,500쌍이다. 한 프레임에 감당할 수 없다. 그래서 충돌 판정은 필요한 정밀도로 가능한 한 적게 계산하는 일이 된다.</p>
+<h3>넓은 단계로 후보를 추리고 좁은 단계로 확인한다</h3>
+<svg viewBox="0 0 640 180" width="100%" role="img" aria-label="왼쪽은 격자로 같은 칸에 든 물체만 후보로 남기는 넓은 단계, 오른쪽은 그 한 쌍만 실제 형상으로 검사해 접촉 법선과 파고든 깊이를 구하는 좁은 단계">
+<text x="16" y="22" font-size="13" fill="currentColor">넓은 단계 - 격자로 후보만 추린다</text>
+<rect x="106" y="36" width="90" height="42" fill="currentColor" fill-opacity="0.08" stroke="none"/>
+<rect x="16" y="36" width="270" height="126" fill="none" stroke="currentColor"/>
+<line x1="106" y1="36" x2="106" y2="162" stroke="currentColor"/>
+<line x1="196" y1="36" x2="196" y2="162" stroke="currentColor"/>
+<line x1="16" y1="78" x2="286" y2="78" stroke="currentColor"/>
+<line x1="16" y1="120" x2="286" y2="120" stroke="currentColor"/>
+<circle cx="56" cy="58" r="11" fill="none" stroke="currentColor"/>
+<circle cx="133" cy="58" r="12" fill="none" stroke="currentColor"/>
+<circle cx="158" cy="62" r="10" fill="none" stroke="currentColor"/>
+<circle cx="240" cy="140" r="12" fill="none" stroke="currentColor"/>
+<circle cx="60" cy="140" r="10" fill="none" stroke="currentColor"/>
+<text x="151" y="104" font-size="13" fill="currentColor" text-anchor="middle">후보 1쌍</text>
+<line x1="300" y1="99" x2="336" y2="99" stroke="currentColor"/>
+<polyline points="328,94 338,99 328,104" fill="none" stroke="currentColor"/>
+<text x="354" y="22" font-size="13" fill="currentColor">좁은 단계 - 이 쌍만 정밀 검사</text>
+<circle cx="424" cy="104" r="32" fill="none" stroke="currentColor"/>
+<rect x="440" y="74" width="96" height="60" fill="none" stroke="currentColor"/>
+<line x1="440" y1="66" x2="440" y2="158" stroke="currentColor" stroke-dasharray="4 3"/>
+<line x1="456" y1="66" x2="456" y2="158" stroke="currentColor" stroke-dasharray="4 3"/>
+<line x1="440" y1="150" x2="456" y2="150" stroke="currentColor"/>
+<text x="464" y="155" font-size="13" fill="currentColor">파고든 깊이</text>
+<line x1="424" y1="104" x2="392" y2="104" stroke="currentColor"/>
+<polyline points="400,99 390,104 400,109" fill="none" stroke="currentColor"/>
+<text x="352" y="98" font-size="13" fill="currentColor">법선</text>
+</svg>
+<p>모든 쌍을 실제 형상으로 보면 O(n²)이다. 넓은 단계에서는 AABB 겹침만 훑어 후보 쌍을 남긴다. 스윕 앤 프룬이나 격자·BVH 같은 공간 분할을 쓴다.</p>
+<p>좁은 단계는 그 후보만 실제 형상으로 검사한다. 접촉점, 법선, 파고든 깊이가 여기서 나온다.</p>
+<p>넓은 단계는 겹칠 수도 있다는 것만 알려 주는 보수적 검사다. 통과했다고 겹친 것이 아니다.</p>
+<h3>AABB·구·캡슐은 제곱근 없이 본다</h3>
+<p>AABB는 x, y, z 모든 축에서 구간이 겹칠 때만 겹친 것이다. 한 축이라도 떨어져 있으면 즉시 끝난다. 분리축 정리의 가장 단순한 형태다.</p>
+<p>구와 구는 거리의 제곱을 반지름 합의 제곱과 비교한다. 제곱근을 쓸 일이 없다.</p>
+<p>캡슐은 선분에서 거리가 반지름 이하인 점들이다. 구 중심을 선분에 투영한 매개변수를 0~1로 자른다. 그 점까지의 거리를 반지름 합과 비교하면 끝이다.</p>
+<h3>볼록 도형 일반은 분리축 정리로 푼다</h3>
+<p>둘이 떨어져 있으면 가르는 축이 반드시 있다. 그 축은 2차원에서는 변의 법선, 3차원에서는 면 법선과 모서리 외적 중에 있다.</p>
+<p>후보 축마다 투영해 본다. 한 축이라도 구간이 안 겹치면 즉시 끝이다. 모두 겹칠 때만 충돌이고, 겹침이 가장 작은 축이 밀어낼 방향과 깊이가 된다.</p>
+<p>볼록 전용이라는 점이 조건이다. 오목한 형상은 볼록 조각으로 나눠야 한다. 점과 다각형은 반직선을 쏴 교차 횟수의 홀짝으로 보면 오목까지 통한다.</p>
+<h3>광선은 식에 t를 넣고, 빠른 물체는 쓸어서 본다</h3>
+<p>광선 위의 점은 O + tD다. 이걸 도형의 식에 넣어 t를 푼다. 법선 N인 평면은 <code>t = Dot(N, Q − O) / Dot(N, D)</code>다.</p>
+<p>분모가 0이면 광선이 평면과 나란해 교차점이 없다. t가 음수면 광선 뒤쪽이라 버린다. 분모의 부호가 앞뒷면을 가른다.</p>
+<p>구는 이차방정식이 되어 판별식이 음수면 만나지 않는다. 삼각형은 교차점을 무게중심 좌표로 안팎 판정한다.</p>
+<p>터널링은 한 스텝에 벽 두께보다 멀리 이동할 때 생긴다. 겹치는 순간이 아예 없어 그냥 통과한다. 이전 위치와 현재 위치 사이를 레이캐스트나 스윕으로 검사하면 막힌다.</p>
+<p>가장 가까워지는 시각도 식으로 나온다. 상대 위치 dp, 상대 속도 dv일 때 <code>t = −Dot(dp, dv) / Dot(dv, dv)</code>다. 이 t를 한 프레임으로 자른 뒤 그때 거리를 반지름 합과 비교하면 스윕 판정이 된다.</p>
+<p>총알을 스윕으로 처리하면 이렇다:</p>
+<pre><code>Vector3 prev;   // 지난 프레임 위치
 
-    // 지난 프레임 위치와 지금 위치 사이를 쓸어 검사한다. 빨라도 뚫리지 않는다
-    void Update()
-    {
-        Vector3 delta = transform.position - prev;
-        float dist = delta.magnitude;
-        if (dist &gt; 0f &amp;&amp; Physics.SphereCast(prev, radius, delta / dist, out RaycastHit hit, dist, hitMask))
-            transform.position = hit.point;   // 스텝 도중 맞은 지점으로 되돌린다
-        prev = transform.position;
-    }
-}</code></pre><h3>면접에서 이렇게 답한다</h3><ul><li><strong>충돌 판정을 왜 두 단계로 나누나</strong> — 모든 쌍을 실제 형상으로 보면 O(n²)이라 감당이 안 된다. 넓은 단계에서 AABB와 공간 분할로 후보만 추리고, 좁은 단계에서 그 쌍만 정밀 검사한다.</li><li><strong>광선과 평면·구·삼각형의 교차는</strong> — O + tD를 도형의 식에 넣어 t를 푼다. 평면은 <code>Dot(N, Q - O) / Dot(N, D)</code>이고 분모가 0이면 나란해 만나지 않는다. 구는 판별식으로 걸러내고 삼각형은 무게중심 좌표로 판정한다.</li><li><strong>분리축 정리를 설명하라</strong> — 볼록한 둘이 떨어져 있으면 가르는 축이 반드시 있고 그 축은 면 법선과 모서리 외적 중에 있다. 한 축이라도 투영 구간이 안 겹치면 충돌이 아니고, 모두 겹치면 겹침이 가장 작은 축이 밀어낼 방향과 깊이가 된다.</li><li><strong>터널링은 어떻게 막나</strong> — 스텝 사이 경로를 레이캐스트나 스윕으로 검사하거나 Collision Detection을 Continuous로 바꾼다. 총알은 물리 바디 대신 레이캐스트로 처리하는 편이 싸다.</li></ul><h3>흔한 오해</h3><ul><li><strong>Fixed Timestep을 늘리면 터널링이 줄어든다</strong> — 반대다. 스텝이 드물어져 한 스텝 이동 거리가 커지므로 더 잘 뚫린다. 근본 해결은 스윕이나 CCD다.</li><li><strong>넓은 단계를 통과했으면 겹친 것이다</strong> — "겹칠 수도 있다"만 알려주는 보수적 검사라 좁은 단계가 필요하다.</li><li><strong>분리축 정리는 아무 도형에나 쓸 수 있다</strong> — 볼록 전용이라 오목한 형상은 볼록 조각으로 나눠야 한다.</li><li><strong>점 포함 판정은 모든 변의 같은 쪽인지 보면 된다</strong> — 볼록 다각형에서만 맞다. 오목에는 반직선 교차 횟수의 홀짝을 쓰되, 반직선이 꼭짓점을 지날 때 셀 규칙을 정해 둬야 한다.</li></ul>
+// 지난 위치와 지금 위치 사이를 쓸어 검사한다. 빨라도 뚫리지 않는다
+void Update()
+{
+    Vector3 delta = transform.position - prev;
+    float dist = delta.magnitude;
+    if (dist &gt; 0f &amp;&amp; Physics.SphereCast(prev, radius, delta / dist,
+                                        out RaycastHit hit, dist, hitMask))
+        transform.position = hit.point;   // 스텝 도중 맞은 지점으로 되돌린다
+    prev = transform.position;
+}</code></pre>
+<h3>면접에서 이렇게 답한다</h3>
+<ul>
+<li><strong>충돌 판정을 왜 두 단계로 나누나</strong> — 모든 쌍을 실제 형상으로 보면 O(n²)이라 감당이 안 된다. 넓은 단계에서 AABB와 공간 분할로 후보만 추린다. 좁은 단계에서 그 쌍만 정밀 검사한다.</li>
+<li><strong>광선과 평면·구·삼각형의 교차는</strong> — O + tD를 도형의 식에 넣어 t를 푼다. 평면은 <code>Dot(N, Q − O) / Dot(N, D)</code>이고 분모가 0이면 나란해 만나지 않는다. 구는 판별식으로 걸러내고 삼각형은 무게중심 좌표로 판정한다.</li>
+<li><strong>분리축 정리를 설명하라</strong> — 볼록한 둘이 떨어져 있으면 가르는 축이 반드시 있다. 그 축은 면 법선과 모서리 외적 중에 있다. 한 축이라도 투영 구간이 안 겹치면 충돌이 아니고, 모두 겹치면 겹침이 가장 작은 축이 밀어낼 방향이다.</li>
+<li><strong>터널링은 어떻게 막나</strong> — 스텝 사이 경로를 레이캐스트나 스윕으로 검사한다. 또는 Collision Detection을 Continuous로 바꾼다. 총알은 물리 바디 대신 레이캐스트로 처리하는 편이 싸다.</li>
+</ul>
+<h3>이런 오해를 한다</h3>
+<ul>
+<li><strong>Fixed Timestep을 늘리면 터널링이 줄어든다</strong> — 반대다. 스텝이 드물어져 한 스텝 이동 거리가 커진다. 근본 해결은 스윕이나 CCD다.</li>
+<li><strong>넓은 단계를 통과했으면 겹친 것이다</strong> — 겹칠 수도 있다만 알려 주는 보수적 검사다. 그래서 좁은 단계가 필요하다.</li>
+<li><strong>분리축 정리는 아무 도형에나 쓸 수 있다</strong> — 볼록 전용이다. 오목한 형상은 볼록 조각으로 나눠야 한다.</li>
+<li><strong>점 포함 판정은 모든 변의 같은 쪽인지 보면 된다</strong> — 볼록 다각형에서만 맞다. 오목에는 반직선 교차 횟수의 홀짝을 쓴다. 반직선이 꼭짓점을 지날 때 셀 규칙은 미리 정해 둔다.</li>
+</ul>
+<h3>3줄 정리</h3>
+<ul>
+<li>넓은 단계로 후보를 추리고 좁은 단계로만 정밀 검사한다.</li>
+<li>구는 제곱끼리, 광선은 식에 t를 넣어 푼다.</li>
+<li>터널링은 스윕이나 CCD로 막는다. 간격을 늘리면 악화된다.</li>
+</ul>
 <div class="refs"><h2>참고 자료</h2><ul><li><a href="https://docs.unity3d.com/Manual/CollidersOverview.html" target="_blank" rel="noopener">Unity 매뉴얼 – Introduction to collision</a></li><li><a href="https://docs.unity3d.com/Manual/ContinuousCollisionDetection.html" target="_blank" rel="noopener">Unity 매뉴얼 – Continuous collision detection (CCD)</a></li><li><a href="https://docs.unity3d.com/ScriptReference/Physics.Raycast.html" target="_blank" rel="noopener">Unity 스크립팅 API – Physics.Raycast</a></li><li><a href="https://docs.unity3d.com/ScriptReference/Physics.SphereCast.html" target="_blank" rel="noopener">Unity 스크립팅 API – Physics.SphereCast</a></li></ul></div>
 </article>
 <div class="pager"><a href="05-04.html">← 보간</a><a href="05-06.html">물리 시뮬레이션 →</a></div>

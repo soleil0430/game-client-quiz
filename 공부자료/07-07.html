@@ -16,7 +16,8 @@
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--text);
-    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+    font: 450 17px/1.85 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  strong { font-weight: 800; }
   main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
   a { color: var(--blue-d); }
   .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
@@ -25,8 +26,12 @@
     padding: 4px 12px; font-size: .8rem; font-weight: 800; }
   h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
   h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
-  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
-  p, ul, ol { margin: 10px 0; }
+  h3 { font-size: 1.1rem; font-weight: 800; margin: 34px 0 10px; padding-top: 4px; border-top: 2px solid var(--line); }
+  article h3:first-of-type { margin-top: 26px; }
+  p, ul, ol { margin: 0 0 20px; }
+  h3 + p, h3 + ul { margin-top: 0; }
+  svg { display: block; width: 100%; max-width: 640px; height: auto; margin: 18px auto 22px; color: var(--muted); }
+  svg text { font: 600 13px -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; }
   li { margin: 5px 0; }
   .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
   .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
@@ -58,22 +63,54 @@
 <div class="nav"><a href="../index.html#library">← 도서관</a><a href="07.html" class="badge">자료구조·알고리즘 목차</a></div>
 <article class="card">
 <h1>정렬과 탐색</h1>
-<p class="lead">정렬마다 최악과 안정성이 다르다. 그 차이와 이진 탐색의 경계 찾기를 정리한다</p>
-<h3>핵심 개념</h3><p>비교로만 정렬하면 아무리 잘해도 O(N log N)보다 빠를 수 없다. 그래서 정렬 선택은 속도가 아니라 <strong>최악일 때 어떻게 되는지, 추가 메모리를 얼마나 쓰는지, 같은 값의 순서를 지키는지</strong>로 갈린다.</p><table><thead><tr><th>정렬</th><th>평균</th><th>최악</th><th>추가 공간</th><th>안정</th></tr></thead><tbody><tr><td>퀵</td><td>O(N log N)</td><td>O(N²)</td><td>O(log N)</td><td>아니다</td></tr><tr><td>병합</td><td>O(N log N)</td><td>O(N log N)</td><td>O(N)</td><td>그렇다</td></tr><tr><td>힙</td><td>O(N log N)</td><td>O(N log N)</td><td>O(1)</td><td>아니다</td></tr><tr><td>삽입</td><td>O(N²)</td><td>O(N²)</td><td>O(1)</td><td>그렇다</td></tr><tr><td>계수</td><td>O(N + K)</td><td>O(N + K)</td><td>O(K)</td><td>그렇다</td></tr></tbody></table><p>퀵 정렬은 피벗으로 작은 쪽과 큰 쪽을 나눈 뒤 각각을 다시 정렬한다. 분할이 반씩 되면 재귀 깊이가 log N이지만 매번 한쪽으로 쏠리면 깊이가 N이 되어 O(N²)이다. 이미 정렬된 배열에서 첫 원소를 피벗으로 삼는 소박한 구현이 정확히 그 경우다. 그래서 무작위 피벗이나 세 값의 중간값을 쓰고, 실무 라이브러리는 <strong>인트로 정렬</strong>(퀵으로 시작해 재귀가 깊어지면 힙, 구간이 작아지면 삽입)로 최악을 막는다. 마지막 단계가 삽입 정렬인 이유는 거의 정렬된 입력에서 삽입 정렬이 O(N)에 수렴하기 때문이다.</p><p>안정 정렬은 비교 기준이 같은 원소들의 원래 순서를 지킨다. 랭킹 화면처럼 이름순 목록을 점수순으로 다시 정렬하면서 동점자의 이름순을 지켜야 할 때 필요하다. C#에서 <code>Array.Sort</code>와 <code>List&lt;T&gt;.Sort</code>는 인트로 정렬이라 제자리·불안정이고, LINQ의 <code>OrderBy</code>는 안정이지만 새 시퀀스를 만들어 할당이 생긴다. 매 프레임 도는 코드면 이 할당이 GC 부담이다.</p><p>정렬돼 있으면 이진 탐색으로 O(log N)에 찾는다. 2의 20제곱이 약 104만이라 100만 개도 스무 번이면 된다. 면접에서는 값 하나보다 <strong>경계</strong>를 묻는다. lower bound는 찾는 값 이상인 첫 위치, upper bound는 그 값을 초과하는 첫 위치이고 둘의 차이가 그 값의 개수다. 값이 없어도 끼워 넣을 자리를 돌려주므로 실패 표시가 아니다.</p><pre><code>public static class Bounds
+<p class="lead">정렬은 최악·추가 공간·안정성으로 고른다. 정렬해 두면 탐색이 O(log N)이다</p>
+<p>랭킹 100만 명에서 특정 점수 구간만 뽑아야 한다. 정렬 없이 하면 질의마다 전체를 훑는다. 한 번 정렬해 두면 그 뒤의 탐색이 스무 번으로 끝난다. </p>
+<h3>정렬은 속도가 아니라 최악·공간·안정성으로 고른다</h3>
+<p>비교로만 정렬하면 아무리 잘해도 O(N log N)보다 빠를 수 없다. 그래서 무엇이 더 빠른지는 선택 기준이 되지 못한다. </p>
+<p>실제로 갈리는 것은 셋이다. 최악일 때 어떻게 되는지, 추가 메모리를 얼마나 쓰는지, 같은 값의 순서를 지키는지다. </p>
+<table><thead><tr><th>정렬 </th><th>평균 </th><th>최악 </th><th>추가 공간 </th><th>안정 </th></tr></thead><tbody>
+<tr><td>퀵 </td><td>O(N log N) </td><td>O(N&#178;) </td><td>O(log N) </td><td>아니다 </td></tr>
+<tr><td>병합 </td><td>O(N log N) </td><td>O(N log N) </td><td>O(N) </td><td>그렇다 </td></tr>
+<tr><td>힙 </td><td>O(N log N) </td><td>O(N log N) </td><td>O(1) </td><td>아니다 </td></tr>
+<tr><td>삽입 </td><td>O(N&#178;) </td><td>O(N&#178;) </td><td>O(1) </td><td>그렇다 </td></tr>
+<tr><td>계수 </td><td>O(N + K) </td><td>O(N + K) </td><td>O(K) </td><td>그렇다 </td></tr></tbody></table>
+<h3>퀵이 O(N&#178;)가 되는 경우와 인트로 정렬</h3>
+<p>퀵 정렬은 피벗으로 작은 쪽과 큰 쪽을 나눈 뒤 각각을 다시 정렬한다. 분할이 반씩 되면 재귀 깊이가 log N이다. 매번 한쪽으로 쏠리면 깊이가 N이 되어 O(N&#178;)다. </p>
+<p>이미 정렬된 배열에서 첫 원소를 피벗으로 삼는 소박한 구현이 정확히 그 경우다. 그래서 무작위 피벗이나 세 값의 중간값을 쓴다. </p>
+<p>실무 라이브러리는 <strong>인트로 정렬</strong>로 최악을 막는다. 퀵으로 시작해 재귀가 깊어지면 힙으로, 구간이 작아지면 삽입으로 갈아탄다. 마지막이 삽입인 이유는 거의 정렬된 입력에서 삽입 정렬이 O(N)에 수렴하기 때문이다. </p>
+<h3>안정 정렬이 필요한 순간</h3>
+<p>안정 정렬은 비교 기준이 같은 원소들의 원래 순서를 지킨다. 여러 기준으로 차례차례 정렬할 때 필요하다. </p>
+<p>랭킹 화면이 그렇다. 이름순 목록을 점수순으로 다시 정렬하면서 동점자의 이름순을 지켜야 한다면 안정 정렬이어야 한다. </p>
+<p>C#의 <code>Array.Sort</code>와 <code>List&lt;T&gt;.Sort</code>는 인트로 정렬이라 제자리이고 불안정하다. LINQ의 <code>OrderBy</code>는 안정이지만 새 시퀀스를 만들어 할당이 생긴다. 매 프레임 도는 코드면 이 할당이 그대로 GC 부담이다. </p>
+<h3>이진 탐색은 값보다 경계를 묻는다</h3>
+<p>정렬돼 있으면 이진 탐색으로 O(log N)에 찾는다. 2의 20제곱이 약 104만이라 100만 개도 스무 번이면 된다. </p>
+<p>면접에서는 값 하나보다 <strong>경계</strong>를 묻는다. lower bound는 찾는 값 이상인 첫 위치, upper bound는 그 값을 초과하는 첫 위치다. 둘의 차이가 그 값의 개수다. </p><svg viewBox="0 0 640 212" width="100%" role="img" aria-label="정렬된 12칸 배열에서 5 이상인 첫 자리를 찾을 때, 탐색 구간이 12칸에서 6칸, 3칸, 1칸으로 절반씩 줄어 인덱스 3에 닿는 과정을 그린 그림"><text x="16" y="18" font-size="13" fill="currentColor">정렬된 배열에서 5 이상인 첫 자리 찾기</text><rect x="16" y="42" width="40" height="30" fill="none" stroke="currentColor"/><text x="36" y="63" font-size="13" text-anchor="middle" fill="currentColor">1</text><text x="36" y="36" font-size="13" text-anchor="middle" fill="currentColor">0</text><rect x="56" y="42" width="40" height="30" fill="none" stroke="currentColor"/><text x="76" y="63" font-size="13" text-anchor="middle" fill="currentColor">3</text><text x="76" y="36" font-size="13" text-anchor="middle" fill="currentColor">1</text><rect x="96" y="42" width="40" height="30" fill="none" stroke="currentColor"/><text x="116" y="63" font-size="13" text-anchor="middle" fill="currentColor">3</text><text x="116" y="36" font-size="13" text-anchor="middle" fill="currentColor">2</text><rect x="136" y="42" width="40" height="30" fill="none" stroke="currentColor"/><text x="156" y="63" font-size="13" text-anchor="middle" fill="currentColor">5</text><text x="156" y="36" font-size="13" text-anchor="middle" fill="currentColor">3</text><rect x="176" y="42" width="40" height="30" fill="none" stroke="currentColor"/><text x="196" y="63" font-size="13" text-anchor="middle" fill="currentColor">5</text><text x="196" y="36" font-size="13" text-anchor="middle" fill="currentColor">4</text><rect x="216" y="42" width="40" height="30" fill="none" stroke="currentColor"/><text x="236" y="63" font-size="13" text-anchor="middle" fill="currentColor">5</text><text x="236" y="36" font-size="13" text-anchor="middle" fill="currentColor">5</text><rect x="256" y="42" width="40" height="30" fill="none" stroke="currentColor"/><text x="276" y="63" font-size="13" text-anchor="middle" fill="currentColor">7</text><text x="276" y="36" font-size="13" text-anchor="middle" fill="currentColor">6</text><rect x="296" y="42" width="40" height="30" fill="none" stroke="currentColor"/><text x="316" y="63" font-size="13" text-anchor="middle" fill="currentColor">8</text><text x="316" y="36" font-size="13" text-anchor="middle" fill="currentColor">7</text><rect x="336" y="42" width="40" height="30" fill="none" stroke="currentColor"/><text x="356" y="63" font-size="13" text-anchor="middle" fill="currentColor">9</text><text x="356" y="36" font-size="13" text-anchor="middle" fill="currentColor">8</text><rect x="376" y="42" width="40" height="30" fill="none" stroke="currentColor"/><text x="396" y="63" font-size="13" text-anchor="middle" fill="currentColor">9</text><text x="396" y="36" font-size="13" text-anchor="middle" fill="currentColor">9</text><rect x="416" y="42" width="40" height="30" fill="none" stroke="currentColor"/><text x="436" y="63" font-size="13" text-anchor="middle" fill="currentColor">12</text><text x="436" y="36" font-size="13" text-anchor="middle" fill="currentColor">10</text><rect x="456" y="42" width="40" height="30" fill="none" stroke="currentColor"/><text x="476" y="63" font-size="13" text-anchor="middle" fill="currentColor">14</text><text x="476" y="36" font-size="13" text-anchor="middle" fill="currentColor">11</text><line x1="16" y1="96" x2="496" y2="96" stroke="currentColor" fill="none"/><line x1="16" y1="90" x2="16" y2="102" stroke="currentColor" fill="none"/><line x1="496" y1="90" x2="496" y2="102" stroke="currentColor" fill="none"/><circle cx="276" cy="96" r="4" fill="currentColor" stroke="none"/><text x="506" y="100" font-size="13" fill="currentColor">7 &#8805; 5 &#8594; hi 6</text><line x1="16" y1="122" x2="256" y2="122" stroke="currentColor" fill="none"/><line x1="16" y1="116" x2="16" y2="128" stroke="currentColor" fill="none"/><line x1="256" y1="116" x2="256" y2="128" stroke="currentColor" fill="none"/><circle cx="156" cy="122" r="4" fill="currentColor" stroke="none"/><text x="506" y="126" font-size="13" fill="currentColor">5 &#8805; 5 &#8594; hi 3</text><line x1="16" y1="148" x2="136" y2="148" stroke="currentColor" fill="none"/><line x1="16" y1="142" x2="16" y2="154" stroke="currentColor" fill="none"/><line x1="136" y1="142" x2="136" y2="154" stroke="currentColor" fill="none"/><circle cx="76" cy="148" r="4" fill="currentColor" stroke="none"/><text x="506" y="152" font-size="13" fill="currentColor">3 &lt; 5 &#8594; lo 2</text><line x1="96" y1="174" x2="136" y2="174" stroke="currentColor" fill="none"/><line x1="96" y1="168" x2="96" y2="180" stroke="currentColor" fill="none"/><line x1="136" y1="168" x2="136" y2="180" stroke="currentColor" fill="none"/><circle cx="116" cy="174" r="4" fill="currentColor" stroke="none"/><text x="506" y="178" font-size="13" fill="currentColor">3 &lt; 5 &#8594; lo 3</text><text x="16" y="200" font-size="13" fill="currentColor">lo와 hi가 만난 3이 답이다. 점은 그때그때 본 가운데 칸</text></svg>
+<p>값이 없어도 끼워 넣을 자리를 돌려주므로 실패 표시가 아니다. 구현은 반열린 구간을 쓰는 쪽이 경계 실수를 줄인다: </p>
+<pre><code>// value 이상인 첫 위치. 없으면 끼워 넣을 자리를 돌려준다
+public static int LowerBound(int[] sorted, int value)
 {
-    // value 이상인 첫 위치. 없으면 끼워 넣을 자리(배열 길이)를 돌려준다
-    public static int LowerBound(int[] sorted, int value)
+    int lo = 0, hi = sorted.Length;          // [lo, hi) 반열린 구간
+    while (lo &lt; hi)
     {
-        int lo = 0, hi = sorted.Length;          // [lo, hi) 반열린 구간
-        while (lo &lt; hi)
-        {
-            int mid = lo + (hi - lo) / 2;        // (lo + hi) / 2는 오버플로 위험
-            if (sorted[mid] &lt; value) lo = mid + 1;
-            else hi = mid;
-        }
-        return lo;                               // &lt;= 로 바꾸면 upper bound
+        int mid = lo + (hi - lo) / 2;        // (lo + hi) / 2는 오버플로 위험
+        if (sorted[mid] &lt; value) lo = mid + 1;
+        else hi = mid;                       // &lt;= 로 바꾸면 upper bound
     }
-}</code></pre><h3>면접에서 이렇게 답한다</h3><ul><li><strong>퀵 정렬과 최악</strong> — 피벗으로 나눠 재귀로 정렬하고 평균 O(N log N)이다. 분할이 한쪽으로 쏠리면 재귀 깊이가 N이 되어 O(N²)이고, 무작위 피벗이나 세 값의 중간값으로 피한다. 실무 구현은 인트로 정렬로 최악을 O(N log N)에 묶는다.</li><li><strong>퀵과 병합 중 무엇을 쓰나</strong> — 메모리에 올라가는 배열이면 제자리로 돌고 캐시 효율이 좋은 퀵 계열을 쓴다. 최악을 보장해야 하거나 안정 정렬이 필요하거나 연결 리스트·외부 정렬이면 O(N) 추가 공간을 쓰더라도 병합을 쓴다.</li><li><strong>안정 정렬이 필요한 때</strong> — 여러 기준으로 차례로 정렬할 때다. 점수순으로 다시 정렬해도 동점자의 이름순이 유지돼야 하면 안정 정렬이어야 한다. C#은 <code>List.Sort</code>가 불안정이라 <code>OrderBy</code>를 쓰거나 비교자에 두 번째 기준을 넣는다.</li><li><strong>lower bound와 upper bound</strong> — 각각 값 이상인 첫 위치와 값을 초과하는 첫 위치이고 둘의 차이가 그 값의 개수다. 둘 다 이진 탐색이라 O(log N)이다.</li></ul><h3>흔한 오해</h3><ul><li><strong>퀵 정렬은 항상 O(N log N)이다</strong> — 피벗이 쏠리면 O(N²)다. 평균과 최악을 나눠 말한다.</li><li><strong>List.Sort는 안정 정렬이다</strong> — 불안정이다. 같은 키의 순서가 필요하면 <code>OrderBy</code>를 쓴다.</li><li><strong>거의 정렬된 데이터에도 퀵이 낫다</strong> — 삽입 정렬이 O(N)에 수렴하고, 소박한 퀵은 오히려 최악이 된다.</li><li><strong>lower bound는 값이 없으면 -1을 준다</strong> — 끼워 넣을 자리를 준다. 실제로 있는지는 그 위치의 값을 봐야 안다.</li></ul>
+    return lo;
+}</code></pre>
+<h3>면접에서 이렇게 답한다</h3><ul>
+<li><strong>퀵 정렬과 최악</strong> — 피벗으로 나눠 재귀로 정렬하고 평균 O(N log N)이다. 분할이 한쪽으로 쏠리면 재귀 깊이가 N이 되어 O(N&#178;)다. 무작위 피벗으로 피하고, 실무 구현은 인트로 정렬로 최악을 O(N log N)에 묶는다. </li>
+<li><strong>퀵과 병합 중 무엇을 쓰나</strong> — 메모리에 올라가는 배열이면 제자리로 돌고 캐시 효율이 좋은 퀵 계열을 쓴다. 최악을 보장해야 하거나 안정 정렬이 필요하면 O(N) 추가 공간을 쓰더라도 병합을 쓴다. </li>
+<li><strong>lower bound와 upper bound</strong> — 각각 값 이상인 첫 위치와 값을 초과하는 첫 위치다. 둘의 차이가 그 값의 개수다. 둘 다 이진 탐색이라 O(log N)이다. </li></ul>
+<h3>이런 오해를 한다</h3><ul>
+<li><strong>퀵 정렬은 항상 O(N log N)이다</strong> — 피벗이 쏠리면 O(N&#178;)다. 평균과 최악을 나눠 말한다. </li>
+<li><strong>List.Sort는 안정 정렬이다</strong> — 불안정이다. 같은 키의 순서가 필요하면 <code>OrderBy</code>를 쓰거나 비교자에 두 번째 기준을 넣는다. </li>
+<li><strong>거의 정렬된 데이터에도 퀵이 낫다</strong> — 삽입 정렬이 O(N)에 수렴하고, 소박한 퀵은 오히려 최악이 된다. </li>
+<li><strong>lower bound는 값이 없으면 -1을 준다</strong> — 끼워 넣을 자리를 준다. 실제로 있는지는 그 위치의 값을 봐야 안다. </li></ul>
+<h3>3줄 정리</h3><ul>
+<li>비교 정렬은 O(N log N)이 한계다. 최악과 안정성으로 고른다 </li>
+<li>퀵은 쏠리면 O(N&#178;). 실무 구현은 인트로 정렬이다 </li>
+<li>이진 탐색은 값이 아니라 경계를 구하는 도구다 </li></ul>
 <div class="refs"><h2>참고 자료</h2><ul><li><a href="https://learn.microsoft.com/ko-kr/dotnet/api/system.array.sort" target="_blank" rel="noopener">Microsoft Learn – Array.Sort 메서드</a></li><li><a href="https://learn.microsoft.com/ko-kr/dotnet/api/system.linq.enumerable.orderby" target="_blank" rel="noopener">Microsoft Learn – Enumerable.OrderBy 메서드</a></li><li><a href="https://learn.microsoft.com/ko-kr/dotnet/api/system.array.binarysearch" target="_blank" rel="noopener">Microsoft Learn – Array.BinarySearch 메서드</a></li></ul></div>
 </article>
 <div class="pager"><a href="07-06.html">← 그래프와 경로 탐색</a><a href="07-08.html">공간 분할 →</a></div>

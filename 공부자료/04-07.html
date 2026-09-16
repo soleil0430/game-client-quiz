@@ -16,7 +16,8 @@
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--text);
-    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+    font: 450 17px/1.85 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  strong { font-weight: 800; }
   main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
   a { color: var(--blue-d); }
   .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
@@ -25,8 +26,12 @@
     padding: 4px 12px; font-size: .8rem; font-weight: 800; }
   h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
   h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
-  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
-  p, ul, ol { margin: 10px 0; }
+  h3 { font-size: 1.1rem; font-weight: 800; margin: 34px 0 10px; padding-top: 4px; border-top: 2px solid var(--line); }
+  article h3:first-of-type { margin-top: 26px; }
+  p, ul, ol { margin: 0 0 20px; }
+  h3 + p, h3 + ul { margin-top: 0; }
+  svg { display: block; width: 100%; max-width: 640px; height: auto; margin: 18px auto 22px; color: var(--muted); }
+  svg text { font: 600 13px -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; }
   li { margin: 5px 0; }
   .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
   .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
@@ -58,18 +63,104 @@
 <div class="nav"><a href="../index.html#library">← 도서관</a><a href="04.html" class="badge">그래픽스·렌더링 목차</a></div>
 <article class="card">
 <h1>Unity 렌더 파이프라인과 셰이더</h1>
-<p class="lead">URP는 C#으로 짠 렌더 파이프라인이다. 확장은 Renderer Feature, 비용은 배리언트로 돌아온다</p>
-<h3>핵심 개념</h3><p>Built-in 렌더 파이프라인은 프레임을 그리는 순서가 엔진 내부(C++)에 고정돼 있어, 개발자는 이미지 이펙트나 커맨드 버퍼처럼 정해진 구멍으로만 끼어들 수 있었다. <strong>SRP(Scriptable Render Pipeline)</strong>는 그 순서를 C#으로 짜게 연 틀이고, URP와 HDRP는 유니티가 SRP 위에 만들어 둔 구현이다. URP는 모바일부터 PC까지, HDRP는 고사양 PC·콘솔용이다.</p><table><thead><tr><th>주제</th><th>Built-in</th><th>URP</th></tr></thead><tbody><tr><td>셰이더 인클루드</td><td>UnityCG.cginc</td><td>Core.hlsl</td></tr><tr><td>패스 태그</td><td>ForwardBase</td><td>UniversalForward</td></tr><tr><td>확장 지점</td><td>이미지 이펙트, GrabPass</td><td>Renderer Feature</td></tr><tr><td>포스트 프로세싱</td><td>별도 패키지</td><td>Volume 내장</td></tr></tbody></table><p>그래서 Built-in용 조명 셰이더는 URP에서 그대로 돌지 않는 경우가 많다. 표준 셰이더를 쓰던 머티리얼은 URP의 자동 변환 도구가 바꿔 주지만, 직접 쓴 셰이더는 사람이 다시 쓴다. Shader Graph는 URP와 HDRP 양쪽에서 쓸 수 있다.</p><p><strong>Renderer Feature</strong>는 URP 렌더러의 정해진 시점(예: 불투명을 그린 뒤)에 패스를 하나 더 끼워 넣는 확장점이다. 외곽선 그리기, 화면을 복사해 왜곡에 쓰기, 특정 레이어 재렌더가 대표적이다.</p><p>셰이더 성능에서 자주 걸리는 것이 <strong>분기</strong>다. GPU는 수십 개 스레드를 한 묶음(워프·웨이브)으로 묶어 같은 명령을 실행하므로, 묶음 안에서 조건이 갈리면 양쪽을 모두 실행하고 결과만 골라 쓴다. 머티리얼 상수처럼 묶음 전체가 같은 값으로 갈리는 분기는 싸다. 키워드로 배리언트를 나누면 분기가 사라지는 대신 배리언트 수가 문제가 된다.</p><pre><code>#pragma multi_compile _ _MAIN_LIGHT_SHADOWS  // 항상 컴파일, 런타임 토글
+<p class="lead">URP는 C#으로 짠 렌더 파이프라인이다. 확장은 Renderer Feature, 비용은 배리언트다</p>
+<p>Built-in용으로 짠 조명 셰이더를 URP 프로젝트에 넣으면 분홍색이 된다. 프레임을 그리는 순서와 셰이더 규약이 통째로 바뀌었기 때문이다. 무엇이 어디로 옮겨졌는지부터 잡아야 전환 비용이 보인다.</p>
+<h3>SRP는 그리는 순서를 C#으로 연 틀이다</h3>
+<p>Built-in 렌더 파이프라인은 프레임을 그리는 순서가 엔진 내부(C++)에 고정돼 있었다. 개발자는 이미지 이펙트나 커맨드 버퍼처럼 정해진 구멍으로만 끼어들 수 있었다.</p>
+<p><strong>SRP(Scriptable Render Pipeline)</strong>는 그 순서를 C#으로 짜게 연 틀이다. URP와 HDRP는 유니티가 SRP 위에 만들어 둔 구현이다. URP는 모바일부터 PC까지, HDRP는 고사양 PC와 콘솔용이다.</p>
+<table>
+<thead>
+<tr><th>주제</th>
+<th>Built-in</th>
+<th>URP</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>셰이더 인클루드</td>
+<td>UnityCG.cginc</td>
+<td>Core.hlsl</td>
+</tr>
+<tr><td>패스 태그</td>
+<td>ForwardBase</td>
+<td>UniversalForward</td>
+</tr>
+<tr><td>확장 지점</td>
+<td>이미지 이펙트, GrabPass</td>
+<td>Renderer Feature</td>
+</tr>
+<tr><td>포스트 프로세싱</td>
+<td>별도 패키지</td>
+<td>Volume 내장</td>
+</tr>
+</tbody>
+</table>
+<p>표준 셰이더를 쓰던 머티리얼은 URP의 자동 변환 도구가 바꿔 준다. 직접 쓴 셰이더는 사람이 다시 쓴다. Shader Graph로 만든 것은 URP와 HDRP 양쪽에서 쓸 수 있다.</p>
+<h3>Renderer Feature로 패스를 하나 더 끼운다</h3>
+<p>Renderer Feature는 URP 렌더러의 정해진 시점에 패스를 추가하는 확장점이다. 불투명을 그린 뒤 같은 위치를 고를 수 있다.</p>
+<svg viewBox="0 0 640 150" width="100%" role="img" aria-label="URP 프레임의 패스 순서와 Renderer Feature가 끼어드는 지점">
+<rect x="190" y="12" width="150" height="34" fill="none" stroke="currentColor" stroke-dasharray="4 3"/>
+<text x="265" y="34" font-size="12" fill="currentColor" text-anchor="middle">Renderer Feature</text>
+<line x1="265" y1="46" x2="265" y2="72" stroke="currentColor"/>
+<polyline points="261,68 265,72 269,68" fill="none" stroke="currentColor"/>
+<rect x="46" y="72" width="100" height="42" fill="none" stroke="currentColor"/>
+<text x="96" y="98" font-size="12" fill="currentColor" text-anchor="middle">그림자 맵</text>
+<rect x="158" y="72" width="100" height="42" fill="none" stroke="currentColor"/>
+<text x="208" y="98" font-size="12" fill="currentColor" text-anchor="middle">불투명</text>
+<rect x="270" y="72" width="100" height="42" fill="none" stroke="currentColor"/>
+<text x="320" y="98" font-size="12" fill="currentColor" text-anchor="middle">스카이박스</text>
+<rect x="382" y="72" width="100" height="42" fill="none" stroke="currentColor"/>
+<text x="432" y="98" font-size="12" fill="currentColor" text-anchor="middle">반투명</text>
+<rect x="494" y="72" width="100" height="42" fill="none" stroke="currentColor"/>
+<text x="544" y="98" font-size="12" fill="currentColor" text-anchor="middle">후처리</text>
+<line x1="146" y1="93" x2="158" y2="93" stroke="currentColor"/>
+<polyline points="154,89 158,93 154,97" fill="none" stroke="currentColor"/>
+<line x1="258" y1="93" x2="270" y2="93" stroke="currentColor"/>
+<polyline points="266,89 270,93 266,97" fill="none" stroke="currentColor"/>
+<line x1="370" y1="93" x2="382" y2="93" stroke="currentColor"/>
+<polyline points="378,89 382,93 378,97" fill="none" stroke="currentColor"/>
+<line x1="482" y1="93" x2="494" y2="93" stroke="currentColor"/>
+<polyline points="490,89 494,93 490,97" fill="none" stroke="currentColor"/>
+<text x="46" y="138" font-size="11" fill="currentColor">정해진 시점에 패스를 하나 더 끼우는 것이 Renderer Feature다</text>
+</svg>
+<p>외곽선 그리기, 화면을 복사해 왜곡에 쓰기, 특정 레이어 재렌더가 대표적이다. 순서 자체를 갈아엎어야 할 때만 커스텀 SRP를 고려한다. 유지 비용이 크기 때문이다.</p>
+<h3>셰이더 분기는 워프 안에서 갈릴 때 비싸다</h3>
+<p>GPU는 수십 개 스레드를 한 묶음(워프·웨이브)으로 묶어 같은 명령을 실행한다. 묶음 안에서 조건이 갈리면 양쪽을 모두 실행하고 결과만 골라 쓴다. 머티리얼 상수처럼 묶음 전체가 같은 값으로 갈리는 분기는 싸다.</p>
+<p>키워드로 배리언트를 나누면 분기 자체가 사라진다. 대신 조합 수가 문제로 넘어온다:</p>
+<pre><code>#pragma multi_compile _ _MAIN_LIGHT_SHADOWS  // 항상 컴파일, 런타임 토글
 #pragma shader_feature_local _EMISSION       // 안 쓰면 빌드에서 빠짐
 
 half4 frag(Varyings i) : SV_Target
 {
     half4 c = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, i.uv);
     #ifdef _EMISSION
-        c.rgb += _EmissionColor.rgb;
+        c.rgb += _EmissionColor.rgb;   // 이 줄은 배리언트에만 들어간다
     #endif
     return c;
-}</code></pre><p>키워드 조합마다 셰이더가 따로 컴파일되므로 키워드가 늘면 조합이 곱으로 폭발한다. 빌드 시간과 용량이 커지고, 처음 쓰는 배리언트를 GPU에 올리는 순간 프레임이 튄다. 안 쓰는 조합이 빠지도록 <code>shader_feature</code>를 쓰고, 빌드 스트리핑으로 잘라 내고, 나머지는 Shader Variant Collection으로 로딩 중에 미리 워밍업한다.</p><p><strong>컴퓨트 셰이더</strong>는 렌더링 파이프라인 밖에서 GPU 병렬 연산을 쓰는 프로그램이라, 서로 독립적인 데이터 수만 건에 같은 계산을 하는 입자 시뮬레이션·컬링·이미지 처리에 맞는다. 결과를 CPU로 되읽으면 동기화 대기가 생긴다. 파티클 시스템(CPU 갱신, 스크립트·물리 연동)과 VFX Graph(컴퓨트 셰이더로 GPU 갱신)를 나눠 쓰는 것도 같은 이유다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>Built-in, URP, HDRP 중 무엇을 고르나</strong> — 모바일이 타깃이면 URP다. 다만 Built-in용 커스텀 셰이더는 다시 써야 하는 경우가 많아 전환 비용을 일정에 잡는다.</li><li><strong>Renderer Feature는 언제 쓰나</strong> — 불투명을 그린 뒤 외곽선을 얹는 식으로 정해진 시점에 패스를 더 넣을 때 쓴다. 커스텀 SRP는 유지 비용이 커서 구조 자체를 갈아야 할 때만 고려한다.</li><li><strong>셰이더 분기가 느린 이유</strong> — GPU는 워프 단위로 같은 명령을 실행해서, 워프 안에서 조건이 갈리면 양쪽을 다 돌고 결과만 고른다.</li><li><strong>배리언트가 많아지면</strong> — 빌드 시간과 용량이 늘고 처음 쓰는 배리언트를 올릴 때 히칭이 생긴다. shader_feature와 스트리핑으로 줄이고 남는 건 미리 워밍업한다.</li><li><strong>컴퓨트 셰이더는 언제 쓰나</strong> — 수만 건의 독립적인 데이터에 같은 계산을 반복할 때 쓴다. 결과를 GPU 안에서 소비해야 이득이 남는다.</li></ul><h3>흔한 오해</h3><ul><li><strong>URP로 바꾸면 셰이더는 그대로 돈다</strong> — 인클루드 파일과 패스 태그가 달라 Built-in용 조명 셰이더는 대개 재작성이 필요하다.</li><li><strong>셰이더 분기도 CPU의 if처럼 한쪽만 실행된다</strong> — 워프 안에서 갈리면 양쪽을 다 돈다.</li><li><strong>배리언트는 GPU만 느려지게 한다</strong> — 실제 문제는 빌드 시간, 용량, 첫 사용 시점의 히칭이다.</li><li><strong>VFX Graph가 파티클 시스템의 상위 호환이다</strong> — CPU 쪽 상호작용이 제한적이고 컴퓨트 셰이더 지원 기기가 필요하다. 게임플레이에 얽힌 효과는 파티클 시스템이 낫다.</li><li><strong>포스트 프로세싱은 공짜에 가깝다</strong> — 화면 픽셀 수에 비례하는 패스이고, 모바일에서는 타일 메모리를 비웠다 채우는 비용까지 붙는다.</li></ul>
+}</code></pre>
+<h3>배리언트는 빌드와 첫 사용에서 값을 치른다</h3>
+<p>키워드 조합마다 셰이더가 따로 컴파일된다. 키워드가 늘면 조합이 곱으로 폭발한다. 빌드 시간과 용량이 커지고, 처음 쓰는 배리언트를 GPU에 올리는 순간 프레임이 튄다.</p>
+<p>대응은 세 가지다. 안 쓰는 조합이 빠지도록 <code>shader_feature</code>를 쓰고, 빌드 스트리핑으로 잘라 낸다. 남는 것은 Shader Variant Collection으로 로딩 중에 미리 워밍업한다.</p>
+<p>컴퓨트 셰이더는 렌더링 파이프라인 밖에서 GPU 병렬 연산을 쓰는 프로그램이다. 서로 독립적인 데이터 수만 건에 같은 계산을 하는 입자 시뮬레이션·컬링·이미지 처리에 맞는다. 결과를 CPU로 되읽으면 동기화 대기가 생긴다.</p>
+<p>파티클 시스템과 VFX Graph를 나눠 쓰는 것도 같은 이유다. 파티클 시스템은 CPU가 갱신해 스크립트·물리와 엮기 쉽다. VFX Graph는 컴퓨트 셰이더로 GPU가 갱신해 수가 많을 때 유리하다.</p>
+<h3>면접에서 이렇게 답한다</h3>
+<ul><li><strong>Built-in, URP, HDRP 중 무엇을 고르나</strong> — 모바일이 타깃이면 URP다. 다만 Built-in용 커스텀 셰이더는 다시 써야 하는 경우가 많다. 전환 비용을 일정에 잡는다.</li>
+<li><strong>Renderer Feature는 언제 쓰나</strong> — 불투명을 그린 뒤 외곽선을 얹는 식으로 정해진 시점에 패스를 더 넣을 때 쓴다. 커스텀 SRP는 유지 비용이 커서 구조 자체를 갈아야 할 때만 고려한다.</li>
+<li><strong>셰이더 분기가 느린 이유</strong> — GPU는 워프 단위로 같은 명령을 실행한다. 워프 안에서 조건이 갈리면 양쪽을 다 돌고 결과만 고른다.</li>
+<li><strong>배리언트가 많아지면</strong> — 빌드 시간과 용량이 늘고 처음 쓰는 배리언트를 올릴 때 히칭이 생긴다. shader_feature와 스트리핑으로 줄이고 남는 건 미리 워밍업한다.</li>
+<li><strong>컴퓨트 셰이더는 언제 쓰나</strong> — 수만 건의 독립적인 데이터에 같은 계산을 반복할 때 쓴다. 결과를 GPU 안에서 소비해야 이득이 남는다.</li>
+</ul>
+<h3>이런 오해를 한다</h3>
+<ul><li><strong>URP로 바꾸면 셰이더는 그대로 돈다</strong> — 인클루드 파일과 패스 태그가 다르다. Built-in용 조명 셰이더는 대개 재작성이 필요하다.</li>
+<li><strong>셰이더 분기도 CPU의 if처럼 한쪽만 실행된다</strong> — 워프 안에서 갈리면 양쪽을 다 돈다.</li>
+<li><strong>배리언트는 GPU만 느려지게 한다</strong> — 실제 문제는 빌드 시간, 용량, 첫 사용 시점의 히칭이다.</li>
+<li><strong>VFX Graph가 파티클 시스템의 상위 호환이다</strong> — CPU 쪽 상호작용이 제한적이고 컴퓨트 셰이더 지원 기기가 필요하다. 게임플레이에 얽힌 효과는 파티클 시스템이 낫다.</li>
+<li><strong>포스트 프로세싱은 공짜에 가깝다</strong> — 화면 픽셀 수에 비례하는 패스다. 모바일에서는 타일 메모리를 비웠다 채우는 비용까지 붙는다.</li>
+</ul>
+<h3>3줄 정리</h3>
+<ul><li>SRP는 그리는 순서를 C#으로 짜게 연 틀이다</li>
+<li>확장은 Renderer Feature, 순서 교체는 커스텀 SRP</li>
+<li>배리언트 값은 빌드 용량과 첫 사용 히칭으로 온다</li>
+</ul>
 <div class="refs"><h2>참고 자료</h2><ul><li><a href="https://docs.unity3d.com/Manual/render-pipelines.html" target="_blank" rel="noopener">Unity 매뉴얼 – Render pipelines</a></li><li><a href="https://docs.unity3d.com/6000.0/Documentation/Manual/urp/urp-renderer-feature.html" target="_blank" rel="noopener">Unity 매뉴얼(URP) – Add a Renderer Feature to a URP Renderer</a></li><li><a href="https://docs.unity3d.com/Manual/SL-MultipleProgramVariants.html" target="_blank" rel="noopener">Unity 매뉴얼 – Changing how shaders work using keywords</a></li><li><a href="https://docs.unity3d.com/Manual/class-ComputeShader.html" target="_blank" rel="noopener">Unity 매뉴얼 – Compute shaders</a></li></ul></div>
 </article>
 <div class="pager"><a href="04-06.html">← 조명과 그림자</a><a href="04-08.html">모바일 GPU와 그래픽스 API →</a></div>

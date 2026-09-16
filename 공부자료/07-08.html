@@ -16,7 +16,8 @@
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--text);
-    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+    font: 450 17px/1.85 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  strong { font-weight: 800; }
   main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
   a { color: var(--blue-d); }
   .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
@@ -25,8 +26,12 @@
     padding: 4px 12px; font-size: .8rem; font-weight: 800; }
   h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
   h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
-  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
-  p, ul, ol { margin: 10px 0; }
+  h3 { font-size: 1.1rem; font-weight: 800; margin: 34px 0 10px; padding-top: 4px; border-top: 2px solid var(--line); }
+  article h3:first-of-type { margin-top: 26px; }
+  p, ul, ol { margin: 0 0 20px; }
+  h3 + p, h3 + ul { margin-top: 0; }
+  svg { display: block; width: 100%; max-width: 640px; height: auto; margin: 18px auto 22px; color: var(--muted); }
+  svg text { font: 600 13px -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; }
   li { margin: 5px 0; }
   .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
   .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
@@ -58,43 +63,55 @@
 <div class="nav"><a href="../index.html#library">← 도서관</a><a href="07.html" class="badge">자료구조·알고리즘 목차</a></div>
 <article class="card">
 <h1>공간 분할</h1>
-<p class="lead">n² 비교를 없애는 구조다. 그리드·쿼드트리·BVH가 각각 언제 유리한지 가른다</p>
-<h3>핵심 개념</h3><p>공간 분할은 <strong>"내 주변에 무엇이 있나"를 전수 검사 없이 답하기 위한 구조</strong>다. 유닛 n개가 서로를 찾으면 비교가 n²번이라 천 개만 돼도 백만 번이다. 공간을 미리 칸이나 상자로 나눠 두면 후보가 주변에 실제로 있는 개수로 줄어든다. 물리의 브로드페이즈와 렌더링의 컬링이 같은 발상이다.</p><table><thead><tr><th>구조</th><th>유리한 상황</th><th>약점</th></tr></thead><tbody><tr><td>균일 그리드</td><td>고르게 퍼지고 크기가 비슷할 때. 칸 번호가 나눗셈 한 번이라 갱신이 싸다</td><td>한곳에 몰리면 한 칸에 다 들어가 다시 O(n)이 된다</td></tr><tr><td>쿼드트리·옥트리</td><td>밀도가 들쭉날쭉할 때. 붐비는 칸만 넷(3D는 여덟)으로 더 쪼갠다</td><td>움직이는 객체는 칸을 넘을 때마다 다시 넣어야 한다</td></tr><tr><td>BVH</td><td>레이·프러스텀 질의. 공간이 아니라 객체를 상자로 묶는다</td><td>트리를 짓는 비용이 크고, 많이 움직이면 다시 맞춰야 한다</td></tr></tbody></table><p>BVH가 레이캐스트에 강한 이유는 <strong>건너뛰기</strong>다. 물체를 감싸는 경계 상자(AABB)를 계층으로 묶어 두면, 레이가 부모 상자와 만나지 않는 순간 그 안의 자식과 삼각형을 전부 버린다. 그래서 평균 비용이 O(log N) 수준으로 떨어진다.</p><p>직접 짜는 것은 대개 균일 그리드다. 셀 크기는 질의 반경과 비슷하게 잡는다.</p><pre><code>using System.Collections.Generic;
-using UnityEngine;
+<p class="lead">n제곱 비교를 없애는 구조다. 그리드·쿼드트리·BVH는 약점이 서로 다르다</p>
+<p>유닛 1,000마리가 서로 주변을 살피면 비교가 50만 번이다. 정작 필요한 이웃은 몇 마리뿐이다. 공간을 미리 칸으로 나눠 두면 후보가 주변 밀도만큼으로 준다. </p>
+<h3>칸으로 나누면 후보가 주변 밀도만큼으로 준다</h3>
+<p>공간 분할은 "내 주변에 무엇이 있나"를 전수 검사 없이 답하는 구조다. 공간을 미리 칸이나 상자로 나눠 두고 닿는 칸만 본다. </p>
+<p>물리의 브로드페이즈와 렌더링의 컬링이 같은 발상이다. 둘 다 정밀 검사에 들어가기 전에 후보를 먼저 쳐내는 단계다. </p><svg viewBox="0 0 640 238" width="100%" role="img" aria-label="격자로 나눈 공간에서 질의 반경이 닿는 가운데 9칸만 검사하고 나머지 칸의 유닛은 건너뛰는 것을 점으로 그린 그림"><rect x="96" y="66" width="108" height="108" fill="currentColor" fill-opacity="0.08" stroke="currentColor"/><line x1="24" y1="30" x2="24" y2="210" stroke="currentColor" fill="none"/><line x1="60" y1="30" x2="60" y2="210" stroke="currentColor" fill="none"/><line x1="96" y1="30" x2="96" y2="210" stroke="currentColor" fill="none"/><line x1="132" y1="30" x2="132" y2="210" stroke="currentColor" fill="none"/><line x1="168" y1="30" x2="168" y2="210" stroke="currentColor" fill="none"/><line x1="204" y1="30" x2="204" y2="210" stroke="currentColor" fill="none"/><line x1="240" y1="30" x2="240" y2="210" stroke="currentColor" fill="none"/><line x1="276" y1="30" x2="276" y2="210" stroke="currentColor" fill="none"/><line x1="312" y1="30" x2="312" y2="210" stroke="currentColor" fill="none"/><line x1="24" y1="30" x2="312" y2="30" stroke="currentColor" fill="none"/><line x1="24" y1="66" x2="312" y2="66" stroke="currentColor" fill="none"/><line x1="24" y1="102" x2="312" y2="102" stroke="currentColor" fill="none"/><line x1="24" y1="138" x2="312" y2="138" stroke="currentColor" fill="none"/><line x1="24" y1="174" x2="312" y2="174" stroke="currentColor" fill="none"/><line x1="24" y1="210" x2="312" y2="210" stroke="currentColor" fill="none"/><circle cx="150" cy="120" r="34" fill="none" stroke="currentColor"/><circle cx="110" cy="80" r="3" fill="currentColor" stroke="none"/><circle cx="160" cy="96" r="3" fill="currentColor" stroke="none"/><circle cx="140" cy="140" r="3" fill="currentColor" stroke="none"/><circle cx="190" cy="160" r="3" fill="currentColor" stroke="none"/><circle cx="126" cy="166" r="3" fill="currentColor" stroke="none"/><circle cx="40" cy="45" r="3" fill="currentColor" stroke="none"/><circle cx="70" cy="60" r="3" fill="currentColor" stroke="none"/><circle cx="58" cy="120" r="3" fill="currentColor" stroke="none"/><circle cx="36" cy="190" r="3" fill="currentColor" stroke="none"/><circle cx="80" cy="200" r="3" fill="currentColor" stroke="none"/><circle cx="230" cy="50" r="3" fill="currentColor" stroke="none"/><circle cx="260" cy="100" r="3" fill="currentColor" stroke="none"/><circle cx="290" cy="60" r="3" fill="currentColor" stroke="none"/><circle cx="240" cy="150" r="3" fill="currentColor" stroke="none"/><circle cx="280" cy="190" r="3" fill="currentColor" stroke="none"/><circle cx="300" cy="140" r="3" fill="currentColor" stroke="none"/><circle cx="200" cy="40" r="3" fill="currentColor" stroke="none"/><circle cx="170" cy="50" r="3" fill="currentColor" stroke="none"/><circle cx="250" cy="205" r="3" fill="currentColor" stroke="none"/><circle cx="90" cy="45" r="3" fill="currentColor" stroke="none"/><circle cx="300" cy="200" r="3" fill="currentColor" stroke="none"/><text x="334" y="62" font-size="13" fill="currentColor">반경이 닿는 9칸만 본다</text><text x="334" y="88" font-size="13" fill="currentColor">나머지 31칸은 건너뛴다</text><text x="334" y="124" font-size="13" fill="currentColor">칸 번호 = 좌표 / 셀 크기</text><text x="334" y="150" font-size="13" fill="currentColor">셀 크기는 질의 반경에 맞춘다</text><text x="24" y="228" font-size="13" fill="currentColor">후보 5개. 그 안에서만 실제 거리를 잰다</text></svg>
+<p>줄어드는 폭이 크다. 유닛 1,000마리가 서로를 찾으면 비교가 약 50만 번이다. 40칸에 고르게 나누면 한 칸에 25마리라, 한 유닛이 보는 후보가 200여 개로 준다. </p>
+<p>주의할 점은 이것이 <strong>후보를 줄이는 단계일 뿐</strong>이라는 것이다. 칸 안에 들어온 것들끼리는 실제 거리로 다시 검사해야 한다. </p>
+<h3>그리드·쿼드트리·BVH는 약점이 다르다</h3>
+<table><thead><tr><th>구조 </th><th>유리한 상황 </th><th>약점 </th></tr></thead><tbody>
+<tr><td>균일 그리드 </td><td>고르게 퍼지고 크기가 비슷할 때. 갱신이 싸다 </td><td>한곳에 몰리면 한 칸에 다 들어가 다시 O(n) </td></tr>
+<tr><td>쿼드트리·옥트리 </td><td>밀도가 들쭉날쭉할 때. 붐비는 칸만 더 쪼갠다 </td><td>움직이는 객체는 칸을 넘을 때마다 다시 넣는다 </td></tr>
+<tr><td>BVH </td><td>레이·프러스텀 질의. 객체를 상자로 묶는다 </td><td>트리를 짓는 비용이 크다 </td></tr></tbody></table>
+<p>쿼드트리는 칸 하나에 원소가 기준을 넘으면 그 칸만 넷으로 쪼갠다. 3D에서는 여덟으로 쪼개는 옥트리가 된다. 빈 공간은 큰 칸 하나로 남아 밀도에 맞춰 해상도가 달라진다. </p>
+<p>BVH가 레이캐스트에 강한 이유는 건너뛰기다. 물체를 감싸는 경계 상자를 계층으로 묶어 둔다. 레이가 부모 상자와 만나지 않는 순간 그 안의 자식과 삼각형을 전부 버린다. 그래서 평균 비용이 O(log N) 수준으로 떨어진다. </p>
+<h3>셀 크기를 질의 반경에 맞춘다</h3>
+<p>직접 짜는 것은 대개 균일 그리드다. 셀이 너무 작으면 훑을 칸이 늘고, 너무 크면 한 칸에 다 들어와 이득이 사라진다. 질의 반경과 비슷하게 잡는 것이 기준이다: </p>
+<pre><code>Vector2Int Key(Vector3 p)   // 좌표를 셀 크기로 나눈 것이 칸 번호다
+    =&gt; new Vector2Int(Mathf.FloorToInt(p.x / _cell), Mathf.FloorToInt(p.z / _cell));
 
-public class SpatialHash
+// 결과 리스트를 재사용해 매 프레임 불러도 할당이 없다
+public void Query(Vector3 center, float radius, List&lt;Transform&gt; result)
 {
-    readonly float _cell;
-    readonly Dictionary&lt;Vector2Int, List&lt;Transform&gt;&gt; _cells
-        = new Dictionary&lt;Vector2Int, List&lt;Transform&gt;&gt;();
+    result.Clear();
+    Vector2Int c = Key(center);
+    int r = Mathf.CeilToInt(radius / _cell);   // 반경이 닿는 칸 범위
+    float sqr = radius * radius;               // 제곱끼리 비교해 루트를 뺀다
 
-    public SpatialHash(float cellSize) { _cell = cellSize; }
-
-    Vector2Int Key(Vector3 p)
-        =&gt; new Vector2Int(Mathf.FloorToInt(p.x / _cell), Mathf.FloorToInt(p.z / _cell));
-
-    public void Add(Transform t)
-    {
-        Vector2Int k = Key(t.position);
-        if (!_cells.TryGetValue(k, out List&lt;Transform&gt; list)) _cells[k] = list = new List&lt;Transform&gt;();
-        list.Add(t);
-    }
-
-    // 결과 리스트를 재사용해 매 프레임 호출해도 할당이 없다
-    public void Query(Vector3 center, float radius, List&lt;Transform&gt; result)
-    {
-        result.Clear();
-        Vector2Int c = Key(center);
-        int r = Mathf.CeilToInt(radius / _cell);
-        float sqr = radius * radius;
-
-        for (int dx = -r; dx &lt;= r; dx++)
-            for (int dy = -r; dy &lt;= r; dy++)
-                if (_cells.TryGetValue(new Vector2Int(c.x + dx, c.y + dy), out List&lt;Transform&gt; list))
-                    foreach (Transform t in list)  // 칸 안에서만 실제 거리 검사
-                        if ((t.position - center).sqrMagnitude &lt;= sqr) result.Add(t);
-    }
-}</code></pre><p>Unity 물리도 프로젝트 설정의 브로드페이즈 방식(Sweep and Prune, Multibox Pruning 등)으로 후보를 추린다. 범위 질의는 <code>Physics.OverlapSphereNonAlloc</code>처럼 미리 잡은 배열에 담고 LayerMask로 후보를 좁힌다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>주변 유닛을 빠르게 찾으려면</strong> — 전수 비교는 질의마다 O(n), 서로 찾으면 O(n²)이라 공간을 칸으로 나눈다. 반경이 닿는 칸만 검사하면 후보가 주변 밀도에 비례하는 수준으로 준다.</li><li><strong>그리드와 쿼드트리 중 무엇을 쓰나</strong> — 고르게 퍼지고 크기가 비슷하면 갱신이 싼 균일 그리드, 한곳에 몰리면 밀도에 맞춰 쪼개는 쿼드트리·옥트리다. 셀 크기를 질의 반경에 맞추는 것이 그리드 성능의 핵심이다.</li><li><strong>BVH가 레이 판정을 빠르게 하는 원리</strong> — 물체를 감싼 AABB를 계층으로 묶고, 레이가 부모 상자와 만나지 않으면 그 아래 전체를 건너뛴다.</li></ul><h3>흔한 오해</h3><ul><li><strong>ID나 이름으로 정렬해 두면 주변 검색도 빨라진다</strong> — 기준이 위치가 아니면 위치 질의에 쓸 수 없다.</li><li><strong>BVH는 레이가 지나는 모든 삼각형을 검사한다</strong> — 상자에 안 맞은 가지는 통째로 버린다.</li><li><strong>공간 분할을 하면 정밀 검사가 필요 없다</strong> — 후보를 줄일 뿐이라 칸 안에서는 실제 거리로 다시 검사한다.</li></ul>
+    for (int dx = -r; dx &lt;= r; dx++)
+        for (int dy = -r; dy &lt;= r; dy++)
+            if (_cells.TryGetValue(new Vector2Int(c.x + dx, c.y + dy), out var list))
+                foreach (Transform tr in list)   // 칸 안에서만 실제 거리 검사
+                    if ((tr.position - center).sqrMagnitude &lt;= sqr) result.Add(tr);
+}</code></pre>
+<h3>Unity도 안에서 같은 일을 한다</h3>
+<p>Unity 물리는 프로젝트 설정의 브로드페이즈 방식으로 후보를 추린다. Sweep and Prune이나 Multibox Pruning 같은 선택지가 거기 있다. </p>
+<p>범위 질의는 <code>Physics.OverlapSphereNonAlloc</code>처럼 미리 잡은 배열에 담아 할당을 없앤다. LayerMask로 후보를 좁히는 것도 같은 목적이다. </p>
+<h3>면접에서 이렇게 답한다</h3><ul>
+<li><strong>주변 유닛을 빠르게 찾으려면</strong> — 전수 비교는 질의마다 O(n), 서로 찾으면 O(n&#178;)이라 공간을 칸으로 나눈다. 반경이 닿는 칸만 검사하면 후보가 주변 밀도에 비례하는 수준으로 준다. </li>
+<li><strong>그리드와 쿼드트리 중 무엇을 쓰나</strong> — 고르게 퍼지고 크기가 비슷하면 갱신이 싼 균일 그리드다. 한곳에 몰리면 밀도에 맞춰 쪼개는 쿼드트리나 옥트리를 쓴다. 셀 크기를 질의 반경에 맞추는 것이 그리드 성능의 핵심이다. </li>
+<li><strong>BVH가 레이 판정을 빠르게 하는 원리</strong> — 물체를 감싼 경계 상자를 계층으로 묶는다. 레이가 부모 상자와 만나지 않으면 그 아래 전체를 건너뛴다. </li></ul>
+<h3>이런 오해를 한다</h3><ul>
+<li><strong>ID나 이름으로 정렬해 두면 주변 검색도 빨라진다</strong> — 기준이 위치가 아니면 위치 질의에 쓸 수 없다. </li>
+<li><strong>BVH는 레이가 지나는 모든 삼각형을 검사한다</strong> — 상자에 안 맞은 가지는 통째로 버린다. </li>
+<li><strong>공간 분할을 하면 정밀 검사가 필요 없다</strong> — 후보를 줄일 뿐이라 칸 안에서는 실제 거리로 다시 검사한다. </li>
+<li><strong>셀은 작을수록 좋다</strong> — 훑을 칸 수가 반경 제곱으로 늘어 오히려 느려진다. </li></ul>
+<h3>3줄 정리</h3><ul>
+<li>공간을 칸으로 나눠 n&#178; 비교를 주변 밀도로 바꾼다 </li>
+<li>고르면 그리드, 몰리면 쿼드트리, 레이면 BVH다 </li>
+<li>후보만 줄일 뿐이라 칸 안에서는 다시 재야 한다 </li></ul>
 <div class="refs"><h2>참고 자료</h2><ul><li><a href="https://docs.unity3d.com/Manual/class-PhysicsManager.html" target="_blank" rel="noopener">Unity 매뉴얼 – Physics project settings reference (Broadphase Type)</a></li><li><a href="https://docs.unity3d.com/ScriptReference/Physics.OverlapSphereNonAlloc.html" target="_blank" rel="noopener">Unity 스크립팅 API – Physics.OverlapSphereNonAlloc</a></li><li><a href="https://docs.unity3d.com/Manual/OcclusionCulling.html" target="_blank" rel="noopener">Unity 매뉴얼 – Occlusion culling</a></li></ul></div>
 </article>
 <div class="pager"><a href="07-07.html">← 정렬과 탐색</a><a href="07-09.html">풀이 기법 →</a></div>

@@ -16,7 +16,8 @@
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--text);
-    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+    font: 450 17px/1.85 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  strong { font-weight: 800; }
   main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
   a { color: var(--blue-d); }
   .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
@@ -25,8 +26,12 @@
     padding: 4px 12px; font-size: .8rem; font-weight: 800; }
   h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
   h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
-  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
-  p, ul, ol { margin: 10px 0; }
+  h3 { font-size: 1.1rem; font-weight: 800; margin: 34px 0 10px; padding-top: 4px; border-top: 2px solid var(--line); }
+  article h3:first-of-type { margin-top: 26px; }
+  p, ul, ol { margin: 0 0 20px; }
+  h3 + p, h3 + ul { margin-top: 0; }
+  svg { display: block; width: 100%; max-width: 640px; height: auto; margin: 18px auto 22px; color: var(--muted); }
+  svg text { font: 600 13px -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; }
   li { margin: 5px 0; }
   .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
   .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
@@ -58,14 +63,76 @@
 <div class="nav"><a href="../index.html#library">← 도서관</a><a href="05.html" class="badge">게임 수학·물리 목차</a></div>
 <article class="card">
 <h1>기초 수학</h1>
-<p class="lead">삼각함수와 근의 공식을 게임 판정에 쓰고, float 오차가 만드는 증상까지 안다</p>
-<h3>핵심 개념</h3><p>삼각함수는 각도와 방향을 오가는 환율이다. 단위원에서 각 θ인 점이 (cos θ, sin θ)이므로, 각도로 방향을 만들 때는 sin·cos를, 방향에서 각도를 되찾을 때는 atan2를 쓴다. Unity의 Mathf 삼각함수는 모두 라디안을 받고 돌려주므로, 도 단위와 섞을 때는 Mathf.Deg2Rad와 Mathf.Rad2Deg를 곱한다.</p><p>파형 변형은 네 숫자로 끝난다. <strong>A·sin(ω·t + φ) + c</strong>에서 A는 진폭, ω는 각속도라 주기가 2π/ω, φ는 위상, c는 중심이다. 밖에 곱한 수가 높이를, 안에 곱한 수가 빠르기를 바꾼다. 그래서 <code>Mathf.Sin(Time.time * 2f) * 3f</code>는 −3에서 3까지, 주기 2π/2 = π ≈ 3.14초로 오르내린다.</p><pre><code>float phase;   // Time.time 대신 누적하면 시작 시점과 일시정지를 제어할 수 있다
+<p class="lead">삼각함수와 근의 공식이 판정을 만들고, float 간격이 증상의 원인을 만든다</p>
+<p>조준 방향을 각도로 바꾸고, 총알이 구에 맞는지 풀고, 멀리 간 캐릭터가 왜 떠는지 안다. 이 셋이 각각 삼각함수와 근의 공식, 부동소수점이다. 게임 코드에서 매일 만나는 세 가지다.</p>
+<h3>각도와 방향은 sin·cos·atan2로 오간다</h3>
+<p>삼각함수는 각도와 방향을 오가는 환율이다. 단위원에서 각 θ인 점이 (cos θ, sin θ)다. 각도로 방향을 만들 때는 sin과 cos를 쓴다.</p>
+<p>방향에서 각도를 되찾을 때는 atan2다. <code>Mathf.Atan(y / x)</code>는 나누는 순간 두 부호가 섞인다. (1, 1)과 (−1, −1)을 구분하지 못하고 x가 0이면 깨진다.</p>
+<p><code>Mathf.Atan2(y, x)</code>는 둘을 따로 받아 사분면을 가린다. −π에서 π까지 전 범위를 안전하게 돌려준다. 조준 방향, 조이스틱 각도, 미니맵 아이콘 회전이 모두 이 함수다.</p>
+<p>Unity의 Mathf 삼각함수는 모두 라디안을 쓴다. 도 단위와 섞을 때는 <code>Mathf.Deg2Rad</code>와 <code>Mathf.Rad2Deg</code>를 곱한다. 두 각의 차이는 ±180도에서 뒤집히므로 <code>Mathf.DeltaAngle</code>로 구한다.</p>
+<h3>파형 변형은 네 숫자로 끝난다</h3>
+<svg viewBox="0 0 640 180" width="100%" role="img" aria-label="사인 곡선 그래프. 진폭 A는 중심선에서 마루까지의 높이, 주기는 2파이 나누기 오메가로 한 번 오르내리는 시간이다">
+<text x="16" y="22" font-size="13" fill="currentColor">A · sin(ω·t + φ) + c 의 네 숫자</text>
+<line x1="40" y1="100" x2="614" y2="100" stroke="currentColor" stroke-dasharray="4 3"/>
+<polyline points="40,100.0 45,93.2 50,86.5 55,80.1 60,74.0 65,68.6 70,63.7 75,59.6 80,56.3 85,53.9 90,52.5 95,52.0 100,52.5 105,53.9 110,56.3 115,59.6 120,63.7 125,68.6 130,74.0 135,80.1 140,86.5 145,93.2 150,100.0 155,106.8 160,113.5 165,119.9 170,126.0 175,131.4 180,136.3 185,140.4 190,143.7 195,146.1 200,147.5 205,148.0 210,147.5 215,146.1 220,143.7 225,140.4 230,136.3 235,131.4 240,126.0 245,119.9 250,113.5 255,106.8 260,100.0 265,93.2 270,86.5 275,80.1 280,74.0 285,68.6 290,63.7 295,59.6 300,56.3 305,53.9 310,52.5 315,52.0 320,52.5 325,53.9 330,56.3 335,59.6 340,63.7 345,68.6 350,74.0 355,80.1 360,86.5 365,93.2 370,100.0 375,106.8 380,113.5 385,119.9 390,126.0 395,131.4 400,136.3 405,140.4 410,143.7 415,146.1 420,147.5 425,148.0 430,147.5 435,146.1 440,143.7 445,140.4 450,136.3 455,131.4 460,126.0 465,119.9 470,113.5 475,106.8 480,100.0 485,93.2 490,86.5 495,80.1 500,74.0 505,68.6 510,63.7 515,59.6 520,56.3 525,53.9 530,52.5 535,52.0 540,52.5 545,53.9 550,56.3 555,59.6 560,63.7 565,68.6 570,74.0 575,80.1 580,86.5 585,93.2 590,100.0 595,106.8 600,113.5 605,119.9" fill="none" stroke="currentColor"/>
+<line x1="95" y1="100" x2="95" y2="52" stroke="currentColor"/>
+<polyline points="90,60 95,50 100,60" fill="none" stroke="currentColor"/>
+<text x="104" y="58" font-size="13" fill="currentColor">A (진폭)</text>
+<line x1="40" y1="162" x2="260" y2="162" stroke="currentColor"/>
+<polyline points="48,157 38,162 48,167" fill="none" stroke="currentColor"/>
+<polyline points="252,157 262,162 252,167" fill="none" stroke="currentColor"/>
+<text x="150" y="156" font-size="13" fill="currentColor" text-anchor="middle">주기 = 2π / ω</text>
+<text x="36" y="96" font-size="13" fill="currentColor" text-anchor="end">c</text>
+<text x="614" y="94" font-size="13" fill="currentColor" text-anchor="end">t</text>
+</svg>
+<p><strong>A·sin(ω·t + φ) + c</strong>가 전부다. A는 진폭, ω는 각속도, φ는 위상, c는 중심이다. 주기는 2π/ω다.</p>
+<p>밖에 곱한 수가 높이를, 안에 곱한 수가 빠르기를 바꾼다. <code>Mathf.Sin(Time.time * 2f) * 3f</code>는 −3에서 3까지 오르내린다. 주기는 2π/2 = π ≈ 3.14초다.</p>
+<p>둥실 뜨는 아이템과 깜빡이는 UI가 이 식이다. 시작 시점과 일시정지를 제어하려면 Time.time 대신 위상을 누적한다:</p>
+<pre><code>float phase;   // Time.time 대신 누적하면 시작 시점을 제어할 수 있다
 
 void Update()
 {
     phase += Time.deltaTime * speed;
+    if (phase &gt; Mathf.PI * 2f) phase -= Mathf.PI * 2f;   // 2π마다 되감는다
     transform.position = origin + Vector3.up * (Mathf.Sin(phase) * amplitude);
-}</code></pre><p>atan2가 atan보다 나은 이유는 정보량이다. <code>Mathf.Atan(y / x)</code>는 나누는 순간 두 성분의 부호가 섞여 −π/2~π/2만 돌려주고 (1, 1)과 (−1, −1)을 구분하지 못하며, x가 0이면 나눗셈부터 깨진다. <code>Mathf.Atan2(y, x)</code>는 둘을 따로 받아 사분면을 가려 −π~π 전 범위를 안전하게 돌려준다. 조준 방향, 조이스틱 각도, 미니맵 아이콘 회전이 모두 이 함수다. 두 각의 차이는 ±180도에서 뒤집히므로 <code>Mathf.DeltaAngle</code>로 구한다.</p><p>근의 공식은 광선과 구의 교차에서 그대로 나온다. 광선 위의 점을 구 방정식에 넣으면 거리 t에 대한 at² + bt + c = 0이 되고, 판별식 b² − 4ac의 부호가 곧 답이다. 음수면 실근이 없어 비껴가고, 0이면 접하고, 양수면 관통해 교차점이 둘이다. 그래서 판별식으로 대부분을 걸러낸 뒤 필요할 때만 제곱근을 계산한다. 두 근 중 작은 쪽이 앞쪽 교차점이고, 그 값이 음수면 광선 뒤라 버린다.</p><p><strong>부동소수점</strong>은 이 계산들이 딛고 선 바닥이다. float는 가수가 24비트뿐이라 유효 숫자가 7자리 남짓이고, 0.1처럼 2진수로 딱 떨어지지 않는 수는 근사값으로 저장된다. 0.1을 열 번 더한 값이 1.0과 <code>==</code>로 같지 않은 이유다. 더 중요한 성질은 <strong>값이 클수록 표현 간격이 벌어진다</strong>는 것이다.</p><table><thead><tr><th>원점에서의 거리</th><th>구분되는 최소 간격</th><th>보이는 증상</th></tr></thead><tbody><tr><td>1m</td><td>약 0.0000001m</td><td>문제 없다</td></tr><tr><td>100,000m</td><td>약 0.008m</td><td>멈춘 물체가 떨리고 카메라가 지글거린다</td></tr><tr><td>1,000,000m</td><td>약 0.06m</td><td>위치가 격자에 스냅되고 물리가 흔들린다</td></tr></tbody></table><p>증상별 대응은 이렇다. 넓은 월드에서 멀리 간 캐릭터가 떨리면 월드 원점을 주기적으로 옮겨(플로팅 오리진) 좌표를 0 근처로 되돌린다. 몇 시간 켜 둔 게임에서 Time.time으로 돌리던 sin 애니메이션이 끊기는 것도 같은 이유라, 시간을 누적하고 2π마다 되감는다. 크기가 다른 두 수를 빼면 유효 숫자가 날아가 판별식이 0에 가까운 스침 판정에서 결과가 튄다. 길이가 0에 가까운 벡터를 정규화하면 NaN이 나오고, NaN은 퍼지기만 해서 오브젝트가 화면에서 사라진다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>atan2는 어디에 쓰나</strong> — 방향 벡터를 각도로 바꿀 때 쓴다. y와 x를 따로 받아 사분면을 구분하므로 −π~π 전 범위를 돌려주고 x가 0이어도 안전하다. 캐릭터를 목표 쪽으로 돌릴 때 쓴다.</li><li><strong>근의 공식은 어디에 쓰나</strong> — 광선과 구의 교차가 대표적이다. 판별식의 부호로 비껴감·접함·관통을 가르고, 제곱근은 필요할 때만 계산한다고 말한다.</li><li><strong>sin 그래프를 설명하라</strong> — A·sin(ωt + φ) + c로 쓰고 A가 진폭, 주기가 2π/ω라고 말한다. 둥실 뜨는 아이템과 깜빡이는 UI가 그 예다.</li><li><strong>float 비교는 어떻게 하나</strong> — <code>==</code> 대신 차이의 절댓값을 허용 오차와 비교한다. 오차는 다루는 값의 크기에 맞춰 정하고, <code>Mathf.Epsilon</code>은 0 근처에서만 의미 있어 기준으로 쓰지 않는다.</li></ul><h3>흔한 오해</h3><ul><li><strong>Atan(y / x)로 충분하다</strong> — 나누는 순간 부호 정보가 합쳐져 사분면을 잃고 결과가 반 바퀴 틀어진다. x가 0이면 계산 자체가 깨진다.</li><li><strong>판별식이 음수면 교차점이 광선 뒤라는 뜻이다</strong> — 실근이 아예 없어 비껴간 것이다. 뒤에 있는 경우는 실근이 있으면서 t가 음수인 경우다.</li><li><strong>Mathf.Sin은 도(degree)를 받는다</strong> — 라디안이다. 도 값을 그대로 넣으면 입력이 57배 커져 주기가 그만큼 짧아진 것처럼 보인다.</li><li><strong>double을 쓰면 오차가 사라진다</strong> — 자릿수가 늘어 늦게 드러날 뿐 성질은 같다. Unity의 Transform과 물리 API는 float이라 결국 변환된다.</li></ul>
+}</code></pre>
+<h3>판별식 하나로 비껴감·접함·관통이 갈린다</h3>
+<p>근의 공식은 광선과 구의 교차에서 그대로 나온다. 광선 위의 점을 구 방정식에 넣으면 거리 t에 대한 at² + bt + c = 0이 된다. 판별식 b² − 4ac의 부호가 곧 답이다.</p>
+<p>음수면 실근이 없어 비껴간다. 0이면 접한다. 양수면 관통해 교차점이 둘이다.</p>
+<p>그래서 판별식으로 대부분을 걸러낸 뒤 필요할 때만 제곱근을 계산한다. 두 근 중 작은 쪽이 앞쪽 교차점이다. 그 값이 음수면 광선 뒤라 버린다.</p>
+<h3>float는 값이 클수록 간격이 벌어진다</h3>
+<p>float는 가수가 24비트뿐이라 유효 숫자가 7자리 남짓이다. 0.1처럼 2진수로 딱 떨어지지 않는 수는 근사값으로 저장된다. 0.1을 열 번 더한 값이 1.0과 <code>==</code>로 같지 않은 이유다.</p>
+<p>더 중요한 성질은 간격이다. 값이 커질수록 구분되는 최소 간격이 벌어진다.</p>
+<table>
+<thead><tr><th>원점에서의 거리</th><th>구분되는 최소 간격</th><th>보이는 증상</th></tr></thead>
+<tbody>
+<tr><td>1m</td><td>약 0.0000001m</td><td>문제 없다</td></tr>
+<tr><td>100,000m</td><td>약 0.008m</td><td>멈춘 물체가 떨리고 카메라가 지글거린다</td></tr>
+<tr><td>1,000,000m</td><td>약 0.06m</td><td>위치가 격자에 스냅되고 물리가 흔들린다</td></tr>
+</tbody>
+</table>
+<p>넓은 월드에서 멀리 간 캐릭터가 떨면 월드 원점을 주기적으로 옮긴다. 이것이 플로팅 오리진이다. 몇 시간 켜 둔 게임에서 <code>Time.time</code>으로 돌리던 sin이 끊기는 것도 같은 이유다.</p>
+<p>크기가 다른 두 수를 빼면 유효 숫자가 날아간다. 판별식이 0에 가까운 스침 판정에서 결과가 튄다. 길이가 0에 가까운 벡터를 정규화하면 NaN이 나오고, NaN은 퍼지기만 해 오브젝트가 화면에서 사라진다.</p>
+<h3>면접에서 이렇게 답한다</h3>
+<ul>
+<li><strong>atan2는 어디에 쓰나</strong> — 방향 벡터를 각도로 바꿀 때 쓴다. y와 x를 따로 받아 사분면을 구분하므로 −π에서 π까지 전 범위를 돌려주고 x가 0이어도 안전하다. 캐릭터를 목표 쪽으로 돌릴 때 쓴다.</li>
+<li><strong>근의 공식은 어디에 쓰나</strong> — 광선과 구의 교차가 대표적이다. 판별식의 부호로 비껴감과 접함, 관통을 가른다. 제곱근은 필요할 때만 계산한다고 말한다.</li>
+<li><strong>sin 그래프를 설명하라</strong> — A·sin(ωt + φ) + c로 쓰고 A가 진폭, 주기가 2π/ω라고 말한다. 둥실 뜨는 아이템과 깜빡이는 UI가 그 예다.</li>
+<li><strong>float 비교는 어떻게 하나</strong> — <code>==</code> 대신 차이의 절댓값을 허용 오차와 비교한다. 오차는 다루는 값의 크기에 맞춰 정한다. <code>Mathf.Epsilon</code>은 0 근처에서만 의미 있어 기준으로 쓰지 않는다.</li>
+</ul>
+<h3>이런 오해를 한다</h3>
+<ul>
+<li><strong>Atan(y / x)로 충분하다</strong> — 나누는 순간 부호 정보가 합쳐져 사분면을 잃는다. 결과가 반 바퀴 틀어지고 x가 0이면 계산 자체가 깨진다.</li>
+<li><strong>판별식이 음수면 교차점이 광선 뒤라는 뜻이다</strong> — 실근이 아예 없어 비껴간 것이다. 뒤에 있는 경우는 실근이 있으면서 t가 음수인 경우다.</li>
+<li><strong>Mathf.Sin은 도(degree)를 받는다</strong> — 라디안이다. 도 값을 그대로 넣으면 입력이 57배 커져 주기가 그만큼 짧아진 것처럼 보인다.</li>
+<li><strong>double을 쓰면 오차가 사라진다</strong> — 자릿수가 늘어 늦게 드러날 뿐 성질은 같다. Unity의 Transform과 물리 API는 float이라 결국 변환된다.</li>
+</ul>
+<h3>3줄 정리</h3>
+<ul>
+<li>방향에서 각도는 atan2로 얻는다. Atan은 사분면을 잃는다.</li>
+<li>파형은 A·sin(ωt + φ) + c, 주기는 2π/ω다.</li>
+<li>float 간격은 값이 클수록 벌어져 먼 좌표에서 떨림이 된다.</li>
+</ul>
 <div class="refs"><h2>참고 자료</h2><ul><li><a href="https://docs.unity3d.com/ScriptReference/Mathf.Atan2.html" target="_blank" rel="noopener">Unity 스크립팅 API – Mathf.Atan2</a></li><li><a href="https://docs.unity3d.com/ScriptReference/Mathf.Sin.html" target="_blank" rel="noopener">Unity 스크립팅 API – Mathf.Sin</a></li><li><a href="https://docs.unity3d.com/ScriptReference/Mathf.Approximately.html" target="_blank" rel="noopener">Unity 스크립팅 API – Mathf.Approximately</a></li><li><a href="https://learn.microsoft.com/ko-kr/dotnet/csharp/language-reference/builtin-types/floating-point-numeric-types" target="_blank" rel="noopener">Microsoft Learn – 부동 소수점 숫자 형식 (C# 참조)</a></li></ul></div>
 </article>
 <div class="pager"><a href="05-06.html">← 물리 시뮬레이션</a><span></span></div>

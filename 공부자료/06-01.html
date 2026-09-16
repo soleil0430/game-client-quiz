@@ -16,7 +16,8 @@
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--text);
-    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+    font: 450 17px/1.85 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  strong { font-weight: 800; }
   main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
   a { color: var(--blue-d); }
   .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
@@ -25,8 +26,12 @@
     padding: 4px 12px; font-size: .8rem; font-weight: 800; }
   h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
   h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
-  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
-  p, ul, ol { margin: 10px 0; }
+  h3 { font-size: 1.1rem; font-weight: 800; margin: 34px 0 10px; padding-top: 4px; border-top: 2px solid var(--line); }
+  article h3:first-of-type { margin-top: 26px; }
+  p, ul, ol { margin: 0 0 20px; }
+  h3 + p, h3 + ul { margin-top: 0; }
+  svg { display: block; width: 100%; max-width: 640px; height: auto; margin: 18px auto 22px; color: var(--muted); }
+  svg text { font: 600 13px -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; }
   li { margin: 5px 0; }
   .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
   .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
@@ -58,17 +63,92 @@
 <div class="nav"><a href="../index.html#library">← 도서관</a><a href="06.html" class="badge">설계·아키텍처 목차</a></div>
 <article class="card">
 <h1>객체지향</h1>
-<p class="lead">데이터와 책임을 객체로 묶는 이유를 알고, SOLID로 바뀔 자리를 미리 열어 둔다</p>
-<h3>핵심 개념</h3><p>객체지향은 데이터와 그것을 다루는 코드를 묶어 <strong>무엇이 무엇을 책임지는지</strong>를 구조에 드러내는 방식이다. 절차지향은 데이터와 함수가 따로 놀아서 규칙이 바뀌면 그 데이터를 만지는 함수를 전부 찾아 고쳐야 한다. 대가는 클래스와 간접 호출이 늘어 읽기 힘들어지는 것이다.</p><table><thead><tr><th>특징</th><th>무엇이고 무엇을 얻나</th></tr></thead><tbody><tr><td>추상화</td><td>세부를 걷어내고 필요한 면만 남긴다. 구현이 바뀌어도 쓰는 쪽은 그대로다</td></tr><tr><td>캡슐화</td><td>상태를 감추고 공개 메서드로만 다루게 한다. 지킬 조건을 클래스가 스스로 지킨다</td></tr><tr><td>상속</td><td>부모의 멤버를 물려받아 특수화한다. 공통 동작이 한곳에 모인다</td></tr><tr><td>다형성</td><td>같은 호출이 실제 타입에 따라 다르게 돈다. 타입마다 분기하는 코드가 사라진다</td></tr></tbody></table><p>Unity에서는 <code>[SerializeField] private</code> 필드로 인스펙터 노출과 캡슐화를 같이 챙기는 것이 관례다. SOLID는 바뀔 자리를 미리 열어 두기 위한 다섯 지침이다.</p><table><thead><tr><th>원칙</th><th>뜻</th><th>게임에서</th></tr></thead><tbody><tr><td>SRP 단일 책임</td><td>바뀌어야 할 이유가 하나뿐</td><td>체력 계산과 체력바 연출을 분리</td></tr><tr><td>OCP 개방-폐쇄</td><td>확장에는 열리고 수정에는 닫힌다</td><td>새 무기는 분기 수정 없이 클래스 추가</td></tr><tr><td>LSP 리스코프 치환</td><td>자식이 부모 자리에 들어가도 동작</td><td>부모의 약속을 예외로 막지 않기</td></tr><tr><td>ISP 인터페이스 분리</td><td>안 쓰는 메서드를 떠안기지 않는다</td><td>공격 안 하는 것엔 공격 계약을 안 붙임</td></tr><tr><td>DIP 의존 역전</td><td>상위와 하위가 모두 추상화에 의존</td><td>전투 로직은 <code>IWeapon</code>만 안다</td></tr></tbody></table><p>OCP와 DIP는 같은 장치로 지켜진다. 분기를 고치는 대신 인터페이스를 두고 구현을 더하면 기존 코드는 손대지 않는다.</p><pre><code>public interface IWeapon { void Fire(Vector3 origin); }
+<p class="lead">데이터와 규칙을 한 클래스에 묶고, 바뀔 자리는 인터페이스로 열어 둔다</p>
+<p>방어력 계산 규칙이 바뀌면, 절차지향 코드는 그 데이터를 만지는 함수를 전부 찾아야 한다. 플레이어와 몬스터와 파괴물이 각자 계산하고 있으면 한 곳만 빠뜨려도 버그다.</p>
+<p>객체지향은 데이터와 그 데이터를 다루는 규칙을 한 클래스에 묶는다. 고칠 곳이 한 군데로 모이는 대신, 클래스와 간접 호출이 늘어 흐름은 읽기 어려워진다.</p>
+<h3>네 가지 특징이 각각 막아 주는 사고</h3>
+<p>추상화·캡슐화·상속·다형성은 그냥 외울 목록이 아니다. 넷은 각각 다른 사고를 막아 준다.</p>
+<table><thead><tr><th>특징</th><th>하는 일</th><th>막아 주는 사고</th></tr></thead><tbody>
+<tr><td>추상화</td><td>세부를 걷어내고 쓸 면만 남긴다</td><td>구현이 바뀌면 쓰는 쪽까지 깨진다</td></tr>
+<tr><td>캡슐화</td><td>상태를 감추고 공개 메서드로만 다룬다</td><td>남의 코드가 체력을 음수로 만든다</td></tr>
+<tr><td>상속</td><td>부모 멤버를 물려받아 특수화한다</td><td>같은 코드가 클래스마다 복사된다</td></tr>
+<tr><td>다형성</td><td>같은 호출이 실제 타입에 따라 갈린다</td><td>타입이 늘 때마다 분기가 늘어난다</td></tr>
+</tbody></table>
+<p>Unity에서는 <code>[SerializeField] private</code> 필드가 관례다. 인스펙터에서는 값을 조정하면서 다른 스크립트는 못 건드리니, 캡슐화를 깨지 않는다.</p>
+<h3>SOLID는 바뀔 자리를 미리 열어 두는 다섯 지침</h3>
+<p>다섯 지침은 지금 잘 도는 코드를 위한 것이 아니다. 다음에 바뀔 코드를 위한 것이다.</p>
+<table><thead><tr><th>원칙</th><th>뜻</th><th>게임에서</th></tr></thead><tbody>
+<tr><td>SRP 단일 책임</td><td>바뀌어야 할 이유가 하나뿐</td><td>체력 계산과 체력바 연출을 분리</td></tr>
+<tr><td>OCP 개방-폐쇄</td><td>확장에는 열고 수정에는 닫는다</td><td>새 무기는 분기 수정 없이 클래스 추가</td></tr>
+<tr><td>LSP 리스코프 치환</td><td>자식이 부모 자리에 들어가도 동작</td><td>부모의 약속을 예외로 막지 않기</td></tr>
+<tr><td>ISP 인터페이스 분리</td><td>안 쓰는 메서드를 떠안기지 않는다</td><td>공격 안 하는 것에 공격 계약을 안 붙임</td></tr>
+<tr><td>DIP 의존 역전</td><td>상위와 하위가 모두 추상화에 의존</td><td>전투 로직은 <code>IWeapon</code>만 안다</td></tr>
+</tbody></table>
+<h3>인터페이스 하나로 OCP와 DIP를 같이 지킨다</h3>
+<p>무기가 늘 때마다 <code>switch</code>를 고치는 코드는 매번 전투 로직 전체를 다시 검증해야 한다. 인터페이스를 두고 구현만 더하면 기존 코드는 손대지 않는다.</p>
+<svg viewBox="0 0 640 190" width="100%" role="img" aria-label="전투 로직과 무기 구현이 모두 IWeapon 인터페이스를 향하는 의존 방향 그림">
+<text x="12" y="20" font-size="13" fill="currentColor">의존 방향 — 전투 로직도 무기 구현도 가운데 계약만 본다</text>
+<rect x="10" y="70" width="150" height="56" rx="6" fill="none" stroke="currentColor"/>
+<text x="85" y="95" font-size="13" text-anchor="middle" fill="currentColor">Attacker</text>
+<text x="85" y="113" font-size="12" text-anchor="middle" fill="currentColor">상위 · 전투 로직</text>
+<line x1="160" y1="98" x2="238" y2="98" stroke="currentColor"/>
+<polyline points="228,93 238,98 228,103" fill="none" stroke="currentColor"/>
+<rect x="240" y="70" width="150" height="56" rx="6" fill="currentColor" fill-opacity="0.08" stroke="currentColor"/>
+<text x="315" y="95" font-size="13" text-anchor="middle" fill="currentColor">IWeapon</text>
+<text x="315" y="113" font-size="12" text-anchor="middle" fill="currentColor">Fire(origin)</text>
+<line x1="440" y1="40" x2="440" y2="156" stroke="currentColor"/>
+<line x1="440" y1="98" x2="394" y2="98" stroke="currentColor"/>
+<polyline points="404,93 394,98 404,103" fill="none" stroke="currentColor"/>
+<line x1="470" y1="40" x2="440" y2="40" stroke="currentColor"/>
+<line x1="470" y1="98" x2="440" y2="98" stroke="currentColor"/>
+<line x1="470" y1="156" x2="440" y2="156" stroke="currentColor"/>
+<rect x="470" y="23" width="155" height="34" rx="6" fill="none" stroke="currentColor"/>
+<text x="547" y="45" font-size="13" text-anchor="middle" fill="currentColor">Sword</text>
+<rect x="470" y="81" width="155" height="34" rx="6" fill="none" stroke="currentColor"/>
+<text x="547" y="103" font-size="13" text-anchor="middle" fill="currentColor">Bow</text>
+<rect x="470" y="139" width="155" height="34" rx="6" fill="none" stroke="currentColor"/>
+<text x="547" y="161" font-size="13" text-anchor="middle" fill="currentColor">Staff</text>
+<text x="315" y="150" font-size="12" text-anchor="middle" fill="currentColor">화살표 = &quot;~를 안다&quot;</text>
+</svg>
+<p>전투 로직이 구체 무기 대신 계약만 아는 코드다:</p>
+<pre><code>public interface IWeapon { void Fire(Vector3 origin); }
 
 public class Attacker : MonoBehaviour
 {
-    private IWeapon weapon;  // 구체 타입이 아니라 계약에 의존
+    private IWeapon weapon;                     // 구체 타입이 아니라 계약에 의존
 
-    public void Equip(IWeapon w) =&gt; weapon = w;  // 구현은 밖에서 넣는다
+    public void Equip(IWeapon w) =&gt; weapon = w; // 구현은 밖에서 넣어 준다
 
-    private void Update() { if (Input.GetButtonDown("Fire1")) weapon?.Fire(transform.position); }
-}</code></pre><p>다형성은 두 갈래다. 오버로딩이나 제네릭처럼 컴파일 시점에 대상이 정해지면 정적, <code>virtual</code>과 <code>override</code>로 실행 중 실제 타입을 보고 정해지면 동적이다. 동적 쪽은 가상 함수 테이블을 거친다.</p><p>상속은 "~이다" 관계가 뚜렷하고 계층이 얕을 때만 쓸 만하다. 날기·헤엄치기를 상속으로 조합하면 <code>FlyingSwimmingEnemy</code> 같은 클래스가 불어난다. Unity의 <code>GameObject</code>와 컴포넌트가 컴포지션을 엔진 차원에서 구현한 것이다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>객체지향이란</strong> — 데이터와 규칙을 객체로 묶어 책임을 나누는 방식이다. 네 특징으로 설명하고, 얻는 것은 변경이 한곳에 갇히는 것이라고 덧붙인다.</li><li><strong>SOLID를 적용한 예</strong> — 무기가 늘 때마다 분기를 고치던 코드를 <code>IWeapon</code>으로 바꿔 새 무기가 클래스 추가만으로 끝나게 했다고 말한다. 원칙 이름보다 고친 코드 하나가 강하다.</li><li><strong>LSP를 어기는 코드</strong> — <code>Bird</code>를 상속한 <code>Penguin</code>이 <code>Fly()</code>에서 예외를 던지면 <code>Bird</code>를 믿고 쓰는 코드가 깨진다. "난다"를 별도 인터페이스로 뺀다고 답한다.</li><li><strong>상속과 컴포지션</strong> — 기본은 컴포지션이고, 모든 팝업이 공유하는 열기·닫기 흐름처럼 공통 동작이 뚜렷하고 계층이 얕을 때는 상속이 더 읽기 쉽다.</li><li><strong>결합도 낮추기</strong> — 구체 타입 대신 인터페이스에 의존하고, 참조는 밖에서 받고, 먼 시스템끼리는 이벤트로 알린다. 줄줄이 따라 고칠 곳을 없애는 것이 목적이다.</li></ul><h3>흔한 오해</h3><ul><li><strong>DIP는 호출 방향을 뒤집는 것</strong> — 방향이 아니라 의존 대상을 바꾸는 것이다. 인터페이스를 상위 쪽 필요에 맞춰 정의하고 하위가 구현한다.</li><li><strong>SRP는 클래스를 작게 쪼개라는 뜻</strong> — 개수를 세는 규칙이 아니다. 기준은 바뀌어야 할 이유이고, 모든 기능을 한 매니저에 모으는 것이 가장 크게 어긴 꼴이다.</li><li><strong>오버라이딩이 정적 다형성</strong> — 반대다. 오버로딩이 컴파일 시점, 오버라이딩이 실행 시점이다.</li><li><strong>자식이 부모와 다르게 동작하면 LSP 위반</strong> — 약속을 지키면서 구현을 바꾸는 것은 다형성의 목적이다. 위반은 약속을 깨뜨릴 때다.</li></ul>
+    private void Update()                       // 어떤 무기인지 몰라도 발사된다
+    {
+        if (Input.GetButtonDown("Fire1")) weapon?.Fire(transform.position);
+    }
+}</code></pre>
+<h3>상속은 얕을 때만, 기본은 컴포지션</h3>
+<p>다형성은 두 갈래다. 오버로딩처럼 컴파일 때 대상이 정해지면 정적, <code>virtual</code>과 <code>override</code>로 실행 중에 정해지면 동적이다.</p>
+<p>상속은 "~이다" 관계가 뚜렷하고 계층이 얕을 때만 쓸 만하다. 날기와 헤엄치기를 상속으로 조합하면 <code>FlyingSwimmingEnemy</code> 같은 클래스가 불어난다.</p>
+<p>컴포지션은 기능을 부품으로 따로 두고 필요한 것만 붙인다. Unity의 <code>GameObject</code>와 컴포넌트가 이 방식을 엔진 차원에서 구현한 것이다.</p>
+<h3>면접에서 이렇게 답한다</h3>
+<ul>
+<li><strong>객체지향이란</strong> — 데이터와 규칙을 객체로 묶어 책임을 나누는 방식이다. 네 특징으로 설명하고, 얻는 것은 변경이 한곳에 갇히는 것이라고 덧붙인다.</li>
+<li><strong>SOLID를 적용한 예</strong> — 무기가 늘 때마다 분기를 고치던 코드를 <code>IWeapon</code>으로 바꿨다고 말한다. 원칙 이름을 외우는 것보다 고친 코드 하나가 강하다.</li>
+<li><strong>LSP를 어기는 코드</strong> — <code>Bird</code>를 상속한 <code>Penguin</code>이 <code>Fly()</code>에서 예외를 던지는 경우다. <code>Bird</code>를 믿고 쓰는 코드가 깨지니 "난다"를 별도 인터페이스로 뺀다.</li>
+<li><strong>상속과 컴포지션</strong> — 기본은 컴포지션이다. 모든 팝업이 공유하는 열기·닫기 흐름처럼 공통 동작이 뚜렷하면 얕은 상속이 더 읽기 쉽다.</li>
+<li><strong>결합도 낮추기</strong> — 구체 타입 대신 인터페이스에 의존하고, 참조는 밖에서 받는다. 먼 시스템끼리는 이벤트로 알린다.</li>
+</ul>
+<h3>이런 오해를 한다</h3>
+<ul>
+<li><strong>DIP는 호출 방향을 뒤집는 것</strong> — 뒤집는 것은 의존 대상이다. 인터페이스를 상위 쪽 필요에 맞춰 정의하고 하위가 구현한다.</li>
+<li><strong>SRP는 클래스를 작게 쪼개라는 뜻</strong> — 개수를 세는 규칙이 아니다. 기준은 바뀌어야 할 이유이고, 한 매니저에 다 모으는 것이 가장 크게 어긴 꼴이다.</li>
+<li><strong>오버라이딩이 정적 다형성</strong> — 반대다. 오버로딩이 컴파일 시점, 오버라이딩이 실행 시점이다.</li>
+<li><strong>자식이 부모와 다르게 동작하면 LSP 위반</strong> — 약속을 지키면서 구현을 바꾸는 것은 다형성의 목적이다. 위반은 약속 자체를 깨뜨릴 때다.</li>
+</ul>
+<h3>3줄 정리</h3>
+<ul>
+<li>데이터와 규칙을 한 클래스에 묶어 고칠 곳을 모은다.</li>
+<li>SOLID의 핵심은 갈아 끼울 자리를 인터페이스로 여는 것.</li>
+<li>상속은 얕은 계층에만, 나머지는 컴포지션으로 조합한다.</li>
+</ul>
 <div class="refs"><h2>참고 자료</h2><ul><li><a href="https://learn.microsoft.com/ko-kr/dotnet/csharp/fundamentals/object-oriented/" target="_blank" rel="noopener">Microsoft Learn – 클래스, 구조체, 그리고 레코드(C#)</a></li><li><a href="https://learn.microsoft.com/ko-kr/dotnet/csharp/fundamentals/object-oriented/inheritance" target="_blank" rel="noopener">Microsoft Learn – 개체 지향 프로그래밍: 상속</a></li><li><a href="https://learn.microsoft.com/ko-kr/dotnet/csharp/fundamentals/object-oriented/polymorphism" target="_blank" rel="noopener">Microsoft Learn – 다형성</a></li><li><a href="https://learn.microsoft.com/ko-kr/dotnet/csharp/fundamentals/types/interfaces" target="_blank" rel="noopener">Microsoft Learn – 인터페이스: 여러 형식에 대한 동작 정의</a></li></ul></div>
 </article>
 <div class="pager"><span></span><a href="06-02.html">디자인 패턴 →</a></div>

@@ -16,7 +16,8 @@
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--text);
-    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+    font: 450 17px/1.85 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  strong { font-weight: 800; }
   main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
   a { color: var(--blue-d); }
   .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
@@ -25,8 +26,12 @@
     padding: 4px 12px; font-size: .8rem; font-weight: 800; }
   h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
   h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
-  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
-  p, ul, ol { margin: 10px 0; }
+  h3 { font-size: 1.1rem; font-weight: 800; margin: 34px 0 10px; padding-top: 4px; border-top: 2px solid var(--line); }
+  article h3:first-of-type { margin-top: 26px; }
+  p, ul, ol { margin: 0 0 20px; }
+  h3 + p, h3 + ul { margin-top: 0; }
+  svg { display: block; width: 100%; max-width: 640px; height: auto; margin: 18px auto 22px; color: var(--muted); }
+  svg text { font: 600 13px -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; }
   li { margin: 5px 0; }
   .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
   .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
@@ -58,24 +63,93 @@
 <div class="nav"><a href="../index.html#library">← 도서관</a><a href="05.html" class="badge">게임 수학·물리 목차</a></div>
 <article class="card">
 <h1>벡터</h1>
-<p class="lead">내적으로 각도와 앞뒤를, 외적으로 좌우와 법선을 얻는다. 거리는 제곱끼리 비교한다</p>
-<h3>핵심 개념</h3><p>게임의 벡터 연산은 대부분 "두 벡터가 이루는 각"과 "한 벡터를 다른 방향으로 투영한 길이"에서 갈라져 나온다. 내적과 외적의 기하학적 의미만 잡으면 시야각 판정, 반사, 평면 거리, 면 법선이 모두 한 도구의 변형으로 보인다.</p><p><strong>내적</strong>은 두 길이의 곱에 사잇각의 코사인을 곱한 값이다. 둘 다 정규화돼 있으면 내적이 곧 코사인이라 값 하나로 각도를 읽는다. 0.5면 60도, 1이면 정면, 0이면 정확히 옆, 음수면 뒤쪽이다. 코사인은 0도에서 180도 구간에서 단조 감소하므로, 역코사인으로 각도를 구하는 대신 내적을 <code>cos(시야각/2)</code>와 바로 비교하면 결과가 같으면서 훨씬 싸다. 시야각 90도면 기준값이 약 0.707, 120도면 정확히 0.5다.</p><p>내적의 두 번째 얼굴은 <strong>투영</strong>이다. 정규화된 법선 N에 대해 <code>Dot(v, N) * N</code>이 v의 법선 방향 성분이고, 여기서 셋이 나온다. 한 번 빼면 <code>I - Dot(I, N) * N</code>으로 벽을 따라 미끄러지는 슬라이드 벡터, 두 배로 빼면 <code>I - 2 * Dot(I, N) * N</code>으로 법선 성분만 부호가 뒤집힌 반사 벡터가 된다. 평면 위 한 점 Q에 대한 <code>Abs(Dot(N, P - Q))</code>는 점과 평면의 최단 거리이고, 절댓값을 벗기면 부호가 앞뒤를 알려준다. 셋 다 N이 단위 길이여야 한다.</p><p><strong>외적</strong>은 두 벡터가 만드는 평면에 수직인 벡터를 준다. 방향은 회전 방향을, 길이는 평행사변형 넓이를 뜻한다. 삼각형 법선을 <code>(B - A)</code>와 <code>(C - A)</code>의 외적으로 구한 뒤 정규화하는 것도 길이가 삼각형 넓이의 두 배라서다. 순서를 바꾸면 부호가 뒤집혀 정점을 감는 방향이 앞뒷면을 정한다. Unity에서 <code>Cross(forward, toTarget).y</code>가 양수면 목표가 오른쪽인데, 정면 (0,0,1)과 오른쪽 (1,0,0)의 외적이 (0,1,0)인 것으로 확인된다.</p><p>길이에는 습관 둘이 따라붙는다. 입력 h, v로 <code>new Vector3(h, 0, v)</code>를 만들어 속도에 그대로 곱하면 대각선 길이가 약 1.41이라 41% 빨라지므로, 방향만 필요하면 정규화한다. 또 제곱근은 단조 증가라 대소 비교 결과를 바꾸지 않으니, 어느 적이 더 가까운지만 보면 될 때는 <code>sqrMagnitude</code>로 비교해 제곱근을 아낀다. 대신 사거리 같은 기준값도 제곱해야 한다.</p><pre><code>public class Sight : MonoBehaviour
+<p class="lead">각도와 앞뒤는 내적, 좌우와 법선은 외적으로 얻는다. 거리는 제곱끼리 비교한다</p>
+<p>적이 내 시야에 들어왔는지, 목표가 왼쪽인지, 튕긴 총알이 어디로 갈지. 이걸 조건문으로 하나씩 풀면 끝이 없다. 벡터 연산 두 개면 셋 다 나온다.</p>
+<svg viewBox="0 0 640 180" width="100%" role="img" aria-label="왼쪽은 내적이 방향을 숫자 하나로 바꾸는 그림, 오른쪽은 외적이 평면에 수직인 벡터와 평행사변형 넓이를 만드는 그림">
+<text x="16" y="20" font-size="13" fill="currentColor">내적 - 방향을 숫자 하나로</text>
+<line x1="110" y1="140" x2="230" y2="140" stroke="currentColor"/>
+<polyline points="222,135 232,140 222,145" fill="none" stroke="currentColor"/>
+<text x="180" y="160" font-size="13" fill="currentColor">forward (1)</text>
+<line x1="110" y1="140" x2="170" y2="38" stroke="currentColor"/>
+<polyline points="162,42 172,34 168,46" fill="none" stroke="currentColor"/>
+<text x="178" y="42" font-size="13" fill="currentColor">0.5 (60도)</text>
+<line x1="110" y1="140" x2="110" y2="38" stroke="currentColor"/>
+<polyline points="105,46 110,36 115,46" fill="none" stroke="currentColor"/>
+<text x="100" y="32" font-size="13" fill="currentColor" text-anchor="end">0 (옆)</text>
+<line x1="110" y1="140" x2="24" y2="140" stroke="currentColor"/>
+<polyline points="32,135 22,140 32,145" fill="none" stroke="currentColor"/>
+<text x="20" y="160" font-size="13" fill="currentColor">-1 (뒤)</text>
+<circle cx="110" cy="140" r="3" fill="currentColor"/>
+<text x="352" y="20" font-size="13" fill="currentColor">외적 - 수직 방향과 넓이</text>
+<path d="M 420 150 L 540 150 L 600 112 L 480 112 Z" fill="currentColor" fill-opacity="0.08" stroke="currentColor" stroke-dasharray="4 3"/>
+<line x1="420" y1="150" x2="540" y2="150" stroke="currentColor"/>
+<polyline points="532,145 542,150 532,155" fill="none" stroke="currentColor"/>
+<text x="548" y="166" font-size="13" fill="currentColor">a</text>
+<line x1="420" y1="150" x2="480" y2="112" stroke="currentColor"/>
+<polyline points="470,112 483,110 476,121" fill="none" stroke="currentColor"/>
+<text x="468" y="104" font-size="13" fill="currentColor">b</text>
+<line x1="420" y1="150" x2="420" y2="52" stroke="currentColor"/>
+<polyline points="415,60 420,50 425,60" fill="none" stroke="currentColor"/>
+<text x="430" y="56" font-size="13" fill="currentColor">Cross(a, b)</text>
+<text x="506" y="136" font-size="13" fill="currentColor">넓이</text>
+<circle cx="420" cy="150" r="3" fill="currentColor"/>
+</svg>
+<h3>내적은 사잇각을 숫자 하나로 준다</h3>
+<p>내적은 두 길이의 곱에 사잇각의 코사인을 곱한 값이다. 두 벡터가 모두 정규화돼 있으면 내적이 곧 코사인이다. 값 하나로 각도를 읽는 셈이다.</p>
+<p>부호와 크기가 곧 방향이다. 1이면 정면, 0이면 정확히 옆, 음수면 뒤쪽이다. 0.5면 60도, 0.707이면 45도다.</p>
+<p>시야각 판정에 역코사인은 필요 없다. 코사인은 0도에서 180도까지 줄어들기만 하기 때문이다. 내적을 <code>cos(시야각 절반)</code>과 바로 비교하면 결과가 같으면서 훨씬 싸다.</p>
+<p>시야각 90도면 기준값이 약 0.707이다. 120도면 정확히 0.5다.</p>
+<h3>내적을 한 번 빼면 미끄러짐, 두 번이면 반사</h3>
+<p>내적의 두 번째 얼굴은 투영이다. 단위 법선 N에 대해 <code>Dot(v, N) * N</code>이 v의 법선 방향 성분이다. 이 성분을 얼마나 빼느냐로 결과가 갈린다.</p>
+<p>아래에서 I는 들어오는 방향, P는 점, Q는 평면 위의 아무 점이다.</p>
+<table>
+<thead><tr><th>필요한 것</th><th>식</th></tr></thead>
+<tbody>
+<tr><td>벽을 따라 미끄러지기</td><td>I − Dot(I, N) * N</td></tr>
+<tr><td>반사</td><td>I − 2 * Dot(I, N) * N</td></tr>
+<tr><td>점 P와 평면의 최단 거리</td><td>Abs(Dot(N, P − Q))</td></tr>
+</tbody>
+</table>
+<p>셋 다 N이 단위 길이라는 전제 위에 있다. 정규화를 빠뜨리면 결과가 조용히 틀어진다. 평면 거리에서 절댓값을 벗기면 부호가 앞뒤를 알려 준다.</p>
+<h3>외적은 좌우와 면 법선을 만든다</h3>
+<p>외적은 두 벡터가 만드는 평면에 수직인 벡터를 준다. 방향은 돌아가는 쪽을, 길이는 평행사변형 넓이를 뜻한다. 순서를 바꾸면 부호가 뒤집힌다.</p>
+<p>삼각형 법선이 여기서 나온다. (B − A)와 (C − A)를 외적한 뒤 정규화하면 된다. 길이가 삼각형 넓이의 두 배라 정규화가 꼭 필요하다.</p>
+<p>좌우 판정도 외적이다. Unity에서 <code>Cross(forward, toTarget).y</code>가 양수면 목표가 오른쪽이다. 정면 (0,0,1)과 오른쪽 (1,0,0)의 외적이 (0,1,0)인 것으로 확인된다.</p>
+<h3>정규화와 제곱 비교로 버그와 비용을 줄인다</h3>
+<p>입력 h, v로 만든 <code>Vector3(h, 0, v)</code>를 속도에 그대로 곱하면 안 된다. 대각선 길이가 약 1.41이라 41% 빨라진다. 방향만 필요하면 정규화한다.</p>
+<p>거리 비교에는 제곱근이 필요 없다. 제곱근은 값이 커지면 결과도 커져 대소 관계를 바꾸지 않는다. <code>sqrMagnitude</code>로 비교하고 기준값도 미리 제곱해 둔다.</p>
+<p>시야 판정과 좌우 판정을 함께 담으면 이렇다:</p>
+<pre><code>public bool CanSee(Transform target)   // 사거리와 시야각을 한 번에 본다
 {
-    public float viewAngle = 90f;   // 시야각(도)
-    public float range = 10f;
+    Vector3 to = target.position - transform.position;
+    if (to.sqrMagnitude &gt; range * range) return false;  // 기준값도 제곱해 비교
+    float cos = Vector3.Dot(transform.forward, to.normalized);
+    return cos &gt;= Mathf.Cos(viewAngle * 0.5f * Mathf.Deg2Rad); // 90도면 약 0.707
+}
 
-    public bool CanSee(Transform target)
-    {
-        Vector3 to = target.position - transform.position;
-        if (to.sqrMagnitude &gt; range * range) return false;         // 기준값도 제곱해서 비교
-        float cos = Vector3.Dot(transform.forward, to.normalized);
-        return cos &gt;= Mathf.Cos(viewAngle * 0.5f * Mathf.Deg2Rad); // 90도면 약 0.707
-    }
-
-    // 앞뒤는 내적, 좌우는 외적의 부호로 가른다
-    public bool IsOnRight(Transform target)
-        =&gt; Vector3.Cross(transform.forward, target.position - transform.position).y &gt; 0f;
-}</code></pre><h3>면접에서 이렇게 답한다</h3><ul><li><strong>내적이란? 어디에 쓰나</strong> — 두 벡터의 사잇각 코사인에 길이를 곱한 값이다. 정규화된 벡터끼리면 값이 곧 코사인이라 부호로 앞뒤를, 크기로 각도를 읽는다. 시야각 판정은 cos(시야각의 절반)과 비교해 역코사인 없이 처리한다.</li><li><strong>외적이란? 결과는 무엇을 뜻하나</strong> — 두 벡터가 이루는 평면에 수직인 벡터다. 방향은 회전 방향을, 길이는 평행사변형 넓이를 뜻해 삼각형 법선과 좌우 판정에 쓴다.</li><li><strong>벡터를 언제 정규화하나</strong> — 방향만 의미가 있고 길이가 결과에 섞이면 안 될 때다. 이동 입력을 정규화하지 않으면 대각선이 약 1.41배 빨라지고, 반사와 평면 거리 공식도 법선이 단위 길이라는 전제 위에 있다.</li><li><strong>거리 비교에 왜 sqrMagnitude를 쓰나</strong> — 제곱근은 단조 증가라 비교 결과를 바꾸지 않는데 계산은 비싸다. 매 프레임 많은 대상을 훑을 때 아끼고, 기준값은 미리 제곱해 둔다.</li></ul><h3>흔한 오해</h3><ul><li><strong>내적으로 좌우도 알 수 있다</strong> — 코사인은 왼쪽 30도와 오른쪽 30도에 같은 값을 준다. 좌우는 외적의 부호로 가른다.</li><li><strong>외적 결과가 곧 단위 법선이다</strong> — 길이가 넓이에 비례하므로 정규화해야 한다. 정점 셋이 거의 일직선이면 길이가 0에 가까워 불안정해진다.</li><li><strong>반사 벡터는 I - Dot(I, N) * N 이다</strong> — 그것은 벽을 따라 미끄러지는 성분이다. 반사는 법선 성분의 부호를 뒤집는 것이라 두 배로 빼야 한다.</li><li><strong>sqrMagnitude는 그냥 빠른 magnitude다</strong> — 값 자체가 다르다. 사거리 5와 비교하려면 25와 비교해야 한다.</li></ul>
+// 앞뒤는 내적, 좌우는 외적의 부호로 가른다
+bool IsOnRight(Transform target)
+    =&gt; Vector3.Cross(transform.forward, target.position - transform.position).y &gt; 0f;</code></pre>
+<h3>면접에서 이렇게 답한다</h3>
+<ul>
+<li><strong>내적이 무엇이고 어디에 쓰나</strong> — 두 벡터의 사잇각 코사인에 길이를 곱한 값이다. 정규화된 벡터끼리면 값이 곧 코사인이다. 시야각 판정은 cos(시야각 절반)과 비교해 역코사인 없이 끝낸다.</li>
+<li><strong>외적의 결과는 무엇을 뜻하나</strong> — 두 벡터가 이루는 평면에 수직인 벡터다. 방향은 돌아가는 쪽, 길이는 평행사변형 넓이다. 삼각형 법선과 좌우 판정에 쓴다.</li>
+<li><strong>벡터를 언제 정규화하나</strong> — 방향만 의미가 있고 길이가 섞이면 안 될 때다. 이동 입력을 정규화하지 않으면 대각선이 1.41배 빨라진다. 반사와 평면 거리 공식도 단위 법선을 전제한다.</li>
+<li><strong>거리 비교에 왜 sqrMagnitude를 쓰나</strong> — 제곱근은 대소 관계를 바꾸지 않는데 계산은 비싸다. 매 프레임 많은 대상을 훑을 때 아낀다. 기준값은 미리 제곱해 둔다.</li>
+</ul>
+<h3>이런 오해를 한다</h3>
+<ul>
+<li><strong>내적으로 좌우도 알 수 있다</strong> — 코사인은 왼쪽 30도와 오른쪽 30도에 같은 값을 준다. 좌우는 외적의 부호로 가른다.</li>
+<li><strong>외적 결과가 곧 단위 법선이다</strong> — 길이가 넓이에 비례하므로 정규화해야 한다. 정점 셋이 거의 일직선이면 길이가 0에 가까워 불안정하다.</li>
+<li><strong>반사는 내적을 한 번 빼는 것이다</strong> — 그건 벽을 따라 미끄러지는 성분이다. 반사는 법선 성분의 부호를 뒤집는 것이라 두 배로 뺀다.</li>
+<li><strong>sqrMagnitude는 그냥 빠른 magnitude다</strong> — 값 자체가 다르다. 사거리 5와 비교하려면 25와 비교해야 한다.</li>
+</ul>
+<h3>3줄 정리</h3>
+<ul>
+<li>각도와 앞뒤는 내적, 좌우와 법선은 외적이다.</li>
+<li>반사는 법선 성분을 두 배로 뺀 값이다. N은 단위 길이여야 한다.</li>
+<li>거리 비교는 sqrMagnitude로, 기준값도 제곱해 둔다.</li>
+</ul>
 <div class="refs"><h2>참고 자료</h2><ul><li><a href="https://docs.unity3d.com/ScriptReference/Vector3.Dot.html" target="_blank" rel="noopener">Unity 스크립팅 API – Vector3.Dot</a></li><li><a href="https://docs.unity3d.com/ScriptReference/Vector3.Cross.html" target="_blank" rel="noopener">Unity 스크립팅 API – Vector3.Cross</a></li><li><a href="https://docs.unity3d.com/ScriptReference/Vector3.Reflect.html" target="_blank" rel="noopener">Unity 스크립팅 API – Vector3.Reflect</a></li><li><a href="https://docs.unity3d.com/ScriptReference/Vector3-sqrMagnitude.html" target="_blank" rel="noopener">Unity 스크립팅 API – Vector3.sqrMagnitude</a></li></ul></div>
 </article>
 <div class="pager"><span></span><a href="05-02.html">행렬과 좌표계 →</a></div>

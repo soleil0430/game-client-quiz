@@ -16,7 +16,8 @@
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--text);
-    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+    font: 450 17px/1.85 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  strong { font-weight: 800; }
   main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
   a { color: var(--blue-d); }
   .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
@@ -25,8 +26,12 @@
     padding: 4px 12px; font-size: .8rem; font-weight: 800; }
   h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
   h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
-  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
-  p, ul, ol { margin: 10px 0; }
+  h3 { font-size: 1.1rem; font-weight: 800; margin: 34px 0 10px; padding-top: 4px; border-top: 2px solid var(--line); }
+  article h3:first-of-type { margin-top: 26px; }
+  p, ul, ol { margin: 0 0 20px; }
+  h3 + p, h3 + ul { margin-top: 0; }
+  svg { display: block; width: 100%; max-width: 640px; height: auto; margin: 18px auto 22px; color: var(--muted); }
+  svg text { font: 600 13px -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; }
   li { margin: 5px 0; }
   .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
   .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
@@ -58,7 +63,7 @@
 <div class="nav"><a href="../index.html#library">← 도서관</a><span class="badge">C++ 기초</span></div>
 <h1>C++ 기초 공부 자료</h1>
 <p class="lead">글 5편. 근거가 된 질문 목록은 질문은행 10-CPP-기초.md에 있다.</p>
-<div class="list"><a href="10-01.html"><strong>클래스와 가상 함수</strong><span>vtable이 무엇을 대가로 다형성을 주는지 알면 가상 소멸자와 생성 순서가 따라온다</span></a><a href="10-02.html"><strong>메모리와 포인터</strong><span>GC가 없는 대신 소유권을 코드로 적는다. RAII와 스마트 포인터가 그 문법이다</span></a><a href="10-03.html"><strong>현대 C++</strong><span>값 복사가 기본이라 이동이 필요하고, 코드를 컴파일 타임에 찍어내는 것이 템플릿이다</span></a><a href="10-04.html"><strong>STL</strong><span>메모리가 이어져 있는지와 정렬을 유지하는지, 두 축으로 컨테이너를 고른다</span></a><a href="10-05.html"><strong>컴파일과 링크</strong><span>파일마다 따로 컴파일하고 마지막에 묶는 구조를 알면 오류만 보고 원인을 좁힌다</span></a></div>
+<div class="list"><a href="10-01.html"><strong>클래스와 가상 함수</strong><span>C#과 달리 virtual이 없으면 재정의가 아니다. 그 대가가 vtable이다</span></a><a href="10-02.html"><strong>메모리와 포인터</strong><span>GC가 없으니 소유권을 코드에 적는다. RAII와 unique_ptr이 그 문법이다</span></a><a href="10-03.html"><strong>현대 C++</strong><span>값 복사가 기본이라 이동이 필요하다. 템플릿은 타입마다 코드를 찍어낸다</span></a><a href="10-04.html"><strong>STL</strong><span>메모리가 이어졌는지, 정렬을 유지하는지 두 축으로 컨테이너를 고른다</span></a><a href="10-05.html"><strong>컴파일과 링크</strong><span>C++은 파일마다 따로 컴파일한다. 링크 오류는 정의가 없다는 뜻이다</span></a></div>
 </main>
 </body>
 </html>

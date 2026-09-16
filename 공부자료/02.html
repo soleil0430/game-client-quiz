@@ -16,7 +16,8 @@
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--text);
-    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+    font: 450 17px/1.85 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  strong { font-weight: 800; }
   main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
   a { color: var(--blue-d); }
   .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
@@ -25,8 +26,12 @@
     padding: 4px 12px; font-size: .8rem; font-weight: 800; }
   h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
   h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
-  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
-  p, ul, ol { margin: 10px 0; }
+  h3 { font-size: 1.1rem; font-weight: 800; margin: 34px 0 10px; padding-top: 4px; border-top: 2px solid var(--line); }
+  article h3:first-of-type { margin-top: 26px; }
+  p, ul, ol { margin: 0 0 20px; }
+  h3 + p, h3 + ul { margin-top: 0; }
+  svg { display: block; width: 100%; max-width: 640px; height: auto; margin: 18px auto 22px; color: var(--muted); }
+  svg text { font: 600 13px -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; }
   li { margin: 5px 0; }
   .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
   .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
@@ -58,7 +63,7 @@
 <div class="nav"><a href="../index.html#library">← 도서관</a><span class="badge">Unity 엔진</span></div>
 <h1>Unity 엔진 공부 자료</h1>
 <p class="lead">글 11편. 근거가 된 질문 목록은 질문은행 02-Unity-엔진.md에 있다.</p>
-<div class="list"><a href="02-01.html"><strong>기본 구조</strong><span>GameObject는 그릇이고 컴포넌트가 기능이다. 프리팹·씬·레이어·특수 폴더가 그 위에 얹힌다</span></a><a href="02-02.html"><strong>생명주기와 스크립팅</strong><span>엔진이 언제 내 함수를 부르는지 알면 초기화·물리·파괴에서 나는 버그가 대부분 사라진다</span></a><a href="02-03.html"><strong>직렬화와 데이터</strong><span>인스펙터에 값이 보이는 이유부터 세이브 파일을 어디에 어떻게 두는지까지가 한 줄기다</span></a><a href="02-04.html"><strong>스크립팅 백엔드</strong><span>내가 쓴 C#이 기기에서 실제로 실행되기까지 — Mono의 JIT과 IL2CPP의 AOT가 갈리는 지점</span></a><a href="02-05.html"><strong>에셋과 리소스 관리</strong><span>무엇을 언제 메모리에 올리고 언제 내리는가 — Resources·AssetBundle·Addressables의 선택 기준</span></a><a href="02-06.html"><strong>UI</strong><span>Canvas가 언제 다시 그려지는지를 알면 해상도 대응도 최적화도 같은 이야기가 된다</span></a><a href="02-07.html"><strong>물리</strong><span>Rigidbody가 있느냐 없느냐로 충돌 이벤트와 비용이 갈린다는 것이 물리의 출발점이다</span></a><a href="02-08.html"><strong>애니메이션·카메라·입력</strong><span>상태 머신이 클립을 고르고, 카메라는 늦게 따라가고, 입력은 기기가 아니라 의미로 묶는다</span></a><a href="02-09.html"><strong>AI와 길찾기</strong><span>NavMesh는 지형을 미리 단순화해 둔 그래프이고, FSM과 행동 트리는 판단을 조직하는 방식이다</span></a><a href="02-10.html"><strong>빌드와 플랫폼</strong><span>빌드 용량은 대부분 텍스처와 오디오이고, 설치 실패는 대부분 아키텍처 설정 문제다</span></a><a href="02-11.html"><strong>DOTS와 최신 기능</strong><span>ECS는 데이터를 한 줄로 늘어놓아 캐시를 살리는 구조이고, Job과 Burst가 함께 가야 값을 한다</span></a></div>
+<div class="list"><a href="02-01.html"><strong>기본 구조</strong><span>GameObject는 빈 그릇이고 기능은 컴포넌트가 맡는다. 프리팹과 레이어가 그 규칙 위에 얹힌다</span></a><a href="02-02.html"><strong>생명주기와 스크립팅</strong><span>엔진이 내 함수를 언제 부르는지 알면 초기화·물리·파괴에서 나는 버그가 대부분 사라진다</span></a><a href="02-03.html"><strong>직렬화와 데이터</strong><span>인스펙터에 보이는 값이 곧 저장되는 값이다. 그 규칙이 씬·프리팹·세이브 파일로 이어진다</span></a><a href="02-04.html"><strong>스크립팅 백엔드</strong><span>C#은 IL로 컴파일된다. 그 IL을 실행 중에 번역하면 Mono, 미리 컴파일하면 IL2CPP다</span></a><a href="02-05.html"><strong>에셋과 리소스 관리</strong><span>에셋은 기기 메모리보다 크다. 무엇을 언제 올리고 내리는지가 세 방식으로 갈린다</span></a><a href="02-06.html"><strong>UI</strong><span>UI 성능을 가르는 기준은 계층 구조가 아니라 무엇이 얼마나 자주 바뀌느냐다</span></a><a href="02-07.html"><strong>물리</strong><span>충돌 이벤트가 오느냐는 Rigidbody가 있느냐에서 갈리고, 비용은 콜라이더 모양에서 갈린다</span></a><a href="02-08.html"><strong>애니메이션·카메라·입력</strong><span>상태 머신이 클립을 고르고, 카메라는 LateUpdate에서 따라가고, 입력은 액션으로 묶는다</span></a><a href="02-09.html"><strong>AI와 길찾기</strong><span>NavMesh는 지형을 미리 단순화해 둔 그래프이고, 판단은 FSM에서 시작해 행동 트리로 넘어간다</span></a><a href="02-10.html"><strong>빌드와 플랫폼</strong><span>빌드 용량은 텍스처에서 갈리고, 설치 실패는 대개 ARM64와 API 레벨에서 갈린다</span></a><a href="02-11.html"><strong>DOTS와 최신 기능</strong><span>ECS는 데이터를 연속 메모리에 늘어놓는 구조이고, Job과 Burst가 같이 붙어야 값을 한다</span></a></div>
 </main>
 </body>
 </html>

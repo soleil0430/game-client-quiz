@@ -16,7 +16,8 @@
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--text);
-    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+    font: 450 17px/1.85 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  strong { font-weight: 800; }
   main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
   a { color: var(--blue-d); }
   .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
@@ -25,8 +26,12 @@
     padding: 4px 12px; font-size: .8rem; font-weight: 800; }
   h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
   h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
-  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
-  p, ul, ol { margin: 10px 0; }
+  h3 { font-size: 1.1rem; font-weight: 800; margin: 34px 0 10px; padding-top: 4px; border-top: 2px solid var(--line); }
+  article h3:first-of-type { margin-top: 26px; }
+  p, ul, ol { margin: 0 0 20px; }
+  h3 + p, h3 + ul { margin-top: 0; }
+  svg { display: block; width: 100%; max-width: 640px; height: auto; margin: 18px auto 22px; color: var(--muted); }
+  svg text { font: 600 13px -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; }
   li { margin: 5px 0; }
   .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
   .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
@@ -58,16 +63,73 @@
 <div class="nav"><a href="../index.html#library">← 도서관</a><a href="08.html" class="badge">운영체제·동시성 목차</a></div>
 <article class="card">
 <h1>컴퓨터 구조</h1>
-<p class="lead">캐시 라인·엔디언·float 정밀도는 프레임 튐과 좌표 떨림으로 눈앞에 나타난다</p>
-<h3>핵심 개념</h3><p>메모리 계층은 빠르고 작고 비싼 것에서 느리고 크고 싼 것으로 내려간다. 레지스터에서 L1, L2, L3, 메인 메모리, 저장 장치 순이고 L1은 코어마다 붙어 있으며 L3는 보통 코어들이 공유한다. L1과 메인 메모리의 지연 차이가 100배쯤 되기 때문에, 요즘 게임 코드의 속도는 연산 횟수보다 <strong>메모리 접근 패턴</strong>이 정한다.</p><table><thead><tr><th>계층</th><th>대략 크기</th><th>대략 지연</th></tr></thead><tbody><tr><td>L1(코어 전용)</td><td>수십 KB</td><td>수 사이클</td></tr><tr><td>L2</td><td>수백 KB ~ 수 MB</td><td>십수 사이클</td></tr><tr><td>L3(코어 공유)</td><td>수 MB 이상</td><td>수십 사이클</td></tr><tr><td>메인 메모리</td><td>GB 단위</td><td>수백 사이클</td></tr></tbody></table><p>캐시는 바이트 하나가 아니라 <strong>캐시 라인</strong>(보통 64바이트) 단위로 퍼 온다. 여기서 두 가지 지역성이 나온다. 방금 쓴 데이터를 곧 다시 쓰는 <strong>시간 지역성</strong>과, 가까운 주소를 잇따라 쓰는 <strong>공간 지역성</strong>이다. C/C++의 2차원 배열은 행 우선으로 저장되므로 안쪽 반복이 열을 도는 순회는 한 번 퍼 온 라인을 끝까지 쓰고, 열을 바깥에 두면 매 접근마다 새 라인을 읽어 미스가 난다. 연산 횟수는 같은데 몇 배가 차이 나는 이유다.</p><pre><code>// 캐시 친화: 안쪽 반복이 이어 붙은 주소를 훑는다
+<p class="lead">속도는 연산 횟수가 아니라 메모리 접근 순서가 정한다. 캐시 라인 64바이트가 기준이다</p>
+<p>연산 횟수는 똑같은데 실행 시간만 몇 배 차이 나는 코드가 있다. 원인은 계산이 아니라 메모리를 훑는 순서다. 캐시가 어떻게 퍼 오는지 알면 그 차이가 설명된다.</p>
+<h3>메모리 계층은 아래로 갈수록 느리고 크다</h3>
+<p>레지스터에서 시작해 L1, L2, L3, 메인 메모리, 저장 장치 순으로 내려간다. L1은 코어마다 붙어 있고 L3는 보통 코어들이 공유한다. 아래로 갈수록 크고 싸지는 대신 느려진다.</p>
+<svg viewBox="0 0 640 220" width="100%" role="img" aria-label="레지스터부터 메인 메모리까지 아래로 갈수록 폭이 넓어지는 메모리 계층과 각 계층의 크기 및 지연">
+<g fill="none" stroke="currentColor">
+<rect x="40" y="16" width="90" height="32" fill="currentColor" fill-opacity="0.08"/>
+<rect x="40" y="52" width="140" height="32" fill="currentColor" fill-opacity="0.08"/>
+<rect x="40" y="88" width="180" height="32"/>
+<rect x="40" y="124" width="230" height="32"/>
+<rect x="40" y="160" width="300" height="32"/>
+</g>
+<g fill="currentColor" font-size="13">
+<text x="52" y="38">레지스터</text>
+<text x="52" y="74">L1 (코어 전용)</text>
+<text x="52" y="110">L2</text>
+<text x="52" y="146">L3 (코어 공유)</text>
+<text x="52" y="182">메인 메모리</text>
+<text x="360" y="38">수십 개 · 1 사이클</text>
+<text x="360" y="74">수십 KB · 수 사이클</text>
+<text x="360" y="110">수백 KB~수 MB · 십수 사이클</text>
+<text x="360" y="146">수 MB 이상 · 수십 사이클</text>
+<text x="360" y="182">GB 단위 · 수백 사이클</text>
+<text x="40" y="212">L1과 메인 메모리의 지연 차이가 100배쯤 된다</text>
+</g>
+</svg>
+<h3>캐시는 64바이트 라인 단위로 퍼 온다</h3>
+<p>캐시는 바이트 하나가 아니라 캐시 라인(보통 64바이트) 통째로 읽어 온다. 여기서 두 가지 지역성이 나온다. 방금 쓴 데이터를 곧 다시 쓰는 시간 지역성과, 가까운 주소를 잇따라 쓰는 공간 지역성이다.</p>
+<p>2차원 배열은 행 우선으로 저장된다. 안쪽 반복이 열을 도는 순회는 한 번 퍼 온 라인을 끝까지 쓴다. 열을 바깥에 두면 접근마다 새 라인을 읽어 미스가 난다.</p>
+<p>격자 맵을 훑는 두 순회의 차이:</p>
+<pre><code>// 캐시 친화: 안쪽 반복이 이어 붙은 주소를 훑는다
 for (int y = 0; y &lt; H; y++)
     for (int x = 0; x &lt; W; x++)
-        sum += grid[y][x];
+        sum += grid[y][x];      // 한 번 퍼 온 라인을 끝까지 쓴다
 
-// 캐시 적대: 한 번 읽을 때마다 새 캐시 라인
+// 캐시 적대: 연산 횟수는 같은데 몇 배 느리다
 for (int x = 0; x &lt; W; x++)
     for (int y = 0; y &lt; H; y++)
-        sum += grid[y][x];</code></pre><p>클라이언트에서 이 이야기는 데이터 배치로 이어진다. 파티클 1만 개의 위치만 갱신하는데 구조체 하나에 색·수명·머티리얼까지 들어 있으면 라인마다 쓰지 않을 값이 딸려 와 대역폭을 버린다. 필요한 필드만 따로 배열로 모으는 배치(SoA)가 빠른 이유이고, 유니티 DOTS가 컴포넌트 조합별로 메모리를 묶는 것도 같은 계산이다.</p><p><strong>엔디언</strong>은 여러 바이트로 된 수를 메모리에 놓는 순서다. 리틀 엔디언은 낮은 자리 바이트를 낮은 주소에 두고 x86과 대부분의 ARM이 쓴다. 네트워크 바이트 순서는 빅 엔디언으로 정해져 있어서, 정수를 그대로 패킷에 실으면 기종이 다를 때 값이 뒤집힌다. 바이트 단위인 문자열은 영향이 없고 여러 바이트 수를 보낼 때만 변환한다. 음수를 담는 2의 보수도 같은 결의 약속이다. 양수의 비트를 뒤집고 1을 더하므로 8비트에서 -3은 <code>11111101</code>이 되고, 덕분에 뺄셈을 덧셈 회로로 처리할 수 있다.</p><p><strong>float</strong>은 부호·지수·가수로 나뉘고 단정밀도의 가수는 암시 비트를 포함해 24비트뿐이다. 그래서 값이 커질수록 표현할 수 있는 간격이 넓어진다. 좌표가 수십만 단위가 되면 작은 이동이 아예 반영되지 않거나 값이 튀어 오브젝트가 떨린다. 오픈 월드에서 플레이어가 멀어지면 월드 전체를 원점 쪽으로 되돌리는 <strong>원점 이동</strong>을 쓰는 이유다. 64비트 빌드로 바꿔도 해결되지 않는다. 포인터가 8바이트가 될 뿐 float은 여전히 4바이트다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>캐시 지역성이란</strong> — 시간 지역성은 방금 쓴 데이터를 곧 다시 쓰는 성질, 공간 지역성은 가까운 주소를 잇따라 쓰는 성질이다. 캐시는 라인 단위로 퍼 오므로 붙어 있는 데이터를 순서대로 훑으면 미스가 줄고, 찾으면 히트, 없어서 아래 계층까지 내려가면 미스다.</li><li><strong>행 우선과 열 우선 순회의 성능이 왜 다른가</strong> — 배열이 행 단위로 이어 붙어 있어서다. 행을 따라 돌면 한 캐시 라인을 여러 번 쓰고, 열을 따라 돌면 매 접근이 새 라인이라 미스가 난다.</li><li><strong>엔디언을 언제 신경 쓰나</strong> — 여러 바이트 정수를 네트워크나 파일로 주고받을 때다. 네트워크 바이트 순서는 빅 엔디언이라 보낼 때 변환하거나, 직렬화 포맷의 규약을 맞춘다.</li><li><strong>먼 좌표에서 오브젝트가 떨리는 이유는</strong> — float의 가수가 24비트라 값이 클수록 표현 간격이 넓어지기 때문이다. 원점 이동으로 좌표 크기 자체를 줄이거나, 꼭 필요한 계산만 double로 다룬다.</li></ul><h3>흔한 오해</h3><ul><li><strong>L1이 L3보다 크다</strong> — 반대다. 코어에 가까울수록 작고 빠르다. L1은 코어 전용이고 L3는 보통 코어들이 공유한다.</li><li><strong>캐시는 필요한 바이트만 가져온다</strong> — 라인(보통 64바이트) 단위로 가져온다. 쓰지 않는 필드가 섞여 있으면 그만큼 대역폭이 버려진다.</li><li><strong>64비트로 빌드하면 float 정밀도가 올라간다</strong> — 달라지는 것은 포인터 크기와 주소 한계다. float은 그대로 4바이트이고 C#의 <code>int</code>도 플랫폼과 무관하게 4바이트다.</li><li><strong>-3은 부호 비트만 1로 세우면 된다</strong> — 그것은 부호-크기 표현이다. 2의 보수에서는 비트를 뒤집고 1을 더해 <code>11111101</code>이 된다.</li><li><strong>64비트가 무조건 빠르다</strong> — 포인터가 커져 참조가 많은 자료구조는 캐시에 덜 담긴다. 주소 공간과 레지스터를 얻는 대신 치르는 비용이다.</li></ul>
+        sum += grid[y][x];      // 한 번 읽을 때마다 새 캐시 라인</code></pre>
+<p>데이터 배치도 같은 이야기다. 파티클 1만 개의 위치만 갱신하는데 구조체에 색·수명·머티리얼이 함께 들어 있으면, 라인마다 쓰지 않을 값이 딸려 와 대역폭을 버린다. 필요한 필드만 따로 배열로 모으는 배치가 빠른 이유이고, Unity DOTS도 같은 계산이다.</p>
+<h3>엔디언은 여러 바이트 수를 주고받을 때만 문제다</h3>
+<p>엔디언은 여러 바이트로 된 수를 메모리에 놓는 순서다. 리틀 엔디언은 낮은 자리 바이트를 낮은 주소에 두고 x86과 대부분의 ARM이 쓴다. 네트워크 바이트 순서는 빅 엔디언이라, 정수를 그대로 패킷에 실으면 기종이 다를 때 값이 뒤집힌다.</p>
+<p>바이트 단위인 문자열은 영향이 없다. 음수를 담는 2의 보수도 같은 결의 약속이다. 양수의 비트를 뒤집고 1을 더하므로 8비트에서 -3은 <code>11111101</code>이 되고, 덕분에 뺄셈을 덧셈 회로로 처리한다.</p>
+<h3>먼 좌표에서 오브젝트가 떨리는 이유</h3>
+<p>float은 부호·지수·가수로 나뉘고, 단정밀도의 가수는 암시 비트를 포함해 24비트뿐이다. 그래서 값이 커질수록 표현할 수 있는 간격이 넓어진다. 좌표가 수십만 단위가 되면 작은 이동이 아예 반영되지 않거나 값이 튄다.</p>
+<p><strong>오픈 월드에서 월드 전체를 원점 쪽으로 되돌리는 원점 이동을 쓰는 이유가 이것이다.</strong> 64비트 빌드로 바꿔도 해결되지 않는다. 포인터가 8바이트가 될 뿐 float은 여전히 4바이트다.</p>
+<h3>면접에서 이렇게 답한다</h3>
+<ul>
+<li><strong>캐시 지역성이란</strong> — 시간 지역성은 방금 쓴 데이터를 곧 다시 쓰는 성질, 공간 지역성은 가까운 주소를 잇따라 쓰는 성질이다. 캐시는 라인 단위로 퍼 오므로 붙어 있는 데이터를 순서대로 훑으면 미스가 준다.</li>
+<li><strong>행 우선과 열 우선 순회의 성능이 왜 다른가</strong> — 배열이 행 단위로 이어 붙어 있어서다. 행을 따라 돌면 한 캐시 라인을 여러 번 쓴다. 열을 따라 돌면 접근마다 새 라인이라 미스가 난다.</li>
+<li><strong>엔디언을 언제 신경 쓰나</strong> — 여러 바이트 정수를 네트워크나 파일로 주고받을 때다. 네트워크 바이트 순서는 빅 엔디언이라 보낼 때 변환하거나 직렬화 포맷의 규약을 맞춘다.</li>
+<li><strong>먼 좌표에서 오브젝트가 떨리는 이유는</strong> — float의 가수가 24비트라 값이 클수록 표현 간격이 넓어지기 때문이다. 원점 이동으로 좌표 크기를 줄이거나 꼭 필요한 계산만 double로 다룬다.</li>
+</ul>
+<h3>이런 오해를 한다</h3>
+<ul>
+<li><strong>L1이 L3보다 크다</strong> — 반대다. 코어에 가까울수록 작고 빠르다. L1은 코어 전용이고 L3는 보통 공유한다.</li>
+<li><strong>캐시는 필요한 바이트만 가져온다</strong> — 라인(보통 64바이트) 단위로 가져온다. 쓰지 않는 필드가 섞여 있으면 그만큼 대역폭이 버려진다.</li>
+<li><strong>64비트로 빌드하면 float 정밀도가 올라간다</strong> — 달라지는 것은 포인터 크기와 주소 한계다. float은 그대로 4바이트이고 C#의 <code>int</code>도 플랫폼과 무관하게 4바이트다.</li>
+<li><strong>-3은 부호 비트만 1로 세우면 된다</strong> — 그것은 부호-크기 표현이다. 2의 보수에서는 비트를 뒤집고 1을 더해 <code>11111101</code>이 된다.</li>
+<li><strong>64비트가 무조건 빠르다</strong> — 포인터가 커져 참조가 많은 자료구조는 캐시에 덜 담긴다. 주소 공간과 레지스터를 얻는 대신 치르는 비용이다.</li>
+</ul>
+<h3>3줄 정리</h3>
+<ul>
+<li>캐시는 64바이트 라인 단위라 접근 순서가 속도를 정한다</li>
+<li>엔디언은 여러 바이트 수를 네트워크로 보낼 때만 문제다</li>
+<li>float 가수는 24비트라 좌표가 커지면 값이 떨린다</li>
+</ul>
 <div class="refs"><h2>참고 자료</h2><ul><li><a href="https://learn.microsoft.com/ko-kr/dotnet/csharp/language-reference/builtin-types/floating-point-numeric-types" target="_blank" rel="noopener">Microsoft Learn – 부동 소수점 숫자 형식(C#)</a></li><li><a href="https://learn.microsoft.com/ko-kr/dotnet/api/system.bitconverter.islittleendian" target="_blank" rel="noopener">Microsoft Learn – BitConverter.IsLittleEndian 필드</a></li><li><a href="https://learn.microsoft.com/ko-kr/dotnet/api/system.net.ipaddress.hosttonetworkorder" target="_blank" rel="noopener">Microsoft Learn – IPAddress.HostToNetworkOrder 메서드</a></li><li><a href="https://docs.unity3d.com/Packages/com.unity.entities@1.4/manual/concepts-archetypes.html" target="_blank" rel="noopener">Unity Entities 매뉴얼 – Archetypes concepts</a></li></ul></div>
 </article>
 <div class="pager"><a href="08-04.html">← 스케줄링과 커널</a><a href="08-06.html">동기화 →</a></div>

@@ -16,7 +16,8 @@
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--text);
-    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+    font: 450 17px/1.85 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  strong { font-weight: 800; }
   main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
   a { color: var(--blue-d); }
   .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
@@ -25,8 +26,12 @@
     padding: 4px 12px; font-size: .8rem; font-weight: 800; }
   h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
   h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
-  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
-  p, ul, ol { margin: 10px 0; }
+  h3 { font-size: 1.1rem; font-weight: 800; margin: 34px 0 10px; padding-top: 4px; border-top: 2px solid var(--line); }
+  article h3:first-of-type { margin-top: 26px; }
+  p, ul, ol { margin: 0 0 20px; }
+  h3 + p, h3 + ul { margin-top: 0; }
+  svg { display: block; width: 100%; max-width: 640px; height: auto; margin: 18px auto 22px; color: var(--muted); }
+  svg text { font: 600 13px -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; }
   li { margin: 5px 0; }
   .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
   .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
@@ -58,33 +63,95 @@
 <div class="nav"><a href="../index.html#library">← 도서관</a><a href="06.html" class="badge">설계·아키텍처 목차</a></div>
 <article class="card">
 <h1>게임 시스템 설계</h1>
-<p class="lead">요구와 제약을 먼저 묻고, 나중에 바꿔도 깨지지 않는 데이터 구조로 설계한다</p>
-<h3>핵심 개념</h3><p>시스템 설계 질문은 정답을 맞히는 문제가 아니라 <strong>무엇을 먼저 물어보는지</strong>를 보는 문제다. "인벤토리를 설계하라"를 들으면 클래스부터 그리지 말고 제약을 확인한다. 칸 수가 정해져 있나, 같은 아이템이 겹쳐 쌓이나, 정렬·필터가 필요한가, 수량은 수십 개인가 수만 개인가, 서버가 최종 권한을 갖나. 이 답이 자료구조를 정한다. 칸이 고정이면 배열, 아이디로 찾는 일이 잦으면 딕셔너리를 함께 둔다.</p><p>스탯은 <strong>기본값과 보정 목록을 따로 두고 필요할 때 합산</strong>하는 것이 정석이다. 붙을 때 최종 수치에 더하고 풀릴 때 빼면 곱연산이나 상한이 섞이는 순간 원래 값으로 안 돌아온다. 목록으로 들고 있으면 순서가 달라도 결과가 같고 출처도 추적된다. 합산이 부담되면 캐시하고 목록이 바뀔 때만 다시 계산한다.</p><pre><code>public struct StatModifier { public float Add; public float Mul; }  // Mul 0.2f면 +20%
+<p class="lead">클래스보다 제약을 먼저 묻고, 나중에 바뀌어도 안 깨질 구조를 고른다</p>
+<p>"인벤토리를 설계해 보라"는 질문에 클래스부터 그리면 절반은 틀린 답이 된다. 칸이 고정인지, 같은 아이템이 겹쳐 쌓이는지에 따라 자료구조가 통째로 달라지기 때문이다.</p>
+<p>시스템 설계 질문은 정답을 맞히는 문제가 아니다. 무엇을 먼저 물어보는지를 보는 문제다.</p>
+<h3>자료구조를 정하는 것은 다섯 가지 제약이다</h3>
+<p>인벤토리를 들으면 아래를 먼저 확인한다. 답이 나오면 구조는 거의 따라 나온다.</p>
+<ul>
+<li>칸 수가 정해져 있나 — 고정이면 배열, 무제한이면 리스트</li>
+<li>같은 아이템이 겹쳐 쌓이나 — 쌓이면 수량 필드가 필요하다</li>
+<li>아이디로 찾는 일이 잦나 — 잦으면 딕셔너리를 함께 둔다</li>
+<li>수십 개인가 수만 개인가 — 정렬·필터 비용이 여기서 갈린다</li>
+<li>서버가 최종 권한을 갖나 — 가지면 결과가 아니라 행동을 보낸다</li>
+</ul>
+<p>데이터와 표시도 나눈다. 아이템 목록이 바뀌면 UI는 전체가 아니라 바뀐 칸만 갱신하게 둔다.</p>
+<h3>버프는 빼지 말고 목록으로 들고 합산한다</h3>
+<p>붙을 때 최종 수치에 더하고 풀릴 때 빼는 방식은, 곱연산이나 상한이 섞이는 순간 원래 값으로 안 돌아온다. 수치가 조금씩 새는 대표적인 함정이다.</p>
+<svg viewBox="0 0 640 200" width="100%" role="img" aria-label="기본 공격력과 보정 목록을 합산해 최종 공격력을 내는 계산 흐름 그림">
+<text x="12" y="20" font-size="13" fill="currentColor">스탯 합산 — 기본값은 그대로 두고 보정만 목록에 모은다</text>
+<rect x="10" y="70" width="126" height="46" rx="6" fill="none" stroke="currentColor"/>
+<text x="73" y="90" font-size="12" text-anchor="middle" fill="currentColor">기본 공격력</text>
+<text x="73" y="108" font-size="13" text-anchor="middle" fill="currentColor">10</text>
+<line x1="136" y1="93" x2="174" y2="93" stroke="currentColor"/>
+<polyline points="164,88 174,93 164,98" fill="none" stroke="currentColor"/>
+<rect x="176" y="40" width="170" height="110" rx="6" fill="currentColor" fill-opacity="0.08" stroke="currentColor"/>
+<text x="261" y="62" font-size="12" text-anchor="middle" fill="currentColor">보정 목록</text>
+<text x="261" y="88" font-size="13" text-anchor="middle" fill="currentColor">장비 +5</text>
+<text x="261" y="110" font-size="13" text-anchor="middle" fill="currentColor">저주 -2</text>
+<text x="261" y="132" font-size="13" text-anchor="middle" fill="currentColor">버프 x1.2</text>
+<line x1="346" y1="93" x2="384" y2="93" stroke="currentColor"/>
+<polyline points="374,88 384,93 374,98" fill="none" stroke="currentColor"/>
+<rect x="386" y="70" width="140" height="46" rx="6" fill="none" stroke="currentColor"/>
+<text x="456" y="90" font-size="12" text-anchor="middle" fill="currentColor">더하기 먼저</text>
+<text x="456" y="108" font-size="13" text-anchor="middle" fill="currentColor">(10+3) x 1.2</text>
+<line x1="526" y1="93" x2="564" y2="93" stroke="currentColor"/>
+<polyline points="554,88 564,93 554,98" fill="none" stroke="currentColor"/>
+<rect x="566" y="70" width="64" height="46" rx="6" fill="none" stroke="currentColor"/>
+<text x="598" y="98" font-size="13" text-anchor="middle" fill="currentColor">15.6</text>
+<text x="12" y="184" font-size="12" fill="currentColor">목록에서 무엇을 먼저 빼도 남은 결과는 같다. 최종 수치에서 직접 빼면 안 돌아온다</text>
+</svg>
+<p>보정을 목록으로 들고 있으면 푸는 순서가 달라도 결과가 같고, 어떤 버프가 붙었는지 출처도 남는다.</p>
+<p>기본값과 보정 목록을 나눠 두고 읽을 때 합산하는 코드다:</p>
+<pre><code>public struct StatModifier { public float Add; public float Mul; }  // Mul 0.2f = +20%
 
 public class Stats
 {
-    public float BaseAttack = 10f;
-
+    public float BaseAttack = 10f;    // 기본값은 절대 건드리지 않는다
     private readonly List&lt;StatModifier&gt; mods = new List&lt;StatModifier&gt;();
-    private float cached;
-    private bool dirty = true;
 
-    public void Add(StatModifier m)    { mods.Add(m);    dirty = true; }
-    public void Remove(StatModifier m) { mods.Remove(m); dirty = true; }
+    public void Add(StatModifier m) =&gt; mods.Add(m);        // 붙을 때 목록에 넣고
+    public void Remove(StatModifier m) =&gt; mods.Remove(m);  // 풀릴 때 목록에서 뺀다
 
-    public float Attack
+    public float Attack()                    // 읽을 때 목록을 처음부터 합산한다
     {
-        get
-        {
-            if (!dirty) return cached;
-            float add = 0f, mul = 1f;
-            foreach (var m in mods) { add += m.Add; mul += m.Mul; }
-            cached = (BaseAttack + add) * mul;
-            dirty = false;
-            return cached;
-        }
+        float add = 0f, mul = 1f;
+        foreach (var m in mods) { add += m.Add; mul += m.Mul; }
+        return (BaseAttack + add) * mul;     // 더하기 먼저, 곱하기 나중
     }
-}</code></pre><p>세이브는 <strong>저장 항목이 반드시 바뀐다</strong>는 전제로 설계한다. 파일에 스키마 버전을 넣고 읽을 때 버전에 맞춰 변환해 올리면, 기존 진행을 지키면서 구조를 바꿀 수 있다. 빠진 항목은 실패시키지 말고 기본값으로 채운다.</p><table><thead><tr><th>저장 위치</th><th>맞는 용도</th><th>주의</th></tr></thead><tbody><tr><td><code>PlayerPrefs</code></td><td>설정값처럼 작고 잃어도 되는 것</td><td>평문이라 변조가 쉽다</td></tr><tr><td>파일(JSON 등)</td><td>진행도 전체</td><td>버전 필드, 저장 중 종료 대비(임시 파일 후 교체)</td></tr><tr><td>서버</td><td>재화처럼 검증이 필요한 것</td><td>결과가 아니라 행동을 보내고 서버가 계산한다</td></tr></tbody></table><p>절차적 생성은 <strong>같은 시드와 규칙이면 항상 같은 결과</strong>가 나오게 만드는 것이 기본이다. 그러면 맵 전체 대신 시드 하나만 저장해도 복원된다. 청크마다 좌표에서 시드를 파생시키면 멀리 있는 지형을 버렸다 다시 만들어도 같은 모습이다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>인벤토리를 설계하라</strong> — 칸 제한과 스택 여부, 최대 아이템 수, 서버 검증 여부를 먼저 묻고 자료구조를 고른다. 그다음 데이터와 표시를 나눠 아이템이 바뀌면 UI가 바뀐 칸만 갱신하게 했다고 말한다.</li><li><strong>버프와 장비로 스탯이 계속 바뀐다면</strong> — 기본값은 그대로 두고 보정 목록을 합산해 최종값을 낸다. 순서에 무관하고 출처 추적이 되며, 캐시와 더티 플래그로 성능도 해결된다고 답한다.</li><li><strong>세이브·로드 설계</strong> — 포맷에 버전을 넣고 변환 단계를 둔다. 빠진 항목은 기본값, 저장 중 종료에 대비해 임시 파일에 쓴 뒤 교체, 중요한 값은 서버 검증이다.</li><li><strong>나중에 서버를 붙인다면</strong> — 규칙 계산을 UI와 분리해 순수 함수에 가깝게 두고 저장·조회를 인터페이스 하나로 감싼다. 구현만 서버 호출로 바꾸면 되고, 시간도 기기 시계 대신 서버 시간을 받게 통로를 모은다.</li><li><strong>업적·퀘스트 시스템</strong> — 조건을 코드가 아니라 데이터로 두고, 게임 쪽은 "적 처치" 같은 사건만 던진다. 진행 시스템이 그 사건으로 조건을 갱신하면 새 업적이 데이터 추가만으로 는다.</li></ul><h3>흔한 오해</h3><ul><li><strong>버프는 붙을 때 더하고 풀릴 때 빼면 된다</strong> — 곱연산이나 상한이 섞이면 원래 값으로 안 돌아와 수치가 새는 대표적 함정이다.</li><li><strong>세이브는 메모리 덤프가 빠르고 간단하다</strong> — 필드가 하나만 늘거나 순서가 바뀌어도 기존 파일이 전부 깨진다. 버전을 가진 명시적 포맷을 쓴다.</li><li><strong>절차적 맵은 시스템 시간을 시드로 쓰면 된다</strong> — 같은 맵을 두 번 만들 수 없어 복원과 버그 재현이 불가능해진다.</li><li><strong>로컬 저장을 서버로 그대로 옮기면 된다</strong> — 결과만 저장하던 구조는 서버가 검증할 근거가 없다. 계획이 있으면 처음부터 행동을 기록하고 규칙 계산을 한곳에 모은다.</li></ul>
+}</code></pre>
+<p>합산이 부담되면 결과를 캐시하고, 목록이 바뀔 때만 더티 플래그를 세워 다시 계산한다.</p>
+<h3>세이브는 저장 항목이 바뀐다는 전제로 짠다</h3>
+<p>파일에 스키마 버전을 넣고, 읽을 때 버전에 맞춰 변환해 올린다. 그러면 기존 진행을 지키면서 구조를 바꿀 수 있다. 빠진 항목은 실패시키지 말고 기본값으로 채운다.</p>
+<table><thead><tr><th>저장 위치</th><th>맞는 용도</th><th>주의</th></tr></thead><tbody>
+<tr><td><code>PlayerPrefs</code></td><td>설정값처럼 작고 잃어도 되는 것</td><td>평문이라 변조가 쉽다</td></tr>
+<tr><td>파일(JSON 등)</td><td>진행도 전체</td><td>버전 필드, 저장 중 종료 대비(임시 파일에 쓴 뒤 교체)</td></tr>
+<tr><td>서버</td><td>재화처럼 검증이 필요한 것</td><td>결과가 아니라 행동을 보내고 서버가 계산한다</td></tr>
+</tbody></table>
+<h3>시드가 같으면 같은 맵이 나오게 만든다</h3>
+<p>절차적 생성의 기본은 같은 시드와 같은 규칙이면 항상 같은 결과다. 그러면 맵 전체 대신 시드 하나만 저장해도 복원된다.</p>
+<p>청크마다 좌표에서 시드를 파생시키면, 멀리 있는 지형을 버렸다 다시 만들어도 같은 모습이 나온다.</p>
+<h3>면접에서 이렇게 답한다</h3>
+<ul>
+<li><strong>인벤토리를 설계하라</strong> — 칸 제한과 스택 여부, 최대 아이템 수, 서버 검증 여부를 먼저 묻고 자료구조를 고른다. 그다음 데이터와 표시를 나눠 바뀐 칸만 갱신하게 했다고 말한다.</li>
+<li><strong>버프와 장비로 스탯이 계속 바뀐다면</strong> — 기본값은 그대로 두고 보정 목록을 합산해 최종값을 낸다. 순서에 무관하고 출처 추적이 되며, 캐시와 더티 플래그로 성능도 해결된다.</li>
+<li><strong>세이브·로드 설계</strong> — 포맷에 버전을 넣고 변환 단계를 둔다. 빠진 항목은 기본값, 저장 중 종료에 대비해 임시 파일에 쓴 뒤 교체, 중요한 값은 서버 검증이다.</li>
+<li><strong>나중에 서버를 붙인다면</strong> — 규칙 계산을 UI와 분리해 순수 함수에 가깝게 두고, 저장·조회를 인터페이스 하나로 감싼다. 시간도 기기 시계 대신 서버 시간을 받게 통로를 모은다.</li>
+<li><strong>업적·퀘스트 시스템</strong> — 조건을 코드가 아니라 데이터로 두고, 게임 쪽은 "적 처치" 같은 사건만 던진다. 진행 시스템이 그 사건으로 조건을 갱신하면 새 업적이 데이터 추가만으로 는다.</li>
+</ul>
+<h3>이런 오해를 한다</h3>
+<ul>
+<li><strong>버프는 붙을 때 더하고 풀릴 때 빼면 된다</strong> — 곱연산이나 상한이 섞이면 원래 값으로 안 돌아온다. 수치가 새는 대표적 함정이다.</li>
+<li><strong>세이브는 메모리 덤프가 빠르고 간단하다</strong> — 필드가 하나만 늘거나 순서가 바뀌어도 기존 파일이 전부 깨진다. 버전을 가진 명시적 포맷을 쓴다.</li>
+<li><strong>절차적 맵은 시스템 시간을 시드로 쓰면 된다</strong> — 같은 맵을 두 번 만들 수 없다. 복원과 버그 재현이 불가능해진다.</li>
+<li><strong>로컬 저장을 서버로 그대로 옮기면 된다</strong> — 결과만 저장하던 구조는 서버가 검증할 근거가 없다. 계획이 있으면 처음부터 행동을 기록한다.</li>
+</ul>
+<h3>3줄 정리</h3>
+<ul>
+<li>클래스보다 제약을 먼저 묻는다. 구조는 따라 나온다.</li>
+<li>스탯은 기본값과 보정 목록을 나눠 두고 합산한다.</li>
+<li>세이브는 버전, 절차적 생성은 시드로 재현한다.</li>
+</ul>
 <div class="refs"><h2>참고 자료</h2><ul><li><a href="https://docs.unity3d.com/Manual/class-ScriptableObject.html" target="_blank" rel="noopener">Unity 매뉴얼 – ScriptableObject</a></li><li><a href="https://docs.unity3d.com/ScriptReference/JsonUtility.html" target="_blank" rel="noopener">Unity 스크립팅 API – JsonUtility</a></li><li><a href="https://docs.unity3d.com/ScriptReference/Random.InitState.html" target="_blank" rel="noopener">Unity 스크립팅 API – Random.InitState(시드 고정)</a></li></ul></div>
 </article>
 <div class="pager"><a href="06-03.html">← 아키텍처</a><span></span></div>

@@ -16,7 +16,8 @@
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--text);
-    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+    font: 450 17px/1.85 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  strong { font-weight: 800; }
   main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
   a { color: var(--blue-d); }
   .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
@@ -25,8 +26,12 @@
     padding: 4px 12px; font-size: .8rem; font-weight: 800; }
   h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
   h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
-  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
-  p, ul, ol { margin: 10px 0; }
+  h3 { font-size: 1.1rem; font-weight: 800; margin: 34px 0 10px; padding-top: 4px; border-top: 2px solid var(--line); }
+  article h3:first-of-type { margin-top: 26px; }
+  p, ul, ol { margin: 0 0 20px; }
+  h3 + p, h3 + ul { margin-top: 0; }
+  svg { display: block; width: 100%; max-width: 640px; height: auto; margin: 18px auto 22px; color: var(--muted); }
+  svg text { font: 600 13px -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; }
   li { margin: 5px 0; }
   .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
   .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
@@ -58,19 +63,94 @@
 <div class="nav"><a href="../index.html#library">← 도서관</a><a href="09.html" class="badge">네트워크 목차</a></div>
 <article class="card">
 <h1>TCP와 UDP</h1>
-<p class="lead">무엇을 기다리느라 느려지는지 알면 게임의 어느 데이터에 무엇을 쓸지 고를 수 있다</p>
-<h3>핵심 개념</h3><p>TCP와 UDP의 차이는 무엇을 보장하느냐보다 <strong>보장을 위해 무엇을 기다리느냐</strong>로 보면 정리된다. TCP는 바이트마다 순서 번호를 붙이고 받은 쪽이 ACK로 확인하며, 확인이 없으면 재전송한다. 순서까지 보장하므로 중간 한 조각이 빠지면 뒤에 이미 도착한 데이터도 응용으로 올라가지 못한다(head-of-line blocking). TCP에서 튀는 지연은 회선이 느려서가 아니라 <strong>빠진 조각을 기다리느라</strong> 생긴다.</p><p>UDP는 그 장치가 전부 없다. 주소만 적어 던지고 도착 여부도 순서도 중복 제거도 하지 않는 대신 지나간 값을 기다리지 않는다. 그래서 선택 기준은 '이 데이터가 늦게 도착해도 쓸모가 있는가'가 된다.</p><table><thead><tr><th>게임 데이터</th><th>고르는 쪽</th><th>이유</th></tr></thead><tbody><tr><td>캐릭터 위치·입력(초당 20~60회)</td><td>UDP</td><td>다음 값이 곧 오므로 잃은 값을 기다리는 것이 손해다</td></tr><tr><td>스킬 사용 확정, 아이템 획득, 채팅</td><td>TCP·UDP 신뢰 채널</td><td>놓치면 다음 패킷이 대신해 주지 못한다</td></tr><tr><td>로그인·결제·랭킹 조회</td><td>TCP(HTTPS)</td><td>유실이 허용되지 않고 빈도가 낮아 지연이 문제되지 않는다</td></tr></tbody></table><p>그래서 실시간 게임은 UDP를 깔고 <strong>필요한 만큼만 신뢰성을 직접 얹는다</strong>. 패킷마다 시퀀스 번호를 붙이고 ACK를 받으며, 제때 ACK가 없으면 재전송하고, 중복은 버리고 순서는 수신 버퍼에서 맞춘다. 모든 패킷에 이 규칙을 걸면 TCP를 다시 만든 꼴이라, 중요한 메시지만 신뢰 채널로 보내는 선택적 신뢰성이 실무 형태다.</p><p>TCP를 쓸 때 게임이 반드시 손대는 옵션이 네이글 알고리즘이다. 네이글은 앞서 보낸 데이터의 ACK가 올 때까지 작은 데이터를 모아 두었다가 묶어 보내 패킷 수를 줄인다. 대역폭에는 좋지만 입력 같은 작은 메시지가 수십 ms 늦게 나가므로 .NET에서는 <code>NoDelay</code>로 끈다. 꺼지는 것은 <strong>모아 보내기뿐</strong>이고 재전송과 순서 보장은 그대로 남는다.</p><pre><code>using System.Net.Sockets;
+<p class="lead">TCP가 튀는 이유는 회선이 아니라 빠진 조각을 기다리기 때문이다</p>
+<p>캐릭터 위치를 TCP로 보내면 패킷 하나만 잃어도 화면이 잠깐 멈춘다. 이미 도착한 뒷값까지 빠진 조각을 기다리기 때문이다. 어느 데이터에 무엇을 쓸지는 이 기다림을 아는 데서 갈린다.</p>
+<h3>TCP가 느려지는 건 회선이 아니라 기다림 때문</h3>
+<p>TCP는 바이트마다 순서 번호를 붙이고 ACK로 도착을 확인한다. 확인이 없으면 재전송하고 순서까지 맞춰 올린다. 그래서 중간 한 조각이 빠지면 뒤 데이터가 응용까지 못 올라간다.</p>
+<p>이 멈춤이 head-of-line blocking이다. UDP에는 그 장치가 전부 없어 지나간 값을 기다리지 않는다. 주소만 적어 던지고 도착 여부도 순서도 책임지지 않는다.</p>
+<p>그래서 고르는 기준은 하나로 줄어든다. 늦게 도착한 그 값이 아직 쓸모가 있는가다. 다음 값이 곧 오는 데이터라면 기다리는 쪽이 손해다.</p>
+<h3>연결을 세 번 주고받아야 여는 이유</h3>
+<svg viewBox="0 0 640 205" width="100%" role="img" aria-label="TCP 연결은 세 번, 종료는 네 번 주고받는다">
+<text x="20" y="14" font-size="12" fill="currentColor">연결 — 세 번</text>
+<text x="360" y="14" font-size="12" fill="currentColor">종료 — 네 번</text>
+<line x1="40" y1="22" x2="40" y2="176" stroke="currentColor"/>
+<line x1="260" y1="22" x2="260" y2="176" stroke="currentColor"/>
+<text x="6" y="192" font-size="12" fill="currentColor">클라이언트</text>
+<text x="238" y="192" font-size="12" fill="currentColor">서버</text>
+<text x="52" y="42" font-size="12" fill="currentColor">SYN — 내 순서 번호</text>
+<line x1="42" y1="52" x2="256" y2="52" stroke="currentColor"/>
+<polyline points="248,47 258,52 248,57" fill="none" stroke="currentColor"/>
+<text x="52" y="82" font-size="12" fill="currentColor">SYN+ACK — 서버 번호</text>
+<line x1="258" y1="92" x2="44" y2="92" stroke="currentColor"/>
+<polyline points="52,87 42,92 52,97" fill="none" stroke="currentColor"/>
+<text x="52" y="122" font-size="12" fill="currentColor">ACK — 받았다</text>
+<line x1="42" y1="132" x2="256" y2="132" stroke="currentColor"/>
+<polyline points="248,127 258,132 248,137" fill="none" stroke="currentColor"/>
+<text x="52" y="160" font-size="12" fill="currentColor">여기서부터 데이터</text>
+<line x1="380" y1="22" x2="380" y2="176" stroke="currentColor"/>
+<line x1="600" y1="22" x2="600" y2="176" stroke="currentColor"/>
+<text x="346" y="192" font-size="12" fill="currentColor">클라이언트</text>
+<text x="578" y="192" font-size="12" fill="currentColor">서버</text>
+<text x="392" y="36" font-size="12" fill="currentColor">FIN</text>
+<line x1="382" y1="46" x2="596" y2="46" stroke="currentColor"/>
+<polyline points="588,41 598,46 588,51" fill="none" stroke="currentColor"/>
+<text x="392" y="70" font-size="12" fill="currentColor">ACK</text>
+<line x1="598" y1="80" x2="384" y2="80" stroke="currentColor"/>
+<polyline points="392,75 382,80 392,85" fill="none" stroke="currentColor"/>
+<text x="392" y="104" font-size="12" fill="currentColor">FIN — 반대 방향도 닫는다</text>
+<line x1="598" y1="114" x2="384" y2="114" stroke="currentColor"/>
+<polyline points="392,109 382,114 392,119" fill="none" stroke="currentColor"/>
+<text x="392" y="138" font-size="12" fill="currentColor">ACK</text>
+<line x1="382" y1="148" x2="596" y2="148" stroke="currentColor"/>
+<polyline points="588,143 598,148 588,153" fill="none" stroke="currentColor"/>
+<text x="346" y="170" font-size="12" fill="currentColor">TIME_WAIT으로 잠시 머문다</text>
+</svg>
+<p>양쪽이 각자의 초기 순서 번호를 보내고 도착을 확인받아야 한다. 두 번이면 서버는 자기 번호가 닿았는지 모른다. 그래서 SYN, SYN+ACK, ACK로 세 번이 필요하다.</p>
+<p>종료가 네 번인 것도 같은 이유다. 한쪽이 FIN을 보내도 반대 방향은 아직 열려 있다. 먼저 닫은 쪽은 늦게 오는 패킷에 대비해 TIME_WAIT으로 머문다.</p>
+<p>비정상 종료에는 FIN이 오지 않는다. 그래서 몇 초 주기로 하트비트를 주고받아 끊김을 판단한다. TCP keep-alive는 기본 주기가 분 단위라 게임에는 느리다.</p>
+<h3>무엇을 UDP로, 무엇을 TCP로 보내나</h3>
+<table>
+<thead><tr><th>게임 데이터</th><th>고르는 쪽</th><th>이유</th></tr></thead>
+<tbody>
+<tr><td>캐릭터 위치·입력(초당 20~60회)</td><td>UDP</td><td>다음 값이 곧 오므로 기다림이 손해다</td></tr>
+<tr><td>스킬 확정, 아이템 획득, 채팅</td><td>UDP 신뢰 채널·TCP</td><td>놓치면 다음 패킷이 대신하지 못한다</td></tr>
+<tr><td>로그인·결제·랭킹 조회</td><td>TCP(HTTPS)</td><td>유실이 안 되고 빈도가 낮다</td></tr>
+</tbody></table>
+<p>실시간 게임은 UDP를 깔고 필요한 만큼만 신뢰성을 얹는다. 중요한 메시지에만 시퀀스 번호와 ACK를 붙이고 제때 없으면 재전송한다. 모든 패킷에 이 규칙을 걸면 TCP를 다시 만든 꼴이다.</p>
+<h3>TCP를 쓴다면 네이글은 끈다</h3>
+<p>네이글은 앞 데이터의 ACK를 기다리며 작은 데이터를 모아 보낸다. 패킷 수는 줄지만 입력이 수십 ms 늦게 나간다. 그래서 실시간 연결에서는 이 모으기를 꺼 둔다.</p>
+<p>게임용 TCP 연결에서 네이글만 끄는 코드다:</p>
+<pre><code>using System.Net.Sockets;
 
-public static class RealtimeSocket
+public static TcpClient ConnectForGame(string host, int port)
 {
-    public static TcpClient ConnectForGame(string host, int port)
-    {
-        var client = new TcpClient();
-        client.Connect(host, port);
-        client.NoDelay = true;   // 네이글 끄기: 작은 입력 패킷을 모으지 않고 바로 내보낸다
-        return client;
-    }
-}</code></pre><p>패킷 크기는 MTU(한 번에 보낼 수 있는 상한, 이더넷은 보통 1500바이트)에 맞춘다. 넘으면 조각으로 나뉘는데 UDP는 조각 하나만 잃어도 원래 패킷 전체를 못 쓴다. 게임 패킷을 헤더 포함 1200바이트 안팎으로 맞추는 이유다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>TCP와 UDP의 차이와 게임에서의 선택 기준</strong> — TCP는 연결·순서·재전송을 보장하느라 손실이 나면 뒤 데이터가 밀리고, UDP는 보장이 없는 대신 기다리지 않는다. 최신 값만 의미 있는 위치·입력은 UDP, 유실이 안 되는 거래와 인증은 TCP나 HTTPS로 나눠 쓴다.</li><li><strong>3-way handshake와 2-way가 안 되는 이유</strong> — 클라이언트 SYN, 서버 SYN+ACK, 클라이언트 ACK다. 양쪽이 각자의 초기 순서 번호를 보내고 그것이 상대에게 닿았음을 확인해야 해서 세 번이 필요하다. 두 번이면 서버는 자기 순서 번호가 전달됐는지 알 수 없다.</li><li><strong>4-way handshake와 TIME_WAIT</strong> — FIN과 ACK를 양쪽이 주고받아 네 번 오간다. 먼저 닫은 쪽이 마지막 ACK 유실과 늦게 오는 패킷에 대비해 TIME_WAIT으로 머문다. 서버에 TIME_WAIT이 쌓이면 서버가 먼저 끊는 구조가 아닌지 의심한다.</li><li><strong>흐름 제어와 혼잡 제어</strong> — 흐름 제어는 수신자 버퍼에, 혼잡 제어는 중간 네트워크 상태에 맞춰 전송량을 조절한다. 실제 전송량은 두 윈도 중 작은 쪽으로 정해지고, 혼잡 제어는 손실을 혼잡 신호로 읽어 전송률을 낮춘다.</li><li><strong>상대가 갑자기 꺼졌을 때 알아채는 법</strong> — 비정상 종료에는 FIN이 오지 않아 다음 송신 전까지 알 수 없다. 응용에서 몇 초 주기로 하트비트를 주고받고 연속 몇 회 응답이 없으면 끊긴 것으로 처리한다. TCP keep-alive는 기본 주기가 분 단위라 게임에는 느리다.</li></ul><h3>흔한 오해</h3><ul><li><strong>UDP는 언제나 TCP보다 빠르다</strong> — 손실이 없으면 크게 다르지 않다. UDP의 이점은 잃은 패킷을 기다리지 않아 지연이 튀지 않는 것이지 회선이 빨라지는 것이 아니다.</li><li><strong>TCP_NODELAY를 켜면 신뢰성이 사라진다</strong> — 꺼지는 것은 작은 패킷 모아 보내기뿐이고 재전송·순서 보장은 그대로 동작한다.</li><li><strong>TIME_WAIT은 서버에 생긴다</strong> — 먼저 close한 쪽에 생긴다.</li><li><strong>Connected 속성으로 연결 상태를 알 수 있다</strong> — 마지막 통신 시점의 값이라 현재를 보장하지 않는다. 지금 살아 있는지는 하트비트로만 알 수 있다.</li></ul>
+    var client = new TcpClient();
+    client.Connect(host, port);
+    client.NoDelay = true;   // 작은 입력 패킷을 모으지 않고 바로 내보낸다
+    return client;           // 재전송과 순서 보장은 그대로 남는다
+}</code></pre>
+<p>패킷 크기는 MTU에 맞춘다. MTU는 한 번에 보낼 수 있는 상한이고 이더넷은 보통 1500바이트다. 넘으면 조각으로 나뉘는데, UDP는 조각 하나만 잃어도 원래 패킷 전체를 못 쓴다.</p>
+<h3>면접에서 이렇게 답한다</h3>
+<ul>
+<li><strong>TCP와 UDP의 선택 기준</strong> — TCP는 순서와 재전송을 보장하느라 손실이 나면 뒤 데이터가 밀린다. 최신 값만 의미 있는 위치와 입력은 UDP로, 유실이 안 되는 거래는 TCP로 나눈다.</li>
+<li><strong>3-way handshake가 두 번으로 안 되는 이유</strong> — 양쪽이 각자의 초기 순서 번호를 알리고 그것이 닿았음을 확인해야 한다. 두 번이면 서버는 자기 번호의 도착을 확인할 수 없다.</li>
+<li><strong>4-way handshake와 TIME_WAIT</strong> — FIN과 ACK를 양방향으로 주고받아 네 번 오간다. 먼저 닫은 쪽이 TIME_WAIT으로 머물므로, 서버에 쌓이면 서버가 먼저 끊는 구조인지 본다.</li>
+<li><strong>흐름 제어와 혼잡 제어</strong> — 흐름 제어는 수신자 버퍼에, 혼잡 제어는 중간 네트워크 상태에 맞춘다. 실제 전송량은 두 윈도 중 작은 쪽으로 정해진다.</li>
+<li><strong>상대가 갑자기 꺼진 것을 아는 법</strong> — 비정상 종료에는 FIN이 오지 않아 다음 송신 전까지 모른다. 응용에서 하트비트를 주고받고 연속 실패 횟수로 판단한다.</li>
+</ul>
+<h3>이런 오해를 한다</h3>
+<ul>
+<li><strong>UDP는 언제나 TCP보다 빠르다</strong> — 손실이 없으면 큰 차이가 없다. 이점은 잃은 패킷을 기다리지 않는 것이지 회선 속도가 아니다.</li>
+<li><strong>NoDelay를 켜면 신뢰성이 사라진다</strong> — 꺼지는 것은 작은 패킷 모아 보내기뿐이다. 재전송과 순서 보장은 그대로 동작한다.</li>
+<li><strong>TIME_WAIT은 서버에 생긴다</strong> — 먼저 close한 쪽에 생긴다. 서버에 쌓였다면 서버가 먼저 끊고 있다는 신호다.</li>
+<li><strong>Connected 속성으로 연결 상태를 안다</strong> — 마지막 통신 시점의 값이라 현재를 보장하지 않는다. 지금 살아 있는지는 하트비트로만 안다.</li>
+</ul>
+<h3>3줄 정리</h3>
+<ul>
+<li>TCP의 지연은 빠진 조각을 기다려서 생긴다</li>
+<li>위치는 UDP, 거래와 인증은 TCP로 나눈다</li>
+<li>실시간 TCP 연결은 네이글을 꺼 둔다</li>
+</ul>
 <div class="refs"><h2>참고 자료</h2><ul><li><a href="https://www.rfc-editor.org/rfc/rfc9293.html" target="_blank" rel="noopener">RFC 9293 – Transmission Control Protocol (TCP)</a></li><li><a href="https://www.rfc-editor.org/rfc/rfc768.html" target="_blank" rel="noopener">RFC 768 – User Datagram Protocol</a></li><li><a href="https://learn.microsoft.com/ko-kr/dotnet/api/system.net.sockets.socket.nodelay" target="_blank" rel="noopener">Microsoft Learn – Socket.NoDelay 속성(네이글 알고리즘)</a></li></ul></div>
 </article>
 <div class="pager"><a href="09-01.html">← 계층 모델</a><a href="09-03.html">소켓과 HTTP →</a></div>

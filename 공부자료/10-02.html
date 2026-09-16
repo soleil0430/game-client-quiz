@@ -16,7 +16,8 @@
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--text);
-    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+    font: 450 17px/1.85 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  strong { font-weight: 800; }
   main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
   a { color: var(--blue-d); }
   .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
@@ -25,8 +26,12 @@
     padding: 4px 12px; font-size: .8rem; font-weight: 800; }
   h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
   h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
-  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
-  p, ul, ol { margin: 10px 0; }
+  h3 { font-size: 1.1rem; font-weight: 800; margin: 34px 0 10px; padding-top: 4px; border-top: 2px solid var(--line); }
+  article h3:first-of-type { margin-top: 26px; }
+  p, ul, ol { margin: 0 0 20px; }
+  h3 + p, h3 + ul { margin-top: 0; }
+  svg { display: block; width: 100%; max-width: 640px; height: auto; margin: 18px auto 22px; color: var(--muted); }
+  svg text { font: 600 13px -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; }
   li { margin: 5px 0; }
   .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
   .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
@@ -58,14 +63,56 @@
 <div class="nav"><a href="../index.html#library">← 도서관</a><a href="10.html" class="badge">C++ 기초 목차</a></div>
 <article class="card">
 <h1>메모리와 포인터</h1>
-<p class="lead">GC가 없는 대신 소유권을 코드로 적는다. RAII와 스마트 포인터가 그 문법이다</p>
-<h3>핵심 개념</h3><p>C#에서는 GC가 메모리를 걷어 가므로 이 객체를 누가 책임지는지 코드에 적을 일이 거의 없다. C++에는 그 담당자가 없어 <strong>소유권과 수명을 코드로 표현한다</strong>. 그 방식이 RAII다. 자원을 생성자에서 얻고 소멸자에서 놓으면 자원의 수명이 객체의 수명에 묶인다. 스택 객체는 스코프를 벗어날 때 반드시 소멸자가 불리므로 예외가 나거나 일찍 return해도 해제가 빠지지 않는다. C#의 <code>IDisposable</code>과 <code>using</code>이 같은 목적이지만 using은 적어야 하고, C++은 스코프가 알아서 한다. 메모리뿐 아니라 파일 핸들과 락에도 그대로 쓴다.</p><pre><code>void Load() {
-    auto tex = std::make_unique&lt;Texture&gt;("hero.png");  // 생성자에서 열고
+<p class="lead">GC가 없으니 소유권을 코드에 적는다. RAII와 unique_ptr이 그 문법이다</p>
+<p>C#에서는 이 객체를 누가 책임지는지 코드에 적을 일이 거의 없다. 가비지 컬렉션(GC)이 걷어 가기 때문이다. C++에는 그 담당자가 없어 <strong>소유권과 수명을 코드로 적는다</strong>.</p>
+<h3>C#의 using을 C++은 스코프가 대신한다</h3>
+<p>자원을 생성자에서 얻고 소멸자에서 놓는 방식이 RAII다. 그러면 자원의 수명이 객체의 수명에 묶인다. 스택 객체는 스코프를 벗어날 때 반드시 소멸자가 불린다.</p>
+<p>예외가 나거나 일찍 return해도 해제가 빠지지 않는다. C#의 IDisposable과 using이 같은 목적이지만 using은 부르는 쪽이 적어야 한다. 메모리뿐 아니라 파일 핸들과 락에도 그대로 쓴다.</p>
+<p>중간에 빠져나가도 텍스처가 닫히는 형태다:</p>
+<pre><code>void Load() {
+    auto tex = std::make_unique&lt;Texture&gt;("hero.png");  // 생성자에서 연다
     if (!tex-&gt;IsValid())
-        return;                                          // 여기서 나가도
+        return;          // 여기서 나가도
     Use(*tex);
-}                                                        // 소멸자에서 닫는다
-</code></pre><p><code>new</code>와 <code>malloc</code>의 차이도 여기서 나온다. <code>new</code>는 타입에서 크기를 계산해 할당하고 <strong>생성자까지 부르며</strong> 실패하면 <code>std::bad_alloc</code> 예외를 던진다. <code>malloc</code>은 바이트 수만큼 메모리를 줄 뿐 생성자를 모르고 실패하면 <code>NULL</code>을 돌려준다. 그래서 <code>new</code>로 잡고 <code>free</code>로 놓거나 <code>new[]</code>를 <code>delete</code>로 놓으면 소멸자 호출과 해제 방식이 어긋나 정의되지 않은 동작이 된다.</p><p>스마트 포인터는 RAII를 포인터에 적용한 것이다. 셋 중 무엇을 쓸지는 <strong>소유자가 몇 명인가</strong>로 정한다.</p><table><thead><tr><th>종류</th><th>소유</th><th>쓰는 자리</th></tr></thead><tbody><tr><td>unique_ptr</td><td>혼자</td><td>기본 선택. 복사가 막혀 있고 std::move로 소유권을 넘긴다</td></tr><tr><td>shared_ptr</td><td>여럿(참조 카운트)</td><td>수명을 진짜로 나눠 가질 때. 카운트가 0이 되면 해제한다</td></tr><tr><td>weak_ptr</td><td>없음(관찰만)</td><td>카운트를 올리지 않는 참조. lock()으로 살아 있는지 보고 쓴다</td></tr></tbody></table><p><code>shared_ptr</code>끼리 서로를 가리키면 카운트가 1 아래로 내려가지 않아 둘 다 영영 해제되지 않는다. <strong>참조 카운트는 순환을 스스로 풀지 못한다</strong>. C#의 GC는 루트에서 닿을 수 있는지를 보므로 서로만 가리키는 섬도 수거하지만 shared_ptr은 그렇지 않다. 부모가 자식을 shared_ptr로, 자식이 부모를 weak_ptr로 갖는 식으로 한쪽 고리를 끊는다.</p><p>기초 문법도 C#과 대비하면 정리된다. <strong>참조</strong>는 선언할 때 대상을 정하고 바꿀 수 없어 늘 유효한 객체를 가리킨다고 보고 쓰며, <strong>포인터</strong>는 <code>nullptr</code>일 수 있고 다른 주소로 바꿀 수 있으며 산술 연산도 된다. 값이 없을 수 있으면 포인터, 반드시 있으면 참조로 받아 의도를 드러낸다. 포인터 멤버가 있는 클래스를 컴파일러가 만든 복사 생성자로 복사하면 <strong>얕은 복사</strong>라 두 객체가 같은 메모리를 가리켜 이중 해제가 난다. 새 메모리를 잡아 내용을 옮기는 깊은 복사를 직접 쓰거나 소유권이 분명한 스마트 포인터로 바꾼다. 배열은 범위를 검사하지 않아 넘어가면 예외가 아니라 정의되지 않은 동작이고, 남의 메모리를 조용히 덮어써 한참 뒤 엉뚱한 곳에서 터지는 쪽이 더 흔하다.</p><p>구조체 크기는 정렬 때문에 멤버 크기의 합보다 클 수 있다. <code>struct A { char c; int i; char d; };</code>는 int가 4바이트 경계에 놓여야 해 c 뒤에 3바이트가 들어가고, 전체가 4의 배수가 되도록 d 뒤에 3바이트가 더 붙어 12바이트다. <code>int i; char c; char d;</code> 순서면 8바이트다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>RAII란</strong> — 자원의 수명을 객체의 수명에 묶는 기법이다. 생성자에서 얻고 소멸자에서 놓으면 스코프를 벗어날 때 반드시 해제되므로 예외나 조기 반환에도 새지 않는다. unique_ptr과 lock_guard가 그 예이고 C#의 using 문과 목적이 같다.</li><li><strong>스마트 포인터는 어떻게 고르나</strong> — 소유자가 하나면 unique_ptr을 기본으로 쓰고, 수명을 여러 곳이 정말 나눠 가져야 할 때만 shared_ptr을 쓴다. 고리가 생길 수 있는 역방향 참조는 weak_ptr로 두고 쓸 때 lock()으로 확인한다.</li><li><strong>malloc과 new의 차이는</strong> — new는 크기 계산과 생성자 호출까지 하고 실패하면 예외를 던지며, malloc은 할당만 하고 실패하면 NULL을 준다. 섞어 쓰면 소멸자가 빠지거나 해제 방식이 어긋나 정의되지 않은 동작이 된다.</li><li><strong>얕은 복사와 깊은 복사는</strong> — 얕은 복사는 포인터 값만 복사해 두 객체가 같은 메모리를 공유하므로 이중 해제와 의도치 않은 공유가 생긴다. 깊은 복사는 새 메모리를 잡아 내용을 옮긴다. 요즘은 소유권이 분명한 타입으로 설계해 문제 자체를 없앤다.</li></ul><h3>흔한 오해</h3><ul><li><strong>shared_ptr을 쓰면 누수가 없다</strong> — 서로 가리키는 순환이 생기면 카운트가 0이 되지 않아 그대로 샌다. GC와 달리 참조 카운트는 순환을 못 푼다.</li><li><strong>배열 범위를 넘으면 예외가 난다</strong> — C#의 IndexOutOfRangeException을 떠올린 오해다. 검사가 필요하면 vector::at()이 예외를 던지고, 디버깅에는 AddressSanitizer를 쓴다.</li><li><strong>참조도 nullptr일 수 있다</strong> — 참조는 초기화 없이 만들 수 없고 대상을 바꿀 수도 없다. 없을 수 있는 값은 포인터로 표현한다.</li><li><strong>delete와 free는 이름만 다르다</strong> — delete는 소멸자를 부르고 free는 부르지 않는다. 짝을 맞추지 않으면 정의되지 않은 동작이다.</li><li><strong>구조체 크기는 멤버 크기의 합이다</strong> — 정렬 때문에 패딩이 들어가므로 선언 순서가 크기를 바꾼다.</li></ul>
+}                        // 스코프를 벗어나면 소멸자가 닫는다</code></pre>
+<h3>소유자가 몇 명인가로 스마트 포인터를 고른다</h3>
+<p>스마트 포인터는 RAII를 포인터에 적용한 것이다. 셋 중 무엇을 쓸지는 기준 하나로 정해진다. 이 자원의 소유자가 몇 명인가다.</p>
+<table>
+<thead><tr><th>종류</th><th>소유</th><th>쓰는 자리</th></tr></thead>
+<tbody>
+<tr><td>unique_ptr</td><td>혼자</td><td>기본 선택. 복사가 막혀 있고 move로 넘긴다</td></tr>
+<tr><td>shared_ptr</td><td>여럿(참조 카운트)</td><td>수명을 정말 나눠 가질 때만</td></tr>
+<tr><td>weak_ptr</td><td>없음(관찰만)</td><td>카운트를 올리지 않는 참조, lock으로 확인</td></tr>
+</tbody></table>
+<p>new와 malloc의 차이도 여기서 나온다. new는 타입에서 크기를 계산하고 <strong>생성자까지 부르며</strong> 실패하면 예외를 던진다. malloc은 바이트만 주고 실패하면 NULL을 돌려준다.</p>
+<p>그래서 new로 잡고 free로 놓으면 소멸자 호출과 해제 방식이 어긋난다. 결과는 정의되지 않은 동작이다. new[]를 delete로 놓는 것도 같다.</p>
+<h3>참조 카운트는 순환을 못 푼다</h3>
+<p>shared_ptr끼리 서로를 가리키면 카운트가 1 아래로 내려가지 않는다. 둘 다 영영 해제되지 않는다. C#에서는 겪지 않는 누수다.</p>
+<p>GC는 루트에서 닿을 수 있는지를 보므로 서로만 가리키는 섬도 수거한다. 참조 카운트에는 그런 시야가 없다. 부모가 자식을 shared_ptr로, 자식이 부모를 weak_ptr로 갖는 식으로 고리를 끊는다.</p>
+<h3>예외 대신 조용히 망가지는 것들</h3>
+<p>참조는 선언할 때 대상을 정하고 바꿀 수 없어 항상 유효한 객체를 가리킨다. 포인터는 nullptr일 수 있고 주소를 바꿀 수 있다. 값이 없을 수 있으면 포인터, 반드시 있으면 참조로 받아 의도를 드러낸다.</p>
+<p>포인터 멤버가 있는 클래스를 기본 복사 생성자로 복사하면 얕은 복사다. 두 객체가 같은 메모리를 가리켜 이중 해제가 난다. 깊은 복사를 직접 쓰거나 소유권이 분명한 타입으로 바꾼다.</p>
+<p>배열은 범위를 검사하지 않는다. 넘어가면 예외가 아니라 정의되지 않은 동작이고, 남의 메모리를 덮어써 한참 뒤 엉뚱한 곳에서 터진다. 구조체 크기도 정렬 때문에 멤버 합보다 커지므로 선언 순서가 크기를 바꾼다.</p>
+<h3>면접에서 이렇게 답한다</h3>
+<ul>
+<li><strong>RAII란</strong> — 자원의 수명을 객체의 수명에 묶는 기법이다. 생성자에서 얻고 소멸자에서 놓으면 예외나 조기 반환에도 새지 않는다. C#의 using 문과 목적이 같다.</li>
+<li><strong>스마트 포인터는 어떻게 고르나</strong> — 소유자가 하나면 unique_ptr을 기본으로 쓴다. 수명을 정말 나눠 가질 때만 shared_ptr을 쓰고, 역방향 참조는 weak_ptr로 둔다.</li>
+<li><strong>malloc과 new의 차이는</strong> — new는 크기 계산과 생성자 호출까지 하고 실패하면 예외를 던진다. malloc은 할당만 하고 NULL을 주며, 섞어 쓰면 정의되지 않은 동작이 된다.</li>
+<li><strong>얕은 복사와 깊은 복사는</strong> — 얕은 복사는 포인터 값만 복사해 이중 해제가 생긴다. 깊은 복사는 새 메모리를 잡아 내용을 옮기며, 요즘은 소유권이 분명한 타입으로 문제 자체를 없앤다.</li>
+</ul>
+<h3>이런 오해를 한다</h3>
+<ul>
+<li><strong>shared_ptr을 쓰면 누수가 없다</strong> — 서로 가리키는 순환이 생기면 그대로 샌다. GC와 달리 참조 카운트는 순환을 못 푼다.</li>
+<li><strong>배열 범위를 넘으면 예외가 난다</strong> — C#의 예외를 떠올린 오해다. 검사가 필요하면 vector의 at을 쓰고 디버깅에는 AddressSanitizer를 쓴다.</li>
+<li><strong>참조도 nullptr일 수 있다</strong> — 참조는 초기화 없이 만들 수 없다. 없을 수 있는 값은 포인터로 표현한다.</li>
+<li><strong>delete와 free는 이름만 다르다</strong> — delete는 소멸자를 부르고 free는 부르지 않는다. 짝을 맞추지 않으면 정의되지 않은 동작이다.</li>
+</ul>
+<h3>3줄 정리</h3>
+<ul>
+<li>RAII는 자원 수명을 스코프에 묶는다</li>
+<li>소유자 수로 unique·shared·weak를 고른다</li>
+<li>참조 카운트는 순환 참조를 풀지 못한다</li>
+</ul>
 <div class="refs"><h2>참고 자료</h2><ul><li><a href="https://en.cppreference.com/w/cpp/language/raii.html" target="_blank" rel="noopener">cppreference – RAII</a></li><li><a href="https://en.cppreference.com/w/cpp/language/new.html" target="_blank" rel="noopener">cppreference – new expression</a></li><li><a href="https://en.cppreference.com/w/cpp/memory/shared_ptr.html" target="_blank" rel="noopener">cppreference – std::shared_ptr</a></li><li><a href="https://en.cppreference.com/w/cpp/memory/weak_ptr.html" target="_blank" rel="noopener">cppreference – std::weak_ptr</a></li></ul></div>
 </article>
 <div class="pager"><a href="10-01.html">← 클래스와 가상 함수</a><a href="10-03.html">현대 C++ →</a></div>

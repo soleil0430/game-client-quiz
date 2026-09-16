@@ -16,7 +16,8 @@
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--text);
-    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+    font: 450 17px/1.85 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  strong { font-weight: 800; }
   main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
   a { color: var(--blue-d); }
   .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
@@ -25,8 +26,12 @@
     padding: 4px 12px; font-size: .8rem; font-weight: 800; }
   h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
   h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
-  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
-  p, ul, ol { margin: 10px 0; }
+  h3 { font-size: 1.1rem; font-weight: 800; margin: 34px 0 10px; padding-top: 4px; border-top: 2px solid var(--line); }
+  article h3:first-of-type { margin-top: 26px; }
+  p, ul, ol { margin: 0 0 20px; }
+  h3 + p, h3 + ul { margin-top: 0; }
+  svg { display: block; width: 100%; max-width: 640px; height: auto; margin: 18px auto 22px; color: var(--muted); }
+  svg text { font: 600 13px -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; }
   li { margin: 5px 0; }
   .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
   .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
@@ -58,8 +63,31 @@
 <div class="nav"><a href="../index.html#library">← 도서관</a><a href="02.html" class="badge">Unity 엔진 목차</a></div>
 <article class="card">
 <h1>DOTS와 최신 기능</h1>
-<p class="lead">ECS는 데이터를 한 줄로 늘어놓아 캐시를 살리는 구조이고, Job과 Burst가 함께 가야 값을 한다</p>
-<h3>핵심 개념</h3><p>GameObject 방식이 느려지는 지점은 계산량이 아니라 <strong>메모리를 읽는 순서</strong>다. MonoBehaviour는 각각 힙에 따로 할당돼 주소가 흩어져 있고, Transform 값을 만질 때마다 C# 쪽에서 엔진 네이티브 쪽으로 넘어간다. 유닛 1만 개를 순회하면 CPU는 매번 캐시에 없는 주소를 기다리게 되고, 이 기다림이 실제 연산보다 몇 배 길다.</p><p>ECS는 이 배치를 뒤집는다. 엔티티는 번호일 뿐이고 데이터는 <strong>컴포넌트 타입 조합(아키타입)이 같은 것끼리 모아 청크라는 연속 메모리 블록</strong>에 저장한다. System은 "LocalTransform과 Velocity를 둘 다 가진 것"을 쿼리해 그 청크들을 앞에서부터 쭉 훑는다. 주소가 순서대로 이어지니 캐시 라인 하나에 여러 개가 같이 딸려오고 프리페처도 다음에 읽을 곳을 맞힌다. 여기에 Job System으로 워커 스레드에 나눠 돌리고, Burst 컴파일러가 그 코드를 LLVM으로 SIMD가 들어간 네이티브로 바꾼다. <strong>셋이 같이 있을 때 값을 한다.</strong></p><pre><code>[BurstCompile]
+<p class="lead">ECS는 데이터를 연속 메모리에 늘어놓는 구조이고, Job과 Burst가 같이 붙어야 값을 한다</p>
+<p>유닛 1만 개를 MonoBehaviour로 돌리면 프레임이 무너진다. 그런데 병목은 계산량이 아니라 기다림이다. ECS는 계산을 줄이는 대신 메모리 배치를 바꾼다.</p> <h3>느린 원인은 계산량이 아니라 메모리를 읽는 순서다</h3> <p>MonoBehaviour는 각각 힙에 따로 할당돼 주소가 흩어져 있다. 1만 개를 순회하면 CPU는 매번 캐시에 없는 주소를 기다린다. <strong>이 기다림이 실제 연산보다 몇 배 길다.</strong></p> <p>Transform 값을 만질 때마다 C# 쪽에서 엔진 네이티브 쪽으로 넘어가는 비용도 함께 붙는다.</p> <h3>같은 조합끼리 청크에 모아 앞에서부터 훑는다</h3> <p>ECS는 이 배치를 뒤집는다. 엔티티는 번호일 뿐이고, 데이터는 <strong>컴포넌트 조합(아키타입)이 같은 것끼리 청크라는 연속 메모리 블록</strong>에 담는다.</p> <svg viewBox="0 0 640 200" width="100%" role="img" aria-label="GameObject는 힙에 흩어져 있어 CPU가 주소를 건너뛰며 읽고, ECS 청크는 같은 조합끼리 한 줄로 이어 붙여 순서대로 읽는다">
+<text x="8" y="18" font-size="13" fill="currentColor">GameObject: 주소가 흩어져 있다</text>
+<rect x="30" y="30" width="34" height="22" fill="currentColor" fill-opacity="0.08" stroke="currentColor"/>
+<rect x="150" y="58" width="34" height="22" fill="currentColor" fill-opacity="0.08" stroke="currentColor"/>
+<rect x="256" y="30" width="34" height="22" fill="currentColor" fill-opacity="0.08" stroke="currentColor"/>
+<rect x="380" y="62" width="34" height="22" fill="currentColor" fill-opacity="0.08" stroke="currentColor"/>
+<rect x="470" y="34" width="34" height="22" fill="currentColor" fill-opacity="0.08" stroke="currentColor"/>
+<polyline points="47,52 167,58 273,52 397,62 487,56" fill="none" stroke="currentColor" stroke-dasharray="4 4"/>
+<text x="518" y="72" font-size="13" fill="currentColor">매번 캐시 미스</text>
+<text x="8" y="116" font-size="13" fill="currentColor">ECS 청크: 같은 조합끼리 한 줄로 붙여 둔다</text>
+<rect x="30" y="128" width="40" height="26" fill="currentColor" fill-opacity="0.08" stroke="currentColor"/>
+<rect x="70" y="128" width="40" height="26" fill="currentColor" fill-opacity="0.08" stroke="currentColor"/>
+<rect x="110" y="128" width="40" height="26" fill="currentColor" fill-opacity="0.08" stroke="currentColor"/>
+<rect x="150" y="128" width="40" height="26" fill="currentColor" fill-opacity="0.08" stroke="currentColor"/>
+<rect x="190" y="128" width="40" height="26" fill="currentColor" fill-opacity="0.08" stroke="currentColor"/>
+<rect x="230" y="128" width="40" height="26" fill="currentColor" fill-opacity="0.08" stroke="currentColor"/>
+<rect x="270" y="128" width="40" height="26" fill="currentColor" fill-opacity="0.08" stroke="currentColor"/>
+<rect x="310" y="128" width="40" height="26" fill="currentColor" fill-opacity="0.08" stroke="currentColor"/>
+<rect x="350" y="128" width="40" height="26" fill="currentColor" fill-opacity="0.08" stroke="currentColor"/>
+<rect x="390" y="128" width="40" height="26" fill="currentColor" fill-opacity="0.08" stroke="currentColor"/>
+<line x1="30" y1="166" x2="430" y2="166" stroke="currentColor"/>
+<polyline points="420,160 430,166 420,172" fill="none" stroke="currentColor"/>
+<text x="30" y="190" font-size="13" fill="currentColor">캐시 라인 하나에 여러 개가 함께 딸려온다</text>
+</svg> <p>System은 LocalTransform과 Velocity를 둘 다 가진 것을 쿼리해 그 청크를 앞에서부터 훑는다. 주소가 이어지니 캐시 라인 하나에 여러 개가 딸려온다. 프리페처도 다음에 읽을 곳을 맞힌다.</p> <p>다음은 속도만큼 위치를 옮기는 시스템이다:</p> <pre><code>[BurstCompile]
 public partial struct MoveSystem : ISystem
 {
     [BurstCompile]
@@ -71,7 +99,7 @@ public partial struct MoveSystem : ISystem
         foreach (var (tr, v) in SystemAPI.Query&lt;RefRW&lt;LocalTransform&gt;, RefRO&lt;Velocity&gt;&gt;())
             tr.ValueRW.Position += v.ValueRO.Value * dt;
     }
-}</code></pre><p>대가도 분명하다. 컴포넌트가 struct라 참조 타입을 못 담고, 문자열이나 매니지드 객체를 쓰려면 별도 처리가 필요하다. 엔티티에 컴포넌트를 붙이거나 떼면 아키타입이 바뀌어 데이터를 다른 청크로 옮기는 구조 변경이 일어나므로, 매 프레임 붙였다 떼는 설계는 오히려 느리다. 에디터 워크플로와 디버깅, 기존 플러그인 연동도 전부 다르다. 그래서 현실적인 선택은 전면 전환이 아니라 <strong>대량 유닛, 탄막, 군중처럼 개수가 압도적인 부분만</strong> ECS로 돌리는 하이브리드다. Entities 1.0 정식 버전은 Unity 2022 LTS 시기에 나왔고 Unity 6에서 안정화가 더 진행됐지만, 게임의 기본 골격은 여전히 GameObject다.</p><p>Unity 6에서 하나만 고른다면 <strong>GPU Resident Drawer</strong>가 설명하기 좋다. 렌더링이 느린 이유가 GPU 계산이 아니라 CPU가 오브젝트마다 드로우 콜을 준비하는 비용인 경우가 많은데, 이 기능은 BatchRendererGroup API로 메시 데이터를 GPU 쪽에 상주시켜 CPU의 준비 작업을 크게 줄인다. 같이 들어온 GPU Occlusion Culling은 가려진 인스턴스를 GPU에서 걸러낸다. 그 외에 Render Graph 정리, 플랫폼별 빌드 설정을 에셋으로 관리하는 Build Profiles, 멀티플레이 설정을 모은 Multiplayer Center가 있다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>ECS란 무엇인가</strong> — 엔티티는 식별자, 컴포넌트는 순수 데이터, 시스템은 그 데이터를 처리하는 로직으로 나눈 구조다. 상속으로 기능을 물려주는 대신 어떤 컴포넌트를 가졌느냐로 동작이 정해진다.</li><li><strong>GameObject 방식보다 왜 빠른가</strong> — 같은 컴포넌트 조합을 가진 엔티티의 데이터를 연속된 메모리에 모아 두고 순서대로 훑기 때문에 캐시 미스가 크게 준다. 여기에 Job System으로 코어를 나눠 쓰고 Burst로 SIMD까지 얹으면 몇 배 차이가 난다.</li><li><strong>언제 도입하나</strong> — 유닛 수천에서 수만처럼 같은 처리를 대량으로 반복하는 구간에 먼저 쓴다. 워크플로와 디버깅 방식이 달라 전면 전환은 비용이 크므로 하이브리드로 시작해 효과를 측정한 뒤 넓힌다.</li><li><strong>Unity 6의 특징 하나를 소개하라</strong> — GPU Resident Drawer를 말한다. 오브젝트마다 CPU가 드로우 콜을 준비하던 비용을 GPU 상주 데이터와 BatchRendererGroup으로 옮겨, 오브젝트가 많은 씬에서 CPU 렌더 스레드 부하를 줄여 주는 기능이라고 설명한다.</li></ul><h3>흔한 오해</h3><ul><li><strong>ECS를 쓰면 무조건 빨라진다</strong> — 대상 개수가 적으면 구조 변경과 쿼리 오버헤드만 남는다. 수천 개 이상을 같은 방식으로 처리할 때 이득이 나온다.</li><li><strong>ECS가 곧 멀티스레딩이다</strong> — 별개다. 병렬화는 Job System이 하고, ECS는 그 Job이 읽기 좋은 형태로 데이터를 배치할 뿐이다.</li><li><strong>Burst를 켜면 모든 C#이 빨라진다</strong> — Burst가 컴파일할 수 있는 것은 값 타입과 NativeContainer만 쓰는 제한된 코드다. 매니지드 객체를 건드리면 빠진다.</li><li><strong>DOTS가 MonoBehaviour를 대체했다</strong> — Unity 6에서도 기본은 GameObject다. DOTS는 필요한 부분에 골라 쓰는 선택지다.</li><li><strong>GPU Resident Drawer를 켜면 드로우 콜이 사라진다</strong> — 없어지는 게 아니라 CPU가 준비하던 일이 GPU 쪽으로 옮겨진다. GPU가 이미 한계면 도움이 되지 않는다.</li></ul>
+}</code></pre> <h3>ECS와 Job, Burst는 셋이 같이 있어야 값을 한다</h3> <p>ECS는 데이터를 읽기 좋게 놓을 뿐이다. 코어를 나눠 쓰는 일은 Job System이 하고, 그 코드를 SIMD가 들어간 네이티브로 바꾸는 일은 Burst 컴파일러가 한다.</p> <p>대가도 분명하다. 컴포넌트가 struct라 참조 타입을 못 담고, 문자열이나 매니지드 객체는 별도 처리가 필요하다.</p> <p>컴포넌트를 붙이거나 떼면 아키타입이 바뀌어 데이터를 다른 청크로 옮긴다. 이 구조 변경이 비싸서, 매 프레임 붙였다 떼는 설계는 오히려 느리다.</p> <p>그래서 현실적인 선택은 하이브리드다. 대량 유닛, 탄막, 군중처럼 개수가 압도적인 부분만 ECS로 돌린다. Unity 6에서도 게임의 기본 골격은 GameObject다.</p> <h3>Unity 6에서 하나 고르면 GPU Resident Drawer</h3> <p>렌더링이 느린 이유가 GPU 계산이 아니라 CPU의 드로우 콜 준비인 경우가 많다. GPU Resident Drawer는 메시 데이터를 GPU 쪽에 상주시켜 그 준비 작업을 줄인다.</p> <p>같이 들어온 GPU Occlusion Culling은 가려진 인스턴스를 GPU에서 걸러낸다. 그 밖에 Render Graph 정리와, 플랫폼별 빌드 설정을 에셋으로 관리하는 Build Profiles가 있다.</p> <h3>면접에서 이렇게 답한다</h3> <ul><li><strong>ECS란 무엇인가</strong> — 엔티티는 식별자, 컴포넌트는 순수 데이터, 시스템은 그 데이터를 처리하는 로직으로 나눈 구조입니다. 상속으로 기능을 물려주는 대신 어떤 컴포넌트를 가졌느냐로 동작이 정해집니다.</li> <li><strong>GameObject 방식보다 왜 빠른가</strong> — 같은 컴포넌트 조합끼리 데이터를 연속 메모리에 모아 두고 순서대로 훑어 캐시 미스가 크게 줍니다. 여기에 Job System으로 코어를 나눠 쓰고 Burst로 SIMD까지 얹습니다.</li> <li><strong>언제 도입하나</strong> — 유닛 수천에서 수만처럼 같은 처리를 대량으로 반복하는 구간에 먼저 씁니다. 워크플로와 디버깅이 달라 전면 전환은 비싸므로 하이브리드로 시작해 효과를 재고 넓힙니다.</li> <li><strong>Unity 6의 특징 하나를 소개하라</strong> — GPU Resident Drawer를 말합니다. 오브젝트마다 CPU가 드로우 콜을 준비하던 비용을 GPU 상주 데이터로 옮겨, 오브젝트가 많은 씬에서 CPU 부하를 줄여 줍니다.</li></ul> <h3>이런 오해를 한다</h3> <ul><li><strong>ECS를 쓰면 무조건 빨라진다</strong> — 대상 개수가 적으면 구조 변경과 쿼리 오버헤드만 남는다. 수천 개 이상을 같은 방식으로 처리할 때 이득이 나온다.</li> <li><strong>ECS가 곧 멀티스레딩이다</strong> — 별개다. 병렬화는 Job System이 하고, ECS는 그 Job이 읽기 좋은 형태로 데이터를 놓을 뿐이다.</li> <li><strong>Burst를 켜면 모든 C#이 빨라진다</strong> — Burst가 컴파일하는 것은 값 타입과 NativeContainer만 쓰는 제한된 코드다. 매니지드 객체를 건드리면 빠진다.</li> <li><strong>DOTS가 MonoBehaviour를 대체했다</strong> — Unity 6에서도 기본은 GameObject다. DOTS는 필요한 부분에 골라 쓰는 선택지다.</li> <li><strong>GPU Resident Drawer를 켜면 드로우 콜이 사라진다</strong> — 없어지는 게 아니라 CPU가 준비하던 일이 GPU 쪽으로 옮겨진다. GPU가 이미 한계면 도움이 되지 않는다.</li></ul> <h3>3줄 정리</h3> <ul><li>ECS는 계산이 아니라 메모리 배치를 바꿔 캐시를 살린다</li> <li>병렬화는 Job, 네이티브 변환은 Burst가 맡는다</li> <li>전면 전환 대신 개수가 압도적인 부분만 골라 쓴다</li></ul>
 <div class="refs"><h2>참고 자료</h2><ul><li><a href="https://docs.unity3d.com/Packages/com.unity.entities@1.3/manual/index.html" target="_blank" rel="noopener">Unity 매뉴얼 – Entities overview(DOTS)</a></li><li><a href="https://docs.unity3d.com/Manual/job-system.html" target="_blank" rel="noopener">Unity 매뉴얼 – Write multithreaded code with the job system</a></li><li><a href="https://docs.unity3d.com/Packages/com.unity.burst@1.8/manual/index.html" target="_blank" rel="noopener">Unity 매뉴얼 – Burst compiler</a></li><li><a href="https://docs.unity3d.com/6000.0/Documentation/Manual/WhatsNewUnity6.html" target="_blank" rel="noopener">Unity 매뉴얼 – New in Unity 6.0</a></li></ul></div>
 </article>
 <div class="pager"><a href="02-10.html">← 빌드와 플랫폼</a><span></span></div>

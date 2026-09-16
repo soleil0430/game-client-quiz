@@ -16,7 +16,8 @@
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--text);
-    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+    font: 450 17px/1.85 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  strong { font-weight: 800; }
   main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
   a { color: var(--blue-d); }
   .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
@@ -25,8 +26,12 @@
     padding: 4px 12px; font-size: .8rem; font-weight: 800; }
   h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
   h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
-  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
-  p, ul, ol { margin: 10px 0; }
+  h3 { font-size: 1.1rem; font-weight: 800; margin: 34px 0 10px; padding-top: 4px; border-top: 2px solid var(--line); }
+  article h3:first-of-type { margin-top: 26px; }
+  p, ul, ol { margin: 0 0 20px; }
+  h3 + p, h3 + ul { margin-top: 0; }
+  svg { display: block; width: 100%; max-width: 640px; height: auto; margin: 18px auto 22px; color: var(--muted); }
+  svg text { font: 600 13px -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; }
   li { margin: 5px 0; }
   .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
   .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
@@ -58,8 +63,109 @@
 <div class="nav"><a href="../index.html#library">← 도서관</a><a href="04.html" class="badge">그래픽스·렌더링 목차</a></div>
 <article class="card">
 <h1>렌더링 파이프라인</h1>
-<p class="lead">씬의 큐브 하나가 화면 픽셀이 되기까지 CPU와 GPU가 나눠 맡는 단계를 순서대로 꿴다</p>
-<h3>핵심 개념</h3><p>렌더링은 <strong>무엇을 그릴지 정하는 CPU</strong>와 <strong>실제로 칠하는 GPU</strong>의 분업이다. CPU는 컬링으로 목록을 추리고 정렬한 뒤 렌더 스테이트를 잡고 드로우 콜을 보낸다. 이후 GPU 쪽 순서는 <strong>버텍스 셰이더 → 클리핑·원근 나눗셈·뷰포트 변환 → 래스터화 → 프래그먼트 셰이더 → 깊이·스텐실 테스트와 블렌딩 → 프레임 버퍼</strong>다. 화면 좌표가 나와야 어떤 픽셀을 덮는지 알고, 조각이 나와야 색을 계산하고, 색이 나와야 기존 값과 섞으므로 이 순서는 뒤집히지 않는다.</p><table><thead><tr><th>변환</th><th>하는 일</th></tr></thead><tbody><tr><td>모델(로컬 → 월드)</td><td>오브젝트를 씬 좌표에 놓는다</td></tr><tr><td>뷰(월드 → 뷰)</td><td>카메라를 원점으로 옮긴다</td></tr><tr><td>투영(뷰 → 클립)</td><td>절두체를 정육면체로 펴 원근을 준비한다</td></tr><tr><td>원근 나눗셈(→ NDC)</td><td>w로 나눠 멀수록 작아지게 한다</td></tr><tr><td>뷰포트(→ 화면)</td><td>-1~1을 픽셀 좌표로 바꾼다</td></tr></tbody></table><p>셰이더는 우리가 코드를 쓰는 프로그래머블 단계이고, 래스터라이저와 깊이·스텐실 테스트, 블렌딩은 하드웨어가 하는 고정 기능 단계다. 고정 단계도 동작은 <code>Cull</code>, <code>ZWrite</code>, <code>Blend</code> 같은 렌더 스테이트로 고른다.</p><p>여기서 드로우 콜·패스·렌더 스테이트의 관계도 정리된다. 셰이더의 <strong>패스</strong>는 한 번 그리는 방법이고, <strong>렌더 스테이트</strong>는 그때 고정 기능 단계를 어떻게 설정할지이며, <strong>드로우 콜</strong>은 그 상태로 이 메시를 그리라는 CPU의 명령이다. 배칭은 같은 상태로 그릴 수 있는 것들을 묶어 이 명령 횟수를 줄이는 일이다.</p><p>정점의 UV·색이 삼각형 내부 픽셀에서 정해지는 것은 래스터라이저가 무게중심 좌표로, 그것도 원근 보정을 넣어 보간하기 때문이다. 실행 횟수는 프래그먼트가 정점보다 훨씬 많으므로 픽셀마다 같은 결과가 나오는 계산은 버텍스 셰이더로 올린다.</p><p>GPU가 빠른 것은 같은 명령을 수많은 데이터에 한꺼번에 적용하는 구조라서다. 단순한 코어를 대량으로 두고 정점·픽셀을 묶음(워프) 단위로 돌리며 메모리 대기는 다른 묶음으로 감춘다. 대가로 분기 예측과 큰 캐시를 포기해, 한 묶음 안에서 <code>if</code>가 갈리면 양쪽을 다 실행하고 필요 없는 결과를 버린다. 스킨드 메시는 정점에 담긴 본 인덱스와 가중치로 본 행렬을 섞어 정점을 옮긴다.</p><p><strong>모바일(타일 기반 GPU)</strong>은 지오메트리를 먼저 다 처리해 타일별로 나눠 담은 뒤(비닝) 타일 하나씩 칠한다. 색·깊이를 칩 안 타일 메모리에서 다뤄 대역폭이 싼 대신, 정점 처리 결과를 메모리에 적어 두므로 정점 수와 정점 속성 크기가 데스크톱보다 더 아프다. 프레임 도중 렌더 타겟을 바꾸거나 그린 화면을 다시 읽으면 타일을 내렸다 올리는 비용이 붙는다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>큐브 하나가 화면에 그려지기까지</strong> — CPU가 컬링·정렬을 거쳐 렌더 스테이트를 잡고 드로우 콜을 보내면, GPU가 정점을 클립 공간으로 옮기고 삼각형을 조각으로 래스터화한 뒤 조각마다 색을 계산하고, 깊이 테스트와 블렌딩을 거쳐 프레임 버퍼에 쓴다.</li><li><strong>세 단계의 역할</strong> — 버텍스 셰이더는 정점마다, 프래그먼트 셰이더는 조각마다 도는 우리 코드고, 그 사이의 래스터라이저는 삼각형이 덮는 조각을 만들고 정점 값을 보간하는 고정 기능이다.</li><li><strong>정점 사이 값은 어떻게 정해지나</strong> — 래스터라이저가 세 정점 값을 무게중심 좌표로, 원근 보정까지 넣어 보간해 넘긴다.</li><li><strong>GPU는 왜 빠른가</strong> — 같은 연산을 대량의 데이터에 동시에 적용하도록 단순 코어를 많이 둔 구조다. 대신 분기와 순차 의존이 큰 작업에는 약하다.</li></ul><h3>흔한 오해</h3><ul><li><strong>래스터라이저도 셰이더로 짠다</strong> — 래스터화·깊이 테스트·블렌딩은 고정 기능이고, 우리는 렌더 스테이트로 동작만 고른다.</li><li><strong>투영 변환을 하면 화면 좌표가 나온다</strong> — 투영은 클립 공간까지다. 원근 나눗셈과 뷰포트 변환이 남아 있다.</li><li><strong>깊이 테스트는 항상 픽셀 셰이더 뒤다</strong> — 셰이더가 깊이를 바꾸거나 <code>discard</code>하지 않으면 하드웨어가 먼저 테스트해 셰이딩을 건너뛴다(Early-Z).</li><li><strong>프래그먼트 셰이더는 보이는 픽셀만큼만 돈다</strong> — 가려진 조각도 실행될 수 있고, 미분값 때문에 2x2 묶음으로 돌아 가장자리에서는 버려지는 실행이 생긴다.</li></ul>
+<p class="lead">렌더링은 CPU가 그릴 목록을 만들고 GPU가 칠하는 분업이다. 이 순서는 뒤집히지 않는다</p>
+<p>프레임이 느릴 때 어디를 고칠지는 이 순서가 정해 준다. 정점이 문제인지 픽셀이 문제인지 가르려면 단계를 알아야 한다. 큐브 하나가 화면에 찍히는 길을 따라가 본다.</p>
+<svg viewBox="0 0 640 140" width="100%" role="img" aria-label="렌더링 파이프라인 단계 순서 도식">
+<text x="20" y="16" font-size="11" fill="currentColor">CPU가 정한다</text>
+<text x="132" y="16" font-size="11" fill="currentColor">GPU가 칠한다</text>
+<line x1="20" y1="24" x2="98" y2="24" stroke="currentColor"/>
+<line x1="106" y1="24" x2="614" y2="24" stroke="currentColor"/>
+<rect x="20" y="34" width="78" height="46" fill="none" stroke="currentColor"/>
+<text x="59" y="54" font-size="11" fill="currentColor" text-anchor="middle">CPU</text>
+<text x="59" y="70" font-size="11" fill="currentColor" text-anchor="middle">드로우 콜</text>
+<rect x="106" y="34" width="78" height="46" fill="none" stroke="currentColor"/>
+<text x="145" y="54" font-size="11" fill="currentColor" text-anchor="middle">버텍스</text>
+<text x="145" y="70" font-size="11" fill="currentColor" text-anchor="middle">셰이더</text>
+<rect x="192" y="34" width="78" height="46" fill="none" stroke="currentColor"/>
+<text x="231" y="54" font-size="11" fill="currentColor" text-anchor="middle">클리핑</text>
+<text x="231" y="70" font-size="11" fill="currentColor" text-anchor="middle">뷰포트</text>
+<rect x="278" y="34" width="78" height="46" fill="none" stroke="currentColor"/>
+<text x="317" y="62" font-size="11" fill="currentColor" text-anchor="middle">래스터화</text>
+<rect x="364" y="34" width="78" height="46" fill="none" stroke="currentColor"/>
+<text x="403" y="54" font-size="11" fill="currentColor" text-anchor="middle">프래그먼트</text>
+<text x="403" y="70" font-size="11" fill="currentColor" text-anchor="middle">셰이더</text>
+<rect x="450" y="34" width="78" height="46" fill="none" stroke="currentColor"/>
+<text x="489" y="54" font-size="11" fill="currentColor" text-anchor="middle">깊이 테스트</text>
+<text x="489" y="70" font-size="11" fill="currentColor" text-anchor="middle">블렌딩</text>
+<rect x="536" y="34" width="78" height="46" fill="none" stroke="currentColor"/>
+<text x="575" y="54" font-size="11" fill="currentColor" text-anchor="middle">프레임</text>
+<text x="575" y="70" font-size="11" fill="currentColor" text-anchor="middle">버퍼</text>
+<line x1="98" y1="57" x2="106" y2="57" stroke="currentColor"/>
+<polyline points="102,53 106,57 102,61" fill="none" stroke="currentColor"/>
+<line x1="184" y1="57" x2="192" y2="57" stroke="currentColor"/>
+<polyline points="188,53 192,57 188,61" fill="none" stroke="currentColor"/>
+<line x1="270" y1="57" x2="278" y2="57" stroke="currentColor"/>
+<polyline points="274,53 278,57 274,61" fill="none" stroke="currentColor"/>
+<line x1="356" y1="57" x2="364" y2="57" stroke="currentColor"/>
+<polyline points="360,53 364,57 360,61" fill="none" stroke="currentColor"/>
+<line x1="442" y1="57" x2="450" y2="57" stroke="currentColor"/>
+<polyline points="446,53 450,57 446,61" fill="none" stroke="currentColor"/>
+<line x1="528" y1="57" x2="536" y2="57" stroke="currentColor"/>
+<polyline points="532,53 536,57 532,61" fill="none" stroke="currentColor"/>
+<text x="145" y="98" font-size="10" fill="currentColor" text-anchor="middle">우리 코드</text>
+<text x="403" y="98" font-size="10" fill="currentColor" text-anchor="middle">우리 코드</text>
+<text x="231" y="98" font-size="10" fill="currentColor" text-anchor="middle">고정 기능</text>
+<text x="317" y="98" font-size="10" fill="currentColor" text-anchor="middle">고정 기능</text>
+<text x="489" y="98" font-size="10" fill="currentColor" text-anchor="middle">고정 기능</text>
+<text x="20" y="126" font-size="11" fill="currentColor">고정 기능 단계도 Cull·ZWrite·Blend 같은 렌더 스테이트로 동작만 고른다</text>
+</svg>
+<h3>CPU는 그릴 목록을 만들고 GPU는 칠한다</h3>
+<p>렌더링은 분업이다. CPU는 무엇을 그릴지 정하고, GPU는 그것을 칠한다. CPU는 컬링으로 목록을 추리고 정렬한 뒤 렌더 스테이트를 잡고 드로우 콜을 보낸다.</p>
+<p>GPU 쪽 순서는 뒤집히지 않는다. 화면 좌표가 나와야 어느 픽셀을 덮는지 안다. 조각이 나와야 색을 계산하고, 색이 나와야 기존 값과 섞는다.</p>
+<p>헷갈리는 용어 셋의 관계도 여기서 정리된다. 패스는 한 번 그리는 방법이고, 렌더 스테이트는 그때의 고정 기능 설정이다. <strong>드로우 콜</strong>은 그 상태로 이 메시를 그리라는 CPU의 명령이다.</p>
+<h3>투영이 끝나도 아직 화면 좌표가 아니다</h3>
+<p>정점 좌표는 다섯 번 바뀌어 픽셀 자리가 된다. 앞의 셋은 행렬 곱이고, 뒤의 둘은 하드웨어가 한다.</p>
+<table>
+<thead>
+<tr><th>변환</th>
+<th>하는 일</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>모델(로컬 → 월드)</td>
+<td>오브젝트를 씬 좌표에 놓는다</td>
+</tr>
+<tr><td>뷰(월드 → 뷰)</td>
+<td>카메라를 원점으로 옮긴다</td>
+</tr>
+<tr><td>투영(뷰 → 클립)</td>
+<td>절두체를 정육면체로 펴 원근을 준비한다</td>
+</tr>
+<tr><td>원근 나눗셈(→ NDC)</td>
+<td>w로 나눠 멀수록 작아지게 한다</td>
+</tr>
+<tr><td>뷰포트(→ 화면)</td>
+<td>-1~1을 픽셀 좌표로 바꾼다</td>
+</tr>
+</tbody>
+</table>
+<p>면접에서 자주 걸리는 지점이 여기다. 투영 변환의 결과는 클립 공간까지다. 원근 나눗셈과 뷰포트 변환이 아직 남아 있다.</p>
+<h3>래스터화와 깊이 테스트는 우리가 못 짜는 단계다</h3>
+<p>코드를 쓰는 단계는 셰이더뿐이다. 래스터화·깊이 테스트·블렌딩은 하드웨어가 하는 고정 기능이다. 우리는 <code>Cull</code>, <code>ZWrite</code>, <code>Blend</code> 같은 렌더 스테이트로 동작만 고른다.</p>
+<p>삼각형 안쪽 픽셀의 UV와 색은 래스터라이저가 만든다. 세 정점 값을 무게중심 좌표로, 원근 보정까지 넣어 보간한다. 그래서 정점에만 값을 넣어도 면 전체가 채워진다.</p>
+<p>실행 횟수는 프래그먼트가 정점보다 훨씬 많다. 그래서 픽셀마다 결과가 같은 계산은 버텍스 셰이더로 올린다.</p>
+<h3>GPU가 빠른 대가는 분기에서 나온다</h3>
+<p>GPU는 같은 명령을 수많은 데이터에 한꺼번에 적용한다. 단순한 코어를 대량으로 두고 정점과 픽셀을 묶음(워프) 단위로 돌린다. 메모리 대기는 다른 묶음으로 감춘다.</p>
+<p>대신 분기 예측과 큰 캐시를 포기했다. 한 묶음 안에서 <code>if</code>가 갈리면 양쪽을 다 실행하고 필요 없는 결과를 버린다. 셰이더에서 분기가 비싼 이유가 이것이다.</p>
+<p>스킨드 메시도 이 단계에서 움직인다. 정점에 담긴 본 인덱스와 가중치로 본 행렬을 섞어 정점을 옮긴다.</p>
+<p>모바일의 타일 기반 GPU는 이 순서를 한 번 끊는다. 지오메트리를 먼저 다 처리해 타일별로 나눠 담은 뒤 타일 하나씩 칠한다. 정점 처리 결과를 메모리에 적어 두므로 정점 수와 정점 속성 크기가 데스크톱보다 더 아프다.</p>
+<h3>면접에서 이렇게 답한다</h3>
+<ul><li><strong>큐브 하나가 화면에 그려지기까지</strong> — CPU가 컬링과 정렬을 거쳐 렌더 스테이트를 잡고 드로우 콜을 보낸다. GPU는 정점을 클립 공간으로 옮기고 삼각형을 조각으로 래스터화한다. 조각마다 색을 계산한 뒤 깊이 테스트와 블렌딩을 거쳐 프레임 버퍼에 쓴다.</li>
+<li><strong>세 단계의 역할</strong> — 버텍스 셰이더는 정점마다, 프래그먼트 셰이더는 조각마다 도는 우리 코드다. 그 사이의 래스터라이저는 고정 기능이다. 삼각형이 덮는 조각을 만들고 정점 값을 보간한다.</li>
+<li><strong>정점 사이 값은 어떻게 정해지나</strong> — 래스터라이저가 세 정점 값을 무게중심 좌표로 보간한다. 원근 보정까지 넣어 프래그먼트 셰이더로 넘긴다.</li>
+<li><strong>GPU는 왜 빠른가</strong> — 같은 연산을 대량의 데이터에 동시에 적용하도록 단순 코어를 많이 둔 구조다. 대신 분기와 순차 의존이 큰 작업에는 약하다.</li>
+</ul>
+<h3>이런 오해를 한다</h3>
+<ul><li><strong>래스터라이저도 셰이더로 짠다</strong> — 래스터화·깊이 테스트·블렌딩은 고정 기능이다. 우리는 렌더 스테이트로 동작만 고른다.</li>
+<li><strong>투영 변환을 하면 화면 좌표가 나온다</strong> — 투영은 클립 공간까지다. 원근 나눗셈과 뷰포트 변환이 남아 있다.</li>
+<li><strong>깊이 테스트는 항상 픽셀 셰이더 뒤다</strong> — 셰이더가 깊이를 바꾸거나 <code>discard</code>하지 않으면 하드웨어가 먼저 테스트한다. 셰이딩 자체를 건너뛴다(Early-Z).</li>
+<li><strong>프래그먼트 셰이더는 보이는 픽셀만큼만 돈다</strong> — 가려진 조각도 실행될 수 있다. 미분값 때문에 2x2 묶음으로 돌아 가장자리에서는 버려지는 실행이 생긴다.</li>
+</ul>
+<h3>3줄 정리</h3>
+<ul><li>CPU는 그릴 목록을, GPU는 칠하기를 맡는다</li>
+<li>투영 뒤에 원근 나눗셈과 뷰포트 변환이 남는다</li>
+<li>셰이더만 우리 코드, 래스터화와 깊이는 고정 기능</li>
+</ul>
 <div class="refs"><h2>참고 자료</h2><ul><li><a href="https://docs.unity3d.com/Manual/render-pipelines.html" target="_blank" rel="noopener">Unity 매뉴얼 – Render pipelines</a></li><li><a href="https://docs.unity3d.com/Manual/writing-shader-writing-shader-programs-hlsl.html" target="_blank" rel="noopener">Unity 매뉴얼 – Writing HLSL shader programs</a></li><li><a href="https://learn.microsoft.com/ko-kr/windows/win32/direct3d11/overviews-direct3d-11-graphics-pipeline" target="_blank" rel="noopener">Microsoft Learn – 그래픽 파이프라인(Direct3D 11)</a></li><li><a href="https://docs.unity3d.com/Manual/class-SkinnedMeshRenderer.html" target="_blank" rel="noopener">Unity 매뉴얼 – Skinned Mesh Renderer component</a></li></ul></div>
 </article>
 <div class="pager"><span></span><a href="04-02.html">컬링과 가시성 →</a></div>

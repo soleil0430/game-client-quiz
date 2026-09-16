@@ -16,7 +16,8 @@
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--text);
-    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+    font: 450 17px/1.85 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  strong { font-weight: 800; }
   main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
   a { color: var(--blue-d); }
   .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
@@ -25,8 +26,12 @@
     padding: 4px 12px; font-size: .8rem; font-weight: 800; }
   h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
   h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
-  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
-  p, ul, ol { margin: 10px 0; }
+  h3 { font-size: 1.1rem; font-weight: 800; margin: 34px 0 10px; padding-top: 4px; border-top: 2px solid var(--line); }
+  article h3:first-of-type { margin-top: 26px; }
+  p, ul, ol { margin: 0 0 20px; }
+  h3 + p, h3 + ul { margin-top: 0; }
+  svg { display: block; width: 100%; max-width: 640px; height: auto; margin: 18px auto 22px; color: var(--muted); }
+  svg text { font: 600 13px -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; }
   li { margin: 5px 0; }
   .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
   .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
@@ -58,22 +63,84 @@
 <div class="nav"><a href="../index.html#library">← 도서관</a><a href="08.html" class="badge">운영체제·동시성 목차</a></div>
 <article class="card">
 <h1>메모리 구조</h1>
-<p class="lead">코드·데이터·힙·스택이 무엇을 담고 언제 정리되는지 알면 크래시 로그가 읽힌다</p>
-<h3>핵심 개념</h3><p>프로세스의 주소 공간은 성격이 다른 네 구역으로 나뉜다. <strong>코드</strong>에는 컴파일된 기계어가, <strong>데이터</strong>에는 전역·정적 변수가, <strong>힙</strong>에는 실행 중에 잡는 동적 할당이, <strong>스택</strong>에는 함수 호출마다 쌓이는 지역 변수와 매개변수와 복귀 주소가 들어간다. 나눠 둔 이유는 <strong>수명이 다르기 때문</strong>이다. 코드와 전역은 프로그램이 도는 내내 살아 있고, 스택은 함수가 끝나면 사라지고, 힙은 놓아 줄 때까지 남는다.</p><table><thead><tr><th>영역</th><th>무엇이 들어가나</th><th>언제 정리되나</th><th>크기가 정해지는 때</th></tr></thead><tbody><tr><td>코드</td><td>기계어</td><td>프로세스 종료</td><td>빌드 시점</td></tr><tr><td>데이터</td><td>전역·static 변수</td><td>프로세스 종료</td><td>빌드 시점</td></tr><tr><td>스택</td><td>지역 변수, 매개변수, 복귀 주소</td><td>함수 반환 때 자동</td><td>스레드를 만들 때 고정</td></tr><tr><td>힙</td><td><code>new</code>·<code>malloc</code>으로 잡은 것</td><td>해제 또는 GC 수거</td><td>실행 중 늘었다 줄었다</td></tr></tbody></table><p>스택이 빠른 이유는 알고리즘이 좋아서가 아니라 <strong>정리 방식이 단순해서</strong>다. 스택 포인터를 올렸다 내리는 것이 할당과 해제의 전부라 빈 자리를 찾을 일도, 단편화도 없다. 게다가 방금 건드린 영역을 다시 쓰니 CPU 캐시에 거의 항상 올라와 있다. 힙은 원하는 크기를 원하는 시점에 잡는 자유를 주는 대신 빈 블록을 찾아야 하고, 잡았다 놓기를 반복하면 빈 공간이 흩어져 총량은 남는데 큰 덩어리를 못 잡는 상태가 된다.</p><p>스택 오버플로는 그 고정 크기를 넘겼다는 뜻이다. 종료 조건 없는 재귀가 대표적이지만, 깊은 계층을 재귀로 훑거나 큰 배열을 지역 변수로 잡아도 난다. 힙이 모자라는 OutOfMemory와는 아예 다른 사고다. 게임에서는 노드가 많은 UI 계층이나 씬 그래프를 재귀로 순회할 때 에디터에서는 멀쩡하다가 실기기에서만 터지는 일이 있는데, 스레드 스택 크기가 플랫폼마다 다르기 때문이다. 깊이가 커질 수 있으면 반복문과 명시적 스택으로 바꾸는 편이 안전하다.</p><pre><code>void Traverse(Transform root)               // 깊으면 스택 오버플로
-{
-    foreach (Transform c in root) Traverse(c);
-}
+<p class="lead">네 구역은 수명이 달라서 나뉜다. 스택은 함수가 끝나면 걷히고 힙은 놓을 때까지 남는다</p>
+<p>크래시 로그에 StackOverflow와 OutOfMemory는 다르게 찍힌다. 어느 구역이 터졌는지 모르면 고칠 자리를 못 찾는다. 프로세스 메모리는 수명이 다른 네 구역으로 나뉘어 있다.</p>
+<h3>네 구역을 가른 기준은 수명이다</h3>
+<p>코드에는 컴파일된 기계어가, 데이터에는 전역·정적 변수가 들어간다. 힙에는 실행 중에 잡는 동적 할당이 쌓인다. 스택에는 함수 호출마다 지역 변수와 매개변수와 복귀 주소가 쌓인다.</p>
+<p>나눠 둔 이유는 <strong>사는 기간이 다르기 때문</strong>이다. 코드와 전역은 프로그램이 도는 내내 살아 있다. 스택은 함수가 끝나면 사라지고, 힙은 놓아 줄 때까지 남는다.</p>
+<svg viewBox="0 0 640 240" width="100%" role="img" aria-label="높은 주소의 스택이 아래로 자라고 낮은 주소 쪽 힙이 위로 자라며 그 아래에 데이터와 코드가 놓인 프로세스 메모리 배치">
+<g fill="none" stroke="currentColor">
+<rect x="140" y="20" width="200" height="210"/>
+<rect x="140" y="20" width="200" height="50" fill="currentColor" fill-opacity="0.08"/>
+<rect x="140" y="150" width="200" height="30" fill="currentColor" fill-opacity="0.08"/>
+<line x1="140" y1="70" x2="340" y2="70"/>
+<line x1="140" y1="150" x2="340" y2="150"/>
+<line x1="140" y1="180" x2="340" y2="180"/>
+<line x1="140" y1="205" x2="340" y2="205"/>
+<line x1="200" y1="78" x2="200" y2="104"/>
+<polyline points="194,96 200,106 206,96"/>
+<line x1="280" y1="144" x2="280" y2="118"/>
+<polyline points="274,126 280,116 286,126"/>
+</g>
+<g fill="currentColor" font-size="13">
+<text x="20" y="34">높은 주소</text>
+<text x="20" y="226">낮은 주소</text>
+<text x="152" y="48">스택</text>
+<text x="152" y="118">빈 공간</text>
+<text x="152" y="170">힙</text>
+<text x="152" y="198">데이터</text>
+<text x="152" y="223">코드</text>
+<text x="356" y="40">지역 변수·매개변수·복귀 주소</text>
+<text x="356" y="60">함수가 끝나면 통째로 걷힌다</text>
+<text x="356" y="114">스택은 내려오고 힙은 올라간다</text>
+<text x="356" y="170">실행 중에 늘었다 줄었다</text>
+<text x="356" y="198">전역·static, 프로그램 끝까지</text>
+<text x="356" y="223">기계어, 빌드 때 크기 확정</text>
+</g>
+</svg>
+<h3>스택이 빠른 이유는 정리 방식이 단순해서다</h3>
+<p>스택 할당은 포인터를 올렸다 내리는 것이 전부다. 빈 자리를 찾을 일도, 단편화도 없다. 방금 건드린 영역을 다시 쓰니 CPU 캐시에도 거의 항상 올라와 있다.</p>
+<p>힙은 원하는 크기를 원하는 시점에 잡는 자유를 준다. 대신 빈 블록을 찾아야 한다. 잡았다 놓기를 반복하면 빈 공간이 흩어져, 총량은 남는데 큰 덩어리를 못 잡는 상태가 된다.</p>
+<h3>스택 오버플로와 OutOfMemory는 다른 사고다</h3>
+<p>스택 오버플로는 스레드마다 고정된 스택 크기를 넘겼다는 뜻이다. 종료 조건 없는 재귀가 대표적이다. 깊은 계층을 재귀로 훑거나 큰 배열을 지역 변수로 잡아도 난다.</p>
+<p>에디터에서 멀쩡하다가 실기기에서만 터지는 일이 여기서 나온다. 스레드 스택 크기가 플랫폼마다 다르기 때문이다. 깊이가 커질 수 있으면 반복문과 명시적 스택으로 바꾸는 편이 안전하다.</p>
+<p>UI 계층을 훑는 코드를 재귀에서 반복문으로 바꾼 모습:</p>
+<pre><code>void Traverse(Transform root)                   // 계층이 깊으면 스택 오버플로
+    { foreach (Transform c in root) Traverse(c); }  // 호출마다 프레임이 쌓인다
 
-void TraverseIterative(Transform root)      // 호출 스택 대신 힙의 스택을 쓴다
+void TraverseIterative(Transform root)          // 힙에 만든 스택으로 바꾼다
 {
-    var stack = new Stack&lt;Transform&gt;();
+    var stack = new Stack&lt;Transform&gt;();        // 이 스택은 힙이라 유연하다
     stack.Push(root);
-    while (stack.Count &gt; 0)
+    while (stack.Count &gt; 0)                     // 호출 프레임은 하나로 유지
     {
         Transform t = stack.Pop();
         foreach (Transform c in t) stack.Push(c);
     }
-}</code></pre><p>C#에는 한 겹이 더 붙는다. 클래스 인스턴스는 관리 힙에 놓여 GC가 수거하고, 구조체는 <strong>지역 변수일 때만</strong> 스택에 놓인다. 클래스의 필드이거나 박싱되면 구조체라도 힙으로 간다. "구조체는 스택, 클래스는 힙"이라고 외운 문장이 자주 틀리는 지점이다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>프로세스 메모리 구조를 설명하라</strong> — 코드·데이터·힙·스택 네 구역이고, 나눈 기준은 수명과 정리 방식이다. 스택은 함수 반환 때 통째로 걷히고 힙은 해제나 GC가 필요하다. 힙과 스택은 보통 주소 공간의 양끝에서 서로를 향해 자란다.</li><li><strong>스택과 힙 중 어느 쪽 접근이 빠른가</strong> — 스택이다. 할당·해제가 포인터 이동뿐이고 방금 건드린 영역이라 캐시 적중률이 높다. 힙은 빈 블록 탐색과 단편화가 따라오고, C#이면 GC 부담까지 붙는다.</li><li><strong>스택 오버플로는 언제 나나</strong> — 스레드마다 고정된 스택 크기를 넘길 때다. 무한 재귀가 대표적이고 깊은 계층 순회나 큰 지역 배열도 원인이 된다. 힙 고갈인 OutOfMemory와는 구분해서 말해야 한다.</li><li><strong>스택과 힙의 크기는 언제 정해지나</strong> — 스택은 스레드를 만들 때 예약 크기가 정해져 실행 중에 늘지 않는다. 힙은 실행 중 OS에서 더 받아 오며 늘어난다.</li></ul><h3>흔한 오해</h3><ul><li><strong>전역 변수는 힙에 있다</strong> — 전역·static은 데이터 영역에 잡혀 프로그램이 끝날 때까지 산다. 힙은 실행 중에 요청해 받는 영역이다.</li><li><strong>C#에서 구조체는 언제나 스택이다</strong> — 클래스의 필드이거나 박싱되면 힙에 함께 놓인다. 어디에 놓이는지는 타입이 아니라 어디에 선언됐는지가 정한다.</li><li><strong>힙이 부족하면 스택 오버플로가 난다</strong> — 힙 고갈은 OutOfMemoryException이다. 두 영역은 한계가 따로 있다.</li><li><strong>스택 크기는 늘리면 그만이다</strong> — 스레드마다 주소 공간을 예약하므로 무작정 키우면 스레드를 많이 만들지 못한다. 깊은 재귀를 반복문으로 바꾸는 쪽이 낫다.</li></ul>
+}</code></pre>
+<h3>C#에서 구조체가 힙으로 가는 경우</h3>
+<p>클래스 인스턴스는 관리 힙에 놓여 가비지 컬렉션(GC)이 수거한다. 구조체는 <strong>지역 변수일 때만</strong> 스택에 놓인다. 클래스의 필드이거나 박싱되면 구조체라도 힙으로 간다.</p>
+<p>"구조체는 스택, 클래스는 힙"이라고 외운 문장이 자주 틀리는 지점이다. 어디에 놓이는지는 타입이 아니라 어디에 선언했는지가 정한다.</p>
+<h3>면접에서 이렇게 답한다</h3>
+<ul>
+<li><strong>프로세스 메모리 구조를 설명하라</strong> — 코드·데이터·힙·스택 네 구역이고 나눈 기준은 수명과 정리 방식이다. 스택은 함수 반환 때 통째로 걷히고 힙은 해제나 GC가 필요하다. 힙과 스택은 주소 공간의 양끝에서 서로를 향해 자란다.</li>
+<li><strong>스택과 힙 중 어느 쪽이 빠른가</strong> — 스택이다. 할당과 해제가 포인터 이동뿐이고 방금 건드린 영역이라 캐시 적중률이 높다. 힙은 빈 블록 탐색과 단편화가 따라오고 C#이면 GC 부담이 붙는다.</li>
+<li><strong>스택 오버플로는 언제 나나</strong> — 스레드마다 고정된 스택 크기를 넘길 때다. 무한 재귀가 대표적이고 깊은 계층 순회나 큰 지역 배열도 원인이 된다. 힙 고갈인 OutOfMemory와는 구분해서 말해야 한다.</li>
+<li><strong>스택과 힙의 크기는 언제 정해지나</strong> — 스택은 스레드를 만들 때 예약 크기가 정해져 실행 중에 늘지 않는다. 힙은 실행 중에 OS에서 더 받아 오며 늘어난다.</li>
+</ul>
+<h3>이런 오해를 한다</h3>
+<ul>
+<li><strong>전역 변수는 힙에 있다</strong> — 전역과 static은 데이터 영역에 잡혀 프로그램이 끝날 때까지 산다. 힙은 실행 중에 요청해 받는 영역이다.</li>
+<li><strong>C#에서 구조체는 언제나 스택이다</strong> — 클래스의 필드이거나 박싱되면 힙에 함께 놓인다. 타입이 아니라 선언 위치가 정한다.</li>
+<li><strong>힙이 부족하면 스택 오버플로가 난다</strong> — 힙 고갈은 OutOfMemoryException이다. 두 영역은 한계가 따로 있다.</li>
+<li><strong>스택 크기는 늘리면 그만이다</strong> — 스레드마다 주소 공간을 예약하므로 무작정 키우면 스레드를 많이 못 만든다. 깊은 재귀를 반복문으로 바꾸는 쪽이 낫다.</li>
+</ul>
+<h3>3줄 정리</h3>
+<ul>
+<li>코드·데이터·힙·스택을 가른 기준은 수명과 정리 방식이다</li>
+<li>스택은 포인터만 움직여 빠르고, 크기는 스레드마다 고정이다</li>
+<li>구조체가 클래스 필드이거나 박싱되면 스택이 아니라 힙에 있다</li>
+</ul>
 <div class="refs"><h2>참고 자료</h2><ul><li><a href="https://en.cppreference.com/w/cpp/language/storage_duration" target="_blank" rel="noopener">cppreference – Storage class specifiers(저장 기간)</a></li><li><a href="https://learn.microsoft.com/en-us/windows/win32/procthread/thread-stack-size" target="_blank" rel="noopener">Microsoft Learn – Thread Stack Size(Win32)</a></li><li><a href="https://learn.microsoft.com/ko-kr/dotnet/api/system.stackoverflowexception" target="_blank" rel="noopener">Microsoft Learn – StackOverflowException 클래스</a></li></ul></div>
 </article>
 <div class="pager"><a href="08-01.html">← 프로세스와 스레드</a><a href="08-03.html">가상 메모리 →</a></div>

@@ -16,7 +16,8 @@
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--text);
-    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+    font: 450 17px/1.85 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  strong { font-weight: 800; }
   main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
   a { color: var(--blue-d); }
   .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
@@ -25,8 +26,12 @@
     padding: 4px 12px; font-size: .8rem; font-weight: 800; }
   h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
   h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
-  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
-  p, ul, ol { margin: 10px 0; }
+  h3 { font-size: 1.1rem; font-weight: 800; margin: 34px 0 10px; padding-top: 4px; border-top: 2px solid var(--line); }
+  article h3:first-of-type { margin-top: 26px; }
+  p, ul, ol { margin: 0 0 20px; }
+  h3 + p, h3 + ul { margin-top: 0; }
+  svg { display: block; width: 100%; max-width: 640px; height: auto; margin: 18px auto 22px; color: var(--muted); }
+  svg text { font: 600 13px -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; }
   li { margin: 5px 0; }
   .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
   .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
@@ -58,30 +63,81 @@
 <div class="nav"><a href="../index.html#library">← 도서관</a><a href="09.html" class="badge">네트워크 목차</a></div>
 <article class="card">
 <h1>동기화 기법</h1>
-<p class="lead">입력을 맞출지 상태를 맞출지가 갈림길이다. 장르에 맞는 기법을 고르는 기준을 잡는다</p>
-<h3>핵심 개념</h3><p>동기화는 <strong>내 화면과 상대 화면 사이에 늘 왕복 시간만큼의 과거가 끼어 있다</strong>는 사실에서 출발한다. 대응은 둘이다. <strong>입력을 맞춰</strong> 각자 같은 시뮬레이션을 돌리거나(락스텝·롤백), <strong>상태를 맞춰</strong> 빈틈을 예측으로 메운다.</p><table><thead><tr><th>기법</th><th>보내는 것</th><th>맞는 장르</th><th>왜 맞나 / 대가</th></tr></thead><tbody><tr><td>락스텝</td><td>입력·명령</td><td>RTS, 유닛 많은 전략</td><td>유닛이 수백이어도 트래픽이 유닛 수와 무관 / 결정론 필요, 가장 느린 참가자만큼 입력 지연</td></tr><tr><td>롤백</td><td>입력 + 예측</td><td>격투, 2~4인 대전</td><td>내 입력이 지연 없이 반영된다 / 상태 스냅숏과 재시뮬레이션 비용</td></tr><tr><td>클라이언트 예측 + 서버 보정</td><td>입력과 권위 상태</td><td>FPS, 액션 MMO</td><td>서버가 판정해 치트에 강하고 조작은 즉시 반응 / 예측이 빗나가면 위치가 튄다</td></tr><tr><td>데드 레커닝·보간</td><td>위치·속도</td><td>원격 오브젝트 표시, 레이싱</td><td>전송 빈도를 낮춰도 끊기지 않는다 / 급한 방향 전환에서 오차가 커진다</td></tr></tbody></table><p><strong>락스텝</strong>은 입력만 보내고 모두가 같은 시뮬레이션을 돌린다. 유닛 수백 개의 위치를 보내지 않아도 되니 RTS처럼 개체가 많은 장르에 맞는다. 대신 모든 기기의 결과가 한 비트도 달라선 안 돼 고정소수점을 쓰고 난수 시드와 순회 순서를 고정한다. 한 번 갈라지면(desync) 복구가 어려워 상태 체크섬을 주기적으로 비교한다.</p><p><strong>롤백</strong>은 그 대기를 없앤 락스텝이다. 상대 입력을 예측해 진행하다 실제 입력이 다르면 그 프레임으로 되감아 현재까지 다시 돌린다. 상태를 통째로 저장·복원할 수 있고 재시뮬이 싸야 하므로, 참가자가 둘이고 1~2프레임 지연도 크게 느껴지는 격투 장르가 조건에 맞는다.</p><p><strong>클라이언트 예측과 서버 보정</strong>은 권위 서버를 둔 채 반응성을 사는 방법이다. 입력을 즉시 로컬에 적용하고, 서버 상태가 오면 그 시점에 맞춘 뒤 서버가 못 본 입력만 다시 돌린다(reconciliation).</p><pre><code>using System.Collections.Generic;
-using UnityEngine;
-
-public class PredictedMover : MonoBehaviour
+<p class="lead">입력을 맞출지 상태를 맞출지가 갈림길이다. 장르가 답을 정해 준다</p>
+<p>내 화면과 상대 화면 사이에는 늘 왕복 시간만큼의 과거가 끼어 있다. 아무리 빨라도 이 차이는 없앨 수 없다. 동기화 기법은 그 차이를 감추는 방법들이다.</p>
+<h3>입력을 맞출 것인가, 상태를 맞출 것인가</h3>
+<p>대응은 크게 둘로 갈린다. 입력만 주고받아 각자 같은 시뮬레이션을 돌리거나, 권위 있는 상태를 받아 빈틈을 예측으로 메운다. 어느 쪽이 맞는지는 장르가 정해 준다.</p>
+<table>
+<thead><tr><th>기법</th><th>보내는 것</th><th>맞는 장르</th><th>왜 맞나 / 대가</th></tr></thead>
+<tbody>
+<tr><td>락스텝</td><td>입력·명령</td><td>RTS, 유닛 많은 전략</td><td>트래픽이 유닛 수와 무관 / 결정론 필요</td></tr>
+<tr><td>롤백</td><td>입력 + 예측</td><td>격투, 2~4인 대전</td><td>입력 지연이 없다 / 재시뮬레이션 비용</td></tr>
+<tr><td>클라이언트 예측</td><td>입력과 권위 상태</td><td>FPS, 액션 MMO</td><td>서버가 판정 / 빗나가면 위치가 튄다</td></tr>
+<tr><td>데드 레커닝·보간</td><td>위치·속도</td><td>원격 오브젝트, 레이싱</td><td>빈도를 낮춰도 된다 / 급선회에 약하다</td></tr>
+</tbody></table>
+<h3>락스텝은 결정론을, 롤백은 되감기를 산다</h3>
+<p>락스텝은 입력만 보내고 모두가 같은 시뮬레이션을 돌린다. 유닛 수백 개의 위치를 보내지 않아도 되니 RTS에 맞는다. 대신 모든 기기의 결과가 한 비트도 달라선 안 된다.</p>
+<p>그래서 고정소수점을 쓰고 난수 시드와 순회 순서를 고정한다. 한 번 갈라지면 복구가 어려워 상태 체크섬을 주기적으로 비교한다. 진행 속도는 가장 느린 참가자에 묶인다.</p>
+<p>롤백은 그 대기를 없앤 락스텝이다. 상대 입력을 예측해 진행하다 실제 입력이 다르면 그 프레임으로 되감아 다시 돌린다. 상태 저장과 재시뮬레이션이 싸야 해서 참가자가 적은 격투에 맞는다.</p>
+<h3>서버 권한을 지키면서 즉시 반응하게 만드는 법</h3>
+<svg viewBox="0 0 640 190" width="100%" role="img" aria-label="클라이언트 예측과 서버 보정의 시간 흐름">
+<text x="6" y="16" font-size="12" fill="currentColor">클라이언트</text>
+<line x1="6" y1="70" x2="634" y2="70" stroke="currentColor"/>
+<text x="6" y="182" font-size="12" fill="currentColor">서버</text>
+<line x1="6" y1="150" x2="634" y2="150" stroke="currentColor"/>
+<circle cx="80" cy="70" r="5" fill="currentColor"/>
+<text x="20" y="46" font-size="12" fill="currentColor">입력 12 — 내 화면에 즉시 적용</text>
+<circle cx="150" cy="70" r="3" fill="currentColor"/>
+<circle cx="200" cy="70" r="3" fill="currentColor"/>
+<text x="230" y="46" font-size="12" fill="currentColor">13, 14는 응답을 기다리지 않는다</text>
+<line x1="84" y1="76" x2="296" y2="144" stroke="currentColor"/>
+<polyline points="286,138 298,146 288,148" fill="none" stroke="currentColor"/>
+<text x="96" y="122" font-size="12" fill="currentColor">입력만 보낸다</text>
+<circle cx="300" cy="150" r="5" fill="currentColor"/>
+<text x="250" y="172" font-size="12" fill="currentColor">서버가 판정 — 이쪽이 진짜 위치</text>
+<circle cx="430" cy="150" r="3" fill="currentColor"/>
+<line x1="432" y1="146" x2="516" y2="78" stroke="currentColor"/>
+<polyline points="510,89 517,77 504,82" fill="none" stroke="currentColor"/>
+<text x="300" y="120" font-size="12" fill="currentColor">상태 + 처리한 입력 번호</text>
+<circle cx="520" cy="70" r="5" fill="currentColor"/>
+<text x="396" y="30" font-size="12" fill="currentColor">받은 위치로 되돌리고 13, 14만 다시 적용</text>
+</svg>
+<p>입력에 번호를 붙여 보내면서 동시에 내 화면에 먼저 적용한다. 서버 상태가 오면 그 시점 위치로 되돌린다. 그리고 서버가 아직 보지 못한 입력만 다시 적용한다.</p>
+<p>서버가 확인한 입력을 버리고 나머지만 다시 밟는 부분이다:</p>
+<pre><code>public void Push(Vector3 move)                  // 보내면서 먼저 내 화면에 적용
 {
-    struct Cmd { public uint Seq; public Vector3 Move; }
+    _pending.Add(new Cmd { Seq = ++_seq, Move = move });
+    transform.position += move;
+}
 
-    readonly List&lt;Cmd&gt; _pending = new List&lt;Cmd&gt;();   // 서버가 아직 확인하지 않은 입력
-    uint _seq;
-
-    public void Push(Vector3 move)                  // 보내면서 먼저 내 화면에 적용
-    {
-        _pending.Add(new Cmd { Seq = ++_seq, Move = move });
-        transform.position += move;
-    }
-
-    public void OnServerState(Vector3 pos, uint ackSeq)
-    {
-        _pending.RemoveAll(c =&gt; c.Seq &lt;= ackSeq);   // 서버가 처리한 입력은 버리고
-        foreach (var c in _pending) pos += c.Move;  // 못 본 입력만 다시 적용
-        transform.position = pos;
-    }
-}</code></pre><p><strong>데드 레커닝</strong>은 남의 캐릭터를 그릴 때 쓴다. 받은 위치와 속도로 다음 위치를 추정해 패킷 사이를 메우고, 새 값이 오면 순간이동 대신 짧은 시간에 수렴시킨다. 손실을 전제해 상태는 델타보다 최신 값을 통째로 보낸다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>데드 레커닝이란</strong> — 받은 위치와 속도로 원격 오브젝트의 다음 위치를 추정해 갱신 사이를 메우는 기법이다. 전송 빈도를 낮춰도 부드럽다.</li><li><strong>락스텝은 어떤 장르에 맞나, 유닛 수백 개는 어떻게 동기화하나</strong> — 입력만 주고받고 각자 같은 시뮬레이션을 돌리므로 상태가 많은 RTS에 맞는다. 모든 기기의 결과가 같아야 해 고정소수점과 시드·순회 순서 고정이 필요하다.</li><li><strong>클라이언트 예측과 서버 보정</strong> — 입력에 순서 번호를 붙여 보내고 즉시 로컬에 적용한 뒤, 서버 상태가 오면 그 시점에 맞추고 남은 입력을 다시 적용한다. 판정 권한은 서버에 남는다.</li><li><strong>롤백 지연 보상</strong> — 상대 입력을 예측해 진행하고, 다르면 되감아 재시뮬레이션한다. 입력 지연이 없어 격투에 쓰지만 스냅숏 저장과 재계산 비용이 든다.</li></ul><h3>흔한 오해</h3><ul><li><strong>데드 레커닝은 서버가 과거로 되감는 것이다</strong> — 되감기는 히트스캔 슈터가 쓰는 서버 측 지연 보상이고, 데드 레커닝은 받은 값으로 앞을 추정하는 것이다. 같은 입력을 같은 턴에 쓰는 것은 락스텝이다.</li><li><strong>클라이언트 예측은 클라이언트에 판정을 맡기는 것이다</strong> — 미리 그려 볼 뿐 판정은 서버가 하고, 결과가 다르면 클라이언트가 맞춰진다.</li><li><strong>보간만 켜면 지연이 해결된다</strong> — 보간은 받은 값 사이를 채우느라 한 틱만큼 과거를 보여 준다. 내 캐릭터는 예측으로 메운다.</li></ul>
+public void OnServerState(Vector3 pos, uint ackSeq)
+{
+    _pending.RemoveAll(c =&gt; c.Seq &lt;= ackSeq);   // 서버가 처리한 입력은 버린다
+    foreach (var c in _pending) pos += c.Move;  // 못 본 입력만 다시 적용
+    transform.position = pos;                   // 판정 권한은 서버에 남는다
+}</code></pre>
+<h3>남의 캐릭터는 추정으로 그린다</h3>
+<p>데드 레커닝은 받은 위치와 속도로 다음 위치를 추정한다. 그렇게 패킷과 패킷 사이를 메운다. 새 값이 오면 순간이동 대신 짧은 시간에 수렴시킨다.</p>
+<p>손실을 전제하므로 상태는 델타보다 최신 값을 통째로 보낸다. 보간은 받은 값 사이를 채우느라 한 틱만큼 과거를 보여 준다. 내 캐릭터의 반응성은 예측이 맡는다.</p>
+<h3>면접에서 이렇게 답한다</h3>
+<ul>
+<li><strong>데드 레커닝이란</strong> — 받은 위치와 속도로 원격 오브젝트의 다음 위치를 추정해 갱신 사이를 메우는 기법이다. 전송 빈도를 낮춰도 화면이 끊기지 않는다.</li>
+<li><strong>락스텝은 어떤 장르에 맞나</strong> — 입력만 주고받아 각자 같은 시뮬레이션을 돌리므로 유닛이 많은 RTS에 맞는다. 결과가 같아야 해서 고정소수점과 시드 고정이 필요하다.</li>
+<li><strong>클라이언트 예측과 서버 보정</strong> — 입력에 번호를 붙여 보내고 즉시 로컬에 적용한다. 서버 상태가 오면 그 시점에 맞추고 남은 입력만 다시 적용하며, 판정은 서버가 한다.</li>
+<li><strong>롤백 지연 보상</strong> — 상대 입력을 예측해 진행하고 다르면 되감아 재시뮬레이션한다. 입력 지연이 없어 격투에 쓰지만 스냅숏 저장 비용이 든다.</li>
+</ul>
+<h3>이런 오해를 한다</h3>
+<ul>
+<li><strong>데드 레커닝은 서버가 과거로 되감는 것이다</strong> — 되감기는 히트스캔 슈터의 서버 측 지연 보상이다. 데드 레커닝은 받은 값으로 앞을 추정하는 것이다.</li>
+<li><strong>클라이언트 예측은 판정을 맡기는 것이다</strong> — 미리 그려 볼 뿐이다. 판정은 서버가 하고 결과가 다르면 클라이언트가 맞춰진다.</li>
+<li><strong>보간만 켜면 지연이 해결된다</strong> — 보간은 한 틱만큼 과거를 보여 준다. 내 캐릭터는 예측으로 메워야 한다.</li>
+</ul>
+<h3>3줄 정리</h3>
+<ul>
+<li>입력을 맞추면 락스텝, 상태를 맞추면 예측</li>
+<li>예측은 되돌린 뒤 못 본 입력만 다시 밟는다</li>
+<li>남의 캐릭터는 추정과 보간으로 그린다</li>
+</ul>
 <div class="refs"><h2>참고 자료</h2><ul><li><a href="https://www.gabrielgambetta.com/client-side-prediction-server-reconciliation.html" target="_blank" rel="noopener">Gabriel Gambetta – Fast-Paced Multiplayer (Part II): Client-Side Prediction and Server Reconciliation</a></li><li><a href="https://www.gabrielgambetta.com/lag-compensation.html" target="_blank" rel="noopener">Gabriel Gambetta – Fast-Paced Multiplayer: Lag Compensation</a></li><li><a href="https://docs.unity3d.com/Packages/com.unity.netcode@1.3/manual/intro-to-prediction.html" target="_blank" rel="noopener">Unity Netcode for Entities – Introduction to prediction</a></li><li><a href="https://docs.unity3d.com/Packages/com.unity.netcode.gameobjects@3.0/manual/learn/lagandpacketloss.html" target="_blank" rel="noopener">Unity Netcode for GameObjects – Understanding latency</a></li></ul></div>
 </article>
 <div class="pager"><a href="09-04.html">← 멀티플레이 구조</a><a href="09-06.html">클라이언트-서버 신뢰성 →</a></div>

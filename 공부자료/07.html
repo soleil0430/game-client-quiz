@@ -16,7 +16,8 @@
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--text);
-    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+    font: 450 17px/1.85 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  strong { font-weight: 800; }
   main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
   a { color: var(--blue-d); }
   .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
@@ -25,8 +26,12 @@
     padding: 4px 12px; font-size: .8rem; font-weight: 800; }
   h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
   h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
-  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
-  p, ul, ol { margin: 10px 0; }
+  h3 { font-size: 1.1rem; font-weight: 800; margin: 34px 0 10px; padding-top: 4px; border-top: 2px solid var(--line); }
+  article h3:first-of-type { margin-top: 26px; }
+  p, ul, ol { margin: 0 0 20px; }
+  h3 + p, h3 + ul { margin-top: 0; }
+  svg { display: block; width: 100%; max-width: 640px; height: auto; margin: 18px auto 22px; color: var(--muted); }
+  svg text { font: 600 13px -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; }
   li { margin: 5px 0; }
   .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
   .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
@@ -58,7 +63,7 @@
 <div class="nav"><a href="../index.html#library">← 도서관</a><span class="badge">자료구조·알고리즘</span></div>
 <h1>자료구조·알고리즘 공부 자료</h1>
 <p class="lead">글 10편. 근거가 된 질문 목록은 질문은행 07-자료구조-알고리즘.md에 있다.</p>
-<div class="list"><a href="07-01.html"><strong>복잡도</strong><span>입력이 커질 때 비용이 어떤 속도로 자라는지를 재는 자다. 상수 배는 실측으로 따진다</span></a><a href="07-02.html"><strong>배열과 리스트</strong><span>연속 메모리냐 흩어진 노드냐에 따라 접근 비용과 캐시 적중률이 함께 갈린다</span></a><a href="07-03.html"><strong>스택·큐·우선순위 큐</strong><span>꺼내는 순서 규칙 하나가 자료구조를 가른다. 후입선출·선입선출·우선순위 순</span></a><a href="07-04.html"><strong>해시</strong><span>키를 숫자로 바꿔 자리를 정한다. 충돌 처리와 로드 팩터가 평균 O(1)을 떠받친다</span></a><a href="07-05.html"><strong>트리와 힙</strong><span>전체 순서를 지키는 트리와 최솟값만 지키는 힙. 무엇을 포기했는지가 다르다</span></a><a href="07-06.html"><strong>그래프와 경로 탐색</strong><span>길찾기는 그래프 탐색이다. BFS·다익스트라·A*의 차이와 유닛이 많을 때 비용 줄이는 법</span></a><a href="07-07.html"><strong>정렬과 탐색</strong><span>정렬마다 최악과 안정성이 다르다. 그 차이와 이진 탐색의 경계 찾기를 정리한다</span></a><a href="07-08.html"><strong>공간 분할</strong><span>n² 비교를 없애는 구조다. 그리드·쿼드트리·BVH가 각각 언제 유리한지 가른다</span></a><a href="07-09.html"><strong>풀이 기법</strong><span>재귀·DP·그리디·비트 연산은 각각 언제 성립하는지가 핵심이다. 조건과 반례로 외운다</span></a><a href="07-10.html"><strong>코딩 테스트와 실기 유형</strong><span>라이브 코딩·코드 리뷰 과제에서 보는 것은 정답이 아니라 푸는 과정과 예외 처리다</span></a></div>
+<div class="list"><a href="07-01.html"><strong>복잡도</strong><span>N이 두 배가 될 때 비용이 몇 배로 자라는지만 말한다. 실제 시간은 프로파일러로 잰다</span></a><a href="07-02.html"><strong>배열과 리스트</strong><span>연속으로 놓느냐 흩어 놓느냐가 접근 비용과 캐시 적중률을 함께 가른다</span></a><a href="07-03.html"><strong>스택·큐·우선순위 큐</strong><span>꺼내는 순서 규칙 하나가 자료구조를 가른다. 기능을 줄인 대가로 모두 O(1)이다</span></a><a href="07-04.html"><strong>해시</strong><span>키를 숫자로 바꿔 자리를 정한다. 충돌 처리와 로드 팩터가 평균 O(1)을 떠받친다</span></a><a href="07-05.html"><strong>트리와 힙</strong><span>전체 순서를 지키는 트리와 최솟값만 지키는 힙. 무엇을 포기했는지가 다르다</span></a><a href="07-06.html"><strong>그래프와 경로 탐색</strong><span>길찾기는 그래프 탐색이다. 다음에 어디를 펼치느냐가 알고리즘을 가른다</span></a><a href="07-07.html"><strong>정렬과 탐색</strong><span>정렬은 최악·추가 공간·안정성으로 고른다. 정렬해 두면 탐색이 O(log N)이다</span></a><a href="07-08.html"><strong>공간 분할</strong><span>n제곱 비교를 없애는 구조다. 그리드·쿼드트리·BVH는 약점이 서로 다르다</span></a><a href="07-09.html"><strong>풀이 기법</strong><span>재귀·DP·그리디·비트 연산은 언제 성립하는지가 핵심이다. 조건과 반례로 외운다</span></a><a href="07-10.html"><strong>코딩 테스트와 실기 유형</strong><span>실기는 정답이 아니라 푸는 과정을 본다. 범위·예외·복잡도를 입으로 말한다</span></a></div>
 </main>
 </body>
 </html>

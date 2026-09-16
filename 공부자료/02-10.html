@@ -16,7 +16,8 @@
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--text);
-    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+    font: 450 17px/1.85 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  strong { font-weight: 800; }
   main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
   a { color: var(--blue-d); }
   .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
@@ -25,8 +26,12 @@
     padding: 4px 12px; font-size: .8rem; font-weight: 800; }
   h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
   h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
-  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
-  p, ul, ol { margin: 10px 0; }
+  h3 { font-size: 1.1rem; font-weight: 800; margin: 34px 0 10px; padding-top: 4px; border-top: 2px solid var(--line); }
+  article h3:first-of-type { margin-top: 26px; }
+  p, ul, ol { margin: 0 0 20px; }
+  h3 + p, h3 + ul { margin-top: 0; }
+  svg { display: block; width: 100%; max-width: 640px; height: auto; margin: 18px auto 22px; color: var(--muted); }
+  svg text { font: 600 13px -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; }
   li { margin: 5px 0; }
   .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
   .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
@@ -58,8 +63,30 @@
 <div class="nav"><a href="../index.html#library">← 도서관</a><a href="02.html" class="badge">Unity 엔진 목차</a></div>
 <article class="card">
 <h1>빌드와 플랫폼</h1>
-<p class="lead">빌드 용량은 대부분 텍스처와 오디오이고, 설치 실패는 대부분 아키텍처 설정 문제다</p>
-<h3>핵심 개념</h3><p>빌드 크기를 줄이는 이유는 저장 공간이 아니라 <strong>설치 전에 이탈하는 사람</strong>이다. 용량이 커질수록 설치 전환율이 떨어지고, 구글 플레이는 App Bundle 크기에 상한이 있어(초과분은 Play Asset Delivery로 분리) 넘기면 아예 올리지 못한다. 무엇부터 줄일지는 감이 아니라 빌드 리포트로 정한다. 빌드 직후 Editor.log에 에셋 종류별 용량이 남는다.</p><table><thead><tr><th>항목</th><th>방법</th><th>보통 효과</th></tr></thead><tbody><tr><td>텍스처</td><td>ASTC 등 플랫폼 압축, Max Size 하향, 불필요한 밉맵·알파 제거</td><td>가장 크다</td></tr><tr><td>오디오</td><td>BGM은 Vorbis + Streaming, 짧은 효과음은 ADPCM, 샘플레이트 하향</td><td>크다</td></tr><tr><td>코드</td><td>Managed Stripping Level 상향, 안 쓰는 패키지 제거</td><td>중간</td></tr><tr><td>배포 구조</td><td>Addressables로 빼서 나중에 내려받기</td><td>초기 용량만 준다</td></tr></tbody></table><p>텍스처가 1등인 이유는 압축 포맷 하나로 몇 배가 갈리기 때문이다. 같은 2048 크기라도 RGBA32 무압축은 16MB, ASTC 6x6은 1MB 수준이다. 코드 쪽 Managed Stripping은 진입점에서 도달 가능한 코드만 남기는데, 리플렉션으로만 부르는 타입은 도달 불가로 보여 같이 지워진다. 이걸 막는 것이 link.xml이다.</p><p>Resources 폴더는 이 맥락에서 함정이다. <strong>참조가 하나도 없어도 폴더 안의 모든 에셋이 빌드에 들어가고</strong>, 앱 시작 시 인덱스를 만드느라 기동도 느려진다. 필요한 것만 그때 불러오려면 Addressables를 쓴다. 반대로 주석이나 변수 이름을 줄이는 것은 컴파일 결과에 남지 않아 용량과 무관하다.</p><p>안드로이드 아키텍처는 ARMv7이 32비트, ARM64가 64비트 명령어 집합이다. 구글 플레이는 2019년 8월부터 64비트 지원을 요구해 ARMv7만 올리면 등록이 거부된다. <strong>ARM64는 IL2CPP 백엔드에서만 빌드된다</strong>는 점이 중요한데, Mono로 두면 Player Settings에서 ARM64 체크박스 자체가 비활성이다. "최신 기기에 APK가 설치되지 않는다"는 문제는 대개 ARM64 미포함이거나 Target API Level이 스토어 요구치보다 낮은 경우다. 둘 다 체크하면 APK 하나에 두 벌이 들어가 커지므로, 스토어 배포는 App Bundle로 올려 기기에 맞는 것만 내려가게 한다.</p><p>기기에서 도는 빌드의 로그는 <code>adb logcat</code>으로 본다. Android Logcat 패키지를 깔면 에디터 창에서 패키지 이름과 로그 레벨로 걸러 볼 수 있다. Development Build를 켜면 스택 트레이스가 온전히 남고 프로파일러도 붙지만 오버헤드가 있어 성능 수치는 상대 비교로만 쓴다. 서드파티 SDK는 대개 Gradle 의존성 충돌과 매니페스트 병합에서 사고가 나고, 결제는 <strong>영수증 검증을 반드시 서버에서</strong> 해야 한다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>빌드 크기를 왜, 어떻게 줄이나</strong> — 설치 전환율과 스토어 상한 때문이다. 먼저 빌드 리포트로 무엇이 큰지 확인하고, 대개 텍스처 압축 포맷과 Max Size에서 가장 큰 폭이 나온다. 그다음이 오디오 설정, 코드 스트리핑, Addressables 분리 순이다.</li><li><strong>ARMv7과 ARM64의 차이는</strong> — 32비트와 64비트 명령어 집합이고, 구글 플레이가 64비트를 필수로 요구한다. ARM64는 IL2CPP에서만 빌드되므로 백엔드를 IL2CPP로 바꾸고 두 아키텍처를 모두 체크한 뒤 App Bundle로 배포한다.</li><li><strong>최신 기기에 설치가 안 된다면</strong> — 먼저 ARM64가 빠졌는지, Target API Level이 스토어 요구치보다 낮은지를 본다. 그다음 minSdkVersion과 서명, 설치 로그를 adb logcat으로 확인한다.</li><li><strong>기기 로그는 어떻게 보나</strong> — adb logcat이나 Unity의 Android Logcat 창으로 본다. 개발 중에는 Development Build로 스택 트레이스를 살리고, 출시 빌드는 크래시 리포팅으로 모아서 본다.</li><li><strong>서드파티 SDK와 결제는</strong> — Gradle 의존성 충돌과 매니페스트 병합이 주된 사고 지점이라 버전을 맞추고 병합 결과를 확인한다. 결제는 영수증을 서버에서 검증해 클라이언트 변조로 아이템이 나가지 않게 한다.</li></ul><h3>흔한 오해</h3><ul><li><strong>주석과 변수 이름을 줄이면 빌드가 작아진다</strong> — 컴파일 결과에 남지 않는다. 용량은 에셋과 컴파일된 코드가 차지한다.</li><li><strong>Resources 폴더에 넣으면 관리가 편하다</strong> — 참조가 없어도 전부 빌드에 들어가고 시작 속도까지 느려진다. 동적 로딩이 필요하면 Addressables를 쓴다.</li><li><strong>IL2CPP로 바꾸면 빌드가 작아진다</strong> — 네이티브 코드로 변환하므로 오히려 커질 수 있다. 얻는 것은 실행 속도와 ARM64 지원이다.</li><li><strong>빌드 크기를 줄이면 프레임도 오른다</strong> — 용량은 다운로드와 로딩 시간에 영향을 줄 뿐 한 프레임의 계산량과는 다른 축이다.</li><li><strong>ARMv7만 올려도 요즘 기기는 다 돌아간다</strong> — 기기가 실행은 해도 구글 플레이가 등록을 거부한다.</li></ul>
+<p class="lead">빌드 용량은 텍스처에서 갈리고, 설치 실패는 대개 ARM64와 API 레벨에서 갈린다</p>
+<p>용량이 큰 앱은 설치 화면에서 사람을 잃는다. 스토어는 App Bundle 크기에 상한을 둬, 넘기면 올리지도 못한다. 그래서 빌드 줄이기는 취향이 아니라 지표 문제다.</p> <h3>무엇부터 줄일지는 감이 아니라 빌드 리포트가 정한다</h3> <p>빌드 직후 Editor.log에 에셋 종류별 용량이 남는다. 그걸 보고 큰 것부터 손댄다. 효과 순서는 대개 아래와 같다.</p> <table><thead><tr><th>항목</th><th>방법</th><th>보통 효과</th></tr></thead><tbody><tr><td>텍스처</td><td>ASTC 등 플랫폼 압축, Max Size 하향, 밉맵과 알파 정리</td><td>가장 크다</td></tr><tr><td>오디오</td><td>BGM은 Vorbis와 Streaming, 짧은 효과음은 ADPCM</td><td>크다</td></tr><tr><td>코드</td><td>Managed Stripping Level 상향, 안 쓰는 패키지 제거</td><td>중간</td></tr><tr><td>배포 구조</td><td>Addressables로 빼서 나중에 내려받기</td><td>초기 용량만 준다</td></tr></tbody></table> <p>텍스처가 1등인 이유는 압축 포맷 하나로 몇 배가 갈리기 때문이다. 같은 2048 크기라도 무압축 RGBA32는 16MB, ASTC 6x6은 1MB 수준이다.</p> <p>코드 쪽 Managed Stripping은 진입점에서 도달 가능한 코드만 남긴다. 리플렉션으로만 부르는 타입은 도달 불가로 보여 같이 지워진다. 이걸 막는 것이 link.xml이다.</p> <h3>Resources 폴더는 참조가 없어도 전부 들어간다</h3> <p><strong>Resources 폴더 안의 에셋은 아무도 참조하지 않아도 빌드에 들어간다.</strong> 앱 시작 시 인덱스를 만드느라 기동도 느려진다.</p> <p>필요한 것만 그때 불러오려면 Addressables를 쓴다. 초기 설치 용량을 줄이고 나머지는 나중에 내려받는 구조다.</p> <p>반대로 주석이나 변수 이름을 줄이는 것은 용량과 무관하다. 컴파일 결과에 남지 않기 때문이다.</p> <h3>설치가 안 되면 ARM64와 Target API부터 본다</h3> <p>ARMv7은 32비트, ARM64는 64비트 명령어 집합이다. 구글 플레이는 2019년 8월부터 64비트 지원을 요구해, ARMv7만 올리면 등록이 거부된다.</p> <p><strong>ARM64는 IL2CPP 백엔드에서만 빌드된다.</strong> Mono로 두면 Player Settings에서 ARM64 체크박스 자체가 비활성이다.</p> <p>최신 기기에 설치가 안 된다는 문제는 대개 둘 중 하나다. ARM64가 빠졌거나, Target API Level이 스토어 요구치보다 낮다.</p> <svg viewBox="0 0 640 180" width="100%" role="img" aria-label="APK 하나에는 두 아키텍처가 모두 들어가 그대로 설치되고, App Bundle은 스토어가 기기에 맞는 한 벌만 내려보낸다">
+<text x="8" y="16" font-size="13" fill="currentColor">APK 하나로 올릴 때</text>
+<rect x="8" y="26" width="274" height="72" fill="none" stroke="currentColor"/>
+<rect x="22" y="42" width="120" height="40" fill="currentColor" fill-opacity="0.08" stroke="currentColor"/>
+<text x="46" y="67" font-size="13" fill="currentColor">ARMv7 코드</text>
+<rect x="150" y="42" width="120" height="40" fill="currentColor" fill-opacity="0.08" stroke="currentColor"/>
+<text x="172" y="67" font-size="13" fill="currentColor">ARM64 코드</text>
+<text x="8" y="126" font-size="13" fill="currentColor">기기가 하나만 쓰는데도</text>
+<text x="8" y="148" font-size="13" fill="currentColor">두 벌이 그대로 설치된다</text>
+<text x="336" y="16" font-size="13" fill="currentColor">App Bundle로 올릴 때</text>
+<rect x="336" y="26" width="158" height="72" fill="none" stroke="currentColor"/>
+<rect x="348" y="42" width="60" height="40" fill="currentColor" fill-opacity="0.08" stroke="currentColor"/>
+<text x="352" y="67" font-size="13" fill="currentColor">v7</text>
+<rect x="418" y="42" width="64" height="40" fill="currentColor" fill-opacity="0.08" stroke="currentColor"/>
+<text x="424" y="67" font-size="13" fill="currentColor">64</text>
+<line x1="494" y1="62" x2="548" y2="62" stroke="currentColor"/>
+<polyline points="538,56 548,62 538,68" fill="none" stroke="currentColor"/>
+<rect x="552" y="26" width="80" height="72" fill="none" stroke="currentColor" stroke-dasharray="4 4"/>
+<text x="562" y="58" font-size="13" fill="currentColor">ARM64</text>
+<text x="562" y="78" font-size="13" fill="currentColor">기기</text>
+<text x="336" y="126" font-size="13" fill="currentColor">스토어가 기기에 맞는</text>
+<text x="336" y="148" font-size="13" fill="currentColor">한 벌만 내려보낸다</text>
+</svg> <p>둘 다 체크하면 APK 하나에 두 벌이 들어가 커진다. 그래서 스토어에는 App Bundle로 올려 기기에 맞는 것만 내려가게 한다.</p> <h3>기기에서 도는 빌드는 logcat으로 본다</h3> <p>기기 로그는 <code>adb logcat</code>으로 본다. Android Logcat 패키지를 깔면 에디터 창에서 패키지 이름과 로그 레벨로 걸러 볼 수 있다.</p> <p>Development Build를 켜면 스택 트레이스가 온전히 남고 프로파일러도 붙는다. 대신 오버헤드가 있어 성능 수치는 상대 비교로만 쓴다.</p> <p>서드파티 SDK는 대개 Gradle 의존성 충돌과 매니페스트 병합에서 사고가 난다. 결제는 <strong>영수증 검증을 반드시 서버에서</strong> 한다. 클라이언트만 믿으면 변조로 아이템이 나간다.</p> <h3>면접에서 이렇게 답한다</h3> <ul><li><strong>빌드 크기를 왜, 어떻게 줄이나</strong> — 설치 전환율과 스토어 상한 때문입니다. 먼저 빌드 리포트로 무엇이 큰지 보고, 대개 텍스처 압축 포맷과 Max Size에서 가장 큰 폭이 나옵니다. 그다음이 오디오 설정, 코드 스트리핑, Addressables 분리입니다.</li> <li><strong>ARMv7과 ARM64의 차이는</strong> — 32비트와 64비트 명령어 집합이고, 구글 플레이가 64비트를 필수로 요구합니다. ARM64는 IL2CPP에서만 빌드되므로 백엔드를 바꾸고 App Bundle로 배포합니다.</li> <li><strong>최신 기기에 설치가 안 된다면</strong> — 먼저 ARM64가 빠졌는지, Target API Level이 요구치보다 낮은지 봅니다. 그다음 minSdkVersion과 서명, 설치 로그를 adb logcat으로 확인합니다.</li> <li><strong>서드파티 SDK와 결제는</strong> — Gradle 의존성 충돌과 매니페스트 병합이 주된 사고 지점이라 버전을 맞추고 병합 결과를 봅니다. 결제는 영수증을 서버에서 검증해 변조로 아이템이 나가지 않게 합니다.</li></ul> <h3>이런 오해를 한다</h3> <ul><li><strong>주석과 변수 이름을 줄이면 빌드가 작아진다</strong> — 컴파일 결과에 남지 않는다. 용량은 에셋과 컴파일된 코드가 차지한다.</li> <li><strong>Resources 폴더에 넣으면 관리가 편하다</strong> — 참조가 없어도 전부 빌드에 들어가고 시작 속도까지 느려진다. 동적 로딩은 Addressables로 한다.</li> <li><strong>IL2CPP로 바꾸면 빌드가 작아진다</strong> — 네이티브 코드로 변환하므로 오히려 커질 수 있다. 얻는 것은 실행 속도와 ARM64 지원이다.</li> <li><strong>빌드 크기를 줄이면 프레임도 오른다</strong> — 용량은 다운로드와 로딩 시간에 영향을 줄 뿐이다. 한 프레임의 계산량과는 다른 축이다.</li> <li><strong>ARMv7만 올려도 요즘 기기는 다 돌아간다</strong> — 기기가 실행은 해도 구글 플레이가 등록을 거부한다.</li></ul> <h3>3줄 정리</h3> <ul><li>무엇부터 줄일지는 빌드 리포트를 보고 정한다</li> <li>텍스처 압축이 가장 크고, Resources 폴더는 통째로 들어간다</li> <li>설치가 안 되면 ARM64와 Target API Level부터 본다</li></ul>
 <div class="refs"><h2>참고 자료</h2><ul><li><a href="https://docs.unity3d.com/Manual/ReducingFilesize.html" target="_blank" rel="noopener">Unity 매뉴얼 – Reducing the file size of a build</a></li><li><a href="https://docs.unity3d.com/Manual/managed-code-stripping.html" target="_blank" rel="noopener">Unity 매뉴얼 – Managed code stripping</a></li><li><a href="https://docs.unity3d.com/Manual/class-PlayerSettingsAndroid.html" target="_blank" rel="noopener">Unity 매뉴얼 – Android Player settings</a></li><li><a href="https://docs.unity3d.com/Packages/com.unity.mobile.android-logcat@1.4/manual/index.html" target="_blank" rel="noopener">Unity 매뉴얼 – Android Logcat 패키지</a></li></ul></div>
 </article>
 <div class="pager"><a href="02-09.html">← AI와 길찾기</a><a href="02-11.html">DOTS와 최신 기능 →</a></div>

@@ -16,7 +16,8 @@
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--text);
-    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+    font: 450 17px/1.85 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  strong { font-weight: 800; }
   main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
   a { color: var(--blue-d); }
   .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
@@ -25,8 +26,12 @@
     padding: 4px 12px; font-size: .8rem; font-weight: 800; }
   h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
   h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
-  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
-  p, ul, ol { margin: 10px 0; }
+  h3 { font-size: 1.1rem; font-weight: 800; margin: 34px 0 10px; padding-top: 4px; border-top: 2px solid var(--line); }
+  article h3:first-of-type { margin-top: 26px; }
+  p, ul, ol { margin: 0 0 20px; }
+  h3 + p, h3 + ul { margin-top: 0; }
+  svg { display: block; width: 100%; max-width: 640px; height: auto; margin: 18px auto 22px; color: var(--muted); }
+  svg text { font: 600 13px -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; }
   li { margin: 5px 0; }
   .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
   .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
@@ -58,28 +63,62 @@
 <div class="nav"><a href="../index.html#library">← 도서관</a><a href="09.html" class="badge">네트워크 목차</a></div>
 <article class="card">
 <h1>소켓과 HTTP</h1>
-<p class="lead">소켓·포트·HTTP·TLS가 각각 무엇을 맡는지 알고 메타 통신과 인게임 통신을 나눈다</p>
-<h3>핵심 개념</h3><p>포트는 <strong>어느 프로세스에 줄지 고르는 16비트 번호</strong>(0~65535)이고, 소켓은 IP와 포트를 묶은 <strong>통신 종단점</strong>이자 OS가 관리하는 자원이다. 서버는 리스닝 소켓 하나로 연결을 받고 연결마다 별도 소켓을 만든다. 각 연결은 출발지·목적지의 IP와 포트 네 값으로 구분돼 한 포트에서 섞이지 않는다.</p><p>HTTP는 그 위에 얹힌 요청-응답 규약이다. <strong>무상태</strong>라 이전 요청을 기억하지 않고 <strong>비연결</strong>이라 응답이 끝나면 대화가 끝난다. 로그인 상태는 쿠키 속 세션 ID나 액세스 토큰으로 매번 알려 주고, 연결 비용은 keep-alive로 줄인다. 무상태 덕분에 어느 서버가 받아도 처리가 같아 증설이 쉽다.</p><table><thead><tr><th>버전</th><th>핵심 변화</th><th>남는 문제</th></tr></thead><tbody><tr><td>HTTP/1.1</td><td>keep-alive로 연결 재사용</td><td>응답이 앞 요청 순서에 묶인다</td></tr><tr><td>HTTP/2</td><td>바이너리 프레이밍, 멀티플렉싱, 헤더 압축</td><td>TCP 위라 한 패킷을 잃으면 모든 스트림이 밀린다</td></tr><tr><td>HTTP/3</td><td>UDP 기반 QUIC, 빠른 연결</td><td>환경에 따라 UDP가 막히기도 한다</td></tr></tbody></table><p>HTTPS는 여기에 TLS를 끼운다. 공개키는 안전하게 키를 나눌 수 있지만 느려서 인증서 검증과 세션 키 합의까지만 쓰고, <strong>이후 데이터는 빠른 대칭키로 암호화</strong>한다. 보호 범위가 전송 구간뿐이라 기기 안의 조작은 막지 못한다.</p><p>게임에서는 용도로 나눈다. 로그인·상점·랭킹처럼 빈도가 낮은 메타 통신은 REST(HTTPS)로, 초당 여러 번 오가는 인게임 통신은 연결을 유지하는 소켓으로 간다. RPC는 원격 호출을 함수처럼 감싸는 방식이라 둘 위에 모두 얹는다.</p><pre><code>using System.Collections;
-using UnityEngine;
-using UnityEngine.Networking;
-
-public class RankingApi : MonoBehaviour
+<p class="lead">소켓은 연결을 열어 두고 HTTP는 매번 새로 묻는다. 게임은 용도로 나눈다</p>
+<p>HTTP로만 통신하면 서버가 먼저 말을 걸 수 없다. 클라이언트가 묻지 않는 한 대전 상대가 잡혔다는 사실도 전할 방법이 없다. 소켓과 HTTP를 어디에 쓸지는 여기서 갈린다.</p>
+<h3>포트는 번호표, 소켓은 그 번호로 뚫린 통로</h3>
+<p>포트는 어느 프로세스에 줄지 고르는 16비트 번호다. 소켓은 IP와 포트를 묶은 통신 종단점이자 OS가 관리하는 자원이다. 서버는 리스닝 소켓 하나로 받고 연결마다 별도 소켓을 만든다.</p>
+<p>포트 하나에 수천 명이 붙어도 섞이지 않는다. 연결을 출발지와 목적지의 IP·포트 네 값으로 구분하기 때문이다. 그래서 서버는 포트 하나로 여러 연결을 다룬다.</p>
+<h3>HTTP가 로그인 상태를 기억하지 못하는 이유</h3>
+<p>HTTP는 <strong>무상태</strong>라 이전 요청을 기억하지 않는다. 응답이 끝나면 대화도 끝난다. 그래서 로그인 상태는 쿠키 속 세션 ID나 액세스 토큰으로 매번 알려 준다.</p>
+<p>불편해 보이지만 이 성질이 증설을 쉽게 한다. 어느 서버가 받아도 처리가 같아 앞에 서버를 더 붙이면 그만이다. 연결을 새로 여는 비용은 keep-alive로 줄인다.</p>
+<table>
+<thead><tr><th>버전</th><th>핵심 변화</th><th>남는 문제</th></tr></thead>
+<tbody>
+<tr><td>HTTP/1.1</td><td>keep-alive로 연결 재사용</td><td>응답이 앞 요청 순서에 묶인다</td></tr>
+<tr><td>HTTP/2</td><td>멀티플렉싱, 헤더 압축</td><td>TCP 위라 한 패킷을 잃으면 다 밀린다</td></tr>
+<tr><td>HTTP/3</td><td>UDP 기반 QUIC, 빠른 연결</td><td>환경에 따라 UDP가 막히기도 한다</td></tr>
+</tbody></table>
+<h3>HTTPS가 지키는 구간은 전송 구간뿐</h3>
+<p>TLS 핸드셰이크에서 인증서로 서버 신원을 확인한다. 이어서 공개키로 세션 키를 합의하고 본 통신은 대칭키로 암호화한다. 공개키는 느려서 키 합의에만 쓰고 데이터는 빠른 대칭키가 맡는다.</p>
+<p>보호 범위는 오가는 구간까지다. 기기 안에서 암호가 풀리므로 변조된 클라이언트는 막지 못한다. 그쪽은 서버 검증의 몫이다.</p>
+<h3>메타 통신은 REST, 인게임은 소켓</h3>
+<p>로그인·상점·랭킹처럼 빈도가 낮은 통신은 HTTPS로 간다. 초당 여러 번 오가거나 서버가 먼저 보내야 하는 통신은 소켓으로 간다. RPC는 원격 호출을 함수처럼 감싸는 방식이라 둘 위에 모두 얹는다.</p>
+<p>랭킹을 받아 오는 최소 형태다. 프레임을 막지 않고 기다리는 부분을 본다:</p>
+<pre><code>IEnumerator GetRanking(string url)
 {
-    public IEnumerator GetRanking(string url)
+    using (UnityWebRequest req = UnityWebRequest.Get(url))
     {
-        using (UnityWebRequest req = UnityWebRequest.Get(url))
+        yield return req.SendWebRequest();  // 프레임을 막지 않고 기다린다
+        if (req.result != UnityWebRequest.Result.Success)
         {
-            yield return req.SendWebRequest();   // 프레임을 막지 않고 기다린다
-
-            if (req.result != UnityWebRequest.Result.Success)
-            {
-                Debug.LogError(req.error);
-                yield break;
-            }
-            Debug.Log(req.downloadHandler.text);
+            Debug.LogError(req.error);      // error 문자열만 보고 판단하지 않는다
+            yield break;
         }
-    }
-}</code></pre><p>직렬화도 같은 저울이다. JSON은 읽기 쉬워 디버깅이 편한 대신 크고 느리며, Protobuf·FlatBuffers 같은 바이너리는 작고 빠른 대신 스키마 관리가 따른다. 어느 쪽이든 필드를 더하고 뺄 때 구버전 클라이언트가 어떻게 동작할지 미리 정해 둔다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>소켓과 포트의 차이</strong> — 포트는 프로세스를 구분하는 번호고, 소켓은 IP와 포트로 식별되는 통신 종단점이다. 연결은 네 값의 조합으로 구분되므로 서버는 포트 하나로 여러 연결을 다룬다.</li><li><strong>HTTP와 HTTPS의 차이, TLS 핸드셰이크</strong> — 핸드셰이크에서 인증서로 서버 신원을 확인하고 공개키로 세션 키를 합의한 뒤 본 통신은 대칭키로 암호화한다. 보호되는 것은 전송 구간뿐이다.</li><li><strong>HTTP의 무상태를 어떻게 보완하나</strong> — 세션 ID 쿠키나 액세스 토큰을 요청마다 실어 보낸다. 상태가 필요하면 서버 메모리 대신 별도 저장소에 둔다.</li><li><strong>URL 입력부터 화면까지</strong> — DNS 조회로 IP를 얻고, TCP 3-way handshake와 TLS 핸드셰이크를 거쳐 HTTP 요청을 보내고, 응답 HTML을 파싱하며 부족한 리소스를 추가로 받아 그린다.</li><li><strong>Unity에서 HTTP API 호출</strong> — <code>UnityWebRequest.Get</code>·<code>Post</code>로 요청을 만들고 <code>SendWebRequest</code>를 코루틴이나 await로 기다린다. 본문은 <code>downloadHandler.text</code>에서 읽고, 네이티브 자원을 쥐므로 <code>using</code>으로 정리한다.</li></ul><h3>흔한 오해</h3><ul><li><strong>HTTPS를 쓰면 치트를 막을 수 있다</strong> — 전송 구간만 보호한다. 변조된 클라이언트가 보내는 값은 서버 검증으로만 걸러진다.</li><li><strong>공개키가 대칭키보다 빠르다</strong> — 반대다. 느린 공개키는 키 합의에만 쓴다.</li><li><strong>UnityWebRequest는 error가 비어 있으면 성공이다</strong> — 성공 판정은 <code>result</code>가 <code>Result.Success</code>인지로 한다.</li><li><strong>실시간 대전도 REST로 처리하면 된다</strong> — 요청마다 왕복이 필요해 맞지 않는다. 서버가 먼저 보내는 메시지도 소켓으로 받는다.</li></ul>
+        Debug.Log(req.downloadHandler.text);  // 본문은 downloadHandler에서 읽는다
+    }                                         // 네이티브 자원이라 using으로 정리
+}</code></pre>
+<p>직렬화도 같은 저울이다. JSON은 읽기 쉬워 디버깅이 편한 대신 크고 느리다. Protobuf 같은 바이너리는 작고 빠른 대신 스키마 관리가 따라온다.</p>
+<h3>면접에서 이렇게 답한다</h3>
+<ul>
+<li><strong>소켓과 포트의 차이</strong> — 포트는 프로세스를 구분하는 번호고 소켓은 IP와 포트로 식별되는 종단점이다. 연결은 네 값의 조합으로 구분되므로 포트 하나로 여러 연결을 다룬다.</li>
+<li><strong>HTTP와 HTTPS, TLS 핸드셰이크</strong> — 인증서로 서버 신원을 확인하고 공개키로 세션 키를 합의한다. 본 통신은 대칭키로 암호화하며 보호 범위는 전송 구간뿐이다.</li>
+<li><strong>무상태를 어떻게 보완하나</strong> — 세션 ID 쿠키나 액세스 토큰을 요청마다 실어 보낸다. 상태가 필요하면 서버 메모리 대신 공용 저장소에 둔다.</li>
+<li><strong>URL 입력부터 화면까지</strong> — DNS로 IP를 얻고 TCP와 TLS 핸드셰이크를 거쳐 요청을 보낸다. 응답을 파싱하며 부족한 리소스를 추가로 받아 그린다.</li>
+<li><strong>Unity에서 HTTP 호출</strong> — UnityWebRequest로 요청을 만들고 코루틴이나 await로 기다린다. 성공 판정은 result로 하고 네이티브 자원이라 using으로 정리한다.</li>
+</ul>
+<h3>이런 오해를 한다</h3>
+<ul>
+<li><strong>HTTPS를 쓰면 치트를 막는다</strong> — 전송 구간만 보호한다. 변조된 클라이언트가 보낸 값은 서버 검증으로만 걸러진다.</li>
+<li><strong>공개키가 대칭키보다 빠르다</strong> — 반대다. 느린 공개키는 키 합의에만 쓴다.</li>
+<li><strong>error가 비어 있으면 성공이다</strong> — 성공 판정은 result가 Success인지로 한다.</li>
+<li><strong>실시간 대전도 REST로 된다</strong> — 요청마다 왕복이 필요하다. 서버가 먼저 보내는 메시지도 받을 수 없다.</li>
+</ul>
+<h3>3줄 정리</h3>
+<ul>
+<li>포트는 번호, 소켓은 IP와 포트를 묶은 종단점</li>
+<li>HTTP는 무상태라 토큰을 매번 실어 보낸다</li>
+<li>메타는 HTTPS, 인게임은 소켓으로 나눈다</li>
+</ul>
 <div class="refs"><h2>참고 자료</h2><ul><li><a href="https://learn.microsoft.com/ko-kr/dotnet/fundamentals/networking/sockets/socket-services" target="_blank" rel="noopener">Microsoft Learn – 소켓을 사용하여 TCP를 통해 데이터 보내기 및 받기</a></li><li><a href="https://developer.mozilla.org/ko/docs/Web/HTTP/Guides/Overview" target="_blank" rel="noopener">MDN – HTTP 개요</a></li><li><a href="https://developer.mozilla.org/ko/docs/Web/HTTP/Guides/Evolution_of_HTTP" target="_blank" rel="noopener">MDN – HTTP의 진화</a></li><li><a href="https://docs.unity3d.com/ScriptReference/Networking.UnityWebRequest.html" target="_blank" rel="noopener">Unity 스크립팅 API – UnityWebRequest</a></li></ul></div>
 </article>
 <div class="pager"><a href="09-02.html">← TCP와 UDP</a><a href="09-04.html">멀티플레이 구조 →</a></div>

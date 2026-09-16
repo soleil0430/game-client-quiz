@@ -16,7 +16,8 @@
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--text);
-    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+    font: 450 17px/1.85 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  strong { font-weight: 800; }
   main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
   a { color: var(--blue-d); }
   .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
@@ -25,8 +26,12 @@
     padding: 4px 12px; font-size: .8rem; font-weight: 800; }
   h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
   h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
-  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
-  p, ul, ol { margin: 10px 0; }
+  h3 { font-size: 1.1rem; font-weight: 800; margin: 34px 0 10px; padding-top: 4px; border-top: 2px solid var(--line); }
+  article h3:first-of-type { margin-top: 26px; }
+  p, ul, ol { margin: 0 0 20px; }
+  h3 + p, h3 + ul { margin-top: 0; }
+  svg { display: block; width: 100%; max-width: 640px; height: auto; margin: 18px auto 22px; color: var(--muted); }
+  svg text { font: 600 13px -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; }
   li { margin: 5px 0; }
   .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
   .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
@@ -58,14 +63,53 @@
 <div class="nav"><a href="../index.html#library">← 도서관</a><a href="10.html" class="badge">C++ 기초 목차</a></div>
 <article class="card">
 <h1>STL</h1>
-<p class="lead">메모리가 이어져 있는지와 정렬을 유지하는지, 두 축으로 컨테이너를 고른다</p>
-<h3>핵심 개념</h3><p>STL 컨테이너는 이름이 아니라 <strong>메모리 배치</strong>로 고르는 것이 빠르다. <code>vector</code>는 원소가 한 덩어리로 이어진 동적 배열이라 인덱스 접근이 O(1)이고 캐시에 잘 맞는다. 용량(capacity)을 넘기면 보통 1.5~2배 크기의 새 버퍼를 잡아 원소를 옮기고 옛 버퍼를 버리는데, 이 순간 <strong>기존 포인터·참조·반복자가 모두 무효</strong>가 된다. 그래서 push_back은 평균 O(1)이되 개별 호출은 튈 수 있다. 넣을 개수를 알면 <code>reserve</code>로 용량만 미리 잡는다. size는 그대로다.</p><pre><code>std::vector&lt;int&gt; v;
+<p class="lead">메모리가 이어졌는지, 정렬을 유지하는지 두 축으로 컨테이너를 고른다</p>
+<p>List를 쓰듯 vector에 계속 넣다가 원소를 가리키던 포인터가 죽는 일이 있다. C#에서는 겪지 않는 일이다. STL 컨테이너는 이름이 아니라 <strong>메모리 배치</strong>로 골라야 한다.</p>
+<h3>vector는 재할당하면 포인터와 반복자가 죽는다</h3>
+<p>vector는 원소가 한 덩어리로 이어진 동적 배열이다. 인덱스 접근이 O(1)이고 캐시에 잘 맞는다. C#의 List와 쓰임이 같다.</p>
+<p>용량을 넘기면 1.5~2배 크기의 새 버퍼를 잡아 원소를 옮긴다. 이때 <strong>기존 포인터와 참조, 반복자가 모두 무효</strong>가 된다. 그래서 push_back은 평균 O(1)이되 개별 호출은 튄다.</p>
+<p>넣을 개수를 알면 미리 용량을 잡는다. 아래에서 reserve와 resize의 차이를 본다:</p>
+<pre><code>std::vector&lt;int&gt; v;
 v.reserve(1000);      // 용량만 확보한다. size는 여전히 0
 v.push_back(1);
 int* first = &amp;v[0];   // 재할당이 없는 동안에만 유효하다
 v.resize(2000);       // 용량 1000을 넘는 순간 재할당
-                      // first는 이제 버려진 옛 버퍼를 가리킨다
-</code></pre><table><thead><tr><th>컨테이너</th><th>메모리</th><th>임의 접근</th><th>중간 삽입·삭제</th><th>C# 대응</th></tr></thead><tbody><tr><td>vector</td><td>이어진 한 덩어리</td><td>O(1)</td><td>O(n) — 뒤를 민다</td><td>List&lt;T&gt;</td></tr><tr><td>list</td><td>흩어진 노드(이중 연결)</td><td>없음</td><td>위치를 알면 O(1)</td><td>LinkedList&lt;T&gt;</td></tr><tr><td>deque</td><td>여러 블록으로 나뉨</td><td>O(1)</td><td>앞뒤 O(1), 중간 O(n)</td><td>Queue&lt;T&gt;(구현은 다르다)</td></tr></tbody></table><p><code>push_back</code>과 <code>emplace_back</code>은 이미 만들어진 객체를 받아 복사·이동해 넣느냐, 생성자 인자를 받아 컨테이너 안 메모리에서 바로 만드느냐의 차이다. 임시 객체 한 번을 아끼는 것이라 이미 객체가 있으면 비용은 사실상 같다. 대신 emplace_back은 explicit 생성자도 통과시켜 의도치 않은 변환이 조용히 생길 수 있다.</p><p>연관 컨테이너는 <strong>정렬을 유지하느냐</strong>로 갈린다. <code>map</code>은 보통 레드-블랙 트리라 키가 늘 정렬돼 있고 탐색·삽입·삭제가 O(log n)이며, 순서대로 순회하거나 범위 질의를 할 수 있다. <code>unordered_map</code>은 해시 테이블이라 키를 버킷에 나눠 담아 평균 O(1)이지만 순회 순서가 정해져 있지 않고, 해시가 한 버킷에 몰리면 최악 O(n)까지 떨어진다. C#의 <code>Dictionary&lt;K,V&gt;</code>가 unordered_map, <code>SortedDictionary&lt;K,V&gt;</code>가 map 쪽이다. 조회가 잦고 순서가 필요 없으면 unordered_map, 정렬이나 범위 탐색이 필요하면 map을 고른다.</p><p>정렬 함수도 메모리 배치를 따라간다. <code>std::sort</code>는 인트로소트라 <strong>임의 접근 반복자</strong>를 요구해 vector와 배열에는 쓰지만 list에는 쓸 수 없고, 같은 값끼리의 원래 순서를 보장하지 않는다(불안정). <code>list::sort</code>는 값을 옮기는 대신 노드 연결만 바꾸는 병합 정렬이라 안정 정렬이고 반복자도 그대로 유효하다. 같은 값의 순서를 지켜야 하면 <code>std::stable_sort</code>를 쓴다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>vector는 어떻게 동작하나</strong> — 연속된 메모리를 쓰는 동적 배열이고 용량이 차면 더 큰 버퍼를 새로 잡아 원소를 옮긴다. 그래서 추가는 평균 O(1)이지만 재할당이 일어나면 기존 반복자와 포인터가 무효가 된다. 개수를 알면 reserve로 재할당을 없앤다.</li><li><strong>vector와 list 중 무엇을 쓰나</strong> — 대부분 vector를 기본으로 둔다. list는 삽입·삭제 자체는 O(1)이지만 위치를 찾으려면 노드를 따라가야 하고 원소가 흩어져 있어 캐시 미스가 많아, 실제 측정에서는 vector가 이기는 경우가 흔하다.</li><li><strong>map과 unordered_map의 차이는</strong> — map은 균형 이진 탐색 트리라 O(log n)이고 키 순서대로 순회할 수 있다. unordered_map은 해시 테이블이라 평균 O(1)이지만 순서가 없고 충돌이 몰리면 최악 O(n)이다. 순서가 필요한지로 고른다.</li><li><strong>push_back과 emplace_back은</strong> — emplace_back은 생성자 인자를 받아 컨테이너 안에서 바로 객체를 만들어 임시 객체 하나를 아낀다. 이미 만들어진 객체를 넣을 때는 차이가 거의 없다.</li></ul><h3>흔한 오해</h3><ul><li><strong>중간 삽입이 많으면 list가 항상 유리하다</strong> — 삽입 지점을 찾는 비용과 캐시 미스를 빼먹은 비교다. 원소가 작고 개수가 많으면 vector가 빠른 경우가 많다.</li><li><strong>reserve를 하면 그만큼 원소가 생긴다</strong> — reserve는 capacity만 늘리고 size는 그대로다. 원소까지 만들려면 resize다.</li><li><strong>emplace_back이 항상 더 빠르다</strong> — 아끼는 것은 임시 객체 한 번이라 이미 있는 객체를 넣으면 사실상 같다.</li><li><strong>map은 해시로 찾고 unordered_map은 언제나 O(1)이다</strong> — map은 트리라 O(log n)이고, unordered_map의 O(1)은 평균값이라 충돌이 몰리면 나빠진다.</li><li><strong>std::sort는 안정 정렬이고 list에도 쓸 수 있다</strong> — 안정성을 보장하지 않고 임의 접근 반복자를 요구한다. list는 멤버 함수 sort를, 안정성이 필요하면 stable_sort를 쓴다.</li></ul>
+                      // first는 이제 버려진 옛 버퍼를 가리킨다</code></pre>
+<table>
+<thead><tr><th>컨테이너</th><th>메모리</th><th>임의 접근</th><th>중간 삽입·삭제</th><th>C# 대응</th></tr></thead>
+<tbody>
+<tr><td>vector</td><td>이어진 한 덩어리</td><td>O(1)</td><td>O(n) — 뒤를 민다</td><td>List</td></tr>
+<tr><td>list</td><td>흩어진 노드</td><td>없음</td><td>위치를 알면 O(1)</td><td>LinkedList</td></tr>
+<tr><td>deque</td><td>여러 블록</td><td>O(1)</td><td>앞뒤 O(1), 중간 O(n)</td><td>Queue(구현은 다르다)</td></tr>
+</tbody></table>
+<h3>map은 트리, unordered_map은 해시</h3>
+<p>연관 컨테이너는 정렬을 유지하느냐로 갈린다. map은 보통 레드-블랙 트리라 키가 늘 정렬돼 있다. 탐색과 삽입, 삭제가 O(log n)이고 범위 질의를 할 수 있다.</p>
+<p>unordered_map은 해시 테이블이라 평균 O(1)이다. 대신 순회 순서가 정해져 있지 않고 해시가 한 버킷에 몰리면 최악 O(n)까지 떨어진다. C#의 Dictionary가 이쪽, SortedDictionary가 map 쪽이다.</p>
+<p>조회가 잦고 순서가 필요 없으면 unordered_map을 쓴다. 정렬이나 범위 탐색이 필요하면 map을 쓴다. 이름만 비슷한 둘을 여기서 가른다.</p>
+<h3>정렬 함수도 메모리 배치를 따라간다</h3>
+<p>std::sort는 임의 접근 반복자를 요구한다. 그래서 vector와 배열에는 쓰지만 list에는 쓸 수 없다. 같은 값끼리의 원래 순서도 보장하지 않는다.</p>
+<p>list의 멤버 sort는 값을 옮기는 대신 노드 연결만 바꾼다. 그래서 안정 정렬이고 반복자도 그대로 유효하다. 같은 값의 순서를 지켜야 하면 stable_sort를 쓴다.</p>
+<p>넣는 방식도 하나 갈린다. emplace_back은 생성자 인자를 받아 컨테이너 안에서 바로 만든다. 아끼는 것은 임시 객체 한 번이라 이미 객체가 있으면 push_back과 차이가 거의 없다.</p>
+<h3>면접에서 이렇게 답한다</h3>
+<ul>
+<li><strong>vector는 어떻게 동작하나</strong> — 연속된 메모리를 쓰는 동적 배열이고 용량이 차면 더 큰 버퍼로 옮긴다. 추가는 평균 O(1)이지만 재할당이 일어나면 반복자와 포인터가 무효가 된다.</li>
+<li><strong>vector와 list 중 무엇을 쓰나</strong> — 대부분 vector를 기본으로 둔다. list는 위치를 찾으려면 노드를 따라가야 하고 캐시 미스가 많아 실제 측정에서 지는 경우가 흔하다.</li>
+<li><strong>map과 unordered_map의 차이는</strong> — map은 균형 이진 탐색 트리라 O(log n)이고 키 순서대로 순회한다. unordered_map은 평균 O(1)이지만 순서가 없고 충돌이 몰리면 최악 O(n)이다.</li>
+<li><strong>push_back과 emplace_back은</strong> — emplace_back은 생성자 인자를 받아 컨테이너 안에서 바로 만들어 임시 객체 하나를 아낀다. 이미 만들어진 객체를 넣을 때는 차이가 거의 없다.</li>
+</ul>
+<h3>이런 오해를 한다</h3>
+<ul>
+<li><strong>중간 삽입이 많으면 list가 항상 유리하다</strong> — 삽입 지점을 찾는 비용과 캐시 미스를 빼먹은 비교다. 원소가 작고 많으면 vector가 빠른 경우가 많다.</li>
+<li><strong>reserve를 하면 그만큼 원소가 생긴다</strong> — reserve는 capacity만 늘리고 size는 그대로다. 원소까지 만들려면 resize다.</li>
+<li><strong>map은 해시로 찾는다</strong> — map은 트리라 O(log n)이다. unordered_map의 O(1)도 평균값이라 충돌이 몰리면 나빠진다.</li>
+<li><strong>std::sort는 안정 정렬이고 list에도 쓴다</strong> — 안정성을 보장하지 않고 임의 접근 반복자를 요구한다. list는 멤버 sort를 쓴다.</li>
+</ul>
+<h3>3줄 정리</h3>
+<ul>
+<li>vector 재할당은 포인터와 반복자를 죽인다</li>
+<li>순서가 필요하면 map, 아니면 unordered_map</li>
+<li>std::sort는 불안정하고 list에는 못 쓴다</li>
+</ul>
 <div class="refs"><h2>참고 자료</h2><ul><li><a href="https://en.cppreference.com/w/cpp/container/vector.html" target="_blank" rel="noopener">cppreference – std::vector</a></li><li><a href="https://en.cppreference.com/w/cpp/container/map.html" target="_blank" rel="noopener">cppreference – std::map</a></li><li><a href="https://en.cppreference.com/w/cpp/container/unordered_map.html" target="_blank" rel="noopener">cppreference – std::unordered_map</a></li><li><a href="https://en.cppreference.com/w/cpp/algorithm/sort.html" target="_blank" rel="noopener">cppreference – std::sort</a></li></ul></div>
 </article>
 <div class="pager"><a href="10-03.html">← 현대 C++</a><a href="10-05.html">컴파일과 링크 →</a></div>

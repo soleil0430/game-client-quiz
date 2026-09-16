@@ -16,7 +16,8 @@
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--text);
-    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+    font: 450 17px/1.85 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  strong { font-weight: 800; }
   main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
   a { color: var(--blue-d); }
   .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
@@ -25,8 +26,12 @@
     padding: 4px 12px; font-size: .8rem; font-weight: 800; }
   h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
   h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
-  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
-  p, ul, ol { margin: 10px 0; }
+  h3 { font-size: 1.1rem; font-weight: 800; margin: 34px 0 10px; padding-top: 4px; border-top: 2px solid var(--line); }
+  article h3:first-of-type { margin-top: 26px; }
+  p, ul, ol { margin: 0 0 20px; }
+  h3 + p, h3 + ul { margin-top: 0; }
+  svg { display: block; width: 100%; max-width: 640px; height: auto; margin: 18px auto 22px; color: var(--muted); }
+  svg text { font: 600 13px -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; }
   li { margin: 5px 0; }
   .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
   .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
@@ -58,8 +63,31 @@
 <div class="nav"><a href="../index.html#library">← 도서관</a><a href="02.html" class="badge">Unity 엔진 목차</a></div>
 <article class="card">
 <h1>UI</h1>
-<p class="lead">Canvas가 언제 다시 그려지는지를 알면 해상도 대응도 최적화도 같은 이야기가 된다</p>
-<h3>핵심 개념</h3><p>uGUI는 셋이 역할을 나눠 맡는다. <strong>Canvas</strong>는 자식 UI들의 사각형과 색을 모아 하나의 메시로 만들어 그리는 루트다. <strong>RectTransform</strong>은 Transform을 확장해 앵커(부모의 어디에 붙을지), 피벗(무엇을 기준으로 회전·크기 변경할지), 크기를 다루는 UI 전용 트랜스폼이다. <strong>EventSystem</strong>은 입력이 들어오면 Graphic Raycaster로 어떤 UI가 맞았는지 찾아 전달한다. 버튼이 안 눌리는 문제의 첫 번째 원인은 씬에 EventSystem이 없는 것이다.</p><p>성능 이야기는 전부 <strong>Canvas가 메시를 다시 만드는 시점</strong>에서 나온다. Canvas는 자식 그래픽 하나만 바뀌어도 그 Canvas 전체의 메시를 다시 만든다. 정적인 배경 100장과 매 프레임 바뀌는 타이머가 같은 Canvas에 있으면 숫자 하나 때문에 배경 100장이 매 프레임 재구성된다. 그래서 갱신 빈도가 다른 UI는 Canvas를 나눈다. 다만 배칭은 Canvas 경계를 넘지 못하니 무작정 쪼개면 드로우 콜이 늘어난다. 기준은 계층 구조가 아니라 <strong>얼마나 자주 바뀌는가</strong>다.</p><p>해상도 대응은 두 축으로 나뉜다. 크기는 CanvasScaler를 Scale With Screen Size로 두고 기준 해상도와 Match(너비와 높이 중 어느 쪽을 따를지)를 정해 비례시킨다. 화면비 차이는 스케일로 못 푼다. 이건 앵커의 몫이라 한쪽 구석에 붙는 요소는 그 방향에 앵커를 두고, 늘어나야 하는 요소는 앵커를 벌려 스트레치로 만든다. 노치가 있는 기기는 <code>Screen.safeArea</code>를 읽어 루트 RectTransform을 안쪽으로 민다.</p><p>3D를 따라다니는 체력 바는 World Space Canvas로 캐릭터에 붙이거나(거리에 따라 작아진다) Overlay Canvas에 두고 화면 좌표로 옮기는(항상 같은 크기) 두 방식이 있다. 뒤쪽은 카메라가 움직인 뒤에 잡아야 하므로 Update가 아니라 LateUpdate에서 갱신한다.</p><pre><code>void LateUpdate()   // 카메라가 움직인 뒤에 잡아야 한 프레임 밀리지 않는다
+<p class="lead">UI 성능을 가르는 기준은 계층 구조가 아니라 무엇이 얼마나 자주 바뀌느냐다</p>
+<p>기기마다 화면 크기와 비율이 다르다. 한 벌로 만든 UI를 모든 화면에 맞추고, 손가락이 어디를 눌렀는지도 알아내야 한다. uGUI는 이 일을 세 컴포넌트에 나눠 맡긴다.</p> <h3>화면은 나오는데 클릭이 안 먹을 때</h3> <p><strong>Canvas</strong>는 자식 UI의 사각형과 색을 모아 하나의 메시로 만들어 그리는 루트다. UI는 Canvas 밑에 있어야 화면에 나온다.</p> <p>RectTransform은 UI 전용 트랜스폼이다. 앵커는 부모의 어디에 붙을지를 정하고, 피벗은 무엇을 기준으로 돌고 커질지를 정한다.</p> <p>EventSystem은 입력이 들어오면 Graphic Raycaster로 어떤 UI가 맞았는지 찾아 전달한다. 버튼이 안 눌리는 문제의 첫 원인은 씬에 EventSystem이 없는 것이다.</p> <h3>숫자 하나가 배경 100장을 다시 그리게 한다</h3> <p>Canvas는 자식 그래픽 하나만 바뀌어도 그 Canvas 전체의 메시를 다시 만든다. 정적인 배경 100장과 매 프레임 바뀌는 타이머가 한 Canvas에 있다고 하자. 숫자 하나 때문에 배경까지 매 프레임 재구성된다.</p> <svg viewBox="0 0 640 180" width="100%" role="img" aria-label="한 Canvas에 모아 두면 타이머 하나가 바뀌어도 전체 메시를 다시 만들고, 갱신 빈도로 나누면 바뀐 Canvas만 다시 만든다">
+<text x="8" y="16" font-size="13" fill="currentColor">한 Canvas에 다 넣을 때</text>
+<rect x="8" y="26" width="292" height="86" fill="none" stroke="currentColor"/>
+<rect x="20" y="40" width="44" height="26" fill="currentColor" fill-opacity="0.08" stroke="currentColor"/>
+<rect x="72" y="40" width="44" height="26" fill="currentColor" fill-opacity="0.08" stroke="currentColor"/>
+<rect x="124" y="40" width="44" height="26" fill="currentColor" fill-opacity="0.08" stroke="currentColor"/>
+<rect x="176" y="40" width="44" height="26" fill="currentColor" fill-opacity="0.08" stroke="currentColor"/>
+<rect x="228" y="40" width="60" height="26" fill="currentColor" fill-opacity="0.08" stroke="currentColor"/>
+<text x="20" y="88" font-size="13" fill="currentColor">배경 100장</text>
+<text x="228" y="88" font-size="13" fill="currentColor">타이머</text>
+<text x="8" y="136" font-size="13" fill="currentColor">타이머가 1초마다 바뀌면</text>
+<text x="8" y="158" font-size="13" fill="currentColor">배경까지 101장을 다시 만든다</text>
+<text x="336" y="16" font-size="13" fill="currentColor">갱신 빈도로 나눌 때</text>
+<rect x="336" y="26" width="212" height="86" fill="none" stroke="currentColor"/>
+<rect x="348" y="40" width="44" height="26" fill="currentColor" fill-opacity="0.08" stroke="currentColor"/>
+<rect x="400" y="40" width="44" height="26" fill="currentColor" fill-opacity="0.08" stroke="currentColor"/>
+<rect x="452" y="40" width="44" height="26" fill="currentColor" fill-opacity="0.08" stroke="currentColor"/>
+<text x="348" y="88" font-size="13" fill="currentColor">배경 Canvas (안 바뀜)</text>
+<rect x="560" y="26" width="72" height="86" fill="none" stroke="currentColor" stroke-dasharray="4 4"/>
+<text x="568" y="56" font-size="13" fill="currentColor">타이머</text>
+<text x="568" y="76" font-size="13" fill="currentColor">Canvas</text>
+<text x="336" y="136" font-size="13" fill="currentColor">다시 만드는 것은 점선 안 하나뿐이다</text>
+<text x="336" y="158" font-size="13" fill="currentColor">대신 두 Canvas 사이는 배칭이 끊긴다</text>
+</svg> <p>그래서 갱신 빈도가 다른 UI는 Canvas를 나눈다. 기준은 계층 구조가 아니라 <strong>얼마나 자주 바뀌는가</strong>다. 다만 배칭은 Canvas 경계를 넘지 못해, 무작정 쪼개면 드로우 콜이 늘어난다.</p> <p>요소가 아주 많으면 두 가지를 더 본다. 누를 일이 없는 이미지와 텍스트는 Raycast Target을 끈다. 긴 목록은 화면에 보이는 만큼만 만들어 돌려 쓴다.</p> <h3>크기는 CanvasScaler, 화면비는 앵커가 맡는다</h3> <p>크기는 CanvasScaler로 맞춘다. Scale With Screen Size로 두고 기준 해상도를 정하면 화면이 커진 만큼 UI도 비례해 커진다. Match는 너비와 높이 중 어느 쪽을 따를지를 정하는 값이다.</p> <p>화면비 차이는 스케일로 못 푼다. 이건 앵커의 몫이다. 구석에 붙는 요소는 그 방향에 앵커를 두고, 늘어나야 하는 요소는 앵커를 벌려 스트레치로 만든다.</p> <p>노치가 있는 기기는 <code>Screen.safeArea</code>를 읽는다. 그 값만큼 루트 RectTransform을 안쪽으로 밀면 카메라 구멍에 버튼이 가리지 않는다.</p> <h3>3D를 따라다니는 체력 바는 LateUpdate에서 옮긴다</h3> <p>머리 위 체력 바는 두 방법이 있다. World Space Canvas로 캐릭터에 붙이면 멀어질수록 작아진다. Overlay Canvas에 두고 화면 좌표로 옮기면 거리와 상관없이 같은 크기다.</p> <p>뒤쪽 방법은 카메라가 움직인 뒤에 좌표를 잡아야 한다. 다음은 체력 바를 한 프레임 밀리지 않게 옮기는 코드다:</p> <pre><code>void LateUpdate()   // 카메라가 움직인 뒤에 잡아야 한 프레임 밀리지 않는다
 {
     Vector3 world = target.position + offset;
     Vector3 view = Camera.main.WorldToViewportPoint(world);
@@ -67,7 +95,7 @@
 
     if (bar.gameObject.activeSelf != visible) bar.gameObject.SetActive(visible);
     if (visible) bar.position = Camera.main.WorldToScreenPoint(world);
-}</code></pre><p>UI Toolkit은 구조가 다르다. UI가 게임오브젝트가 아니라 VisualElement 트리이고 레이아웃을 UXML과 USS(CSS 비슷한 스타일 시트)로 쓴다. 수천 개를 만들어도 씬 계층이 무거워지지 않는다. 대신 2022 LTS 시점에는 월드 스페이스 UI를 지원하지 않아 런타임 게임 UI는 uGUI가 기본이었고, 월드 스페이스는 Unity 6에서 들어왔다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>Canvas, RectTransform, EventSystem의 역할은</strong> — Canvas는 자식 UI를 메시로 합쳐 그리는 루트, RectTransform은 앵커와 피벗으로 위치와 크기를 정하는 UI 전용 트랜스폼, EventSystem은 레이캐스트로 입력 대상을 찾아 전달하는 쪽이다. EventSystem이 없으면 화면은 나오는데 클릭만 안 먹는다.</li><li><strong>여러 해상도와 화면비를 어떻게 맞추나</strong> — 크기는 CanvasScaler를 Scale With Screen Size로 두고 기준 해상도와 Match로 맞추고, 화면비는 앵커로 흡수한다. 노치 기기는 Safe Area를 읽어 루트를 안쪽으로 민다.</li><li><strong>UI 요소가 아주 많을 때</strong> — 갱신 빈도로 Canvas를 나눠 리빌드 범위를 줄이고, 누를 일 없는 이미지는 Raycast Target을 끈다. 목록은 화면에 보이는 만큼만 만들어 재활용하고, 숨길 때는 알파를 낮추지 말고 Canvas 컴포넌트를 끈다.</li><li><strong>NGUI와 uGUI의 차이는</strong> — NGUI는 에셋 스토어 서드파티 UI였고 uGUI는 그 개발자를 영입해 엔진에 내장한 공식 UI다. 아틀라스를 손으로 관리하던 방식이 스프라이트 패커와 Canvas 배칭으로 들어왔다.</li></ul><h3>흔한 오해</h3><ul><li><strong>알파를 0으로 만들면 안 그려진다</strong> — 투명해질 뿐 메시는 그대로 만들어지고 배치에도 들어간다. 실제로 빼려면 Canvas 컴포넌트를 끄거나 게임오브젝트를 비활성화한다.</li><li><strong>Canvas는 하나로 두는 게 좋다</strong> — 반대다. 하나에 몰면 작은 변경 하나가 전체 리빌드를 부른다. 다만 잘게 쪼개면 배칭이 끊기므로 갱신 빈도 기준으로 나눈다.</li><li><strong>CanvasScaler만 설정하면 화면비도 해결된다</strong> — 스케일만 다룬다. 16:9와 20:9의 남는 폭은 앵커로 처리해야 하고, 안 그러면 요소가 쏠리거나 잘린다.</li><li><strong>Raycast Target은 켜 둬도 공짜다</strong> — 입력이 들어올 때마다 그래픽을 하나하나 검사한다. 배경이나 텍스트처럼 누를 일이 없는 것은 꺼 둔다.</li></ul>
+}</code></pre> <p>UI Toolkit은 구조가 다르다. UI가 게임오브젝트가 아니라 VisualElement 트리라, 수천 개를 만들어도 씬 계층이 무거워지지 않는다. 다만 월드 스페이스 UI는 Unity 6에 와서 들어와, 런타임 게임 UI는 아직 uGUI가 기본이다.</p> <h3>면접에서 이렇게 답한다</h3> <ul><li><strong>Canvas, RectTransform, EventSystem의 역할은</strong> — Canvas는 자식 UI를 메시로 합쳐 그리는 루트입니다. RectTransform은 앵커와 피벗으로 위치와 크기를 정하고, EventSystem은 레이캐스트로 입력 대상을 찾습니다. EventSystem이 없으면 화면은 나오는데 클릭만 안 먹습니다.</li> <li><strong>여러 해상도와 화면비를 어떻게 맞추나</strong> — 크기는 CanvasScaler를 Scale With Screen Size로 두고 기준 해상도와 Match로 맞춥니다. 화면비는 앵커로 흡수하고, 노치 기기는 Safe Area만큼 루트를 안쪽으로 밉니다.</li> <li><strong>UI 요소가 아주 많을 때</strong> — 갱신 빈도로 Canvas를 나눠 리빌드 범위를 줄입니다. 누를 일 없는 이미지는 Raycast Target을 끄고, 목록은 보이는 만큼만 만들어 재활용합니다.</li> <li><strong>NGUI와 uGUI의 차이는</strong> — NGUI는 에셋 스토어 서드파티 UI였고, uGUI는 그 개발자를 영입해 엔진에 내장한 공식 UI입니다. 손으로 관리하던 아틀라스가 스프라이트 패커와 Canvas 배칭으로 들어왔습니다.</li></ul> <h3>이런 오해를 한다</h3> <ul><li><strong>알파를 0으로 만들면 안 그려진다</strong> — 투명해질 뿐 메시는 그대로 만들어진다. 실제로 빼려면 Canvas 컴포넌트를 끄거나 게임오브젝트를 비활성화한다.</li> <li><strong>Canvas는 하나로 두는 게 좋다</strong> — 반대다. 하나에 몰면 작은 변경 하나가 전체 리빌드를 부른다. 다만 잘게 쪼개면 배칭이 끊기므로 갱신 빈도로 나눈다.</li> <li><strong>CanvasScaler만 설정하면 화면비도 해결된다</strong> — 스케일만 다룬다. 16:9와 20:9의 남는 폭은 앵커로 처리해야 요소가 쏠리거나 잘리지 않는다.</li> <li><strong>Raycast Target은 켜 둬도 공짜다</strong> — 입력이 들어올 때마다 그래픽을 하나씩 검사한다. 배경과 텍스트는 꺼 둔다.</li></ul> <h3>3줄 정리</h3> <ul><li>Canvas는 자식 하나가 바뀌면 전체 메시를 다시 만든다</li> <li>그래서 계층이 아니라 갱신 빈도로 Canvas를 나눈다</li> <li>크기는 CanvasScaler, 화면비와 노치는 앵커와 Safe Area</li></ul>
 <div class="refs"><h2>참고 자료</h2><ul><li><a href="https://docs.unity3d.com/Packages/com.unity.ugui@2.0/manual/UICanvas.html" target="_blank" rel="noopener">Unity 매뉴얼 – Canvas(uGUI)</a></li><li><a href="https://docs.unity3d.com/Packages/com.unity.ugui@2.0/manual/HOWTO-UIMultiResolution.html" target="_blank" rel="noopener">Unity 매뉴얼 – Designing UI for Multiple Resolutions</a></li><li><a href="https://docs.unity3d.com/Packages/com.unity.ugui@2.0/manual/EventSystem.html" target="_blank" rel="noopener">Unity 매뉴얼 – Event System(uGUI)</a></li><li><a href="https://docs.unity3d.com/Manual/UIElements.html" target="_blank" rel="noopener">Unity 매뉴얼 – UI Toolkit</a></li></ul></div>
 </article>
 <div class="pager"><a href="02-05.html">← 에셋과 리소스 관리</a><a href="02-07.html">물리 →</a></div>
