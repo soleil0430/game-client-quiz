@@ -94,6 +94,33 @@
   .mode.free .emoji { background: var(--blue-bg); }
   .mode.exam .emoji { background: var(--red-bg); }
   .mode.library .emoji { background: var(--purple-bg); }
+  /* 컷신 */
+  .cut { background: var(--card); border: 2px solid var(--line); border-radius: 20px; padding: 18px; }
+  .cut-art svg { display: block; width: 100%; height: auto; color: var(--text); animation: cutin 1s ease-out; }
+  .cut-art .ln { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .cut-art .thick { stroke-width: 3; }
+  .cut-art .dim { opacity: .45; }
+  .cut-art .fill { fill: currentColor; stroke: none; }
+  .cut-art .fillfaint { fill: currentColor; fill-opacity: .08; }
+  .cut-art text { font: 600 13px -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif; fill: currentColor; stroke: none; }
+  @keyframes cutin { from { opacity: 0; transform: scale(1.04); } }
+  .cut-text { min-height: 3.2em; margin: 14px 0 6px; font-size: 1.05rem; font-weight: 700; line-height: 1.7; text-align: center; }
+  .cut-text.show { animation: cutline .5s ease-out; }
+  @keyframes cutline { from { opacity: 0; transform: translateY(8px); } }
+  .cut-dots { display: flex; gap: 6px; justify-content: center; margin-bottom: 14px; }
+  .cut-dots span { width: 24px; height: 4px; border-radius: 999px; background: var(--line); }
+  .cut-dots span.on { background: var(--green); }
+  #cutscene .btn { min-width: 160px; }
+
+  .test-box { border: 2px dashed var(--line); border-radius: 16px; padding: 12px 16px; margin-top: 14px; }
+  .test-box strong { display: block; font-size: .9rem; }
+  .test-box .muted { display: block; font-size: .8rem; margin-bottom: 6px; }
+  .test-box input { width: 70px; padding: 6px 8px; border: 2px solid var(--line); border-radius: 10px;
+    background: var(--panel); color: inherit; font: inherit; font-size: .9rem; }
+
+  .act { margin: 24px 4px 12px; }
+  .act strong { display: block; font-size: 1.02rem; font-weight: 800; }
+  .act p { margin: 4px 0 0; line-height: 1.65; }
   .mode.chapter .emoji { background: var(--panel); font-size: 1.2rem; font-weight: 800; }
   .mode.chapter.done .emoji { background: var(--green-bg); color: var(--green-d); }
   .mode.chapter[disabled] { opacity: .5; cursor: default; }
@@ -225,6 +252,7 @@
   .lib-list small { color: var(--muted); font-weight: 800; }
 
   footer { color: var(--muted); font-size: .78rem; font-weight: 600; margin-top: 28px; line-height: 1.6; }
+  .ver { display: block; font-weight: 800; margin-bottom: 6px; }
   @media (prefers-reduced-motion: reduce) { * { animation-duration: .01ms !important; animation-delay: 0s !important; transition: none !important; } }
 </style>
 </head>
@@ -248,6 +276,28 @@
     </div>
     <div id="modeList" class="modes"></div>
     <div class="row center"><button id="download" class="link">기록 파일 받기</button></div>
+    <div id="testBox" class="test-box" hidden>
+      <strong>테스트 도구</strong>
+      <span class="muted">?test 주소에서만 보입니다. 저장 공간도 따로 씁니다</span>
+      <div class="row">
+        <button id="tUnlock" class="link">모든 챕터 해금</button>
+        <button id="tReset" class="link">진행 초기화</button>
+        <input id="tChapter" type="number" min="1" max="51" value="1" aria-label="챕터 번호">
+        <button id="tGo" class="link">그 챕터로 이동</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="cutscene" hidden>
+    <div class="cut">
+      <div id="cutArt" class="cut-art"></div>
+      <p id="cutText" class="cut-text"></p>
+      <div id="cutDots" class="cut-dots"></div>
+      <div class="row center">
+        <button id="cutNext" class="btn">다음</button>
+        <button id="cutSkip" class="quit-link">건너뛰기 ▸</button>
+      </div>
+    </div>
   </section>
 
   <section id="story" hidden>
@@ -306,6 +356,7 @@
       <p id="status" class="muted center"></p>
       <div class="row center"><button id="askBtn" class="btn wide">문제 받기</button></div>
       <button id="giveUp" class="quit-link">← 그만두고 나가기</button>
+      <button id="tClear" class="quit-link" hidden>[테스트] 이 챕터 클리어</button>
       <div id="result" class="result" hidden>
         <p id="resultText"></p>
         <button id="retry" class="btn wide" hidden>한 번 더 도전</button>
@@ -323,11 +374,12 @@
         <div id="feedback" hidden></div>
         <button id="next" class="btn wide" disabled>제출</button>
         <button id="skip" class="quit-link">기권하고 정답 보기</button>
+        <button id="tAnswer" class="quit-link" hidden>[테스트] 정답 제출</button>
       </div>
     </div>
   </section>
 
-  <footer>공개된 면접 질문 목록을 참고해 새로 만든 문제입니다. 정답과 해설이 틀릴 수 있습니다. 면접관을 누르거나 Enter로 문제를 받고, 숫자 키 1~5로 고른 뒤 Enter로 제출할 수 있습니다. 진행 중인 게임과 기록은 이 브라우저에 저장됩니다. 효과음: Kenney (CC0).</footer>
+  <footer><span id="version" class="ver"></span>공개된 면접 질문 목록을 참고해 새로 만든 문제입니다. 정답과 해설이 틀릴 수 있습니다. 면접관을 누르거나 Enter로 문제를 받고, 숫자 키 1~5로 고른 뒤 Enter로 제출할 수 있습니다. 진행 중인 게임과 기록은 이 브라우저에 저장됩니다. 효과음: Kenney (CC0).</footer>
 </main>
 
 <script>
@@ -6848,8 +6900,10 @@ window.QUESTIONS = [
 ];
 </script>
 <script>
+// 버전: 공유 사이트에 반영할 때마다 올린다
+const VERSION = "v1.6 · 2026-09-16";
 const LABELS = ["1", "2", "3", "4", "5"];
-const STORE = "game-client-quiz";
+const STORE = "game-client-quiz" + (location.search.includes("test") ? ":test" : "");
 // 모드는 둘뿐이다. chapter: 난이도 순 챕터를 따라간다, limit: 그만큼 풀면 끝난다, allTopics: 분야를 고를 수 없다
 const MODES = [
   { id: "story", name: "스토리", icon: "📖", lives: 3, chapter: true,
@@ -6924,6 +6978,42 @@ const CHAPTERS = [];
     if (i % CHAPTER_SIZE === 0) CHAPTERS.push([]);
     CHAPTERS[CHAPTERS.length - 1].push(q);
   });
+// 스토리: 이직 여정 5막. 챕터마다 장면 제목과 클리어 대사가 붙는다
+const josa = (n) => ("0136 78".includes(String(n).slice(-1)) ? "이" : "가");
+const actOf = (ch) => ACTS.filter((a) => a.at <= ch).pop();
+const actIndex = (ch) => ACTS.findIndex((a) => a === actOf(ch));
+const ACTS = [
+ {
+  "at": 0,
+  "name": "1막 · 첫 면접, 여덟 명짜리 스타트업",
+  "intro": "졸업반. 내세울 건 팀 프로젝트 하나뿐이다. 스무 곳에 넣어 한 곳에서 연락이 왔다. 기초를 묻는 자리다."
+ },
+ {
+  "at": 10,
+  "name": "2막 · 1년 만의 이직, 매출 있는 스타트업",
+  "intro": "첫 게임은 출시도 못 하고 접혔다. 월급이 밀리기 시작했을 때 이력서를 다시 열었다. 이번엔 쓸 게 있다."
+ },
+ {
+  "at": 22,
+  "name": "3막 · 3년차, 백 명 규모 중소 게임사",
+  "intro": "라이브 서비스를 겪으며 3년차가 됐다. 팀이 줄어드는 걸 보고 움직이기로 했다. 면접관은 셋이다."
+ },
+ {
+  "at": 34,
+  "name": "4막 · 5년차, 중견의 글로벌 서비스 팀",
+  "intro": "기능 하나를 통째로 맡는 연차가 됐다. 회사는 안정적이지만 배우는 속도가 느려졌다. 이번엔 설계를 본다."
+ },
+ {
+  "at": 45,
+  "name": "5막 · 8년차, 대기업 최종 면접",
+  "intro": "후배들이 물어보는 자리가 됐다. 수백 명이 붙는 조직의 공고에 눈이 갔다. 기술은 끝났고 마지막 관문만 남았다."
+ }
+];
+const SHOTS = {"desk": "<svg viewBox=\"0 0 640 300\" role=\"img\" aria-label=\"밤 책상 위 노트북\"><g class=\"ln\"><rect x=\"40\" y=\"24\" width=\"250\" height=\"150\" rx=\"6\"/><line x1=\"165\" y1=\"24\" x2=\"165\" y2=\"174\"/><line x1=\"40\" y1=\"99\" x2=\"290\" y2=\"99\"/><circle cx=\"520\" cy=\"60\" r=\"26\"/><g class=\"dim\"><rect x=\"330\" y=\"120\" width=\"34\" height=\"54\"/><rect x=\"376\" y=\"96\" width=\"40\" height=\"78\"/><rect x=\"428\" y=\"132\" width=\"30\" height=\"42\"/><rect x=\"470\" y=\"110\" width=\"44\" height=\"64\"/><rect x=\"526\" y=\"140\" width=\"34\" height=\"34\"/><rect x=\"572\" y=\"118\" width=\"30\" height=\"56\"/></g><line x1=\"20\" y1=\"212\" x2=\"620\" y2=\"212\" class=\"thick\"/><path d=\"M250 212 L268 152 L392 152 L410 212 Z\"/><rect x=\"268\" y=\"152\" width=\"124\" height=\"60\" rx=\"3\" class=\"fillfaint\"/><rect x=\"150\" y=\"178\" width=\"34\" height=\"34\" rx=\"4\"/><path d=\"M184 186 a8 8 0 0 1 0 16\"/></g></svg>", "docs": "<svg viewBox=\"0 0 640 300\" role=\"img\" aria-label=\"책상에 펼친 이력서\"><g class=\"ln\"><rect x=\"150\" y=\"40\" width=\"200\" height=\"230\" rx=\"6\" transform=\"rotate(-6 250 155)\"/><rect x=\"300\" y=\"60\" width=\"200\" height=\"230\" rx=\"6\" transform=\"rotate(5 400 175)\"/><g class=\"dim\"><line x1=\"190\" y1=\"90\" x2=\"300\" y2=\"78\"/><line x1=\"192\" y1=\"120\" x2=\"320\" y2=\"107\"/><line x1=\"196\" y1=\"150\" x2=\"290\" y2=\"140\"/><line x1=\"200\" y1=\"180\" x2=\"315\" y2=\"168\"/><line x1=\"335\" y1=\"120\" x2=\"455\" y2=\"131\"/><line x1=\"332\" y1=\"150\" x2=\"440\" y2=\"159\"/><line x1=\"329\" y1=\"180\" x2=\"460\" y2=\"191\"/><line x1=\"326\" y1=\"210\" x2=\"430\" y2=\"219\"/></g><rect x=\"330\" y=\"82\" width=\"60\" height=\"16\" rx=\"8\" class=\"fillfaint\" transform=\"rotate(5 360 90)\"/></g></svg>", "reject": "<svg viewBox=\"0 0 640 300\" role=\"img\" aria-label=\"지원했지만 답이 없는 회사들\"><g class=\"ln\"><rect x=\"60\" y=\"60\" width=\"80\" height=\"56\" rx=\"5\" class=\"dim\"/><path d=\"M70 70 l60 36 M130 70 l-60 36\" class=\"dim\"/><rect x=\"170\" y=\"60\" width=\"80\" height=\"56\" rx=\"5\" class=\"dim\"/><path d=\"M180 70 l60 36 M240 70 l-60 36\" class=\"dim\"/><rect x=\"280\" y=\"60\" width=\"80\" height=\"56\" rx=\"5\" class=\"dim\"/><path d=\"M290 70 l60 36 M350 70 l-60 36\" class=\"dim\"/><rect x=\"390\" y=\"60\" width=\"80\" height=\"56\" rx=\"5\" class=\"dim\"/><path d=\"M400 70 l60 36 M460 70 l-60 36\" class=\"dim\"/><rect x=\"500\" y=\"60\" width=\"80\" height=\"56\" rx=\"5\" class=\"dim\"/><path d=\"M510 70 l60 36 M570 70 l-60 36\" class=\"dim\"/><rect x=\"60\" y=\"140\" width=\"80\" height=\"56\" rx=\"5\" class=\"dim\"/><path d=\"M70 150 l60 36 M130 150 l-60 36\" class=\"dim\"/><rect x=\"170\" y=\"140\" width=\"80\" height=\"56\" rx=\"5\" class=\"dim\"/><path d=\"M180 150 l60 36 M240 150 l-60 36\" class=\"dim\"/><rect x=\"280\" y=\"140\" width=\"80\" height=\"56\" rx=\"5\" class=\"dim\"/><path d=\"M290 150 l60 36 M350 150 l-60 36\" class=\"dim\"/><rect x=\"390\" y=\"140\" width=\"80\" height=\"56\" rx=\"5\" class=\"dim\"/><path d=\"M400 150 l60 36 M460 150 l-60 36\" class=\"dim\"/><rect x=\"500\" y=\"140\" width=\"80\" height=\"56\" rx=\"5\" class=\"dim\"/><path d=\"M510 150 l60 36 M570 150 l-60 36\" class=\"dim\"/><rect x=\"60\" y=\"220\" width=\"80\" height=\"56\" rx=\"5\" class=\"dim\"/><path d=\"M70 230 l60 36 M130 230 l-60 36\" class=\"dim\"/><rect x=\"170\" y=\"220\" width=\"80\" height=\"56\" rx=\"5\" class=\"dim\"/><path d=\"M180 230 l60 36 M240 230 l-60 36\" class=\"dim\"/><rect x=\"280\" y=\"220\" width=\"80\" height=\"56\" rx=\"5\" class=\"dim\"/><path d=\"M290 230 l60 36 M350 230 l-60 36\" class=\"dim\"/><rect x=\"390\" y=\"220\" width=\"80\" height=\"56\" rx=\"5\" class=\"dim\"/><path d=\"M400 230 l60 36 M460 230 l-60 36\" class=\"dim\"/><rect x=\"500\" y=\"220\" width=\"80\" height=\"56\" rx=\"5\" class=\"dim\"/><path d=\"M510 230 l60 36 M570 230 l-60 36\" class=\"dim\"/><rect x=\"60\" y=\"300\" width=\"80\" height=\"56\" rx=\"5\" class=\"dim\"/><path d=\"M70 310 l60 36 M130 310 l-60 36\" class=\"dim\"/><rect x=\"170\" y=\"300\" width=\"80\" height=\"56\" rx=\"5\" class=\"dim\"/><path d=\"M180 310 l60 36 M240 310 l-60 36\" class=\"dim\"/><rect x=\"280\" y=\"300\" width=\"80\" height=\"56\" rx=\"5\" class=\"dim\"/><path d=\"M290 310 l60 36 M350 310 l-60 36\" class=\"dim\"/><rect x=\"390\" y=\"300\" width=\"80\" height=\"56\" rx=\"5\" class=\"dim\"/><path d=\"M400 310 l60 36 M460 310 l-60 36\" class=\"dim\"/><rect x=\"500\" y=\"220\" width=\"80\" height=\"56\" rx=\"5\" class=\"thick\"/><path d=\"M516 248 l14 14 l30 -30\" class=\"thick\"/></g></svg>", "office_small": "<svg viewBox=\"0 0 640 300\" role=\"img\" aria-label=\"작은 사무실\"><g class=\"ln\"><rect x=\"60\" y=\"40\" width=\"520\" height=\"200\" rx=\"8\"/><line x1=\"60\" y1=\"96\" x2=\"580\" y2=\"96\" class=\"dim\"/><rect x=\"110\" y=\"150\" width=\"120\" height=\"14\" rx=\"4\"/><rect x=\"270\" y=\"150\" width=\"120\" height=\"14\" rx=\"4\"/><rect x=\"430\" y=\"150\" width=\"120\" height=\"14\" rx=\"4\"/><circle cx=\"150\" cy=\"126\" r=\"14\"/><circle cx=\"310\" cy=\"126\" r=\"14\"/><circle cx=\"470\" cy=\"126\" r=\"14\"/><g class=\"dim\"><rect x=\"130\" y=\"132\" width=\"40\" height=\"18\" rx=\"3\"/><rect x=\"290\" y=\"132\" width=\"40\" height=\"18\" rx=\"3\"/><rect x=\"450\" y=\"132\" width=\"40\" height=\"18\" rx=\"3\"/></g><line x1=\"30\" y1=\"252\" x2=\"610\" y2=\"252\" class=\"thick\"/></g></svg>", "phone_game": "<svg viewBox=\"0 0 640 300\" role=\"img\" aria-label=\"모바일 게임 화면\"><g class=\"ln\"><rect x=\"250\" y=\"30\" width=\"140\" height=\"240\" rx=\"18\"/><rect x=\"266\" y=\"56\" width=\"108\" height=\"180\" rx=\"4\" class=\"fillfaint\"/><circle cx=\"320\" cy=\"252\" r=\"10\"/><g class=\"dim\"><circle cx=\"300\" cy=\"120\" r=\"14\"/><rect x=\"330\" y=\"150\" width=\"30\" height=\"30\"/><path d=\"M280 190 l20 -24 l20 24 Z\"/><line x1=\"276\" y1=\"80\" x2=\"364\" y2=\"80\"/></g></g></svg>", "mail": "<svg viewBox=\"0 0 640 300\" role=\"img\" aria-label=\"합격 메일\"><g class=\"ln\"><rect x=\"180\" y=\"90\" width=\"280\" height=\"170\" rx=\"8\"/><path d=\"M180 98 L320 190 L460 98\"/><circle cx=\"470\" cy=\"96\" r=\"18\" class=\"fill\"/><g class=\"dim\"><line x1=\"210\" y1=\"228\" x2=\"330\" y2=\"228\"/></g><path d=\"M300 40 l20 -20 l20 20\" class=\"dim\"/></g></svg>", "clock": "<svg viewBox=\"0 0 640 300\" role=\"img\" aria-label=\"면접 시간\"><g class=\"ln\"><circle cx=\"320\" cy=\"150\" r=\"96\"/><line x1=\"320\" y1=\"150\" x2=\"320\" y2=\"92\" class=\"thick\"/><line x1=\"320\" y1=\"150\" x2=\"372\" y2=\"168\" class=\"thick\"/><circle cx=\"320\" cy=\"150\" r=\"6\" class=\"fill\"/><g class=\"dim\"><line x1=\"320\" y1=\"62\" x2=\"320\" y2=\"76\"/><line x1=\"320\" y1=\"224\" x2=\"320\" y2=\"238\"/><line x1=\"232\" y1=\"150\" x2=\"246\" y2=\"150\"/><line x1=\"394\" y1=\"150\" x2=\"408\" y2=\"150\"/></g></g></svg>", "chart_down": "<svg viewBox=\"0 0 640 300\" role=\"img\" aria-label=\"접힌 프로젝트\"><g class=\"ln\"><line x1=\"90\" y1=\"250\" x2=\"560\" y2=\"250\"/><line x1=\"90\" y1=\"40\" x2=\"90\" y2=\"250\"/><polyline points=\"110,120 190,100 270,130 350,110 430,190 510,235\" class=\"thick\"/><g class=\"dim\"><line x1=\"90\" y1=\"100\" x2=\"560\" y2=\"100\"/><line x1=\"90\" y1=\"170\" x2=\"560\" y2=\"170\"/></g><path d=\"M470 210 l40 25 l-8 -30\" class=\"thick\"/></g></svg>", "chart_up": "<svg viewBox=\"0 0 640 300\" role=\"img\" aria-label=\"출시까지 간 프로젝트\"><g class=\"ln\"><line x1=\"90\" y1=\"250\" x2=\"560\" y2=\"250\"/><line x1=\"90\" y1=\"40\" x2=\"90\" y2=\"250\"/><polyline points=\"110,230 190,215 270,180 350,150 430,100 510,60\" class=\"thick\"/><g class=\"dim\"><line x1=\"90\" y1=\"100\" x2=\"560\" y2=\"100\"/><line x1=\"90\" y1=\"170\" x2=\"560\" y2=\"170\"/></g><path d=\"M480 80 l30 -20 l2 34\" class=\"thick\"/></g></svg>", "payday": "<svg viewBox=\"0 0 640 300\" role=\"img\" aria-label=\"밀리는 월급\"><g class=\"ln\"><rect x=\"150\" y=\"120\" width=\"44\" height=\"30\" rx=\"4\" class=\"dim\"/><rect x=\"120\" y=\"50\" width=\"400\" height=\"210\" rx=\"8\"/><line x1=\"120\" y1=\"100\" x2=\"520\" y2=\"100\"/><rect x=\"222\" y=\"120\" width=\"44\" height=\"30\" rx=\"4\" class=\"dim\"/><rect x=\"120\" y=\"50\" width=\"400\" height=\"210\" rx=\"8\"/><line x1=\"120\" y1=\"100\" x2=\"520\" y2=\"100\"/><rect x=\"294\" y=\"120\" width=\"44\" height=\"30\" rx=\"4\" class=\"dim\"/><rect x=\"120\" y=\"50\" width=\"400\" height=\"210\" rx=\"8\"/><line x1=\"120\" y1=\"100\" x2=\"520\" y2=\"100\"/><rect x=\"366\" y=\"120\" width=\"44\" height=\"30\" rx=\"4\" class=\"dim\"/><rect x=\"120\" y=\"50\" width=\"400\" height=\"210\" rx=\"8\"/><line x1=\"120\" y1=\"100\" x2=\"520\" y2=\"100\"/><rect x=\"438\" y=\"120\" width=\"44\" height=\"30\" rx=\"4\" class=\"dim\"/><rect x=\"120\" y=\"50\" width=\"400\" height=\"210\" rx=\"8\"/><line x1=\"120\" y1=\"100\" x2=\"520\" y2=\"100\"/><rect x=\"150\" y=\"164\" width=\"44\" height=\"30\" rx=\"4\" class=\"dim\"/><rect x=\"120\" y=\"50\" width=\"400\" height=\"210\" rx=\"8\"/><line x1=\"120\" y1=\"100\" x2=\"520\" y2=\"100\"/><rect x=\"222\" y=\"164\" width=\"44\" height=\"30\" rx=\"4\" class=\"dim\"/><rect x=\"120\" y=\"50\" width=\"400\" height=\"210\" rx=\"8\"/><line x1=\"120\" y1=\"100\" x2=\"520\" y2=\"100\"/><rect x=\"294\" y=\"164\" width=\"44\" height=\"30\" rx=\"4\" class=\"dim\"/><rect x=\"120\" y=\"50\" width=\"400\" height=\"210\" rx=\"8\"/><line x1=\"120\" y1=\"100\" x2=\"520\" y2=\"100\"/><rect x=\"366\" y=\"164\" width=\"44\" height=\"30\" rx=\"4\" class=\"dim\"/><rect x=\"120\" y=\"50\" width=\"400\" height=\"210\" rx=\"8\"/><line x1=\"120\" y1=\"100\" x2=\"520\" y2=\"100\"/><rect x=\"438\" y=\"164\" width=\"44\" height=\"30\" rx=\"4\" class=\"dim\"/><circle cx=\"366\" cy=\"164\" r=\"22\" class=\"thick\"/><path d=\"M366 150 v16 l12 8\" class=\"thick\"/></g></svg>", "alert": "<svg viewBox=\"0 0 640 300\" role=\"img\" aria-label=\"새벽 장애 알림\"><g class=\"ln\"><rect x=\"250\" y=\"40\" width=\"140\" height=\"240\" rx=\"18\"/><rect x=\"266\" y=\"66\" width=\"108\" height=\"180\" rx=\"4\" class=\"fillfaint\"/><path d=\"M320 100 l46 80 h-92 Z\" class=\"thick\"/><line x1=\"320\" y1=\"130\" x2=\"320\" y2=\"152\" class=\"thick\"/><circle cx=\"320\" cy=\"166\" r=\"4\" class=\"fill\"/><g class=\"dim\"><path d=\"M410 70 a70 70 0 0 1 0 100\"/><path d=\"M440 50 a100 100 0 0 1 0 140\"/><path d=\"M230 70 a70 70 0 0 0 0 100\"/><path d=\"M200 50 a100 100 0 0 0 0 140\"/></g></g></svg>", "team_shrink": "<svg viewBox=\"0 0 640 300\" role=\"img\" aria-label=\"줄어드는 팀\"><g class=\"ln\"><g class=\"\"><circle cx=\"110\" cy=\"120\" r=\"20\"/><path d=\"M80 190 a30 28 0 0 1 60 0\"/></g><g class=\"\"><circle cx=\"180\" cy=\"120\" r=\"20\"/><path d=\"M150 190 a30 28 0 0 1 60 0\"/></g><g class=\"\"><circle cx=\"250\" cy=\"120\" r=\"20\"/><path d=\"M220 190 a30 28 0 0 1 60 0\"/></g><g class=\"\"><circle cx=\"320\" cy=\"120\" r=\"20\"/><path d=\"M290 190 a30 28 0 0 1 60 0\"/></g><g class=\"\"><circle cx=\"390\" cy=\"120\" r=\"20\"/><path d=\"M360 190 a30 28 0 0 1 60 0\"/></g><g class=\"\"><circle cx=\"460\" cy=\"120\" r=\"20\"/><path d=\"M430 190 a30 28 0 0 1 60 0\"/></g><g class=\"dim\"><circle cx=\"530\" cy=\"120\" r=\"20\"/><path d=\"M500 190 a30 28 0 0 1 60 0\"/></g><g class=\"dim\"><circle cx=\"600\" cy=\"120\" r=\"20\"/><path d=\"M570 190 a30 28 0 0 1 60 0\"/></g><g class=\"dim\"><circle cx=\"670\" cy=\"120\" r=\"20\"/><path d=\"M640 190 a30 28 0 0 1 60 0\"/></g><g class=\"dim\"><circle cx=\"740\" cy=\"120\" r=\"20\"/><path d=\"M710 190 a30 28 0 0 1 60 0\"/></g></g></svg>", "tower": "<svg viewBox=\"0 0 640 300\" role=\"img\" aria-label=\"회사 건물\"><g class=\"ln\"><rect x=\"90\" y=\"130\" width=\"120\" height=\"140\"/><rect x=\"240\" y=\"60\" width=\"150\" height=\"210\"/><rect x=\"420\" y=\"150\" width=\"120\" height=\"120\"/><g class=\"dim\"><rect x=\"255\" y=\"85\" width=\"28\" height=\"24\"/><rect x=\"299\" y=\"85\" width=\"28\" height=\"24\"/><rect x=\"343\" y=\"85\" width=\"28\" height=\"24\"/><rect x=\"255\" y=\"125\" width=\"28\" height=\"24\"/><rect x=\"299\" y=\"125\" width=\"28\" height=\"24\"/><rect x=\"343\" y=\"125\" width=\"28\" height=\"24\"/><rect x=\"255\" y=\"165\" width=\"28\" height=\"24\"/><rect x=\"299\" y=\"165\" width=\"28\" height=\"24\"/><rect x=\"343\" y=\"165\" width=\"28\" height=\"24\"/><rect x=\"255\" y=\"205\" width=\"28\" height=\"24\"/><rect x=\"299\" y=\"205\" width=\"28\" height=\"24\"/><rect x=\"343\" y=\"205\" width=\"28\" height=\"24\"/><rect x=\"105\" y=\"155\" width=\"28\" height=\"24\"/><rect x=\"155\" y=\"155\" width=\"28\" height=\"24\"/><rect x=\"105\" y=\"195\" width=\"28\" height=\"24\"/><rect x=\"155\" y=\"195\" width=\"28\" height=\"24\"/><rect x=\"105\" y=\"235\" width=\"28\" height=\"24\"/><rect x=\"155\" y=\"235\" width=\"28\" height=\"24\"/><rect x=\"435\" y=\"175\" width=\"28\" height=\"24\"/><rect x=\"485\" y=\"175\" width=\"28\" height=\"24\"/><rect x=\"435\" y=\"215\" width=\"28\" height=\"24\"/><rect x=\"485\" y=\"215\" width=\"28\" height=\"24\"/></g><line x1=\"30\" y1=\"272\" x2=\"610\" y2=\"272\" class=\"thick\"/></g></svg>", "crowd": "<svg viewBox=\"0 0 640 300\" role=\"img\" aria-label=\"수백 명이 일하는 조직\"><g class=\"ln\"><g class=\"\"><circle cx=\"80\" cy=\"90\" r=\"14\"/><path d=\"M58 140 a22 20 0 0 1 44 0\"/></g><g class=\"dim\"><circle cx=\"150\" cy=\"90\" r=\"14\"/><path d=\"M128 140 a22 20 0 0 1 44 0\"/></g><g class=\"dim\"><circle cx=\"220\" cy=\"90\" r=\"14\"/><path d=\"M198 140 a22 20 0 0 1 44 0\"/></g><g class=\"\"><circle cx=\"290\" cy=\"90\" r=\"14\"/><path d=\"M268 140 a22 20 0 0 1 44 0\"/></g><g class=\"dim\"><circle cx=\"360\" cy=\"90\" r=\"14\"/><path d=\"M338 140 a22 20 0 0 1 44 0\"/></g><g class=\"dim\"><circle cx=\"430\" cy=\"90\" r=\"14\"/><path d=\"M408 140 a22 20 0 0 1 44 0\"/></g><g class=\"\"><circle cx=\"500\" cy=\"90\" r=\"14\"/><path d=\"M478 140 a22 20 0 0 1 44 0\"/></g><g class=\"dim\"><circle cx=\"570\" cy=\"90\" r=\"14\"/><path d=\"M548 140 a22 20 0 0 1 44 0\"/></g><g class=\"dim\"><circle cx=\"80\" cy=\"170\" r=\"14\"/><path d=\"M58 220 a22 20 0 0 1 44 0\"/></g><g class=\"\"><circle cx=\"150\" cy=\"170\" r=\"14\"/><path d=\"M128 220 a22 20 0 0 1 44 0\"/></g><g class=\"dim\"><circle cx=\"220\" cy=\"170\" r=\"14\"/><path d=\"M198 220 a22 20 0 0 1 44 0\"/></g><g class=\"dim\"><circle cx=\"290\" cy=\"170\" r=\"14\"/><path d=\"M268 220 a22 20 0 0 1 44 0\"/></g><g class=\"\"><circle cx=\"360\" cy=\"170\" r=\"14\"/><path d=\"M338 220 a22 20 0 0 1 44 0\"/></g><g class=\"dim\"><circle cx=\"430\" cy=\"170\" r=\"14\"/><path d=\"M408 220 a22 20 0 0 1 44 0\"/></g><g class=\"dim\"><circle cx=\"500\" cy=\"170\" r=\"14\"/><path d=\"M478 220 a22 20 0 0 1 44 0\"/></g><g class=\"\"><circle cx=\"570\" cy=\"170\" r=\"14\"/><path d=\"M548 220 a22 20 0 0 1 44 0\"/></g><g class=\"dim\"><circle cx=\"80\" cy=\"250\" r=\"14\"/><path d=\"M58 300 a22 20 0 0 1 44 0\"/></g><g class=\"dim\"><circle cx=\"150\" cy=\"250\" r=\"14\"/><path d=\"M128 300 a22 20 0 0 1 44 0\"/></g><g class=\"\"><circle cx=\"220\" cy=\"250\" r=\"14\"/><path d=\"M198 300 a22 20 0 0 1 44 0\"/></g><g class=\"dim\"><circle cx=\"290\" cy=\"250\" r=\"14\"/><path d=\"M268 300 a22 20 0 0 1 44 0\"/></g><g class=\"dim\"><circle cx=\"360\" cy=\"250\" r=\"14\"/><path d=\"M338 300 a22 20 0 0 1 44 0\"/></g><g class=\"\"><circle cx=\"430\" cy=\"250\" r=\"14\"/><path d=\"M408 300 a22 20 0 0 1 44 0\"/></g><g class=\"dim\"><circle cx=\"500\" cy=\"250\" r=\"14\"/><path d=\"M478 300 a22 20 0 0 1 44 0\"/></g><g class=\"dim\"><circle cx=\"570\" cy=\"250\" r=\"14\"/><path d=\"M548 300 a22 20 0 0 1 44 0\"/></g></g></svg>", "call": "<svg viewBox=\"0 0 640 300\" role=\"img\" aria-label=\"화상 면접\"><g class=\"ln\"><rect x=\"60\" y=\"30\" width=\"520\" height=\"210\" rx=\"10\"/><line x1=\"320\" y1=\"30\" x2=\"320\" y2=\"240\"/><circle cx=\"190\" cy=\"110\" r=\"30\"/><path d=\"M140 190 a50 46 0 0 1 100 0\"/><circle cx=\"450\" cy=\"110\" r=\"30\"/><path d=\"M400 190 a50 46 0 0 1 100 0\"/><g class=\"dim\"><rect x=\"252\" y=\"250\" width=\"136\" height=\"26\" rx=\"13\"/><circle cx=\"288\" cy=\"263\" r=\"7\"/><circle cx=\"320\" cy=\"263\" r=\"7\"/><circle cx=\"352\" cy=\"263\" r=\"7\"/></g><circle cx=\"320\" cy=\"20\" r=\"5\" class=\"fill\"/></g></svg>", "meeting3": "<svg viewBox=\"0 0 640 300\" role=\"img\" aria-label=\"면접관 세 명\"><g class=\"ln\"><rect x=\"60\" y=\"24\" width=\"300\" height=\"110\" rx=\"6\"/><g class=\"dim\"><line x1=\"90\" y1=\"56\" x2=\"240\" y2=\"56\"/><line x1=\"90\" y1=\"80\" x2=\"300\" y2=\"80\"/><line x1=\"90\" y1=\"104\" x2=\"200\" y2=\"104\"/></g><circle cx=\"180\" cy=\"186\" r=\"24\"/><path d=\"M144 252 a36 34 0 0 1 72 0\"/><circle cx=\"300\" cy=\"178\" r=\"26\"/><path d=\"M262 250 a38 36 0 0 1 76 0\"/><circle cx=\"420\" cy=\"186\" r=\"24\"/><path d=\"M384 252 a36 34 0 0 1 72 0\"/><path d=\"M20 262 H620\" class=\"thick\"/></g></svg>", "board": "<svg viewBox=\"0 0 640 300\" role=\"img\" aria-label=\"화이트보드 설계\"><g class=\"ln\"><rect x=\"40\" y=\"20\" width=\"470\" height=\"230\" rx=\"8\"/><rect x=\"80\" y=\"70\" width=\"110\" height=\"52\" rx=\"4\"/><rect x=\"270\" y=\"60\" width=\"110\" height=\"52\" rx=\"4\"/><rect x=\"270\" y=\"160\" width=\"110\" height=\"52\" rx=\"4\"/><rect x=\"420\" y=\"110\" width=\"70\" height=\"52\" rx=\"4\"/><path d=\"M190 96 H262\"/><path d=\"M190 100 L262 186\"/><path d=\"M380 86 L414 128\"/><path d=\"M380 186 L414 148\"/><circle cx=\"560\" cy=\"150\" r=\"16\"/><path d=\"M552 166 L536 214\" class=\"thick\"/></g></svg>", "code": "<svg viewBox=\"0 0 640 300\" role=\"img\" aria-label=\"코드 편집기\"><g class=\"ln\"><rect x=\"90\" y=\"40\" width=\"460\" height=\"220\" rx=\"8\"/><line x1=\"90\" y1=\"80\" x2=\"550\" y2=\"80\"/><g class=\"dim\"><circle cx=\"112\" cy=\"60\" r=\"6\"/><circle cx=\"132\" cy=\"60\" r=\"6\"/><circle cx=\"152\" cy=\"60\" r=\"6\"/><line x1=\"120\" y1=\"110\" x2=\"300\" y2=\"110\"/><line x1=\"140\" y1=\"136\" x2=\"380\" y2=\"136\"/><line x1=\"140\" y1=\"162\" x2=\"340\" y2=\"162\"/><line x1=\"160\" y1=\"188\" x2=\"420\" y2=\"188\"/><line x1=\"120\" y1=\"214\" x2=\"260\" y2=\"214\"/></g><rect x=\"424\" y=\"204\" width=\"10\" height=\"20\" class=\"fill\"/></g></svg>", "globe": "<svg viewBox=\"0 0 640 300\" role=\"img\" aria-label=\"글로벌 서비스\"><g class=\"ln\"><circle cx=\"320\" cy=\"150\" r=\"100\"/><ellipse cx=\"320\" cy=\"150\" rx=\"46\" ry=\"100\"/><line x1=\"220\" y1=\"150\" x2=\"420\" y2=\"150\"/><path d=\"M236 96 a120 120 0 0 0 168 0\"/><path d=\"M236 204 a120 120 0 0 1 168 0\"/><g class=\"dim\"><circle cx=\"150\" cy=\"90\" r=\"10\"/><circle cx=\"500\" cy=\"110\" r=\"10\"/><circle cx=\"480\" cy=\"230\" r=\"10\"/><line x1=\"160\" y1=\"96\" x2=\"240\" y2=\"126\"/><line x1=\"490\" y1=\"116\" x2=\"410\" y2=\"136\"/><line x1=\"470\" y1=\"224\" x2=\"396\" y2=\"196\"/></g></g></svg>", "handshake": "<svg viewBox=\"0 0 640 300\" role=\"img\" aria-label=\"최종 합격\"><g class=\"ln\"><rect x=\"40\" y=\"20\" width=\"560\" height=\"170\" rx=\"8\"/><line x1=\"320\" y1=\"20\" x2=\"320\" y2=\"190\"/><g class=\"dim\"><rect x=\"70\" y=\"110\" width=\"40\" height=\"80\"/><rect x=\"124\" y=\"82\" width=\"46\" height=\"108\"/><rect x=\"184\" y=\"126\" width=\"36\" height=\"64\"/><rect x=\"236\" y=\"96\" width=\"50\" height=\"94\"/><rect x=\"356\" y=\"118\" width=\"42\" height=\"72\"/><rect x=\"412\" y=\"88\" width=\"48\" height=\"102\"/><rect x=\"474\" y=\"130\" width=\"38\" height=\"60\"/><rect x=\"526\" y=\"102\" width=\"44\" height=\"88\"/></g><path d=\"M20 222 H620\" class=\"thick\"/><circle cx=\"232\" cy=\"238\" r=\"20\"/><circle cx=\"408\" cy=\"238\" r=\"20\"/><path d=\"M256 252 L290 264 L350 264 L384 252\" class=\"thick\"/></g></svg>"};
+const ACT_STORY = [[{"t": "졸업반. 포트폴리오라고 부를 만한 건 팀 프로젝트 하나뿐이었다.", "s": "docs"}, {"t": "그걸로 스무 곳에 넣었고, 열아홉 곳은 답이 없었다.", "s": "reject"}, {"t": "남은 한 곳은 사람 여덟 명짜리 스타트업이다.", "s": "office_small"}, {"t": "모바일 게임을 만든다고 했다. 클라이언트 자리 하나.", "s": "phone_game"}, {"t": "서류가 붙었다는 메일이 왔다.", "s": "mail"}, {"t": "내일 두 시, 첫 면접이다.", "s": "clock"}], [{"t": "입사 1년. 첫 게임은 출시도 못 하고 접혔다.", "s": "chart_down"}, {"t": "월급이 하루씩 밀리기 시작했다.", "s": "payday"}, {"t": "대표는 다음 투자를 기다려 보자고 했다.", "s": "office_small"}, {"t": "기다리는 대신 이력서를 열었다. 이번엔 쓸 게 있었다.", "s": "docs"}, {"t": "지인이 소개한 곳은 이미 게임을 서비스 중인 스타트업이다.", "s": "phone_game"}, {"t": "규모는 비슷하지만 매출이 있다. 서류는 통과했다.", "s": "mail"}, {"t": "이번 면접은 실무자가 본다.", "s": "call"}], [{"t": "두 번째 회사에서 2년을 채웠다. 이제 3년차다.", "s": "desk"}, {"t": "라이브 서비스를 겪으며 배운 게 많았다. 새벽 장애도 몇 번.", "s": "alert"}, {"t": "그런데 팀이 열 명에서 여섯 명으로 줄었다.", "s": "team_shrink"}, {"t": "다음 프로젝트가 안 보인다는 뜻이었다.", "s": "chart_down"}, {"t": "이번엔 백 명 규모의 중소 게임사에 넣었다.", "s": "tower"}, {"t": "면접관이 셋이라고 한다. 파고드는 질문이 나올 것이다.", "s": "meeting3"}], [{"t": "5년차. 이제 기능 하나를 통째로 맡는다.", "s": "code"}, {"t": "지난 프로젝트에서 최적화와 네트워크를 맡아 출시까지 갔다.", "s": "chart_up"}, {"t": "회사는 안정적이지만 배우는 속도가 눈에 띄게 느려졌다.", "s": "desk"}, {"t": "중견 게임사에서 연락이 왔다. 글로벌 서비스 팀이다.", "s": "globe"}, {"t": "이번 면접은 설계를 본다고 했다.", "s": "board"}, {"t": "정답이 아니라 판단을 묻는 자리다.", "s": "meeting3"}], [{"t": "8년차. 후배들이 물어보는 자리가 됐다.", "s": "meeting3"}, {"t": "이직 생각은 없었는데 대기업 공고에 눈이 갔다.", "s": "tower"}, {"t": "수백 명이 붙는 조직, 몇 년짜리 프로젝트.", "s": "crowd"}, {"t": "서류와 기술 면접을 지나 최종까지 왔다.", "s": "mail"}, {"t": "여기서부터는 실력보다 사람을 본다.", "s": "call"}, {"t": "마지막 관문이다.", "s": "handshake"}]];
+const SCENES = ["면접장을 찾아가다", "여덟 명짜리 사무실", "대표가 직접 앉다", "포트폴리오를 열다", "팀 프로젝트를 설명하다", "기초부터 묻는다", "모르는 걸 모른다고 말하다", "화이트보드에 그려 보라", "언제부터 나올 수 있나요", "첫 합격 통보", "면접 일정을 조율하다", "점심시간에 몰래 나오다", "이직 이유를 묻는다", "1년 동안 뭘 했나", "출시 못 한 프로젝트 이야기", "실무자가 코드를 본다", "왜 이렇게 짰나요", "라이브 경험은 없죠", "배울 수 있는 곳인가", "역질문 시간", "처우는 나중에 이야기하죠", "두 번째 합격", "정장을 꺼내 입다", "면접관이 셋이다", "3년간의 이력을 훑다", "장애 대응 경험을 묻다", "수치로 말해 달라", "왜 그 방법이었나", "다른 선택지는 없었나", "화이트보드로 나오세요", "반대 의견이 들어오다", "모르는 영역을 만나다", "팀에 무엇을 줄 수 있나", "합격, 그리고 연봉 협상", "글로벌 서비스 팀", "사전 과제를 받다", "설계를 발표하다", "동시 접속을 가정하다", "메모리 예산을 나누다", "프레임 예산 16.7ms", "서버 권한의 경계", "장애를 가정한 질문", "롤백 계획을 묻다", "후배를 어떻게 이끌 건가", "심층 면접 종료", "대기업 채용 공고", "임원 면접장", "왜 지금 옮기려 하나", "8년을 한 문장으로", "처우 협상 테이블", "최종 합격"];
+const CLEARS = ["찾아오시느라 고생하셨습니다", "좁죠? 곧 넓은 데로 갑니다", "편하게 하세요. 오래 안 걸립니다", "직접 만든 게 있다는 건 큽니다", "설명이 깔끔하네요", "기초는 되어 있습니다", "모른다고 말할 줄 아시네요", "그림으로 그리니 이해됩니다", "빠를수록 좋습니다", "같이 해보시죠", "시간 맞춰 주셔서 감사합니다", "점심 못 드셨겠네요. 짧게 하죠", "솔직하게 말씀하시네요", "1년치고 많이 하셨습니다", "접힌 프로젝트에서도 배울 건 있죠", "코드 읽기 편하네요", "이유가 분명하시네요", "그건 여기서 배우시면 됩니다", "그 질문이 제일 중요하죠", "좋은 질문 감사합니다", "조건은 맞춰 보겠습니다", "환영합니다", "정장 안 입으셔도 됐는데요", "셋이라 부담되셨죠", "이력이 촘촘하네요", "새벽에 겪어 본 사람의 답이네요", "숫자가 나오니 좋습니다", "선택에 근거가 있군요", "대안까지 보셨네요", "그림이 설명을 대신하네요", "반박에도 흔들리지 않으시네요", "모르는 건 모른다, 좋습니다", "팀에 보탬이 되겠네요", "조건 정리해서 연락드리겠습니다", "글로벌은 처음이시죠? 괜찮습니다", "과제 잘 봤습니다", "발표가 정리돼 있네요", "규모를 먼저 잡으셨군요", "예산을 나눌 줄 아시네요", "프레임 감각이 있으십니다", "경계를 정확히 그으셨습니다", "대응 순서가 나오는군요", "되돌릴 계획까지 보셨네요", "후배 이야기가 나오는 연차죠", "오늘 길었습니다. 고생하셨습니다", "지원해 주셔서 감사합니다", "긴장 푸셔도 됩니다", "이유가 분명하시네요", "8년이 한 문장에 담기네요", "내부 검토 후 연락드리겠습니다", "합격입니다. 함께 하시죠"];
+const OPENERS = [["자, 가볍게 시작하죠", "기초부터 여쭙겠습니다", "긴장 안 하셔도 됩니다"], ["반갑습니다. 바로 들어가죠", "실무에서 쓰시는 것 위주로 여쭤볼게요", "편하게 답해 주시면 됩니다"], ["오늘은 조금 더 파고들어 보겠습니다", "왜 그렇게 했는지까지 듣고 싶습니다", "답보다 근거를 보겠습니다"], ["설계 이야기를 해보죠", "정답은 없습니다. 판단을 듣고 싶습니다", "예산을 어떻게 나누실지 보겠습니다"], ["마지막입니다. 편하게 가시죠", "여기까지 오셨으면 충분합니다", "정리하는 자리라고 생각해 주세요"]];
 const chapterLevel = (qs) => Math.round(qs.reduce((n, q) => n + (q.level || 3), 0) / qs.length);
 const STUDY = {"01-CSharp.md · 타입과 메모리":"01-01.html","01-CSharp.md · 객체지향 문법":"01-02.html","01-CSharp.md · 델리게이트·이벤트·람다":"01-03.html","01-CSharp.md · 컬렉션·문자열·LINQ":"01-04.html","01-CSharp.md · 가비지 컬렉션":"01-05.html","01-CSharp.md · 런타임과 컴파일":"01-06.html","01-CSharp.md · 예외 처리":"01-07.html","01-CSharp.md · 코드 문제":"01-08.html","02-Unity-엔진.md · 기본 구조":"02-01.html","02-Unity-엔진.md · 생명주기와 스크립팅":"02-02.html","02-Unity-엔진.md · 직렬화와 데이터":"02-03.html","02-Unity-엔진.md · 스크립팅 백엔드":"02-04.html","02-Unity-엔진.md · 에셋과 리소스 관리":"02-05.html","02-Unity-엔진.md · UI":"02-06.html","02-Unity-엔진.md · 물리":"02-07.html","02-Unity-엔진.md · 애니메이션·카메라·입력":"02-08.html","02-Unity-엔진.md · AI와 길찾기":"02-09.html","02-Unity-엔진.md · 빌드와 플랫폼":"02-10.html","02-Unity-엔진.md · DOTS와 최신 기능":"02-11.html","03-최적화-메모리.md · 접근법":"03-01.html","03-최적화-메모리.md · 프로파일링과 병목 진단":"03-02.html","03-최적화-메모리.md · CPU 쪽 최적화":"03-03.html","03-최적화-메모리.md · 메모리와 GC":"03-04.html","03-최적화-메모리.md · 캐시 친화와 데이터 지향":"03-05.html","03-최적화-메모리.md · 모바일과 상황형 질문":"03-06.html","04-그래픽스-렌더링.md · 렌더링 파이프라인":"04-01.html","04-그래픽스-렌더링.md · 컬링과 가시성":"04-02.html","04-그래픽스-렌더링.md · 드로우 콜과 배칭":"04-03.html","04-그래픽스-렌더링.md · 텍스처":"04-04.html","04-그래픽스-렌더링.md · 투명도와 버퍼":"04-05.html","04-그래픽스-렌더링.md · 조명과 그림자":"04-06.html","04-그래픽스-렌더링.md · Unity 렌더 파이프라인과 셰이더":"04-07.html","04-그래픽스-렌더링.md · 모바일 GPU와 그래픽스 API":"04-08.html","04-그래픽스-렌더링.md · 디버깅과 설계":"04-09.html","05-게임수학-물리.md · 벡터":"05-01.html","05-게임수학-물리.md · 행렬과 좌표계":"05-02.html","05-게임수학-물리.md · 회전":"05-03.html","05-게임수학-물리.md · 보간":"05-04.html","05-게임수학-물리.md · 충돌과 교차 판정":"05-05.html","05-게임수학-물리.md · 물리 시뮬레이션":"05-06.html","05-게임수학-물리.md · 기초 수학":"05-07.html","06-설계-아키텍처.md · 객체지향":"06-01.html","06-설계-아키텍처.md · 디자인 패턴":"06-02.html","06-설계-아키텍처.md · 아키텍처":"06-03.html","06-설계-아키텍처.md · 게임 시스템 설계":"06-04.html","07-자료구조-알고리즘.md · 복잡도":"07-01.html","07-자료구조-알고리즘.md · 배열과 리스트":"07-02.html","07-자료구조-알고리즘.md · 스택·큐·우선순위 큐":"07-03.html","07-자료구조-알고리즘.md · 해시":"07-04.html","07-자료구조-알고리즘.md · 트리와 힙":"07-05.html","07-자료구조-알고리즘.md · 그래프와 경로 탐색":"07-06.html","07-자료구조-알고리즘.md · 정렬과 탐색":"07-07.html","07-자료구조-알고리즘.md · 공간 분할":"07-08.html","07-자료구조-알고리즘.md · 풀이 기법":"07-09.html","07-자료구조-알고리즘.md · 코딩 테스트와 실기 유형":"07-10.html","08-운영체제-동시성.md · 프로세스와 스레드":"08-01.html","08-운영체제-동시성.md · 메모리 구조":"08-02.html","08-운영체제-동시성.md · 가상 메모리":"08-03.html","08-운영체제-동시성.md · 스케줄링과 커널":"08-04.html","08-운영체제-동시성.md · 컴퓨터 구조":"08-05.html","08-운영체제-동시성.md · 동기화":"08-06.html","08-운영체제-동시성.md · 비동기":"08-07.html","08-운영체제-동시성.md · Unity와 멀티스레딩":"08-08.html","09-네트워크.md · 계층 모델":"09-01.html","09-네트워크.md · TCP와 UDP":"09-02.html","09-네트워크.md · 소켓과 HTTP":"09-03.html","09-네트워크.md · 멀티플레이 구조":"09-04.html","09-네트워크.md · 동기화 기법":"09-05.html","09-네트워크.md · 클라이언트-서버 신뢰성":"09-06.html","09-네트워크.md · 보안":"09-07.html","10-CPP-기초.md · 클래스와 가상 함수":"10-01.html","10-CPP-기초.md · 메모리와 포인터":"10-02.html","10-CPP-기초.md · 현대 C++":"10-03.html","10-CPP-기초.md · STL":"10-04.html","10-CPP-기초.md · 컴파일과 링크":"10-05.html"};
 const studyLink = (file, sub) => `공부자료/${STUDY[`${file} · ${sub}`] || `${file.slice(0, 2)}.html`}`;
@@ -6937,6 +7027,7 @@ delete state.solved; // 뽑기 기계 시절의 회차 기록
 if (state.run && !modeOf(state.run.mode)) state.run = null; // 없어진 모드(이지·노멀 등)로 하던 판은 버린다
 if (state.run && !state.run.asked) state.run.asked = [...state.run.correct];
 if (!state.story || !Array.isArray(state.story.cleared)) state.story = { cleared: [], best: {} };
+if (!Array.isArray(state.story.seenActs)) state.story.seenActs = [];
 const save = () => { try { localStorage.setItem(STORE, JSON.stringify(state)); } catch {} };
 
 let current = null; // 지금 푸는 문제 { q, order, selected, chosen }
@@ -6969,7 +7060,7 @@ function left(run = state.run) {
 }
 
 function showScreen(id) {
-  for (const screen of ["modes", "story", "library", "office", "quiz"]) $(screen).hidden = screen !== id;
+  for (const screen of ["modes", "story", "library", "cutscene", "office", "quiz"]) $(screen).hidden = screen !== id;
   $("hud").hidden = !state.run || (id !== "office" && id !== "quiz");
   window.scrollTo(0, 0);
 }
@@ -7054,13 +7145,18 @@ function renderStory() {
   $("chapterList").innerHTML = CHAPTERS.map((qs, i) => {
     const open = i === 0 || cleared.includes(i - 1), done = cleared.includes(i);
     const lv = chapterLevel(qs), best = state.story.best[i];
-    return `<button class="mode chapter${done ? " done" : ""}"${open ? "" : " disabled"} data-ch="${i}">`
+    const act = ACTS.find((a) => a.at === i);
+    return (act ? `<div class="act"><strong>${act.name}</strong><p class="muted">${act.intro}</p>`
+      + (open ? `<button class="link" data-act="${ACTS.indexOf(act)}">▶ 장면 다시 보기</button>` : "") + "</div>" : "")
+      + `<button class="mode chapter${done ? " done" : ""}"${open ? "" : " disabled"} data-ch="${i}">`
       + `<span class="emoji">${done ? "✓" : open ? i + 1 : "🔒"}</span>`
-      + `<span><strong>챕터 ${i + 1}</strong><span class="desc">${"★".repeat(lv)}${"☆".repeat(5 - lv)} · ${qs.length}문제`
+      + `<span><strong>챕터 ${i + 1} · ${SCENES[i]}</strong><span class="desc">${"★".repeat(lv)}${"☆".repeat(5 - lv)} · ${qs.length}문제`
       + `${best ? ` · 최고 ${best} / ${qs.length}` : ""}</span></span></button>`;
   }).join("");
   $("chapterList").querySelectorAll("button:not([disabled])").forEach((b) => {
-    b.onclick = () => startChapter(Number(b.dataset.ch));
+    b.onclick = () => (b.dataset.act !== undefined
+      ? playCutscene(Number(b.dataset.act), renderStory)
+      : startChapter(Number(b.dataset.ch)));
   });
   showScreen("story");
   // 도전할 수 있는 첫 챕터가 보이게 스크롤한다
@@ -7068,13 +7164,49 @@ function renderStory() {
   if (next) next.scrollIntoView({ block: "center" });
 }
 
+// 컷신: 막 그림 한 장에 나레이션을 한 줄씩 얹는다. 건너뛰면 바로 면접관 화면으로 간다
+let cutTimer = null;
+function playCutscene(act, then) {
+  const lines = ACT_STORY[act];
+  let i = 0;
+  $("cutDots").innerHTML = lines.map(() => '<span></span>').join("");
+  showScreen("cutscene");
+  const stop = () => { clearTimeout(cutTimer); cutTimer = null; };
+  const end = () => { stop(); then(); };
+  const step = () => {
+    if (i >= lines.length) return end();
+    $("cutArt").innerHTML = SHOTS[lines[i].s];
+    $("cutText").textContent = lines[i].t;
+    $("cutText").classList.remove("show");
+    void $("cutText").offsetWidth;
+    $("cutText").classList.add("show");
+    [...$("cutDots").children].forEach((d, n) => d.classList.toggle("on", n <= i));
+    $("cutNext").textContent = i === lines.length - 1 ? "면접 시작" : "다음";
+    i++;
+    stop();
+    cutTimer = setTimeout(step, matchMedia("(prefers-reduced-motion: reduce)").matches ? 1200 : 3600);
+  };
+  $("cutNext").onclick = step;
+  $("cutSkip").onclick = end;
+  step();
+}
+
 function startChapter(chapter) {
   state.run = { mode: "story", chapter, lives: modeOf("story").lives, correct: [], asked: [], wrong: 0 };
   result = null;
   lastId = null;
   save();
-  enterOffice(`챕터 ${chapter + 1} 시작하죠`);
-  knock(() => {});
+  const act = actIndex(chapter);
+  const go = () => {
+    const lines = OPENERS[act];
+    enterOffice(lines[chapter % lines.length]);
+    knock(() => {});
+  };
+  // 컷신은 그 막을 처음 열 때 한 번만 본다. 다시 보려면 챕터 목록의 "장면 다시 보기"
+  if (state.story.seenActs.includes(act)) return go();
+  state.story.seenActs.push(act);
+  save();
+  playCutscene(act, go);
 }
 
 function renderLibrary() {
@@ -7132,7 +7264,7 @@ function renderOffice() {
   renderHud(run);
   const count = left().length;
   $("status").textContent = mode.chapter
-    ? `챕터 ${run.chapter + 1} · 남은 목숨 ${run.lives}개 · 남은 문제 ${count}개`
+    ? `${actOf(run.chapter).name} · 챕터 ${run.chapter + 1} · 남은 문제 ${count}개`
     : `남은 목숨 ${run.lives}개 · 문제 ${run.asked.length} / ${mode.limit}`;
 }
 
@@ -7246,9 +7378,9 @@ function renderResult() {
   $("result").hidden = false;
   $("npc").classList.add("off");
   showScreen("office");
-  const title = story ? (cleared ? `🎉 챕터 ${result.chapter + 1} 클리어` : `💔 챕터 ${result.chapter + 1} 실패`)
+  const title = story ? (cleared ? `🎉 ${SCENES[result.chapter]}` : `💔 챕터 ${result.chapter + 1} 실패`)
     : cleared ? "🎉 합격" : "💔 게임 오버";
-  say(cleared ? (story ? "통과입니다. 다음으로 가죠" : "합격입니다. 고생하셨어요") : "오늘은 여기까지 하죠",
+  say(cleared ? (story ? CLEARS[result.chapter] : "합격입니다. 고생하셨어요") : "오늘은 여기까지 하죠",
     cleared ? "happy" : "sad");
   const total = story ? CHAPTERS[result.chapter].length : mode.limit;
   const nextCh = story && cleared && result.chapter + 1 < CHAPTERS.length ? result.chapter + 1 : null;
@@ -7256,7 +7388,7 @@ function renderResult() {
     + `<div class="tiles"><div class="tile"><b>${result.correct} / ${total}</b><span>맞힌 문제</span></div>`
     + `<div class="tile"><b>${result.lives}</b><span>남은 목숨</span></div></div>`
     + (story
-      ? `<p class="muted">${nextCh !== null ? `챕터 ${nextCh + 1}가 열렸습니다`
+      ? `<p class="muted">${nextCh !== null ? `챕터 ${nextCh + 1}${josa(nextCh + 1)} 열렸습니다`
         : cleared ? "마지막 챕터까지 끝냈습니다" : "목숨이 다했습니다. 다시 도전할 수 있습니다"}</p>`
       : `<p class="muted">${result.record ? "최고 기록을 새로 세웠습니다"
         : `최고 기록: ${recordText(mode, state.best[result.mode])}`}</p>`);
@@ -7286,6 +7418,41 @@ $("skip").onclick = () => { if (current && current.chosen === null) submit(-1); 
 $("npc").onclick = ask;
 $("askBtn").onclick = ask;
 $("storyBack").onclick = renderModes;
+
+// 테스트 도구: ?test 주소에서만 켜진다. 스토리를 끝까지 확인할 때 쓴다
+const TEST = location.search.includes("test");
+if (TEST) {
+  $("testBox").hidden = $("tClear").hidden = $("tAnswer").hidden = false;
+  $("tUnlock").onclick = () => {
+    state.story.cleared = CHAPTERS.map((_, i) => i).slice(0, CHAPTERS.length - 1);
+    save();
+    renderStory();
+  };
+  $("tReset").onclick = () => {
+    state.story = { cleared: [], best: {}, seenActs: [] };
+    state.run = null;
+    state.history = [];
+    state.best = {};
+    save();
+    renderModes();
+  };
+  $("tGo").onclick = () => {
+    const ch = Math.min(CHAPTERS.length, Math.max(1, Number($("tChapter").value || 1))) - 1;
+    startChapter(ch);
+  };
+  $("tClear").onclick = () => {
+    if (!state.run) return;
+    const run = state.run;
+    run.correct = CHAPTERS[run.chapter].map((q) => q.id);
+    run.asked = [...run.correct];
+    finish("clear");
+    current = null;
+    renderResult();
+  };
+  $("tAnswer").onclick = () => {
+    if (current && current.chosen === null) submit(current.q.answer);
+  };
+}
 $("libBack").onclick = renderModes;
 
 // 그만두기는 두 번 눌러 확인한다. 브라우저 확인 창(confirm)은 막아 둔 사용자에게 아무 일도 일어나지 않아 쓰지 않는다
@@ -7346,6 +7513,7 @@ $("sound").onclick = () => {
   play("toggle");
 };
 renderSound();
+$("version").textContent = VERSION;
 if (!QUESTIONS.length) $("loadError").hidden = false;
 if (invalid.length) {
   $("invalid").hidden = false;
