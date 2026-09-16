@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>클라이언트-서버 신뢰성 · 네트워크</title>
+<style>
+  :root {
+    --bg:#f2f5f7; --card:#fff; --panel:#f7f9fb; --text:#3c3c3c; --muted:#7a8b93; --line:#e2e8ea;
+    --green:#58cc02; --green-d:#46a302; --blue:#1cb0f6; --blue-d:#1899d6; --blue-bg:#ddf4ff;
+    --purple:#ce82ff; --purple-d:#a855f7; --purple-bg:#f5e8ff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#131f24; --card:#1b2b32; --panel:#16252b; --text:#eaf2f6; --muted:#8fa7b2; --line:#2c4048;
+      --blue-bg:#12303d; --purple-bg:#2e2036; --purple-d:#c99bec; --blue-d:#58c4f7; --green-d:#7ddc2a; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
+  a { color: var(--blue-d); }
+  .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
+  .nav a { text-decoration: none; }
+  .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
+    padding: 4px 12px; font-size: .8rem; font-weight: 800; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
+  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
+  p, ul, ol { margin: 10px 0; }
+  li { margin: 5px 0; }
+  .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
+  .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
+  .card { background: var(--card); border: 2px solid var(--line); border-radius: 20px; padding: 20px; margin-bottom: 14px; }
+  .list { display: grid; gap: 10px; }
+  .list a { display: block; background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px;
+    border-radius: 18px; padding: 14px 16px; text-decoration: none; color: inherit; }
+  .list a:hover { border-color: var(--purple); }
+  .list strong { display: block; font-size: 1.02rem; font-weight: 800; }
+  .list span { color: var(--muted); font-size: .86rem; font-weight: 600; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em;
+    background: var(--panel); border: 1px solid var(--line); padding: 1px 6px; border-radius: 6px; font-weight: 700; }
+  pre { background: var(--panel); border: 2px solid var(--line); padding: 14px; border-radius: 14px; overflow-x: auto; line-height: 1.65; }
+  pre code { background: none; border: 0; padding: 0; }
+  table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; font-size: .94rem; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; }
+  th { background: var(--panel); }
+  .refs { border-top: 2px solid var(--line); margin-top: 24px; padding-top: 14px; }
+  .refs ul { padding-left: 20px; }
+  .pager { display: flex; justify-content: space-between; gap: 10px; margin-top: 16px; }
+  .pager a { background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px; border-radius: 16px;
+    padding: 12px 16px; text-decoration: none; color: inherit; font-weight: 800; font-size: .9rem; max-width: 48%; }
+  .pager a:hover { border-color: var(--blue); }
+  footer { color: var(--muted); font-size: .8rem; font-weight: 600; margin-top: 28px; }
+</style>
+</head>
+<body>
+<main>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="09.html" class="badge">네트워크 목차</a></div>
+<article class="card">
+<h1>클라이언트-서버 신뢰성</h1>
+<p class="lead">끊긴 요청이 두 번 반영되지 않게 멱등 키를 붙이고, 재시도는 백오프로 늦춘다</p>
+<h3>핵심 개념</h3><p>응답이 오지 않았다는 것은 <strong>서버가 처리하지 않았다는 뜻이 아니다</strong>. 요청이 닿기 전에 끊겼을 수도, 처리는 끝났는데 응답만 사라졌을 수도 있고 클라이언트는 둘을 구분하지 못한다. 그래서 "타임아웃이니 다시 보낸다"는 "구매가 두 번 처리될 수 있다"와 같은 말이다.</p><p>해결은 <strong>멱등성</strong>이다. 같은 요청을 여러 번 보내도 결과가 한 번 보낸 것과 같아지는 성질로, 요청마다 고유 키(요청 ID)를 붙이고 서버가 그 키로 처리 기록을 남겨 만든다. 같은 키가 또 오면 저장된 결과를 그대로 돌려준다. 조건이 둘이다. <strong>재시도해도 키가 같아야 한다</strong>. 보낼 때마다 새 GUID를 만들면 서버 눈에는 다른 구매다. <strong>재화 반영과 키 기록은 한 트랜잭션이어야 한다</strong>. 나누면 재화는 들어갔는데 키가 없는 순간이 생기고, 그때 재시도가 오면 두 번 지급된다. 인앱 결제는 스토어 영수증이 그대로 키가 된다.</p><p>앱이 응답을 기다리다 강제 종료된 경우도 같은 장치로 푼다. 키를 보내기 전에 저장해 두고, 다시 켰을 때 미완료 키가 남아 있으면 같은 키로 재전송한다. 로그인 직후 재화와 인벤토리를 서버에서 통째로 받아 맞추면 더 확실하다.</p><pre><code>using System.Collections;
+using UnityEngine;
+using UnityEngine.Networking;
+
+public class PurchaseClient : MonoBehaviour
+{
+    public IEnumerator Buy(string url, string body)
+    {
+        // 키는 한 번만 만들어 저장한다. 앱이 죽어도 남아야 같은 요청이 된다
+        string id = PlayerPrefs.GetString("pendingBuy", "");
+        if (id == "")
+        {
+            id = System.Guid.NewGuid().ToString();
+            PlayerPrefs.SetString("pendingBuy", id);
+            PlayerPrefs.Save();
+        }
+        for (int n = 0; n &lt; 5; n++)
+        {
+            using (var req = UnityWebRequest.Post(url, body, "application/json"))
+            {
+                req.SetRequestHeader("Idempotency-Key", id);  // 서버는 이 키로 중복을 가른다
+                yield return req.SendWebRequest();
+                if (req.result == UnityWebRequest.Result.Success) { PlayerPrefs.DeleteKey("pendingBuy"); yield break; }
+                if (req.responseCode &gt;= 400 &amp;&amp; req.responseCode &lt; 500) yield break;
+            }
+            yield return new WaitForSeconds(Mathf.Pow(2f, n) + Random.Range(0f, 1f)); // 백오프+지터
+        }
+    }
+}</code></pre><p>재시도 간격도 설계 대상이다. 모든 기기가 같은 간격으로 즉시 재시도하면 복구 중인 서버에 요청이 몰려 다시 쓰러지고, 서버 쪽에서는 공격 트래픽과 구분되지 않아 차단될 수 있다. 실패할 때마다 간격을 배로 늘리고(지수 백오프) 기기마다 다른 무작위 지연(지터)을 더한다. 타임아웃과 5xx만 다시 보내고, 4xx는 답이 같으니 멈춘다.</p><p>서버가 먼저 보내는 알림은 연결이 살아 있어야 받는다. 소켓이나 WebSocket을 열어 두고 수신 루프에서 읽고, HTTP만 쓴다면 폴링으로 흉내 낸다. 수신은 별도 스레드에서 돌므로 받은 데이터는 큐에 넣고 메인 스레드 <code>Update</code>에서 꺼낸다. 다른 스레드에서 Unity API를 부르면 예외가 난다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>응답 전에 끊긴 요청을 한 번만 처리하려면</strong> — 요청마다 멱등 키를 붙이고 서버가 키와 결과를 함께 기록한다. 같은 키가 오면 처리 없이 이전 결과를 돌려주고, 결과 반영과 키 기록은 한 트랜잭션으로 묶는다.</li><li><strong>응답을 기다리다 앱이 죽었다면</strong> — 재실행 때 남은 미완료 키로 같은 요청을 다시 보내거나 결과를 조회하고, 로그인 직후 서버 상태를 받아 화면을 맞춘다.</li><li><strong>즉시 재시도가 왜 위험한가</strong> — 복구 시점에 요청이 몰려 서버를 다시 쓰러뜨리고 공격으로 오인돼 차단될 수 있다. 지수 백오프와 지터, 최대 횟수를 함께 둔다.</li><li><strong>재화 계산을 클라이언트에 두면</strong> — 왕복이 없어 즉시 반응하지만 메모리와 패킷 조작에 뚫린다. 연출만 먼저 보여 주고 값은 서버 응답으로 덮어쓴다.</li></ul><h3>흔한 오해</h3><ul><li><strong>타임아웃이 났으니 서버는 처리하지 않았다</strong> — 처리는 끝나고 응답만 사라진 경우와 구분되지 않는다. 재시도가 아니라 중복 반영을 막아야 한다.</li><li><strong>클라이언트에서 중복 전송만 막으면 된다</strong> — 앱 재설치, 기기 변경, 다중 접속에서 무너진다. 중복을 막는 책임은 기록을 가진 서버에 있다.</li><li><strong>TCP를 쓰니 중복은 없다</strong> — TCP는 한 연결 안의 순서와 유실만 책임진다. 끊긴 뒤 다시 보낸 요청은 서버에 새 요청으로 보인다.</li></ul>
+<div class="refs"><h2>참고 자료</h2><ul><li><a href="https://learn.microsoft.com/ko-kr/azure/architecture/patterns/retry" target="_blank" rel="noopener">Microsoft Learn – 다시 시도 패턴(Retry pattern)</a></li><li><a href="https://learn.microsoft.com/ko-kr/azure/architecture/patterns/idempotent-consumer" target="_blank" rel="noopener">Microsoft Learn – Idempotent 소비자 패턴</a></li><li><a href="https://learn.microsoft.com/ko-kr/dotnet/architecture/microservices/implement-resilient-applications/implement-retries-exponential-backoff" target="_blank" rel="noopener">Microsoft Learn – 지수 백오프를 사용하여 재시도 구현</a></li><li><a href="https://docs.unity3d.com/Manual/web-request.html" target="_blank" rel="noopener">Unity 매뉴얼 – Interacting with web servers(UnityWebRequest)</a></li></ul></div>
+</article>
+<div class="pager"><a href="09-05.html">← 동기화 기법</a><a href="09-07.html">보안 →</a></div>
+<footer>정리 글은 Claude가 썼다. 틀린 내용이 있을 수 있으니 중요한 내용은 참고 자료 원문으로 확인한다.</footer>
+</main>
+</body>
+</html>

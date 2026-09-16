@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>캐시 친화와 데이터 지향 · 최적화·메모리</title>
+<style>
+  :root {
+    --bg:#f2f5f7; --card:#fff; --panel:#f7f9fb; --text:#3c3c3c; --muted:#7a8b93; --line:#e2e8ea;
+    --green:#58cc02; --green-d:#46a302; --blue:#1cb0f6; --blue-d:#1899d6; --blue-bg:#ddf4ff;
+    --purple:#ce82ff; --purple-d:#a855f7; --purple-bg:#f5e8ff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#131f24; --card:#1b2b32; --panel:#16252b; --text:#eaf2f6; --muted:#8fa7b2; --line:#2c4048;
+      --blue-bg:#12303d; --purple-bg:#2e2036; --purple-d:#c99bec; --blue-d:#58c4f7; --green-d:#7ddc2a; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
+  a { color: var(--blue-d); }
+  .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
+  .nav a { text-decoration: none; }
+  .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
+    padding: 4px 12px; font-size: .8rem; font-weight: 800; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
+  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
+  p, ul, ol { margin: 10px 0; }
+  li { margin: 5px 0; }
+  .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
+  .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
+  .card { background: var(--card); border: 2px solid var(--line); border-radius: 20px; padding: 20px; margin-bottom: 14px; }
+  .list { display: grid; gap: 10px; }
+  .list a { display: block; background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px;
+    border-radius: 18px; padding: 14px 16px; text-decoration: none; color: inherit; }
+  .list a:hover { border-color: var(--purple); }
+  .list strong { display: block; font-size: 1.02rem; font-weight: 800; }
+  .list span { color: var(--muted); font-size: .86rem; font-weight: 600; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em;
+    background: var(--panel); border: 1px solid var(--line); padding: 1px 6px; border-radius: 6px; font-weight: 700; }
+  pre { background: var(--panel); border: 2px solid var(--line); padding: 14px; border-radius: 14px; overflow-x: auto; line-height: 1.65; }
+  pre code { background: none; border: 0; padding: 0; }
+  table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; font-size: .94rem; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; }
+  th { background: var(--panel); }
+  .refs { border-top: 2px solid var(--line); margin-top: 24px; padding-top: 14px; }
+  .refs ul { padding-left: 20px; }
+  .pager { display: flex; justify-content: space-between; gap: 10px; margin-top: 16px; }
+  .pager a { background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px; border-radius: 16px;
+    padding: 12px 16px; text-decoration: none; color: inherit; font-weight: 800; font-size: .9rem; max-width: 48%; }
+  .pager a:hover { border-color: var(--blue); }
+  footer { color: var(--muted); font-size: .8rem; font-weight: 600; margin-top: 28px; }
+</style>
+</head>
+<body>
+<main>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="03.html" class="badge">최적화·메모리 목차</a></div>
+<article class="card">
+<h1>캐시 친화와 데이터 지향</h1>
+<p class="lead">CPU는 캐시 라인 단위로 읽는다. 쓰는 순서대로 데이터를 연속 배치하면 같은 코드가 빨라진다</p>
+<h3>핵심 개념</h3><p>CPU는 메인 메모리에서 값을 하나씩 읽지 않는다. 주소 주변을 <strong>캐시 라인(보통 64바이트) 단위로 통째로</strong> 가져온다. L1 접근이 몇 사이클인 데 비해 메인 메모리는 수백 사이클이 걸리므로, 이미 올라온 라인을 끝까지 쓰느냐 아니면 매번 새 라인을 불러오느냐가 실제 속도를 가른다.</p><p>배열과 연결 리스트의 차이가 여기서 나온다. 둘 다 순회는 O(n)이지만 배열은 원소가 연속으로 놓여 있어 한 번 올라온 라인 안에서 다음 원소를 바로 읽고, 하드웨어 프리페처도 다음 블록을 미리 당겨 온다. 연결 리스트는 노드가 힙 여기저기 흩어져 있어 다음 노드마다 캐시 미스가 나기 쉽다. 같은 이유로 C#의 <code>arr[i, j]</code> 다차원 배열은 마지막 인덱스가 연속이므로 <code>j</code>를 안쪽 루프에 둬야 메모리를 앞에서부터 차례로 읽는다.</p><p>구조체 배치도 캐시에 영향을 준다. 필드는 자기 크기의 배수 위치에 놓이도록 정렬되고, 그 사이를 패딩이 채운다.</p><table><thead><tr><th>선언 순서</th><th>실제 배치</th><th>크기</th></tr></thead><tbody><tr><td>byte a; long b; byte c;</td><td>a(1) + 패딩(7) + b(8) + c(1) + 패딩(7)</td><td>24바이트</td></tr><tr><td>long b; byte a; byte c;</td><td>b(8) + a(1) + c(1) + 패딩(6)</td><td>16바이트</td></tr></tbody></table><p>원소가 수만 개인 배열이면 이 8바이트 차이가 캐시에 들어가는 원소 수를 바꾼다. 더 나가면 필드를 묶는 방식 자체를 바꾼다. AoS(구조체의 배열)는 한 객체의 모든 필드를 함께 쓰는 처리에 좋고, SoA(배열들의 구조체)는 <strong>일부 필드만 훑는 루프</strong>에서 캐시 라인을 낭비 없이 채우고 SIMD도 태우기 쉽다.</p><pre><code>using UnityEngine;
+
+public struct ParticleAos            // AoS: 한 원소 안에 모든 필드가 붙어 있다
+{
+    public Vector3 Position;
+    public Vector3 Velocity;
+    public Color32 Color;
+    public float Lifetime;
+}
+
+public class ParticleBuffers         // SoA: 필드별로 배열을 나눈다
+{
+    public Vector3[] Positions;
+    public Vector3[] Velocities;
+    public Color32[] Colors;
+
+    public void Move(float dt)
+    {
+        for (int i = 0; i &lt; Positions.Length; i++)
+            Positions[i] += Velocities[i] * dt;   // 색과 수명은 읽지 않는다
+    }
+}</code></pre><p>데이터 지향 설계(DOD)는 이 판단을 앞에 두는 사고방식이다. 객체 단위로 먼저 나누는 대신 <strong>어떤 데이터를 어떤 순서로 훑는지</strong>를 정하고 로직을 거기에 맞춘다. Unity DOTS의 ECS는 같은 컴포넌트 조합을 가진 엔티티를 청크 단위 연속 메모리에 모아 이를 구현하고, Job System이 워커 스레드로 나눠 돌리며, Burst가 그 코드를 SIMD를 활용한 네이티브 코드로 컴파일한다.</p><p>할당자도 같은 맥락에서 고른다. <strong>풀 할당자</strong>는 같은 크기 블록을 재사용해 임의 순서 해제를 허용하면서 단편화를 막고, <strong>스택(선형) 할당자</strong>는 포인터를 앞으로 밀며 할당하고 표시해 둔 지점까지 되감아 한꺼번에 해제해 매우 싸지만 LIFO 순서만 가능하다. <strong>슬랩 할당자</strong>는 같은 타입의 객체를 위한 영역을 미리 잡아 두고 초기화된 조각을 꺼내 쓴다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>캐시를 잘 쓰려면</strong> — 함께 쓰는 데이터를 연속으로 두고 접근 순서와 메모리 순서를 맞춘다. 배열 순회를 기본으로 하고, 루프가 읽지 않는 필드는 다른 배열로 뺀다.</li><li><strong>연결 리스트가 배열보다 느린 이유</strong> — 노드가 흩어져 있어 다음 노드로 갈 때마다 캐시 미스가 난다. 복잡도는 같아도 메모리 접근 상수가 다르다.</li><li><strong>AoS와 SoA</strong> — 한 객체의 필드를 다 쓰면 AoS, 일부 필드만 대량으로 훑으면 SoA가 유리하다. 접근 패턴이 정한다.</li><li><strong>DOD와 DOTS의 관계</strong> — DOD는 데이터 배치를 먼저 정하는 사고방식이고, DOTS의 ECS·Job·Burst는 그것을 엔진 차원에서 구현한 도구다.</li></ul><h3>흔한 오해</h3><ul><li><strong>복잡도가 같으면 성능도 같다</strong> — O 표기는 상수를 버린다. 캐시 미스 한 번이 연산 수백 번 값이다.</li><li><strong>struct 크기는 필드 크기의 합이다</strong> — 정렬 때문에 패딩이 들어간다. 큰 필드부터 선언하면 줄어든다.</li><li><strong>SoA가 항상 빠르다</strong> — 한 원소의 모든 필드를 함께 읽는 처리에서는 오히려 여러 배열을 오가며 미스가 늘어난다.</li><li><strong>DOTS를 써야 DOD를 하는 것이다</strong> — 일반 MonoBehaviour에서도 배열 순회와 필드 분리로 같은 효과를 낸다.</li><li><strong>스택 할당자는 아무 순서로나 해제할 수 있다</strong> — 되감기 방식이라 LIFO만 가능하다. 임의 순서 해제가 필요하면 풀 할당자를 쓴다.</li></ul>
+<div class="refs"><h2>참고 자료</h2><ul><li><a href="https://learn.microsoft.com/ko-kr/dotnet/csharp/language-reference/builtin-types/arrays" target="_blank" rel="noopener">Microsoft Learn – 배열 참조 형식(C# 다차원 배열)</a></li><li><a href="https://learn.microsoft.com/ko-kr/dotnet/api/system.runtime.interopservices.structlayoutattribute" target="_blank" rel="noopener">Microsoft Learn – StructLayoutAttribute 클래스</a></li><li><a href="https://docs.unity3d.com/Packages/com.unity.entities@1.4/manual/concepts-archetypes.html" target="_blank" rel="noopener">Unity Entities 매뉴얼 – Archetypes concepts</a></li><li><a href="https://unity.com/dots" target="_blank" rel="noopener">Unity – DOTS(Data-Oriented Technology Stack)</a></li></ul></div>
+</article>
+<div class="pager"><a href="03-04.html">← 메모리와 GC</a><a href="03-06.html">모바일과 상황형 질문 →</a></div>
+<footer>정리 글은 Claude가 썼다. 틀린 내용이 있을 수 있으니 중요한 내용은 참고 자료 원문으로 확인한다.</footer>
+</main>
+</body>
+</html>

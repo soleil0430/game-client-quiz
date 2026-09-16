@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>스택·큐·우선순위 큐 · 자료구조·알고리즘</title>
+<style>
+  :root {
+    --bg:#f2f5f7; --card:#fff; --panel:#f7f9fb; --text:#3c3c3c; --muted:#7a8b93; --line:#e2e8ea;
+    --green:#58cc02; --green-d:#46a302; --blue:#1cb0f6; --blue-d:#1899d6; --blue-bg:#ddf4ff;
+    --purple:#ce82ff; --purple-d:#a855f7; --purple-bg:#f5e8ff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#131f24; --card:#1b2b32; --panel:#16252b; --text:#eaf2f6; --muted:#8fa7b2; --line:#2c4048;
+      --blue-bg:#12303d; --purple-bg:#2e2036; --purple-d:#c99bec; --blue-d:#58c4f7; --green-d:#7ddc2a; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
+  a { color: var(--blue-d); }
+  .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
+  .nav a { text-decoration: none; }
+  .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
+    padding: 4px 12px; font-size: .8rem; font-weight: 800; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
+  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
+  p, ul, ol { margin: 10px 0; }
+  li { margin: 5px 0; }
+  .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
+  .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
+  .card { background: var(--card); border: 2px solid var(--line); border-radius: 20px; padding: 20px; margin-bottom: 14px; }
+  .list { display: grid; gap: 10px; }
+  .list a { display: block; background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px;
+    border-radius: 18px; padding: 14px 16px; text-decoration: none; color: inherit; }
+  .list a:hover { border-color: var(--purple); }
+  .list strong { display: block; font-size: 1.02rem; font-weight: 800; }
+  .list span { color: var(--muted); font-size: .86rem; font-weight: 600; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em;
+    background: var(--panel); border: 1px solid var(--line); padding: 1px 6px; border-radius: 6px; font-weight: 700; }
+  pre { background: var(--panel); border: 2px solid var(--line); padding: 14px; border-radius: 14px; overflow-x: auto; line-height: 1.65; }
+  pre code { background: none; border: 0; padding: 0; }
+  table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; font-size: .94rem; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; }
+  th { background: var(--panel); }
+  .refs { border-top: 2px solid var(--line); margin-top: 24px; padding-top: 14px; }
+  .refs ul { padding-left: 20px; }
+  .pager { display: flex; justify-content: space-between; gap: 10px; margin-top: 16px; }
+  .pager a { background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px; border-radius: 16px;
+    padding: 12px 16px; text-decoration: none; color: inherit; font-weight: 800; font-size: .9rem; max-width: 48%; }
+  .pager a:hover { border-color: var(--blue); }
+  footer { color: var(--muted); font-size: .8rem; font-weight: 600; margin-top: 28px; }
+</style>
+</head>
+<body>
+<main>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="07.html" class="badge">자료구조·알고리즘 목차</a></div>
+<article class="card">
+<h1>스택·큐·우선순위 큐</h1>
+<p class="lead">꺼내는 순서 규칙 하나가 자료구조를 가른다. 후입선출·선입선출·우선순위 순</p>
+<h3>핵심 개념</h3><p>스택과 큐는 저장 방식이 아니라 <strong>꺼내는 순서 규칙</strong>으로 정의된 자료구조다. 스택은 마지막에 넣은 것을 먼저 꺼내고(LIFO), 큐는 먼저 넣은 것을 먼저 꺼낸다(FIFO). 둘 다 가운데 원소를 보는 기능을 일부러 제공하지 않는다. 할 수 있는 일을 줄인 대신 모든 연산이 O(1)이고, 읽는 사람에게 "여기서는 이 순서로만 쓴다"는 의도가 드러난다.</p><table><thead><tr><th>구조</th><th>꺼내는 순서</th><th>게임에서 쓰는 곳</th></tr></thead><tbody><tr><td>스택</td><td>가장 최근 것</td><td>UI 팝업 쌓기와 뒤로 가기, 실행 취소, DFS, 호출 스택</td></tr><tr><td>큐</td><td>가장 오래된 것</td><td>스폰 대기열, 입력·패킷 버퍼, 순차 로딩 작업, BFS 대기열</td></tr><tr><td>우선순위 큐</td><td>우선순위가 가장 높은 것</td><td>A* 열린 목록, 쿨다운·버프 만료 타이머, 이벤트 스케줄러</td></tr></tbody></table><p>C#의 <code>Stack&lt;T&gt;</code>와 <code>Queue&lt;T&gt;</code>는 내부가 배열이다. 특히 <code>Queue&lt;T&gt;</code>는 <strong>원형 버퍼</strong>라 머리와 꼬리 인덱스를 배열 끝에서 0으로 감아 쓴다. 덕분에 <code>Dequeue</code>가 뒤 원소를 당기는 O(n) 작업이 아니라 머리 인덱스를 한 칸 옮기는 O(1) 작업이 된다. 연결 리스트로 구현해도 O(1)이지만 원소마다 노드를 할당해 GC를 건드리므로 배열 구현이 낫다.</p><p>스택 두 개로 큐를 만드는 문제는 "뒤집기를 두 번 하면 원래 순서"라는 성질을 쓴다. 넣기용과 꺼내기용 스택을 두고, <strong>꺼내기용이 비었을 때만</strong> 넣기용을 통째로 옮긴다. 원소당 이동이 한 번뿐이라 분할 상환 O(1)이다. 호출할 때마다 옮기면 매번 O(N)이라 이득이 사라진다.</p><pre><code>public class QueueByStacks&lt;T&gt;
+{
+    readonly Stack&lt;T&gt; _in = new Stack&lt;T&gt;();
+    readonly Stack&lt;T&gt; _out = new Stack&lt;T&gt;();
+
+    public void Enqueue(T item) =&gt; _in.Push(item);
+
+    public T Dequeue()
+    {
+        if (_out.Count == 0)          // 비었을 때만 통째로 옮긴다
+            while (_in.Count &gt; 0)
+                _out.Push(_in.Pop());
+        return _out.Pop();
+    }
+}</code></pre><p>우선순위 큐는 넣은 순서와 무관하게 <strong>우선순위가 가장 높은 것부터</strong> 꺼내는 큐다. 정렬된 리스트로 만들면 꺼내기는 O(1)이지만 삽입이 O(N)이라, 보통 이진 힙으로 구현해 최솟값 조회 O(1), 삽입과 최솟값 삭제를 각각 O(log N)으로 맞춘다. .NET 6부터는 <code>PriorityQueue&lt;TElement, TPriority&gt;</code>가 표준으로 들어왔고 내부는 배열 기반 4진 최소 힙이며, 우선순위가 같은 원소끼리는 선입선출을 보장하지 않는다. 다만 Unity 2022 LTS의 API 호환성 수준은 .NET Standard 2.1 또는 .NET Framework라 이 타입이 없으므로, Unity에서는 이진 힙을 직접 쓰거나 패키지를 가져다 쓴다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>스택과 큐의 차이와 활용</strong> — 스택은 후입선출, 큐는 선입선출이다. UI 팝업을 쌓았다가 뒤에서부터 닫는 흐름은 스택, 스폰 대기열이나 순차 로딩 작업은 큐로 잡았다. 둘 다 가운데 접근을 막는 대신 모든 연산이 O(1)이다.</li><li><strong>스택 두 개로 큐 만들기</strong> — 넣기용과 꺼내기용 스택을 둔다. 꺼내기용이 비었을 때만 넣기용을 전부 옮기면 두 번 뒤집혀 순서가 바로잡히고, 원소당 이동이 한 번이라 분할 상환 O(1)이다.</li><li><strong>배열 구현과 연결 리스트 구현의 차이</strong> — 배열은 캐시에 유리하고 노드 할당이 없지만 용량이 차면 재할당이 필요하다. 연결 리스트는 재할당이 없는 대신 원소마다 힙 할당이 생겨 GC를 건드린다. <code>Queue&lt;T&gt;</code>는 원형 버퍼라 배열이면서도 양끝 연산이 O(1)이다.</li><li><strong>우선순위 큐란</strong> — 우선순위가 높은 원소부터 꺼내는 큐이고 보통 이진 힙으로 구현해 삽입·삭제가 O(log N)이다. A*의 열린 목록이 대표적이고, .NET 6의 <code>PriorityQueue</code>는 Unity 기본 런타임에 없어 직접 구현했다.</li></ul><h3>흔한 오해</h3><ul><li><strong>우선순위 큐를 순회하면 우선순위 순으로 나온다</strong> — 힙은 부모가 자식보다 앞선다는 부분 순서만 지킨다. <code>UnorderedItems</code>라는 이름이 그대로 말해 준다.</li><li><strong>우선순위 큐는 정렬된 리스트다</strong> — 그렇게 만들면 삽입이 O(N)이다. 힙은 전체 정렬을 포기하는 대신 삽입을 O(log N)으로 낮춘 구조다.</li><li><strong>배열로 만든 큐는 <code>Dequeue</code>가 O(N)이다</strong> — 원형 버퍼로 머리 인덱스만 옮기면 O(1)이다.</li><li><strong>스택 두 개 큐는 꺼낼 때마다 옮긴다</strong> — 매번 옮기면 호출마다 O(N)이라 의미가 없다. 꺼내기용이 빌 때만 옮겨야 한다.</li></ul>
+<div class="refs"><h2>참고 자료</h2><ul><li><a href="https://learn.microsoft.com/ko-kr/dotnet/api/system.collections.generic.stack-1" target="_blank" rel="noopener">Microsoft Learn – Stack&lt;T&gt; 클래스</a></li><li><a href="https://learn.microsoft.com/ko-kr/dotnet/api/system.collections.generic.queue-1" target="_blank" rel="noopener">Microsoft Learn – Queue&lt;T&gt; 클래스</a></li><li><a href="https://learn.microsoft.com/ko-kr/dotnet/api/system.collections.generic.priorityqueue-2" target="_blank" rel="noopener">Microsoft Learn – PriorityQueue&lt;TElement,TPriority&gt; 클래스</a></li><li><a href="https://docs.unity3d.com/Manual/dotnet-profile-support.html" target="_blank" rel="noopener">Unity 매뉴얼 – API compatibility levels for .NET</a></li></ul></div>
+</article>
+<div class="pager"><a href="07-02.html">← 배열과 리스트</a><a href="07-04.html">해시 →</a></div>
+<footer>정리 글은 Claude가 썼다. 틀린 내용이 있을 수 있으니 중요한 내용은 참고 자료 원문으로 확인한다.</footer>
+</main>
+</body>
+</html>

@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>정렬과 탐색 · 자료구조·알고리즘</title>
+<style>
+  :root {
+    --bg:#f2f5f7; --card:#fff; --panel:#f7f9fb; --text:#3c3c3c; --muted:#7a8b93; --line:#e2e8ea;
+    --green:#58cc02; --green-d:#46a302; --blue:#1cb0f6; --blue-d:#1899d6; --blue-bg:#ddf4ff;
+    --purple:#ce82ff; --purple-d:#a855f7; --purple-bg:#f5e8ff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#131f24; --card:#1b2b32; --panel:#16252b; --text:#eaf2f6; --muted:#8fa7b2; --line:#2c4048;
+      --blue-bg:#12303d; --purple-bg:#2e2036; --purple-d:#c99bec; --blue-d:#58c4f7; --green-d:#7ddc2a; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
+  a { color: var(--blue-d); }
+  .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
+  .nav a { text-decoration: none; }
+  .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
+    padding: 4px 12px; font-size: .8rem; font-weight: 800; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
+  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
+  p, ul, ol { margin: 10px 0; }
+  li { margin: 5px 0; }
+  .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
+  .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
+  .card { background: var(--card); border: 2px solid var(--line); border-radius: 20px; padding: 20px; margin-bottom: 14px; }
+  .list { display: grid; gap: 10px; }
+  .list a { display: block; background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px;
+    border-radius: 18px; padding: 14px 16px; text-decoration: none; color: inherit; }
+  .list a:hover { border-color: var(--purple); }
+  .list strong { display: block; font-size: 1.02rem; font-weight: 800; }
+  .list span { color: var(--muted); font-size: .86rem; font-weight: 600; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em;
+    background: var(--panel); border: 1px solid var(--line); padding: 1px 6px; border-radius: 6px; font-weight: 700; }
+  pre { background: var(--panel); border: 2px solid var(--line); padding: 14px; border-radius: 14px; overflow-x: auto; line-height: 1.65; }
+  pre code { background: none; border: 0; padding: 0; }
+  table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; font-size: .94rem; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; }
+  th { background: var(--panel); }
+  .refs { border-top: 2px solid var(--line); margin-top: 24px; padding-top: 14px; }
+  .refs ul { padding-left: 20px; }
+  .pager { display: flex; justify-content: space-between; gap: 10px; margin-top: 16px; }
+  .pager a { background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px; border-radius: 16px;
+    padding: 12px 16px; text-decoration: none; color: inherit; font-weight: 800; font-size: .9rem; max-width: 48%; }
+  .pager a:hover { border-color: var(--blue); }
+  footer { color: var(--muted); font-size: .8rem; font-weight: 600; margin-top: 28px; }
+</style>
+</head>
+<body>
+<main>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="07.html" class="badge">자료구조·알고리즘 목차</a></div>
+<article class="card">
+<h1>정렬과 탐색</h1>
+<p class="lead">정렬마다 최악과 안정성이 다르다. 그 차이와 이진 탐색의 경계 찾기를 정리한다</p>
+<h3>핵심 개념</h3><p>비교로만 정렬하면 아무리 잘해도 O(N log N)보다 빠를 수 없다. 그래서 정렬 선택은 속도가 아니라 <strong>최악일 때 어떻게 되는지, 추가 메모리를 얼마나 쓰는지, 같은 값의 순서를 지키는지</strong>로 갈린다.</p><table><thead><tr><th>정렬</th><th>평균</th><th>최악</th><th>추가 공간</th><th>안정</th></tr></thead><tbody><tr><td>퀵</td><td>O(N log N)</td><td>O(N²)</td><td>O(log N)</td><td>아니다</td></tr><tr><td>병합</td><td>O(N log N)</td><td>O(N log N)</td><td>O(N)</td><td>그렇다</td></tr><tr><td>힙</td><td>O(N log N)</td><td>O(N log N)</td><td>O(1)</td><td>아니다</td></tr><tr><td>삽입</td><td>O(N²)</td><td>O(N²)</td><td>O(1)</td><td>그렇다</td></tr><tr><td>계수</td><td>O(N + K)</td><td>O(N + K)</td><td>O(K)</td><td>그렇다</td></tr></tbody></table><p>퀵 정렬은 피벗으로 작은 쪽과 큰 쪽을 나눈 뒤 각각을 다시 정렬한다. 분할이 반씩 되면 재귀 깊이가 log N이지만 매번 한쪽으로 쏠리면 깊이가 N이 되어 O(N²)이다. 이미 정렬된 배열에서 첫 원소를 피벗으로 삼는 소박한 구현이 정확히 그 경우다. 그래서 무작위 피벗이나 세 값의 중간값을 쓰고, 실무 라이브러리는 <strong>인트로 정렬</strong>(퀵으로 시작해 재귀가 깊어지면 힙, 구간이 작아지면 삽입)로 최악을 막는다. 마지막 단계가 삽입 정렬인 이유는 거의 정렬된 입력에서 삽입 정렬이 O(N)에 수렴하기 때문이다.</p><p>안정 정렬은 비교 기준이 같은 원소들의 원래 순서를 지킨다. 랭킹 화면처럼 이름순 목록을 점수순으로 다시 정렬하면서 동점자의 이름순을 지켜야 할 때 필요하다. C#에서 <code>Array.Sort</code>와 <code>List&lt;T&gt;.Sort</code>는 인트로 정렬이라 제자리·불안정이고, LINQ의 <code>OrderBy</code>는 안정이지만 새 시퀀스를 만들어 할당이 생긴다. 매 프레임 도는 코드면 이 할당이 GC 부담이다.</p><p>정렬돼 있으면 이진 탐색으로 O(log N)에 찾는다. 2의 20제곱이 약 104만이라 100만 개도 스무 번이면 된다. 면접에서는 값 하나보다 <strong>경계</strong>를 묻는다. lower bound는 찾는 값 이상인 첫 위치, upper bound는 그 값을 초과하는 첫 위치이고 둘의 차이가 그 값의 개수다. 값이 없어도 끼워 넣을 자리를 돌려주므로 실패 표시가 아니다.</p><pre><code>public static class Bounds
+{
+    // value 이상인 첫 위치. 없으면 끼워 넣을 자리(배열 길이)를 돌려준다
+    public static int LowerBound(int[] sorted, int value)
+    {
+        int lo = 0, hi = sorted.Length;          // [lo, hi) 반열린 구간
+        while (lo &lt; hi)
+        {
+            int mid = lo + (hi - lo) / 2;        // (lo + hi) / 2는 오버플로 위험
+            if (sorted[mid] &lt; value) lo = mid + 1;
+            else hi = mid;
+        }
+        return lo;                               // &lt;= 로 바꾸면 upper bound
+    }
+}</code></pre><h3>면접에서 이렇게 답한다</h3><ul><li><strong>퀵 정렬과 최악</strong> — 피벗으로 나눠 재귀로 정렬하고 평균 O(N log N)이다. 분할이 한쪽으로 쏠리면 재귀 깊이가 N이 되어 O(N²)이고, 무작위 피벗이나 세 값의 중간값으로 피한다. 실무 구현은 인트로 정렬로 최악을 O(N log N)에 묶는다.</li><li><strong>퀵과 병합 중 무엇을 쓰나</strong> — 메모리에 올라가는 배열이면 제자리로 돌고 캐시 효율이 좋은 퀵 계열을 쓴다. 최악을 보장해야 하거나 안정 정렬이 필요하거나 연결 리스트·외부 정렬이면 O(N) 추가 공간을 쓰더라도 병합을 쓴다.</li><li><strong>안정 정렬이 필요한 때</strong> — 여러 기준으로 차례로 정렬할 때다. 점수순으로 다시 정렬해도 동점자의 이름순이 유지돼야 하면 안정 정렬이어야 한다. C#은 <code>List.Sort</code>가 불안정이라 <code>OrderBy</code>를 쓰거나 비교자에 두 번째 기준을 넣는다.</li><li><strong>lower bound와 upper bound</strong> — 각각 값 이상인 첫 위치와 값을 초과하는 첫 위치이고 둘의 차이가 그 값의 개수다. 둘 다 이진 탐색이라 O(log N)이다.</li></ul><h3>흔한 오해</h3><ul><li><strong>퀵 정렬은 항상 O(N log N)이다</strong> — 피벗이 쏠리면 O(N²)다. 평균과 최악을 나눠 말한다.</li><li><strong>List.Sort는 안정 정렬이다</strong> — 불안정이다. 같은 키의 순서가 필요하면 <code>OrderBy</code>를 쓴다.</li><li><strong>거의 정렬된 데이터에도 퀵이 낫다</strong> — 삽입 정렬이 O(N)에 수렴하고, 소박한 퀵은 오히려 최악이 된다.</li><li><strong>lower bound는 값이 없으면 -1을 준다</strong> — 끼워 넣을 자리를 준다. 실제로 있는지는 그 위치의 값을 봐야 안다.</li></ul>
+<div class="refs"><h2>참고 자료</h2><ul><li><a href="https://learn.microsoft.com/ko-kr/dotnet/api/system.array.sort" target="_blank" rel="noopener">Microsoft Learn – Array.Sort 메서드</a></li><li><a href="https://learn.microsoft.com/ko-kr/dotnet/api/system.linq.enumerable.orderby" target="_blank" rel="noopener">Microsoft Learn – Enumerable.OrderBy 메서드</a></li><li><a href="https://learn.microsoft.com/ko-kr/dotnet/api/system.array.binarysearch" target="_blank" rel="noopener">Microsoft Learn – Array.BinarySearch 메서드</a></li></ul></div>
+</article>
+<div class="pager"><a href="07-06.html">← 그래프와 경로 탐색</a><a href="07-08.html">공간 분할 →</a></div>
+<footer>정리 글은 Claude가 썼다. 틀린 내용이 있을 수 있으니 중요한 내용은 참고 자료 원문으로 확인한다.</footer>
+</main>
+</body>
+</html>

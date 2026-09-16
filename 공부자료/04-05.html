@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>투명도와 버퍼 · 그래픽스·렌더링</title>
+<style>
+  :root {
+    --bg:#f2f5f7; --card:#fff; --panel:#f7f9fb; --text:#3c3c3c; --muted:#7a8b93; --line:#e2e8ea;
+    --green:#58cc02; --green-d:#46a302; --blue:#1cb0f6; --blue-d:#1899d6; --blue-bg:#ddf4ff;
+    --purple:#ce82ff; --purple-d:#a855f7; --purple-bg:#f5e8ff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#131f24; --card:#1b2b32; --panel:#16252b; --text:#eaf2f6; --muted:#8fa7b2; --line:#2c4048;
+      --blue-bg:#12303d; --purple-bg:#2e2036; --purple-d:#c99bec; --blue-d:#58c4f7; --green-d:#7ddc2a; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
+  a { color: var(--blue-d); }
+  .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
+  .nav a { text-decoration: none; }
+  .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
+    padding: 4px 12px; font-size: .8rem; font-weight: 800; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
+  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
+  p, ul, ol { margin: 10px 0; }
+  li { margin: 5px 0; }
+  .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
+  .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
+  .card { background: var(--card); border: 2px solid var(--line); border-radius: 20px; padding: 20px; margin-bottom: 14px; }
+  .list { display: grid; gap: 10px; }
+  .list a { display: block; background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px;
+    border-radius: 18px; padding: 14px 16px; text-decoration: none; color: inherit; }
+  .list a:hover { border-color: var(--purple); }
+  .list strong { display: block; font-size: 1.02rem; font-weight: 800; }
+  .list span { color: var(--muted); font-size: .86rem; font-weight: 600; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em;
+    background: var(--panel); border: 1px solid var(--line); padding: 1px 6px; border-radius: 6px; font-weight: 700; }
+  pre { background: var(--panel); border: 2px solid var(--line); padding: 14px; border-radius: 14px; overflow-x: auto; line-height: 1.65; }
+  pre code { background: none; border: 0; padding: 0; }
+  table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; font-size: .94rem; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; }
+  th { background: var(--panel); }
+  .refs { border-top: 2px solid var(--line); margin-top: 24px; padding-top: 14px; }
+  .refs ul { padding-left: 20px; }
+  .pager { display: flex; justify-content: space-between; gap: 10px; margin-top: 16px; }
+  .pager a { background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px; border-radius: 16px;
+    padding: 12px 16px; text-decoration: none; color: inherit; font-weight: 800; font-size: .9rem; max-width: 48%; }
+  .pager a:hover { border-color: var(--blue); }
+  footer { color: var(--muted); font-size: .8rem; font-weight: 600; margin-top: 28px; }
+</style>
+</head>
+<body>
+<main>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="04.html" class="badge">그래픽스·렌더링 목차</a></div>
+<article class="card">
+<h1>투명도와 버퍼</h1>
+<p class="lead">알파 테스트와 블렌딩이 각각 무엇을 포기하는지, 오버드로와 스텐실은 어디서 비싼지 본다</p>
+<h3>핵심 개념</h3><p>불투명이 싼 이유부터 잡아야 한다. 깊이를 쓰고 순서에 영향받지 않으므로, 앞에서 뒤로 그리면 뒤쪽 픽셀은 깊이 테스트에서 걸러져 프래그먼트 셰이더를 돌지도 않는다. 투명 처리는 이 이점 중 무엇을 포기하느냐의 문제다.</p><table><thead><tr><th>방식</th><th>렌더 큐</th><th>깊이 쓰기</th><th>그리는 순서</th><th>대가</th></tr></thead><tbody><tr><td>불투명</td><td>Geometry</td><td>On</td><td>앞 → 뒤</td><td>반투명 표현이 안 된다</td></tr><tr><td>알파 테스트(clip)</td><td>AlphaTest</td><td>On</td><td>앞 → 뒤</td><td>discard가 사전 깊이 최적화를 막는다</td></tr><tr><td>알파 블렌딩</td><td>Transparent</td><td>Off</td><td>뒤 → 앞</td><td>오버드로와 정렬 의존</td></tr><tr><td>디더링</td><td>Geometry</td><td>On</td><td>앞 → 뒤</td><td>가까이서 점 패턴이 보인다</td></tr></tbody></table><p>알파 테스트는 프래그먼트 셰이더에서 <code>clip()</code>이나 <code>discard</code>로 픽셀을 버린다. 문제는 <strong>셰이더를 끝까지 돌려야 그 픽셀이 살아남는지 정해진다</strong>는 점이다. 가려질 픽셀의 셰이딩을 미리 건너뛰는 최적화(Early-Z, 타일 GPU의 HSR·LRZ)는 셰이더 실행 전에 깊이가 확정된다는 전제 위에 있어서, discard 하나로 그 전제가 깨진다. 컷아웃 나뭇잎이 화면을 크게 덮을 때 모바일에서 특히 비싼 이유다. 잎 모양에 맞춘 메시를 쓰거나 불투명 부분과 컷아웃 부분을 나누는 것이 대안이다.</p><p>알파 블렌딩은 이미 그려진 색 위에 섞는 연산이라 순서를 바꾸면 결과가 달라지고, 깊이 쓰기를 꺼 두므로 깊이 버퍼가 순서를 바로잡아 주지도 못한다. 그래서 Transparent 큐는 카메라에서 먼 것부터 정렬해 그린다. 다만 정렬 단위가 오브젝트라서 서로 뚫고 지나가거나 한 메시 안에서 면이 겹치면 해결되지 않는다. 이때는 깊이만 먼저 쓰는 패스를 두거나, 디더링으로 불투명 큐에 넣거나, 메시를 나눈다.</p><p>오버드로는 한 픽셀을 여러 번 칠하는 것이다. 삼각형 수가 아니라 <strong>화면을 덮은 면적과 겹친 횟수</strong>의 문제이므로, 반투명 파티클이 크고 겹칠수록 급증해 필레이트 병목이 된다. Scene 뷰의 Overdraw 드로 모드와 Frame Debugger로 확인하고, 파티클 크기·수를 줄이고, 알파가 0인 영역이 큰 사각형 대신 모양에 맞춘 메시를 쓰고, 보이지 않는 UI를 꺼서 줄인다.</p><p>스텐실 버퍼는 픽셀마다 작은 정수를 적어 두고, 이후 그리는 픽셀이 그 값과 비교해 통과할지 정하는 마스크용 버퍼다. Unity UI의 <code>Mask</code>가 이 방식으로 자식을 잘라 내고 거울·포탈·외곽선에도 쓴다. 마스크가 중첩되면 비교 값이 달라져 UI 배칭이 끊기므로, 사각형으로 충분하면 <code>RectMask2D</code>가 싸다.</p><p><strong>모바일(타일 기반 GPU)</strong>에서는 블렌딩이 칩 안 타일 메모리에서 일어나 대역폭 부담은 덜하지만, 겹친 만큼 프래그먼트 셰이더가 다시 도는 필레이트 비용은 그대로다. 전면을 덮는 반투명 UI를 겹치거나 풀스크린 파티클을 쓰면 바로 프레임이 떨어진다. 알파 테스트가 HSR을 무력화하는 점까지 합치면, 모바일에서는 투명을 줄이는 것 자체가 최적화 항목이다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>알파 테스트와 알파 블렌딩의 차이</strong> — 알파 테스트는 픽셀을 버리거나 남기거나 둘 중 하나라 깊이를 쓰고 불투명처럼 다루고, 블렌딩은 뒤 색과 섞어야 해 깊이 쓰기를 끄고 뒤에서 앞으로 그린다. 전자는 사전 깊이 최적화를, 후자는 오버드로와 정렬을 대가로 낸다.</li><li><strong>모바일에서 알파 테스트가 느린 이유</strong> — 타일 GPU는 가려질 픽셀의 셰이딩을 미리 건너뛰는데, discard가 있으면 셰이더를 끝까지 돌려야 깊이가 정해져 그 최적화가 꺼진다. 화면을 크게 덮는 컷아웃일수록 손해가 커진다.</li><li><strong>투명은 왜 정렬하나</strong> — 블렌딩은 순서에 따라 결과가 달라지는 연산이고 깊이 쓰기를 껐기 때문에 깊이 버퍼가 잡아 주지 못한다. 그래서 먼 것부터 그리며, 오브젝트 단위 정렬이라 교차하는 경우는 메시를 나누거나 깊이 프리패스로 푼다.</li><li><strong>오버드로는 어떻게 확인하나</strong> — Scene 뷰의 Overdraw 모드와 Frame Debugger로 어디가 몇 겹인지 본다. 파티클 크기와 수, 투명 영역이 큰 사각형 메시, 겹쳐 둔 전면 UI를 줄인다.</li></ul><h3>흔한 오해</h3><ul><li><strong>알파 테스트가 블렌딩보다 항상 싸다</strong> — 데스크톱에서는 대체로 맞지만, 모바일에서는 discard가 사전 깊이 최적화를 막아 역전될 수 있다.</li><li><strong>반투명도 깊이 버퍼가 앞뒤를 맞춰 준다</strong> — 반투명은 깊이 쓰기를 끈 채 그리므로 그리는 순서가 곧 결과다.</li><li><strong>오버드로는 폴리곤이 많아서 생긴다</strong> — 겹쳐 칠한 픽셀 수의 문제라, 삼각형 두 장짜리 전면 쿼드 몇 개로도 심해진다.</li><li><strong>Transparent 큐에 넣으면 정렬이 해결된다</strong> — 정렬 단위가 오브젝트라 서로 교차하거나 한 메시 안에서 겹치는 면은 여전히 틀린다.</li><li><strong>UI 마스크는 공짜다</strong> — 스텐실 비교 값이 달라져 배칭이 끊긴다. 사각형이면 <code>RectMask2D</code>가 더 싸다.</li></ul>
+<div class="refs"><h2>참고 자료</h2><ul><li><a href="https://docs.unity3d.com/Manual/SL-Blend.html" target="_blank" rel="noopener">Unity 매뉴얼 – Blend command in ShaderLab</a></li><li><a href="https://docs.unity3d.com/Manual/SL-SubShaderTags.html" target="_blank" rel="noopener">Unity 매뉴얼 – SubShader tags in ShaderLab(렌더 큐)</a></li><li><a href="https://docs.unity3d.com/Manual/SL-Stencil.html" target="_blank" rel="noopener">Unity 매뉴얼 – Stencil command in ShaderLab</a></li><li><a href="https://docs.unity3d.com/Packages/com.unity.ugui@2.0/manual/script-Mask.html" target="_blank" rel="noopener">Unity uGUI 매뉴얼 – Mask</a></li></ul></div>
+</article>
+<div class="pager"><a href="04-04.html">← 텍스처</a><a href="04-06.html">조명과 그림자 →</a></div>
+<footer>정리 글은 Claude가 썼다. 틀린 내용이 있을 수 있으니 중요한 내용은 참고 자료 원문으로 확인한다.</footer>
+</main>
+</body>
+</html>

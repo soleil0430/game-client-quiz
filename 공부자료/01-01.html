@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>타입과 메모리 · C# 언어</title>
+<style>
+  :root {
+    --bg:#f2f5f7; --card:#fff; --panel:#f7f9fb; --text:#3c3c3c; --muted:#7a8b93; --line:#e2e8ea;
+    --green:#58cc02; --green-d:#46a302; --blue:#1cb0f6; --blue-d:#1899d6; --blue-bg:#ddf4ff;
+    --purple:#ce82ff; --purple-d:#a855f7; --purple-bg:#f5e8ff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#131f24; --card:#1b2b32; --panel:#16252b; --text:#eaf2f6; --muted:#8fa7b2; --line:#2c4048;
+      --blue-bg:#12303d; --purple-bg:#2e2036; --purple-d:#c99bec; --blue-d:#58c4f7; --green-d:#7ddc2a; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
+  a { color: var(--blue-d); }
+  .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
+  .nav a { text-decoration: none; }
+  .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
+    padding: 4px 12px; font-size: .8rem; font-weight: 800; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
+  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
+  p, ul, ol { margin: 10px 0; }
+  li { margin: 5px 0; }
+  .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
+  .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
+  .card { background: var(--card); border: 2px solid var(--line); border-radius: 20px; padding: 20px; margin-bottom: 14px; }
+  .list { display: grid; gap: 10px; }
+  .list a { display: block; background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px;
+    border-radius: 18px; padding: 14px 16px; text-decoration: none; color: inherit; }
+  .list a:hover { border-color: var(--purple); }
+  .list strong { display: block; font-size: 1.02rem; font-weight: 800; }
+  .list span { color: var(--muted); font-size: .86rem; font-weight: 600; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em;
+    background: var(--panel); border: 1px solid var(--line); padding: 1px 6px; border-radius: 6px; font-weight: 700; }
+  pre { background: var(--panel); border: 2px solid var(--line); padding: 14px; border-radius: 14px; overflow-x: auto; line-height: 1.65; }
+  pre code { background: none; border: 0; padding: 0; }
+  table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; font-size: .94rem; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; }
+  th { background: var(--panel); }
+  .refs { border-top: 2px solid var(--line); margin-top: 24px; padding-top: 14px; }
+  .refs ul { padding-left: 20px; }
+  .pager { display: flex; justify-content: space-between; gap: 10px; margin-top: 16px; }
+  .pager a { background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px; border-radius: 16px;
+    padding: 12px 16px; text-decoration: none; color: inherit; font-weight: 800; font-size: .9rem; max-width: 48%; }
+  .pager a:hover { border-color: var(--blue); }
+  footer { color: var(--muted); font-size: .8rem; font-weight: 600; margin-top: 28px; }
+</style>
+</head>
+<body>
+<main>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="01.html" class="badge">C# 언어 목차</a></div>
+<article class="card">
+<h1>타입과 메모리</h1>
+<p class="lead">값 형식과 참조 형식의 차이는 저장 위치가 아니라 복사 방식이고, 박싱은 그 경계에서 생긴다</p>
+<h3>핵심 개념</h3><p>값 형식과 참조 형식을 가르는 기준은 <strong>변수가 값을 직접 담느냐, 값이 있는 곳의 주소를 담느냐</strong>다. int나 struct 같은 값 형식은 변수 안에 값 자체가 들어 있고, class·배열·string 같은 참조 형식은 힙에 있는 객체를 가리키는 주소가 들어 있다.</p><p>그래서 “값 형식은 스택에 있다”는 말은 절반만 맞다. 값 형식은 <strong>선언된 자리에 얹혀서</strong> 산다. 지역 변수면 그 메서드의 스택 프레임에, 클래스 필드면 그 객체와 함께 힙에, 배열 요소면 배열 안에 있다. 반대로 struct 안에 string 필드가 있으면 주소만 struct 안에 있고 문자열 객체는 힙에 있다.</p><pre><code>struct Point { public int X; }
+
+class Box
+{
+    public Point P;                 // P는 Box 객체와 함께 힙에 있다
+}
+
+static class Demo
+{
+    static void Move(in Point p) { }    // 읽기 전용 참조 - 복사가 없다
+
+    static void Run()
+    {
+        Point a = new Point { X = 1 };  // 지역 변수라 스택, 힙 할당은 없다
+        Point b = a;                    // 값 전체가 복사된다
+        b.X = 2;                        // a.X는 그대로 1
+
+        object o = a;                   // 박싱: 힙에 상자를 만들고 값을 복사
+        Point c = (Point)o;             // 언박싱: 꺼내면서 또 복사
+        Move(in a);
+    }
+}</code></pre><p>이 차이가 실제로 문제를 일으키는 지점은 <strong>복사</strong>다. struct는 대입하거나 인자로 넘길 때마다 필드 전체가 복사되므로, 필드가 많은 struct를 매 프레임 넘기면 복사 비용이 쌓인다. 이때 <code>in</code>을 붙이면 읽기 전용 참조로 넘겨 복사를 피하고, 타입 자체를 <code>readonly struct</code>로 선언하면 컴파일러가 안전을 위해 넣는 방어적 복사까지 사라진다. <code>ref</code>도 복사를 피하지만 호출된 쪽이 원본을 고칠 수 있다는 점이 다르다.</p><p>박싱은 값 형식을 <code>object</code>나 인터페이스로 올릴 때 힙에 상자를 만들고 값을 복사하는 일이다. 할당이 생기니 GC 부담으로 이어진다. 제네릭 컬렉션(<code>List&lt;int&gt;</code>)은 박싱 없이 값을 담지만, <code>object</code>를 받는 옛 API에 값 형식을 넘기면 박싱이 난다. 어느 자리에서 박싱이 나는지는 런타임 버전에 따라 달라졌으므로(enum 키 Dictionary가 대표적이다) 외우기보다 프로파일러로 할당을 확인하는 편이 낫다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>값 형식과 참조 형식의 차이</strong> — 변수가 값을 직접 담느냐 주소를 담느냐의 차이고, 그래서 대입할 때 값 전체가 복사되느냐 같은 객체를 공유하느냐가 갈린다. 저장 위치는 “값 형식은 스택”이 아니라 선언된 자리를 따라간다고 덧붙인다.</li><li><strong>class 대신 struct를 쓰는 기준</strong> — 좌표나 색처럼 작고 의미가 값 하나에 가까운 데이터에 쓴다. 상속·다형성·null 표현이 필요하거나 여럿이 같은 인스턴스를 공유해야 하면 class를 쓴다. 필드가 많아지면 복사 비용 때문에 오히려 손해다.</li><li><strong>박싱이 왜 문제인가</strong> — 힙 할당과 값 복사가 함께 일어나 매 프레임 도는 코드에서는 GC를 자주 부른다. 제네릭과 <code>in</code>, <code>readonly struct</code>로 값 형식을 값 형식인 채로 다루는 것이 해법이다.</li><li><strong>ref, out, in의 차이</strong> — 셋 다 참조로 넘긴다. <code>ref</code>는 넘기기 전에 초기화돼 있어야 하고 메서드가 고칠 수 있으며, <code>out</code>은 초기화 없이 넘기는 대신 메서드가 끝나기 전에 반드시 값을 넣어야 하고, <code>in</code>은 읽기 전용이라 큰 struct의 복사를 피하는 용도다.</li></ul><h3>흔한 오해</h3><ul><li><strong>값 형식은 항상 스택에 있다</strong> — 클래스 필드나 배열 요소인 값 형식은 그 객체와 함께 힙에 있다. 스택이냐 힙이냐는 타입이 아니라 어디에 선언됐는지가 정한다.</li><li><strong>new를 쓰면 반드시 힙 할당이 일어난다</strong> — <code>new Vector3(0, 0, 0)</code>처럼 값 형식의 new는 그 자리에서 생성자를 돌릴 뿐 힙을 건드리지 않는다.</li><li><strong>string을 object로 캐스팅하면 박싱이 일어난다</strong> — string은 이미 참조 형식이라 주소만 옮겨 담는다. 박싱은 값 형식에서만 일어난다.</li><li><strong>readonly로 선언한 List는 내용도 못 바꾼다</strong> — 고정되는 것은 어느 리스트를 가리키는지뿐이라 <code>Add</code>나 원소 수정은 그대로 된다. <code>const</code>는 한술 더 떠 값이 사용하는 쪽 코드에 박혀 들어가므로, 라이브러리의 const를 바꾸면 쓰는 쪽도 다시 빌드해야 한다.</li><li><strong>얕은 복사만으로 원본과 분리된다</strong> — <code>MemberwiseClone</code>은 얕은 복사라 참조 멤버는 원본과 같은 객체를 가리킨다. 세이브 데이터나 되돌리기처럼 원본이 바뀌면 안 되는 곳에서는 깊은 복사가 필요하다.</li></ul>
+<div class="refs"><h2>참고 자료</h2><ul><li><a href="https://learn.microsoft.com/ko-kr/dotnet/csharp/language-reference/builtin-types/value-types" target="_blank" rel="noopener">Microsoft Learn – 값 형식(C# 참조)</a></li><li><a href="https://learn.microsoft.com/ko-kr/dotnet/csharp/programming-guide/types/boxing-and-unboxing" target="_blank" rel="noopener">Microsoft Learn – 박싱 및 언박싱</a></li><li><a href="https://learn.microsoft.com/ko-kr/dotnet/csharp/language-reference/keywords/method-parameters" target="_blank" rel="noopener">Microsoft Learn – 메서드 매개 변수 및 한정자(ref, out, in)</a></li><li><a href="https://learn.microsoft.com/ko-kr/dotnet/csharp/language-reference/builtin-types/nullable-value-types" target="_blank" rel="noopener">Microsoft Learn – Nullable 값 형식</a></li></ul></div>
+</article>
+<div class="pager"><span></span><a href="01-02.html">객체지향 문법 →</a></div>
+<footer>정리 글은 Claude가 썼다. 틀린 내용이 있을 수 있으니 중요한 내용은 참고 자료 원문으로 확인한다.</footer>
+</main>
+</body>
+</html>

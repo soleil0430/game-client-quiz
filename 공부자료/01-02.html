@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>객체지향 문법 · C# 언어</title>
+<style>
+  :root {
+    --bg:#f2f5f7; --card:#fff; --panel:#f7f9fb; --text:#3c3c3c; --muted:#7a8b93; --line:#e2e8ea;
+    --green:#58cc02; --green-d:#46a302; --blue:#1cb0f6; --blue-d:#1899d6; --blue-bg:#ddf4ff;
+    --purple:#ce82ff; --purple-d:#a855f7; --purple-bg:#f5e8ff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#131f24; --card:#1b2b32; --panel:#16252b; --text:#eaf2f6; --muted:#8fa7b2; --line:#2c4048;
+      --blue-bg:#12303d; --purple-bg:#2e2036; --purple-d:#c99bec; --blue-d:#58c4f7; --green-d:#7ddc2a; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
+  a { color: var(--blue-d); }
+  .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
+  .nav a { text-decoration: none; }
+  .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
+    padding: 4px 12px; font-size: .8rem; font-weight: 800; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
+  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
+  p, ul, ol { margin: 10px 0; }
+  li { margin: 5px 0; }
+  .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
+  .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
+  .card { background: var(--card); border: 2px solid var(--line); border-radius: 20px; padding: 20px; margin-bottom: 14px; }
+  .list { display: grid; gap: 10px; }
+  .list a { display: block; background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px;
+    border-radius: 18px; padding: 14px 16px; text-decoration: none; color: inherit; }
+  .list a:hover { border-color: var(--purple); }
+  .list strong { display: block; font-size: 1.02rem; font-weight: 800; }
+  .list span { color: var(--muted); font-size: .86rem; font-weight: 600; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em;
+    background: var(--panel); border: 1px solid var(--line); padding: 1px 6px; border-radius: 6px; font-weight: 700; }
+  pre { background: var(--panel); border: 2px solid var(--line); padding: 14px; border-radius: 14px; overflow-x: auto; line-height: 1.65; }
+  pre code { background: none; border: 0; padding: 0; }
+  table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; font-size: .94rem; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; }
+  th { background: var(--panel); }
+  .refs { border-top: 2px solid var(--line); margin-top: 24px; padding-top: 14px; }
+  .refs ul { padding-left: 20px; }
+  .pager { display: flex; justify-content: space-between; gap: 10px; margin-top: 16px; }
+  .pager a { background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px; border-radius: 16px;
+    padding: 12px 16px; text-decoration: none; color: inherit; font-weight: 800; font-size: .9rem; max-width: 48%; }
+  .pager a:hover { border-color: var(--blue); }
+  footer { color: var(--muted); font-size: .8rem; font-weight: 600; margin-top: 28px; }
+</style>
+</head>
+<body>
+<main>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="01.html" class="badge">C# 언어 목차</a></div>
+<article class="card">
+<h1>객체지향 문법</h1>
+<p class="lead">호출하는 쪽이 구체 타입을 몰라도 되게 만드는 장치들과, 그것이 실제로 동작하는 원리</p>
+<h3>핵심 개념</h3><p>상속, 인터페이스, 가상 메서드는 결국 <strong>부르는 쪽이 구체 타입을 모른 채로 일을 시키기 위한 장치</strong>다. 적 100마리를 돌면서 <code>Attack()</code>을 부를 때 그것이 슬라임인지 보스인지 호출하는 쪽이 알 필요가 없게 만드는 것이 목적이고, 문법은 그 목적을 위한 수단이다.</p><p>고를 때의 기준은 간단하다. 물려줄 <strong>상태와 기본 구현</strong>이 있으면 추상 클래스, 서로 상관없는 타입들이 같은 약속만 지키면 되면 인터페이스다. C#은 클래스 다중 상속을 막고(같은 멤버를 양쪽에서 물려받는 다이아몬드 문제를 피하려고) 인터페이스는 여러 개 구현하게 한다. 구현할 두 인터페이스에 이름이 같은 메서드가 있으면 명시적 인터페이스 구현(<code>void IA.Attack()</code>)으로 각각 따로 정의한다.</p><p>가상 메서드가 변수 타입이 아니라 실제 객체 타입에 맞게 불리는 이유는 <strong>타입마다 가상 메서드 표(vtable)를 하나씩 두고</strong> 호출이 그 표를 한 번 더 거치기 때문이다. 그래서 부모 타입 변수로 다뤄도 <code>override</code>한 구현이 실행된다. 반면 <code>new</code>는 표를 고치지 않고 이름만 가리므로 변수 타입 기준으로 불린다. 다형성이 끊기는 것이다.</p><pre><code>class Enemy
+{
+    public virtual void Attack() =&gt; Console.Write("적");
+}
+
+class Boss : Enemy
+{
+    public override void Attack() =&gt; Console.Write("보스");   // 표를 덮어쓴다
+}
+
+class Slime : Enemy
+{
+    public new void Attack() =&gt; Console.Write("슬라임");      // 이름만 가린다
+}
+
+Enemy a = new Boss();
+Enemy b = new Slime();
+a.Attack();   // 보스 - 실제 객체 타입의 구현이 불린다
+b.Attack();   // 적   - 변수 타입 기준으로 불린다</code></pre><p>나머지는 범위와 시점의 문제다. 오버로딩은 같은 이름에 매개변수 구성을 다르게 둔 것이라 <strong>컴파일 시점</strong>에 어느 것을 부를지 정해지고, 오버라이딩은 <strong>실행 중</strong>에 실제 타입을 보고 정해진다. 접근 제한자 중 <code>protected internal</code>은 합집합(같은 어셈블리 전체와 다른 어셈블리의 파생 클래스), <code>private protected</code>는 교집합(같은 어셈블리 안의 파생 클래스)이다. static 생성자는 그 타입을 처음 쓰는 시점에 런타임이 딱 한 번 부르므로 호출 시점을 프로그래머가 정할 수 없고, 그래서 무거운 초기화를 넣지 않는다. 제네릭 제약(<code>where T : IDamageable</code>)은 컴파일러에게 “T는 적어도 이건 한다”를 알려 캐스팅 없이 그 멤버를 쓰게 해 준다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>인터페이스와 추상 클래스 중 무엇을 쓰나</strong> — 공통 상태와 기본 동작을 물려줄 것이 있으면 추상 클래스, 상속 계층이 다른 타입들이 같은 기능을 약속하게 하려면 인터페이스를 쓴다. C#은 클래스 상속이 하나뿐이므로 확장 지점은 인터페이스로 여는 편이 안전하다.</li><li><strong>가상 메서드는 어떻게 동작하나</strong> — 타입마다 가상 메서드 표가 있고 호출이 그 표를 거쳐 실제 구현으로 간다. 간접 호출이라 아주 약간 느리고, 그래서 더 재정의할 일이 없으면 <code>sealed</code>를 붙여 최적화 여지를 준다.</li><li><strong>오버로딩과 오버라이딩의 차이</strong> — 오버로딩은 한 클래스 안에서 이름이 같고 매개변수가 다른 메서드를 여러 개 두는 것으로 컴파일 시점에 결정되고, 오버라이딩은 상속 관계에서 가상 메서드를 다시 구현하는 것으로 실행 중에 결정된다.</li><li><strong>상속은 허용하되 재정의만 막으려면</strong> — 그 메서드를 <code>sealed override</code>로 선언한다. <code>sealed class</code>는 상속 자체를 막아 조건을 넘어선다.</li></ul><h3>흔한 오해</h3><ul><li><strong>new로 재정의해도 override와 결과가 같다</strong> — <code>new</code>는 가리기일 뿐이라 부모 타입 변수로 부르면 부모 구현이 실행된다. 의도한 재정의라면 <code>override</code>를 쓴다.</li><li><strong>protected internal은 같은 어셈블리의 파생 클래스만</strong> — 그것은 <code>private protected</code>다. <code>protected internal</code>은 둘의 합집합이라 같은 어셈블리면 상속 관계가 아니어도 접근된다.</li><li><strong>반환 타입만 다르면 오버로딩이 된다</strong> — 오버로딩 판별에 반환 타입은 쓰이지 않아 컴파일 오류가 난다.</li><li><strong>인터페이스는 구현을 전혀 가질 수 없다</strong> — C# 8부터 기본 구현을 넣을 수 있다(Unity는 2021.2 이후 C# 9 기준). 다만 인스턴스 필드는 여전히 못 가지므로 상태를 물려주려면 추상 클래스가 필요하다.</li><li><strong>어트리뷰트를 붙이면 코드가 실행된다</strong> — 어트리뷰트는 메타데이터일 뿐이고, 그것을 리플렉션으로 읽는 쪽(직렬화기, 에디터, 테스트 러너)이 동작을 바꾼다.</li></ul>
+<div class="refs"><h2>참고 자료</h2><ul><li><a href="https://learn.microsoft.com/ko-kr/dotnet/csharp/fundamentals/object-oriented/inheritance" target="_blank" rel="noopener">Microsoft Learn – 상속(객체 지향 프로그래밍)</a></li><li><a href="https://learn.microsoft.com/ko-kr/dotnet/csharp/fundamentals/object-oriented/polymorphism" target="_blank" rel="noopener">Microsoft Learn – 다형성</a></li><li><a href="https://learn.microsoft.com/ko-kr/dotnet/csharp/language-reference/keywords/access-modifiers" target="_blank" rel="noopener">Microsoft Learn – 액세스 한정자</a></li><li><a href="https://learn.microsoft.com/ko-kr/dotnet/csharp/programming-guide/generics/constraints-on-type-parameters" target="_blank" rel="noopener">Microsoft Learn – 형식 매개 변수에 대한 제약 조건</a></li></ul></div>
+</article>
+<div class="pager"><a href="01-01.html">← 타입과 메모리</a><a href="01-03.html">델리게이트·이벤트·람다 →</a></div>
+<footer>정리 글은 Claude가 썼다. 틀린 내용이 있을 수 있으니 중요한 내용은 참고 자료 원문으로 확인한다.</footer>
+</main>
+</body>
+</html>

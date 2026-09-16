@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>생명주기와 스크립팅 · Unity 엔진</title>
+<style>
+  :root {
+    --bg:#f2f5f7; --card:#fff; --panel:#f7f9fb; --text:#3c3c3c; --muted:#7a8b93; --line:#e2e8ea;
+    --green:#58cc02; --green-d:#46a302; --blue:#1cb0f6; --blue-d:#1899d6; --blue-bg:#ddf4ff;
+    --purple:#ce82ff; --purple-d:#a855f7; --purple-bg:#f5e8ff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#131f24; --card:#1b2b32; --panel:#16252b; --text:#eaf2f6; --muted:#8fa7b2; --line:#2c4048;
+      --blue-bg:#12303d; --purple-bg:#2e2036; --purple-d:#c99bec; --blue-d:#58c4f7; --green-d:#7ddc2a; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
+  a { color: var(--blue-d); }
+  .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
+  .nav a { text-decoration: none; }
+  .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
+    padding: 4px 12px; font-size: .8rem; font-weight: 800; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
+  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
+  p, ul, ol { margin: 10px 0; }
+  li { margin: 5px 0; }
+  .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
+  .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
+  .card { background: var(--card); border: 2px solid var(--line); border-radius: 20px; padding: 20px; margin-bottom: 14px; }
+  .list { display: grid; gap: 10px; }
+  .list a { display: block; background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px;
+    border-radius: 18px; padding: 14px 16px; text-decoration: none; color: inherit; }
+  .list a:hover { border-color: var(--purple); }
+  .list strong { display: block; font-size: 1.02rem; font-weight: 800; }
+  .list span { color: var(--muted); font-size: .86rem; font-weight: 600; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em;
+    background: var(--panel); border: 1px solid var(--line); padding: 1px 6px; border-radius: 6px; font-weight: 700; }
+  pre { background: var(--panel); border: 2px solid var(--line); padding: 14px; border-radius: 14px; overflow-x: auto; line-height: 1.65; }
+  pre code { background: none; border: 0; padding: 0; }
+  table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; font-size: .94rem; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; }
+  th { background: var(--panel); }
+  .refs { border-top: 2px solid var(--line); margin-top: 24px; padding-top: 14px; }
+  .refs ul { padding-left: 20px; }
+  .pager { display: flex; justify-content: space-between; gap: 10px; margin-top: 16px; }
+  .pager a { background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px; border-radius: 16px;
+    padding: 12px 16px; text-decoration: none; color: inherit; font-weight: 800; font-size: .9rem; max-width: 48%; }
+  .pager a:hover { border-color: var(--blue); }
+  footer { color: var(--muted); font-size: .8rem; font-weight: 600; margin-top: 28px; }
+</style>
+</head>
+<body>
+<main>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="02.html" class="badge">Unity 엔진 목차</a></div>
+<article class="card">
+<h1>생명주기와 스크립팅</h1>
+<p class="lead">엔진이 언제 내 함수를 부르는지 알면 초기화·물리·파괴에서 나는 버그가 대부분 사라진다</p>
+<h3>핵심 개념</h3><p>Unity 스크립트에는 <code>main</code>이 없다. 게임 루프는 엔진이 들고 있고 내가 쓴 함수는 엔진이 부르는 콜백이라 "언제 몇 번 불리는가"가 곧 설계 제약이 된다. 한 프레임은 아래 FixedUpdate부터 LateUpdate까지 돈 뒤 렌더링으로 끝난다.</p><table><thead><tr><th>함수</th><th>호출 시점</th><th>여기에 두는 일</th></tr></thead><tbody><tr><td>Awake</td><td>로드될 때 한 번. 꺼져 있어도 불린다</td><td>자기 초기화, 컴포넌트 캐싱</td></tr><tr><td>OnEnable</td><td>활성화될 때마다</td><td>이벤트 구독</td></tr><tr><td>Start</td><td>켜진 뒤 첫 Update 직전 한 번</td><td>남을 찾는 초기화</td></tr><tr><td>FixedUpdate</td><td>고정 간격마다. 한 프레임에 0번일 수도 여러 번일 수도</td><td>물리</td></tr><tr><td>Update</td><td>프레임마다 한 번</td><td>입력, 일반 로직</td></tr><tr><td>LateUpdate</td><td>모든 Update가 끝난 뒤</td><td>카메라 추적, 본 보정</td></tr><tr><td>OnDisable</td><td>비활성화될 때와 파괴 직전</td><td>이벤트 해제</td></tr><tr><td>OnDestroy</td><td>파괴될 때 한 번</td><td>마지막 정리</td></tr></tbody></table><p>Awake와 Start가 갈리는 이유는 <strong>함께 로드된 오브젝트 전부의 Awake가 끝난 뒤에야 Start가 시작</strong>되기 때문이다. Awake 때는 남이 준비되지 않았을 수 있다. 종료는 <code>OnApplicationQuit</code> → <code>OnDisable</code> → <code>OnDestroy</code> 순이지만 모바일에서 강제 종료되면 셋 다 안 불려서, 저장은 <code>OnApplicationPause(true)</code>에 두는 편이 안전하다.</p><p>FixedUpdate가 따로 있는 이유는 물리가 <strong>일정한 간격으로 적분해야 같은 결과가 나오기</strong> 때문이다. Fixed Timestep은 기본 0.02초, <code>Time.fixedDeltaTime</code>으로 읽는다. 반면 Update는 호출 횟수가 기기 성능을 타므로 시간에 비례하는 값에는 <code>Time.deltaTime</code>을 곱해야 기기마다 같은 속도가 된다. <code>timeScale</code>이 0이면 Update는 불리되 deltaTime이 0이 되고 FixedUpdate는 멈춰서, 일시정지 연출에는 <code>unscaledDeltaTime</code>을 쓴다.</p><p>코루틴은 스레드가 아니다. <code>yield</code>가 든 메서드를 컴파일러가 IEnumerator 상태 머신으로 바꾸고, Unity가 매 프레임 <code>MoveNext</code>를 불러 다음 yield까지만 진행시킨다. 메인 스레드에서 돌아 Unity API를 쓸 수 있지만 무거운 계산을 넣으면 프레임이 끊긴다. 오브젝트가 꺼지면 코루틴도 멈추나 async/await는 CancellationToken으로 끊어야 한다.</p><p>파괴에도 함정이 둘 있다. <code>Destroy</code>는 지연 파괴라 그 프레임의 Update가 끝난 뒤 렌더링 전에 지워진다. 그리고 UnityEngine.Object는 네이티브 객체를 감싼 C# 객체라 파괴돼도 껍데기가 남는다. Unity는 <code>==</code>를 오버로드해 이를 null처럼 보이게 하지만(fake null), <code>is null</code>·<code>?.</code>·<code>ReferenceEquals</code>는 오버로드를 타지 않아 접근하다 예외를 낸다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>생명주기를 설명하라</strong> — Awake, OnEnable, Start로 초기화하고 한 프레임은 FixedUpdate(필요한 횟수만큼) → Update → LateUpdate → 렌더링 순이다. 끝날 때 OnDisable, OnDestroy다.</li><li><strong>Awake와 Start를 어떻게 나누나</strong> — Awake가 전부 끝난 뒤 Start가 불리므로 자기 초기화는 Awake, 남을 참조하는 초기화는 Start에 둔다.</li><li><strong>물리는 어느 함수에 두나</strong> — FixedUpdate다. 고정 간격이라 프레임레이트가 달라도 결과가 같다. 입력만 Update에서 받아 플래그로 넘긴다.</li><li><strong>Update 1000개와 매니저 하나 중 무엇이 빠른가</strong> — 매니저다. 네이티브에서 매니지드로 넘어오는 비용이 호출마다 붙어 한 번 넘어가 반복문을 도는 편이 싸다. 빈 Update도 지운다.</li></ul><h3>흔한 오해</h3><ul><li><strong>timeScale이 0이면 Update도 멈춘다</strong> — Update는 계속 불린다. 멈추는 건 deltaTime이 0이 되는 시간 기반 로직과 FixedUpdate다.</li><li><strong>코루틴은 별도 스레드에서 돈다</strong> — 메인 스레드다. 진짜 병렬은 스레드나 Job System이 필요하다.</li><li><strong>파괴된 오브젝트에 <code>?.</code>를 쓰면 안전하다</strong> — 오히려 위험하다. 재정의된 ==를 타지 않아 파괴된 객체에 그대로 접근한다.</li><li><strong><code>transform.position.y = 0f;</code>는 Unity가 막은 것이다</strong> — C# 문법이다. Vector3가 구조체라 프로퍼티가 복사본을 돌려준다.</li></ul>
+<div class="refs"><h2>참고 자료</h2><ul><li><a href="https://docs.unity3d.com/Manual/execution-order.html" target="_blank" rel="noopener">Unity 매뉴얼 – Order of execution for event functions</a></li><li><a href="https://docs.unity3d.com/Manual/managing-time-and-frame-rate.html" target="_blank" rel="noopener">Unity 매뉴얼 – Managing time and frame rate</a></li><li><a href="https://docs.unity3d.com/Manual/Coroutines.html" target="_blank" rel="noopener">Unity 매뉴얼 – Write and run coroutines</a></li><li><a href="https://learn.microsoft.com/ko-kr/dotnet/csharp/iterators" target="_blank" rel="noopener">Microsoft Learn – 이터레이터(C#)</a></li></ul></div>
+</article>
+<div class="pager"><a href="02-01.html">← 기본 구조</a><a href="02-03.html">직렬화와 데이터 →</a></div>
+<footer>정리 글은 Claude가 썼다. 틀린 내용이 있을 수 있으니 중요한 내용은 참고 자료 원문으로 확인한다.</footer>
+</main>
+</body>
+</html>

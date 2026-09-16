@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>드로우 콜과 배칭 · 그래픽스·렌더링</title>
+<style>
+  :root {
+    --bg:#f2f5f7; --card:#fff; --panel:#f7f9fb; --text:#3c3c3c; --muted:#7a8b93; --line:#e2e8ea;
+    --green:#58cc02; --green-d:#46a302; --blue:#1cb0f6; --blue-d:#1899d6; --blue-bg:#ddf4ff;
+    --purple:#ce82ff; --purple-d:#a855f7; --purple-bg:#f5e8ff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#131f24; --card:#1b2b32; --panel:#16252b; --text:#eaf2f6; --muted:#8fa7b2; --line:#2c4048;
+      --blue-bg:#12303d; --purple-bg:#2e2036; --purple-d:#c99bec; --blue-d:#58c4f7; --green-d:#7ddc2a; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
+  a { color: var(--blue-d); }
+  .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
+  .nav a { text-decoration: none; }
+  .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
+    padding: 4px 12px; font-size: .8rem; font-weight: 800; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
+  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
+  p, ul, ol { margin: 10px 0; }
+  li { margin: 5px 0; }
+  .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
+  .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
+  .card { background: var(--card); border: 2px solid var(--line); border-radius: 20px; padding: 20px; margin-bottom: 14px; }
+  .list { display: grid; gap: 10px; }
+  .list a { display: block; background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px;
+    border-radius: 18px; padding: 14px 16px; text-decoration: none; color: inherit; }
+  .list a:hover { border-color: var(--purple); }
+  .list strong { display: block; font-size: 1.02rem; font-weight: 800; }
+  .list span { color: var(--muted); font-size: .86rem; font-weight: 600; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em;
+    background: var(--panel); border: 1px solid var(--line); padding: 1px 6px; border-radius: 6px; font-weight: 700; }
+  pre { background: var(--panel); border: 2px solid var(--line); padding: 14px; border-radius: 14px; overflow-x: auto; line-height: 1.65; }
+  pre code { background: none; border: 0; padding: 0; }
+  table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; font-size: .94rem; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; }
+  th { background: var(--panel); }
+  .refs { border-top: 2px solid var(--line); margin-top: 24px; padding-top: 14px; }
+  .refs ul { padding-left: 20px; }
+  .pager { display: flex; justify-content: space-between; gap: 10px; margin-top: 16px; }
+  .pager a { background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px; border-radius: 16px;
+    padding: 12px 16px; text-decoration: none; color: inherit; font-weight: 800; font-size: .9rem; max-width: 48%; }
+  .pager a:hover { border-color: var(--blue); }
+  footer { color: var(--muted); font-size: .8rem; font-weight: 600; margin-top: 28px; }
+</style>
+</head>
+<body>
+<main>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="04.html" class="badge">그래픽스·렌더링 목차</a></div>
+<article class="card">
+<h1>드로우 콜과 배칭</h1>
+<p class="lead">드로우 콜은 CPU 비용이다. 배칭·인스턴싱·SRP Batcher가 각각 무엇을 줄이는지 구분한다</p>
+<h3>핵심 개념</h3><p>드로우 콜은 CPU가 그래픽스 API에 "이 메시를 이 상태로 그려라"라고 보내는 명령이다. 비싼 쪽은 GPU가 삼각형을 그리는 일이 아니라 호출마다 CPU가 <strong>렌더 스테이트를 세팅하고 드라이버를 거치는 준비 비용</strong>이다. 그래서 드로우 콜이 많으면 GPU가 놀아도 CPU에서 막힌다. 통계 창의 <strong>Batches</strong>는 GPU로 보낸 그리기 묶음의 수, <strong>SetPass calls</strong>는 그 사이에 셰이더 패스와 렌더 스테이트를 바꾼 횟수이고, 상태 전환이 더 비싸 보통 SetPass calls를 먼저 본다.</p><p>줄이는 방법은 층이 다르다. 머티리얼 종류를 줄이고(아틀라스), 호출을 합치고(정적 배칭·메시 결합·인스턴싱), 호출당 준비 비용을 낮춘다(SRP Batcher).</p><table><thead><tr><th>기법</th><th>조건</th><th>줄어드는 것</th><th>대가</th></tr></thead><tbody><tr><td>정적 배칭</td><td>Static + 같은 머티리얼</td><td>드로우 콜 수</td><td>합친 메시만큼 메모리</td></tr><tr><td>동적 배칭</td><td>아주 작은 메시 + 같은 머티리얼</td><td>드로우 콜 수</td><td>매 프레임 CPU 병합</td></tr><tr><td>GPU 인스턴싱</td><td>같은 메시 + 같은 머티리얼</td><td>드로우 콜 수</td><td>개체별 값은 인스턴스 프로퍼티</td></tr><tr><td>SRP Batcher</td><td>URP·HDRP + 같은 셰이더 배리언트</td><td>상태 설정·상수 업로드</td><td>호출 수는 그대로, 셰이더 호환</td></tr></tbody></table><p>배칭을 깨는 가장 흔한 실수는 <code>renderer.material</code>에 접근하는 것이다. 처음 접근하는 순간 전용 복사본이 생겨 머티리얼이 달라지고, 복사본은 오브젝트를 파괴해도 남는다.</p><pre><code>using UnityEngine;
+
+public class TintOnHit : MonoBehaviour
+{
+    static readonly int s_ColorId = Shader.PropertyToID("_BaseColor");
+    MaterialPropertyBlock _block;
+    Renderer _renderer;
+
+    void Awake()
+    {
+        _renderer = GetComponent&lt;Renderer&gt;();
+        _block = new MaterialPropertyBlock();
+    }
+
+    public void SetTint(Color color)
+    {
+        // _renderer.material.color = color; 는 복사본을 만들어 배칭을 깬다
+        _renderer.GetPropertyBlock(_block);
+        _block.SetColor(s_ColorId, color);
+        _renderer.SetPropertyBlock(_block);
+    }
+}</code></pre><p>메시도 머티리얼도 제각각인 나무 100그루라면, 먼저 텍스처를 아틀라스 한 장으로 합쳐 머티리얼을 하나로 만들고(배칭·인스턴싱의 전제), 움직이지 않으면 정적 배칭이나 메시 결합을, 같은 메시가 반복되면 인스턴싱을 쓴다. 스프라이트 아틀라스도 배칭 단위이자 로드 단위라, 같은 화면에 뜨는 UI끼리 묶어야 드로우 콜이 줄고 안 쓰는 이미지가 메모리에 올라오지 않는다.</p><p><strong>모바일(타일 기반 GPU)</strong>에서는 CPU가 약하고 드라이버 오버헤드가 커서 같은 호출 수라도 데스크톱보다 훨씬 아프다. 특히 UI는 캔버스 리빌드에 더해 마스크나 중간에 낀 머티리얼로 배치가 쉽게 끊기므로, 자주 바뀌는 UI와 정적인 UI를 캔버스부터 나눈다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>드로우 콜을 왜 줄이나</strong> — 호출마다 렌더 스테이트 설정과 드라이버 비용이 들어 많아지면 CPU에서 프레임이 막힌다. 그래서 머티리얼을 통일하고 배칭·인스턴싱으로 호출을 합친다.</li><li><strong>정적 배칭과 동적 배칭</strong> — 정적 배칭은 움직이지 않는 메시를 미리 합치는 대신 메모리를 더 쓰고, 동적 배칭은 매 프레임 CPU에서 합쳐 메시가 크면 손해다.</li><li><strong>SRP Batcher와 GPU 인스턴싱</strong> — SRP Batcher는 셰이더 배리언트만 같으면 머티리얼이 달라도 상태 설정 비용을 줄이지만 호출 수는 그대로다. 인스턴싱은 같은 메시·머티리얼을 한 번에 그려 호출 수를 줄인다.</li><li><strong>material과 sharedMaterial</strong> — <code>material</code>은 접근하는 순간 복사본을 만들어 배칭을 깨고 정리 책임까지 남긴다.</li></ul><h3>흔한 오해</h3><ul><li><strong>드로우 콜은 GPU 부하다</strong> — 주된 비용은 CPU의 준비와 드라이버 호출이라 삼각형이 적어도 호출이 많으면 느리다.</li><li><strong>SRP Batcher를 켜면 드로우 콜이 준다</strong> — 줄어드는 것은 호출당 준비 비용이고 Batches는 그대로일 수 있다.</li><li><strong>배칭은 켜면 항상 이득이다</strong> — 동적 배칭은 큰 메시에서 병합 비용이 더 들고, 정적 배칭은 메모리를 더 쓴다.</li><li><strong>머티리얼만 같으면 한 번에 그려진다</strong> — 중간에 다른 머티리얼이 하나 끼는 것만으로 배치가 나뉜다.</li><li><strong>MaterialPropertyBlock은 항상 공짜다</strong> — 인스턴싱과는 맞지만 URP의 SRP Batcher 호환은 깨진다.</li></ul>
+<div class="refs"><h2>참고 자료</h2><ul><li><a href="https://docs.unity3d.com/Manual/DrawCallBatching.html" target="_blank" rel="noopener">Unity 매뉴얼 – Introduction to static batching</a></li><li><a href="https://docs.unity3d.com/Manual/GPUInstancing.html" target="_blank" rel="noopener">Unity 매뉴얼 – Introduction to GPU instancing</a></li><li><a href="https://docs.unity3d.com/Manual/SRPBatcher.html" target="_blank" rel="noopener">Unity 매뉴얼 – Scriptable Render Pipeline Batcher</a></li><li><a href="https://docs.unity3d.com/Manual/RenderingStatistics.html" target="_blank" rel="noopener">Unity 매뉴얼 – Rendering Statistics window</a></li></ul></div>
+</article>
+<div class="pager"><a href="04-02.html">← 컬링과 가시성</a><a href="04-04.html">텍스처 →</a></div>
+<footer>정리 글은 Claude가 썼다. 틀린 내용이 있을 수 있으니 중요한 내용은 참고 자료 원문으로 확인한다.</footer>
+</main>
+</body>
+</html>

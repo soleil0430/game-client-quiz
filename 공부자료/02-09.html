@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI와 길찾기 · Unity 엔진</title>
+<style>
+  :root {
+    --bg:#f2f5f7; --card:#fff; --panel:#f7f9fb; --text:#3c3c3c; --muted:#7a8b93; --line:#e2e8ea;
+    --green:#58cc02; --green-d:#46a302; --blue:#1cb0f6; --blue-d:#1899d6; --blue-bg:#ddf4ff;
+    --purple:#ce82ff; --purple-d:#a855f7; --purple-bg:#f5e8ff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#131f24; --card:#1b2b32; --panel:#16252b; --text:#eaf2f6; --muted:#8fa7b2; --line:#2c4048;
+      --blue-bg:#12303d; --purple-bg:#2e2036; --purple-d:#c99bec; --blue-d:#58c4f7; --green-d:#7ddc2a; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
+  a { color: var(--blue-d); }
+  .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
+  .nav a { text-decoration: none; }
+  .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
+    padding: 4px 12px; font-size: .8rem; font-weight: 800; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
+  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
+  p, ul, ol { margin: 10px 0; }
+  li { margin: 5px 0; }
+  .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
+  .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
+  .card { background: var(--card); border: 2px solid var(--line); border-radius: 20px; padding: 20px; margin-bottom: 14px; }
+  .list { display: grid; gap: 10px; }
+  .list a { display: block; background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px;
+    border-radius: 18px; padding: 14px 16px; text-decoration: none; color: inherit; }
+  .list a:hover { border-color: var(--purple); }
+  .list strong { display: block; font-size: 1.02rem; font-weight: 800; }
+  .list span { color: var(--muted); font-size: .86rem; font-weight: 600; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em;
+    background: var(--panel); border: 1px solid var(--line); padding: 1px 6px; border-radius: 6px; font-weight: 700; }
+  pre { background: var(--panel); border: 2px solid var(--line); padding: 14px; border-radius: 14px; overflow-x: auto; line-height: 1.65; }
+  pre code { background: none; border: 0; padding: 0; }
+  table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; font-size: .94rem; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; }
+  th { background: var(--panel); }
+  .refs { border-top: 2px solid var(--line); margin-top: 24px; padding-top: 14px; }
+  .refs ul { padding-left: 20px; }
+  .pager { display: flex; justify-content: space-between; gap: 10px; margin-top: 16px; }
+  .pager a { background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px; border-radius: 16px;
+    padding: 12px 16px; text-decoration: none; color: inherit; font-weight: 800; font-size: .9rem; max-width: 48%; }
+  .pager a:hover { border-color: var(--blue); }
+  footer { color: var(--muted); font-size: .8rem; font-weight: 600; margin-top: 28px; }
+</style>
+</head>
+<body>
+<main>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="02.html" class="badge">Unity 엔진 목차</a></div>
+<article class="card">
+<h1>AI와 길찾기</h1>
+<p class="lead">NavMesh는 지형을 미리 단순화해 둔 그래프이고, FSM과 행동 트리는 판단을 조직하는 방식이다</p>
+<h3>핵심 개념</h3><p>길찾기를 매번 지형 삼각형 전체에서 풀면 비싸다. 그래서 <strong>NavMesh는 걸을 수 있는 바닥만 골라 볼록 다각형으로 미리 구워 둔 데이터</strong>다. 에이전트 반지름·키·오를 수 있는 높이·경사 한계를 기준으로 굽기 때문에, 같은 지형이라도 덩치가 다른 몬스터는 다른 NavMesh가 필요하다. 탐색은 이 다각형 그래프 위에서 A*로 폴리곤 순서를 찾고, 그 통로를 직선으로 펴서 꺾이는 지점 목록을 만든 뒤 에이전트가 차례로 향한다.</p><p>실제 이동은 NavMeshAgent가 맡는다. <code>SetDestination</code>으로 목적지만 주면 경로 계산, 속도·가속·회전, 다른 에이전트와의 회피까지 직접 처리한다. 즉 <strong>이건 물리 이동이 아니다</strong>. Rigidbody로도 밀면 둘이 서로 위치를 고쳐 떨리므로, 붙일 때는 Is Kinematic으로 둔다.</p><p>지형이 런타임에 바뀌면 세 가지로 나눠 대응한다. 건물이 세워지듯 바닥 자체가 바뀌면 AI Navigation 패키지의 <strong>NavMeshSurface</strong>로 그 영역을 다시 굽는다. 문이나 상자처럼 잠깐 막는 물체는 <strong>NavMeshObstacle</strong>을 붙이는데, carving을 켜면 NavMesh에 구멍을 뚫어 경로가 돌아가고 끄면 경로는 그대로 두고 회피만 한다. 움직이는 동안은 carving을 끄고 멈추면 켜는 것이 보통이다. 사다리나 점프처럼 끊긴 구간은 <strong>NavMeshLink</strong>로 잇는다. Unity 2022부터 이 기능들은 엔진 내장 Navigation 창이 아니라 com.unity.ai.navigation 패키지에 있다.</p><p>판단 쪽은 FSM이 출발점이다. 상태 하나가 한 가지 행동을 맡고 조건이 맞으면 다른 상태로 넘긴다. 들어올 때 준비와 나갈 때 정리를 상태가 직접 갖는 것이 핵심이라, "추격을 그만두면 속도를 되돌린다" 같은 규칙이 흩어지지 않는다.</p><pre><code>public void Change(IState next)
+{
+    if (current == next) return;   // 같은 상태로 다시 들어가 Enter를 반복하지 않는다
+    current?.Exit();               // 나가는 정리는 상태가 직접 갖는다
+    current = next;
+    current.Enter();
+}</code></pre><p>FSM의 한계는 규모다. 상태마다 어디로 갈 수 있는지를 일일이 적으므로 상태가 n개면 전이가 최대 n의 제곱에 가까워진다. "어떤 상태에 있든 체력이 20% 아래면 도망" 같은 전역 규칙을 넣으려면 모든 상태를 고쳐야 한다. <strong>행동 트리</strong>는 전이를 없애고 매 틱 루트부터 트리를 평가한다. Selector는 자식을 왼쪽부터 시도해 처음 성공한 것을 쓰고(우선순위), Sequence는 전부 성공해야 성공한다(절차). 도망 가지를 맨 왼쪽에 붙이면 그 규칙이 모든 상황에 자동으로 우선한다. 대신 매 틱 트리를 훑는 비용과 구조를 읽는 난이도가 생긴다. FSM도 계층형(HFSM)으로 묶으면 꽤 버티므로, 상태가 대여섯 개이고 규칙이 뚜렷하면 FSM이 더 단순하다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>NavMesh란 무엇이고 AI 이동에 어떻게 쓰나</strong> — 걸을 수 있는 바닥을 볼록 다각형으로 미리 구워 둔 그래프다. NavMeshAgent에 SetDestination으로 목적지를 주면 그 그래프 위에서 A*로 경로를 찾아 따라간다. 에이전트 반지름과 경사 한계로 굽기 때문에 덩치가 다른 유닛은 별도 설정이 필요하다.</li><li><strong>런타임에 NavMesh를 갱신하려면</strong> — 바닥 자체가 바뀌면 NavMeshSurface로 다시 굽고, 잠깐 막는 물체는 NavMeshObstacle의 carving으로 구멍을 낸다. 움직이는 동안은 carving을 끄고 멈추면 켜는 식으로 재굽기 비용을 아낀다.</li><li><strong>FSM은 어떻게 구현하나</strong> — 상태를 인터페이스로 두고 Enter, Tick, Exit을 갖게 한 뒤 상태 머신은 전환만 책임진다. 전환 시 이전 상태의 Exit을 반드시 부르게 해서 정리 로직이 한곳에 모이게 한다.</li><li><strong>FSM 말고 다른 방식은</strong> — 행동 트리는 전이 대신 매 틱 트리를 위에서 평가해 Selector로 우선순위를, Sequence로 절차를 표현한다. 전역 규칙을 가지 하나로 넣을 수 있어 상태가 많아질수록 유리하고, 규모가 작으면 FSM이 더 읽기 쉽다.</li></ul><h3>흔한 오해</h3><ul><li><strong>NavMesh는 한 번 구우면 못 바꾼다</strong> — NavMeshSurface로 다시 굽거나 NavMeshObstacle로 구멍을 낼 수 있다. 다만 다시 굽는 건 비싸므로 영역을 쪼개거나 장애물 방식으로 대신한다.</li><li><strong>NavMeshAgent는 Rigidbody로 움직인다</strong> — 에이전트가 직접 위치를 정한다. 물리와 같이 쓰면 서로 위치를 고쳐 떨리므로 Rigidbody는 Kinematic으로 둔다.</li><li><strong>SetDestination은 매 프레임 불러도 싸다</strong> — 목적지가 바뀌면 경로를 다시 계산한다. 유닛이 수백이면 이게 병목이 되므로 일정 거리 이상 움직였을 때만 갱신한다.</li><li><strong>행동 트리가 FSM보다 항상 낫다</strong> — 상태가 적고 전이 규칙이 뚜렷하면 FSM이 더 짧고 읽기 쉽다. 행동 트리는 매 틱 평가 비용과 학습 비용이 있다.</li><li><strong>NavMesh만 깔면 서로 안 부딪힌다</strong> — 에이전트끼리의 회피는 별도의 Obstacle Avoidance 품질 설정이고, 품질을 높이면 그만큼 비싸진다.</li></ul>
+<div class="refs"><h2>참고 자료</h2><ul><li><a href="https://docs.unity3d.com/Packages/com.unity.ai.navigation@2.0/manual/index.html" target="_blank" rel="noopener">Unity 매뉴얼 – AI Navigation 패키지</a></li><li><a href="https://docs.unity3d.com/Packages/com.unity.ai.navigation@2.0/manual/NavMeshSurface.html" target="_blank" rel="noopener">Unity 매뉴얼 – NavMesh Surface component reference</a></li><li><a href="https://docs.unity3d.com/ScriptReference/AI.NavMeshAgent.html" target="_blank" rel="noopener">Unity 스크립팅 API – NavMeshAgent</a></li></ul></div>
+</article>
+<div class="pager"><a href="02-08.html">← 애니메이션·카메라·입력</a><a href="02-10.html">빌드와 플랫폼 →</a></div>
+<footer>정리 글은 Claude가 썼다. 틀린 내용이 있을 수 있으니 중요한 내용은 참고 자료 원문으로 확인한다.</footer>
+</main>
+</body>
+</html>

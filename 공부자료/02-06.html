@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UI · Unity 엔진</title>
+<style>
+  :root {
+    --bg:#f2f5f7; --card:#fff; --panel:#f7f9fb; --text:#3c3c3c; --muted:#7a8b93; --line:#e2e8ea;
+    --green:#58cc02; --green-d:#46a302; --blue:#1cb0f6; --blue-d:#1899d6; --blue-bg:#ddf4ff;
+    --purple:#ce82ff; --purple-d:#a855f7; --purple-bg:#f5e8ff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#131f24; --card:#1b2b32; --panel:#16252b; --text:#eaf2f6; --muted:#8fa7b2; --line:#2c4048;
+      --blue-bg:#12303d; --purple-bg:#2e2036; --purple-d:#c99bec; --blue-d:#58c4f7; --green-d:#7ddc2a; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
+  a { color: var(--blue-d); }
+  .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
+  .nav a { text-decoration: none; }
+  .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
+    padding: 4px 12px; font-size: .8rem; font-weight: 800; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
+  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
+  p, ul, ol { margin: 10px 0; }
+  li { margin: 5px 0; }
+  .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
+  .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
+  .card { background: var(--card); border: 2px solid var(--line); border-radius: 20px; padding: 20px; margin-bottom: 14px; }
+  .list { display: grid; gap: 10px; }
+  .list a { display: block; background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px;
+    border-radius: 18px; padding: 14px 16px; text-decoration: none; color: inherit; }
+  .list a:hover { border-color: var(--purple); }
+  .list strong { display: block; font-size: 1.02rem; font-weight: 800; }
+  .list span { color: var(--muted); font-size: .86rem; font-weight: 600; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em;
+    background: var(--panel); border: 1px solid var(--line); padding: 1px 6px; border-radius: 6px; font-weight: 700; }
+  pre { background: var(--panel); border: 2px solid var(--line); padding: 14px; border-radius: 14px; overflow-x: auto; line-height: 1.65; }
+  pre code { background: none; border: 0; padding: 0; }
+  table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; font-size: .94rem; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; }
+  th { background: var(--panel); }
+  .refs { border-top: 2px solid var(--line); margin-top: 24px; padding-top: 14px; }
+  .refs ul { padding-left: 20px; }
+  .pager { display: flex; justify-content: space-between; gap: 10px; margin-top: 16px; }
+  .pager a { background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px; border-radius: 16px;
+    padding: 12px 16px; text-decoration: none; color: inherit; font-weight: 800; font-size: .9rem; max-width: 48%; }
+  .pager a:hover { border-color: var(--blue); }
+  footer { color: var(--muted); font-size: .8rem; font-weight: 600; margin-top: 28px; }
+</style>
+</head>
+<body>
+<main>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="02.html" class="badge">Unity 엔진 목차</a></div>
+<article class="card">
+<h1>UI</h1>
+<p class="lead">Canvas가 언제 다시 그려지는지를 알면 해상도 대응도 최적화도 같은 이야기가 된다</p>
+<h3>핵심 개념</h3><p>uGUI는 셋이 역할을 나눠 맡는다. <strong>Canvas</strong>는 자식 UI들의 사각형과 색을 모아 하나의 메시로 만들어 그리는 루트다. <strong>RectTransform</strong>은 Transform을 확장해 앵커(부모의 어디에 붙을지), 피벗(무엇을 기준으로 회전·크기 변경할지), 크기를 다루는 UI 전용 트랜스폼이다. <strong>EventSystem</strong>은 입력이 들어오면 Graphic Raycaster로 어떤 UI가 맞았는지 찾아 전달한다. 버튼이 안 눌리는 문제의 첫 번째 원인은 씬에 EventSystem이 없는 것이다.</p><p>성능 이야기는 전부 <strong>Canvas가 메시를 다시 만드는 시점</strong>에서 나온다. Canvas는 자식 그래픽 하나만 바뀌어도 그 Canvas 전체의 메시를 다시 만든다. 정적인 배경 100장과 매 프레임 바뀌는 타이머가 같은 Canvas에 있으면 숫자 하나 때문에 배경 100장이 매 프레임 재구성된다. 그래서 갱신 빈도가 다른 UI는 Canvas를 나눈다. 다만 배칭은 Canvas 경계를 넘지 못하니 무작정 쪼개면 드로우 콜이 늘어난다. 기준은 계층 구조가 아니라 <strong>얼마나 자주 바뀌는가</strong>다.</p><p>해상도 대응은 두 축으로 나뉜다. 크기는 CanvasScaler를 Scale With Screen Size로 두고 기준 해상도와 Match(너비와 높이 중 어느 쪽을 따를지)를 정해 비례시킨다. 화면비 차이는 스케일로 못 푼다. 이건 앵커의 몫이라 한쪽 구석에 붙는 요소는 그 방향에 앵커를 두고, 늘어나야 하는 요소는 앵커를 벌려 스트레치로 만든다. 노치가 있는 기기는 <code>Screen.safeArea</code>를 읽어 루트 RectTransform을 안쪽으로 민다.</p><p>3D를 따라다니는 체력 바는 World Space Canvas로 캐릭터에 붙이거나(거리에 따라 작아진다) Overlay Canvas에 두고 화면 좌표로 옮기는(항상 같은 크기) 두 방식이 있다. 뒤쪽은 카메라가 움직인 뒤에 잡아야 하므로 Update가 아니라 LateUpdate에서 갱신한다.</p><pre><code>void LateUpdate()   // 카메라가 움직인 뒤에 잡아야 한 프레임 밀리지 않는다
+{
+    Vector3 world = target.position + offset;
+    Vector3 view = Camera.main.WorldToViewportPoint(world);
+    bool visible = view.z &gt; 0f;   // z가 음수면 카메라 뒤라 좌표가 뒤집힌다
+
+    if (bar.gameObject.activeSelf != visible) bar.gameObject.SetActive(visible);
+    if (visible) bar.position = Camera.main.WorldToScreenPoint(world);
+}</code></pre><p>UI Toolkit은 구조가 다르다. UI가 게임오브젝트가 아니라 VisualElement 트리이고 레이아웃을 UXML과 USS(CSS 비슷한 스타일 시트)로 쓴다. 수천 개를 만들어도 씬 계층이 무거워지지 않는다. 대신 2022 LTS 시점에는 월드 스페이스 UI를 지원하지 않아 런타임 게임 UI는 uGUI가 기본이었고, 월드 스페이스는 Unity 6에서 들어왔다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>Canvas, RectTransform, EventSystem의 역할은</strong> — Canvas는 자식 UI를 메시로 합쳐 그리는 루트, RectTransform은 앵커와 피벗으로 위치와 크기를 정하는 UI 전용 트랜스폼, EventSystem은 레이캐스트로 입력 대상을 찾아 전달하는 쪽이다. EventSystem이 없으면 화면은 나오는데 클릭만 안 먹는다.</li><li><strong>여러 해상도와 화면비를 어떻게 맞추나</strong> — 크기는 CanvasScaler를 Scale With Screen Size로 두고 기준 해상도와 Match로 맞추고, 화면비는 앵커로 흡수한다. 노치 기기는 Safe Area를 읽어 루트를 안쪽으로 민다.</li><li><strong>UI 요소가 아주 많을 때</strong> — 갱신 빈도로 Canvas를 나눠 리빌드 범위를 줄이고, 누를 일 없는 이미지는 Raycast Target을 끈다. 목록은 화면에 보이는 만큼만 만들어 재활용하고, 숨길 때는 알파를 낮추지 말고 Canvas 컴포넌트를 끈다.</li><li><strong>NGUI와 uGUI의 차이는</strong> — NGUI는 에셋 스토어 서드파티 UI였고 uGUI는 그 개발자를 영입해 엔진에 내장한 공식 UI다. 아틀라스를 손으로 관리하던 방식이 스프라이트 패커와 Canvas 배칭으로 들어왔다.</li></ul><h3>흔한 오해</h3><ul><li><strong>알파를 0으로 만들면 안 그려진다</strong> — 투명해질 뿐 메시는 그대로 만들어지고 배치에도 들어간다. 실제로 빼려면 Canvas 컴포넌트를 끄거나 게임오브젝트를 비활성화한다.</li><li><strong>Canvas는 하나로 두는 게 좋다</strong> — 반대다. 하나에 몰면 작은 변경 하나가 전체 리빌드를 부른다. 다만 잘게 쪼개면 배칭이 끊기므로 갱신 빈도 기준으로 나눈다.</li><li><strong>CanvasScaler만 설정하면 화면비도 해결된다</strong> — 스케일만 다룬다. 16:9와 20:9의 남는 폭은 앵커로 처리해야 하고, 안 그러면 요소가 쏠리거나 잘린다.</li><li><strong>Raycast Target은 켜 둬도 공짜다</strong> — 입력이 들어올 때마다 그래픽을 하나하나 검사한다. 배경이나 텍스트처럼 누를 일이 없는 것은 꺼 둔다.</li></ul>
+<div class="refs"><h2>참고 자료</h2><ul><li><a href="https://docs.unity3d.com/Packages/com.unity.ugui@2.0/manual/UICanvas.html" target="_blank" rel="noopener">Unity 매뉴얼 – Canvas(uGUI)</a></li><li><a href="https://docs.unity3d.com/Packages/com.unity.ugui@2.0/manual/HOWTO-UIMultiResolution.html" target="_blank" rel="noopener">Unity 매뉴얼 – Designing UI for Multiple Resolutions</a></li><li><a href="https://docs.unity3d.com/Packages/com.unity.ugui@2.0/manual/EventSystem.html" target="_blank" rel="noopener">Unity 매뉴얼 – Event System(uGUI)</a></li><li><a href="https://docs.unity3d.com/Manual/UIElements.html" target="_blank" rel="noopener">Unity 매뉴얼 – UI Toolkit</a></li></ul></div>
+</article>
+<div class="pager"><a href="02-05.html">← 에셋과 리소스 관리</a><a href="02-07.html">물리 →</a></div>
+<footer>정리 글은 Claude가 썼다. 틀린 내용이 있을 수 있으니 중요한 내용은 참고 자료 원문으로 확인한다.</footer>
+</main>
+</body>
+</html>

@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>소켓과 HTTP · 네트워크</title>
+<style>
+  :root {
+    --bg:#f2f5f7; --card:#fff; --panel:#f7f9fb; --text:#3c3c3c; --muted:#7a8b93; --line:#e2e8ea;
+    --green:#58cc02; --green-d:#46a302; --blue:#1cb0f6; --blue-d:#1899d6; --blue-bg:#ddf4ff;
+    --purple:#ce82ff; --purple-d:#a855f7; --purple-bg:#f5e8ff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#131f24; --card:#1b2b32; --panel:#16252b; --text:#eaf2f6; --muted:#8fa7b2; --line:#2c4048;
+      --blue-bg:#12303d; --purple-bg:#2e2036; --purple-d:#c99bec; --blue-d:#58c4f7; --green-d:#7ddc2a; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
+  a { color: var(--blue-d); }
+  .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
+  .nav a { text-decoration: none; }
+  .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
+    padding: 4px 12px; font-size: .8rem; font-weight: 800; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
+  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
+  p, ul, ol { margin: 10px 0; }
+  li { margin: 5px 0; }
+  .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
+  .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
+  .card { background: var(--card); border: 2px solid var(--line); border-radius: 20px; padding: 20px; margin-bottom: 14px; }
+  .list { display: grid; gap: 10px; }
+  .list a { display: block; background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px;
+    border-radius: 18px; padding: 14px 16px; text-decoration: none; color: inherit; }
+  .list a:hover { border-color: var(--purple); }
+  .list strong { display: block; font-size: 1.02rem; font-weight: 800; }
+  .list span { color: var(--muted); font-size: .86rem; font-weight: 600; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em;
+    background: var(--panel); border: 1px solid var(--line); padding: 1px 6px; border-radius: 6px; font-weight: 700; }
+  pre { background: var(--panel); border: 2px solid var(--line); padding: 14px; border-radius: 14px; overflow-x: auto; line-height: 1.65; }
+  pre code { background: none; border: 0; padding: 0; }
+  table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; font-size: .94rem; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; }
+  th { background: var(--panel); }
+  .refs { border-top: 2px solid var(--line); margin-top: 24px; padding-top: 14px; }
+  .refs ul { padding-left: 20px; }
+  .pager { display: flex; justify-content: space-between; gap: 10px; margin-top: 16px; }
+  .pager a { background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px; border-radius: 16px;
+    padding: 12px 16px; text-decoration: none; color: inherit; font-weight: 800; font-size: .9rem; max-width: 48%; }
+  .pager a:hover { border-color: var(--blue); }
+  footer { color: var(--muted); font-size: .8rem; font-weight: 600; margin-top: 28px; }
+</style>
+</head>
+<body>
+<main>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="09.html" class="badge">네트워크 목차</a></div>
+<article class="card">
+<h1>소켓과 HTTP</h1>
+<p class="lead">소켓·포트·HTTP·TLS가 각각 무엇을 맡는지 알고 메타 통신과 인게임 통신을 나눈다</p>
+<h3>핵심 개념</h3><p>포트는 <strong>어느 프로세스에 줄지 고르는 16비트 번호</strong>(0~65535)이고, 소켓은 IP와 포트를 묶은 <strong>통신 종단점</strong>이자 OS가 관리하는 자원이다. 서버는 리스닝 소켓 하나로 연결을 받고 연결마다 별도 소켓을 만든다. 각 연결은 출발지·목적지의 IP와 포트 네 값으로 구분돼 한 포트에서 섞이지 않는다.</p><p>HTTP는 그 위에 얹힌 요청-응답 규약이다. <strong>무상태</strong>라 이전 요청을 기억하지 않고 <strong>비연결</strong>이라 응답이 끝나면 대화가 끝난다. 로그인 상태는 쿠키 속 세션 ID나 액세스 토큰으로 매번 알려 주고, 연결 비용은 keep-alive로 줄인다. 무상태 덕분에 어느 서버가 받아도 처리가 같아 증설이 쉽다.</p><table><thead><tr><th>버전</th><th>핵심 변화</th><th>남는 문제</th></tr></thead><tbody><tr><td>HTTP/1.1</td><td>keep-alive로 연결 재사용</td><td>응답이 앞 요청 순서에 묶인다</td></tr><tr><td>HTTP/2</td><td>바이너리 프레이밍, 멀티플렉싱, 헤더 압축</td><td>TCP 위라 한 패킷을 잃으면 모든 스트림이 밀린다</td></tr><tr><td>HTTP/3</td><td>UDP 기반 QUIC, 빠른 연결</td><td>환경에 따라 UDP가 막히기도 한다</td></tr></tbody></table><p>HTTPS는 여기에 TLS를 끼운다. 공개키는 안전하게 키를 나눌 수 있지만 느려서 인증서 검증과 세션 키 합의까지만 쓰고, <strong>이후 데이터는 빠른 대칭키로 암호화</strong>한다. 보호 범위가 전송 구간뿐이라 기기 안의 조작은 막지 못한다.</p><p>게임에서는 용도로 나눈다. 로그인·상점·랭킹처럼 빈도가 낮은 메타 통신은 REST(HTTPS)로, 초당 여러 번 오가는 인게임 통신은 연결을 유지하는 소켓으로 간다. RPC는 원격 호출을 함수처럼 감싸는 방식이라 둘 위에 모두 얹는다.</p><pre><code>using System.Collections;
+using UnityEngine;
+using UnityEngine.Networking;
+
+public class RankingApi : MonoBehaviour
+{
+    public IEnumerator GetRanking(string url)
+    {
+        using (UnityWebRequest req = UnityWebRequest.Get(url))
+        {
+            yield return req.SendWebRequest();   // 프레임을 막지 않고 기다린다
+
+            if (req.result != UnityWebRequest.Result.Success)
+            {
+                Debug.LogError(req.error);
+                yield break;
+            }
+            Debug.Log(req.downloadHandler.text);
+        }
+    }
+}</code></pre><p>직렬화도 같은 저울이다. JSON은 읽기 쉬워 디버깅이 편한 대신 크고 느리며, Protobuf·FlatBuffers 같은 바이너리는 작고 빠른 대신 스키마 관리가 따른다. 어느 쪽이든 필드를 더하고 뺄 때 구버전 클라이언트가 어떻게 동작할지 미리 정해 둔다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>소켓과 포트의 차이</strong> — 포트는 프로세스를 구분하는 번호고, 소켓은 IP와 포트로 식별되는 통신 종단점이다. 연결은 네 값의 조합으로 구분되므로 서버는 포트 하나로 여러 연결을 다룬다.</li><li><strong>HTTP와 HTTPS의 차이, TLS 핸드셰이크</strong> — 핸드셰이크에서 인증서로 서버 신원을 확인하고 공개키로 세션 키를 합의한 뒤 본 통신은 대칭키로 암호화한다. 보호되는 것은 전송 구간뿐이다.</li><li><strong>HTTP의 무상태를 어떻게 보완하나</strong> — 세션 ID 쿠키나 액세스 토큰을 요청마다 실어 보낸다. 상태가 필요하면 서버 메모리 대신 별도 저장소에 둔다.</li><li><strong>URL 입력부터 화면까지</strong> — DNS 조회로 IP를 얻고, TCP 3-way handshake와 TLS 핸드셰이크를 거쳐 HTTP 요청을 보내고, 응답 HTML을 파싱하며 부족한 리소스를 추가로 받아 그린다.</li><li><strong>Unity에서 HTTP API 호출</strong> — <code>UnityWebRequest.Get</code>·<code>Post</code>로 요청을 만들고 <code>SendWebRequest</code>를 코루틴이나 await로 기다린다. 본문은 <code>downloadHandler.text</code>에서 읽고, 네이티브 자원을 쥐므로 <code>using</code>으로 정리한다.</li></ul><h3>흔한 오해</h3><ul><li><strong>HTTPS를 쓰면 치트를 막을 수 있다</strong> — 전송 구간만 보호한다. 변조된 클라이언트가 보내는 값은 서버 검증으로만 걸러진다.</li><li><strong>공개키가 대칭키보다 빠르다</strong> — 반대다. 느린 공개키는 키 합의에만 쓴다.</li><li><strong>UnityWebRequest는 error가 비어 있으면 성공이다</strong> — 성공 판정은 <code>result</code>가 <code>Result.Success</code>인지로 한다.</li><li><strong>실시간 대전도 REST로 처리하면 된다</strong> — 요청마다 왕복이 필요해 맞지 않는다. 서버가 먼저 보내는 메시지도 소켓으로 받는다.</li></ul>
+<div class="refs"><h2>참고 자료</h2><ul><li><a href="https://learn.microsoft.com/ko-kr/dotnet/fundamentals/networking/sockets/socket-services" target="_blank" rel="noopener">Microsoft Learn – 소켓을 사용하여 TCP를 통해 데이터 보내기 및 받기</a></li><li><a href="https://developer.mozilla.org/ko/docs/Web/HTTP/Guides/Overview" target="_blank" rel="noopener">MDN – HTTP 개요</a></li><li><a href="https://developer.mozilla.org/ko/docs/Web/HTTP/Guides/Evolution_of_HTTP" target="_blank" rel="noopener">MDN – HTTP의 진화</a></li><li><a href="https://docs.unity3d.com/ScriptReference/Networking.UnityWebRequest.html" target="_blank" rel="noopener">Unity 스크립팅 API – UnityWebRequest</a></li></ul></div>
+</article>
+<div class="pager"><a href="09-02.html">← TCP와 UDP</a><a href="09-04.html">멀티플레이 구조 →</a></div>
+<footer>정리 글은 Claude가 썼다. 틀린 내용이 있을 수 있으니 중요한 내용은 참고 자료 원문으로 확인한다.</footer>
+</main>
+</body>
+</html>

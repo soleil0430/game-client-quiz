@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>멀티플레이 구조 · 네트워크</title>
+<style>
+  :root {
+    --bg:#f2f5f7; --card:#fff; --panel:#f7f9fb; --text:#3c3c3c; --muted:#7a8b93; --line:#e2e8ea;
+    --green:#58cc02; --green-d:#46a302; --blue:#1cb0f6; --blue-d:#1899d6; --blue-bg:#ddf4ff;
+    --purple:#ce82ff; --purple-d:#a855f7; --purple-bg:#f5e8ff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#131f24; --card:#1b2b32; --panel:#16252b; --text:#eaf2f6; --muted:#8fa7b2; --line:#2c4048;
+      --blue-bg:#12303d; --purple-bg:#2e2036; --purple-d:#c99bec; --blue-d:#58c4f7; --green-d:#7ddc2a; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
+  a { color: var(--blue-d); }
+  .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
+  .nav a { text-decoration: none; }
+  .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
+    padding: 4px 12px; font-size: .8rem; font-weight: 800; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
+  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
+  p, ul, ol { margin: 10px 0; }
+  li { margin: 5px 0; }
+  .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
+  .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
+  .card { background: var(--card); border: 2px solid var(--line); border-radius: 20px; padding: 20px; margin-bottom: 14px; }
+  .list { display: grid; gap: 10px; }
+  .list a { display: block; background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px;
+    border-radius: 18px; padding: 14px 16px; text-decoration: none; color: inherit; }
+  .list a:hover { border-color: var(--purple); }
+  .list strong { display: block; font-size: 1.02rem; font-weight: 800; }
+  .list span { color: var(--muted); font-size: .86rem; font-weight: 600; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em;
+    background: var(--panel); border: 1px solid var(--line); padding: 1px 6px; border-radius: 6px; font-weight: 700; }
+  pre { background: var(--panel); border: 2px solid var(--line); padding: 14px; border-radius: 14px; overflow-x: auto; line-height: 1.65; }
+  pre code { background: none; border: 0; padding: 0; }
+  table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; font-size: .94rem; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; }
+  th { background: var(--panel); }
+  .refs { border-top: 2px solid var(--line); margin-top: 24px; padding-top: 14px; }
+  .refs ul { padding-left: 20px; }
+  .pager { display: flex; justify-content: space-between; gap: 10px; margin-top: 16px; }
+  .pager a { background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px; border-radius: 16px;
+    padding: 12px 16px; text-decoration: none; color: inherit; font-weight: 800; font-size: .9rem; max-width: 48%; }
+  .pager a:hover { border-color: var(--blue); }
+  footer { color: var(--muted); font-size: .8rem; font-weight: 600; margin-top: 28px; }
+</style>
+</head>
+<body>
+<main>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="09.html" class="badge">네트워크 목차</a></div>
+<article class="card">
+<h1>멀티플레이 구조</h1>
+<p class="lead">판정 권한을 어디에 두느냐로 구조가 갈린다. 비용·공정성·지연을 놓고 고른다</p>
+<h3>핵심 개념</h3><p>멀티플레이 구조를 고르는 일은 결국 <strong>권한(authority)을 누구에게 두느냐</strong>를 고르는 일이다. 권한은 "무엇이 진짜인지 정하는 쪽"이라는 뜻이다. 맞았는지, 아이템을 먹었는지, 지금 어디 서 있는지를 판정하는 주체가 어디냐에 따라 비용·공정성·지연이 한꺼번에 따라온다.</p><table><thead><tr><th>방식</th><th>판정 주체</th><th>서버 비용</th><th>치트 내성</th><th>약점</th></tr></thead><tbody><tr><td>데디케이티드 서버</td><td>전용 서버</td><td>상시 발생</td><td>강함</td><td>운영·지역별 서버 배치 비용</td></tr><tr><td>리슨 서버(호스트)</td><td>플레이어 한 명의 기기</td><td>없음</td><td>약함</td><td>호스트가 유리하고, 나가면 호스트 이전이 필요</td></tr><tr><td>P2P</td><td>각 클라이언트</td><td>없음</td><td>약함</td><td>인원이 늘면 연결 수가 급증, 검증 주체가 없음</td></tr><tr><td>릴레이</td><td>여전히 호스트·클라이언트</td><td>중계 비용만</td><td>달라지지 않음</td><td>중계를 거쳐 지연이 늘어남</td></tr></tbody></table><p>릴레이가 따로 있는 이유는 NAT 때문이다. 대부분의 플레이어는 공유기 뒤 사설 IP를 쓰므로 밖에서 바로 연결할 수 없다. 홀 펀칭으로 뚫거나, 안 되면 중계 서버가 패킷을 옮겨 준다. 여기서 중요한 것은 <strong>릴레이는 전달만 하고 게임 판정을 하지 않는다</strong>는 점이다. 그래서 릴레이를 붙여도 호스트 방식의 치트 취약점은 그대로다. Unity의 Relay·Lobby 서비스가 이 역할을 한다.</p><p>서버 권한 구조에서 클라이언트는 입력을 보내고 서버는 상태를 돌려준다. 문제는 대역폭이다. 모든 오브젝트의 모든 값을 매 틱 보내면 인원과 오브젝트 수의 곱만큼 트래픽이 늘어난다. 그래서 관심 영역(AOI)으로 화면 밖·먼 거리 오브젝트는 주기를 늘리거나 아예 빼고, 바뀐 값만 보내는 델타 전송을 함께 쓴다. 전송 빈도를 낮추면 생기는 끊김은 받는 쪽에서 보간과 예측으로 메우므로, 초당 60회 전송이 반드시 부드러운 화면을 뜻하지는 않는다.</p><pre><code>public static class ReplicationRate
+{
+    public const float NoSend = -1f;
+
+    // 관심 영역(AOI): 보는 사람과의 거리에 따라 상태 전송 주기를 벌린다
+    public static float SendInterval(float distanceToViewer)
+    {
+        if (distanceToViewer &lt; 20f) return 1f / 20f;   // 눈앞: 초당 20회
+        if (distanceToViewer &lt; 60f) return 1f / 5f;    // 중거리: 초당 5회
+        return NoSend;                                 // 그 밖: 보내지 않는다
+    }
+}</code></pre><p>서버를 C#으로 만들면 패킷 정의·수치 계산식·데이터 모델을 클라이언트와 같은 코드로 공유할 수 있다. 규칙이 어긋날 일이 줄고 시뮬레이션 결과를 맞추기도 쉽다. 다만 C#에도 GC가 있어 서버에서는 할당을 줄이는 작업이 필요하고, 서버 로직은 Unity 엔진 없이 .NET 콘솔 프로그램으로 돌리는 것이 보통이다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>데디케이티드·호스트·P2P·릴레이의 차이</strong> — 판정을 전용 서버가 하면 데디케이티드, 플레이어 한 명의 기기가 겸하면 리슨 서버, 각자 나눠 가지면 P2P다. 릴레이는 판정 구조가 아니라 NAT를 우회하는 전달 경로다. 공정성과 보안이 중요하면 데디케이티드, 비용이 중요하고 소규모 협동이면 호스트 방식을 고른다.</li><li><strong>호스트 방식의 장단점</strong> — 서버 운영비가 들지 않고 호스트는 지연이 거의 없다. 대신 모두가 호스트의 회선과 기기 성능에 묶이고, 호스트가 유리해지며, 나가면 호스트 이전이 필요하고, 판정 권한이 플레이어 기기에 있어 조작에 약하다.</li><li><strong>권한과 리플리케이션 빈도</strong> — 판정 대상 상태는 서버가 쥐고 클라이언트는 입력만 보낸다. 전송은 거리·중요도에 따라 주기를 나누고(AOI), 바뀐 값만 델타로 보내며, 빈 구간은 수신 측 보간·예측으로 채운다.</li><li><strong>서버를 C#으로 두면 무엇이 좋은가</strong> — 패킷과 규칙 코드를 클라이언트와 공유해 불일치를 줄일 수 있다. 언어와 무관하게 클라이언트가 보낸 값은 서버가 반드시 검증한다는 전제는 같다.</li></ul><h3>흔한 오해</h3><ul><li><strong>릴레이 서버를 쓰면 치트가 막힌다</strong> — 릴레이는 패킷을 옮길 뿐 판정하지 않는다. 검증은 권한을 가진 쪽에서만 일어난다.</li><li><strong>P2P는 서버를 거치지 않으니 항상 빠르다</strong> — 직접 연결이 되면 유리하지만 NAT 때문에 연결 자체가 안 되는 경우가 많고, 인원이 늘면 각자 모두에게 보내느라 상향 대역폭이 먼저 터진다.</li><li><strong>호스트 방식은 서버가 없는 구조다</strong> — 서버가 없는 것이 아니라 플레이어 기기가 서버를 겸하는 것이다. 권한은 여전히 한 곳에 있고, 그 한 곳이 신뢰할 수 없는 기기라는 점이 다르다.</li><li><strong>전송 빈도를 올리면 동기화가 정확해진다</strong> — 대역폭과 서버 부하가 먼저 한계에 닿는다. 정확도는 빈도보다 권한 구조와 보정 방식에서 나온다.</li></ul>
+<div class="refs"><h2>참고 자료</h2><ul><li><a href="https://docs.unity3d.com/Packages/com.unity.netcode.gameobjects@3.0/manual/terms-concepts/network-topologies.html" target="_blank" rel="noopener">Unity Netcode for GameObjects – Network topologies</a></li><li><a href="https://docs.unity3d.com/Manual/multiplayer.html" target="_blank" rel="noopener">Unity 매뉴얼 – Multiplayer</a></li><li><a href="https://www.gabrielgambetta.com/client-server-game-architecture.html" target="_blank" rel="noopener">Gabriel Gambetta – Fast-Paced Multiplayer (Part I): Client-Server Game Architecture</a></li></ul></div>
+</article>
+<div class="pager"><a href="09-03.html">← 소켓과 HTTP</a><a href="09-05.html">동기화 기법 →</a></div>
+<footer>정리 글은 Claude가 썼다. 틀린 내용이 있을 수 있으니 중요한 내용은 참고 자료 원문으로 확인한다.</footer>
+</main>
+</body>
+</html>

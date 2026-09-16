@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Unity와 멀티스레딩 · 운영체제·동시성</title>
+<style>
+  :root {
+    --bg:#f2f5f7; --card:#fff; --panel:#f7f9fb; --text:#3c3c3c; --muted:#7a8b93; --line:#e2e8ea;
+    --green:#58cc02; --green-d:#46a302; --blue:#1cb0f6; --blue-d:#1899d6; --blue-bg:#ddf4ff;
+    --purple:#ce82ff; --purple-d:#a855f7; --purple-bg:#f5e8ff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#131f24; --card:#1b2b32; --panel:#16252b; --text:#eaf2f6; --muted:#8fa7b2; --line:#2c4048;
+      --blue-bg:#12303d; --purple-bg:#2e2036; --purple-d:#c99bec; --blue-d:#58c4f7; --green-d:#7ddc2a; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
+  a { color: var(--blue-d); }
+  .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
+  .nav a { text-decoration: none; }
+  .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
+    padding: 4px 12px; font-size: .8rem; font-weight: 800; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
+  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
+  p, ul, ol { margin: 10px 0; }
+  li { margin: 5px 0; }
+  .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
+  .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
+  .card { background: var(--card); border: 2px solid var(--line); border-radius: 20px; padding: 20px; margin-bottom: 14px; }
+  .list { display: grid; gap: 10px; }
+  .list a { display: block; background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px;
+    border-radius: 18px; padding: 14px 16px; text-decoration: none; color: inherit; }
+  .list a:hover { border-color: var(--purple); }
+  .list strong { display: block; font-size: 1.02rem; font-weight: 800; }
+  .list span { color: var(--muted); font-size: .86rem; font-weight: 600; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em;
+    background: var(--panel); border: 1px solid var(--line); padding: 1px 6px; border-radius: 6px; font-weight: 700; }
+  pre { background: var(--panel); border: 2px solid var(--line); padding: 14px; border-radius: 14px; overflow-x: auto; line-height: 1.65; }
+  pre code { background: none; border: 0; padding: 0; }
+  table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; font-size: .94rem; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; }
+  th { background: var(--panel); }
+  .refs { border-top: 2px solid var(--line); margin-top: 24px; padding-top: 14px; }
+  .refs ul { padding-left: 20px; }
+  .pager { display: flex; justify-content: space-between; gap: 10px; margin-top: 16px; }
+  .pager a { background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px; border-radius: 16px;
+    padding: 12px 16px; text-decoration: none; color: inherit; font-weight: 800; font-size: .9rem; max-width: 48%; }
+  .pager a:hover { border-color: var(--blue); }
+  footer { color: var(--muted); font-size: .8rem; font-weight: 600; margin-top: 28px; }
+</style>
+</head>
+<body>
+<main>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="08.html" class="badge">운영체제·동시성 목차</a></div>
+<article class="card">
+<h1>Unity와 멀티스레딩</h1>
+<p class="lead">무거운 계산은 워커 스레드나 Job으로 넘기고 Unity API 호출은 메인 스레드에 남긴다</p>
+<h3>핵심 개념</h3><p>Unity 멀티스레딩의 규칙은 한 줄이다. <strong>순수 계산은 다른 스레드로 넘기고, 엔진을 만지는 호출은 메인 스레드에 남긴다.</strong> Transform, GameObject, UI 같은 대부분의 Unity API는 메인 스레드 전용이라, 다른 스레드에서 부르면 예외가 나거나 동작이 보장되지 않는다. 엔진 내부 상태가 단일 스레드 접근을 전제로 설계돼 있고, 전부 락을 걸면 흔한 호출 하나가 그만큼 비싸지기 때문이다.</p><p>그래서 난수 100만 개 생성이나 경로 탐색, 데이터 파싱처럼 엔진을 안 건드리는 계산만 워커 스레드로 보내고 결과만 메인 스레드에서 반영한다. 넘길 때는 <code>ConcurrentQueue</code>에 담아 <code>Update</code>에서 꺼내거나 Unity 2023 이후면 <code>Awaitable.MainThreadAsync</code>를 쓴다. 텍스처도 같아서 픽셀 계산은 백그라운드로 빼도 <code>SetPixels</code>·<code>Apply</code>는 메인 스레드다.</p><p>선택지는 셋이다. 코루틴은 컴파일러가 만든 반복자를 <code>MonoBehaviour</code>가 매 프레임 한 칸씩 돌리는 것이라 Unity API를 그대로 쓰지만, 한 칸이 무거우면 그 프레임이 밀린다. <strong>일을 나눠 주는 장치이지 병렬로 만드는 장치가 아니다.</strong> 직접 만든 스레드는 병렬이지만 Unity API를 못 쓰고 수명 관리가 손에 남는다. Job System은 그 사이를 메운다. 엔진이 관리하는 워커 풀에 일을 올리고, 다룰 데이터를 blittable 값 형식과 네이티브 컨테이너로 제한해 레이스가 생길 여지를 줄인다. 두 Job이 같은 컨테이너에 동시에 쓰려 하면 안전 시스템이 알려 주므로 락을 직접 걸 일이 없다.</p><pre><code>[BurstCompile]
+struct MoveJob : IJobParallelFor
+{
+    [ReadOnly] public NativeArray&lt;float3&gt; Velocity;
+    public NativeArray&lt;float3&gt; Position;
+    public float Delta;
+
+    public void Execute(int i) =&gt; Position[i] += Velocity[i] * Delta;
+}
+
+void Update()
+{
+    var job = new MoveJob { Velocity = _v, Position = _p, Delta = Time.deltaTime };
+    JobHandle handle = job.Schedule(_p.Length, 64);   // 64개씩 워커에 나눈다
+    handle.Complete();   // 완료 전에는 _p를 건드릴 수 없다
+    for (int i = 0; i &lt; _p.Length; i++)
+        _transforms[i].position = _p[i];   // Unity API는 메인 스레드에서
+}</code></pre><p><code>NativeArray</code>를 쓰는 이유는 관리 힙 밖이라서다. Job과 Burst는 관리 객체를 다룰 수 없고, 값이 이어 붙어 캐시 효율도 좋다. 대신 GC가 치워 주지 않아 <code>Dispose</code>가 필요하고, 수명에 맞춰 <code>Allocator.Temp</code>·<code>TempJob</code>·<code>Persistent</code> 중에 고른다. Burst는 이 제한된 C# 부분집합을 LLVM으로 컴파일해 SIMD까지 쓴다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>왜 다른 스레드에서 Unity API를 못 쓰나</strong> — 엔진 내부 상태가 단일 스레드 접근을 전제로 만들어져 있어서다. 전부 락을 걸면 흔한 호출이 비싸진다.</li><li><strong>백그라운드 결과를 화면에 반영하려면</strong> — 계산만 워커 스레드에서 하고 결과 값만 넘긴다. <code>ConcurrentQueue</code>에 담아 <code>Update</code>에서 적용하거나 동기화 컨텍스트로 되돌린다.</li><li><strong>코루틴과 스레드의 차이</strong> — 코루틴은 메인 스레드에서 매 프레임 이어 실행되는 반복자라 Unity API를 쓰지만 병렬이 아니고, 스레드는 병렬이지만 Unity API를 못 쓴다.</li><li><strong>Job System은 어떻게 성능을 올리나</strong> — 워커 풀에 작업을 나눠 노는 코어를 쓰고, 데이터를 네이티브 컨테이너로 제한해 안전 시스템이 레이스를 잡아 준다. Burst를 붙이면 SIMD까지 써서 한 번 더 빨라진다.</li><li><strong>멀티스레드 코드를 어떻게 디버깅했나</strong> — 안전 검사를 켜 둔 채 개발하고 로그에 스레드와 프레임을 남겨 재현했다. 공유 상태를 줄이는 것이 근본 해결이었다.</li></ul><h3>흔한 오해</h3><ul><li><strong>코루틴은 별도 스레드에서 돈다</strong> — 메인 스레드에서 나눠 실행될 뿐이라 무거운 계산을 넣으면 프레임만 밀린다.</li><li><strong>Job 안에서도 Unity API를 쓸 수 있다</strong> — 관리 객체와 Unity 오브젝트는 못 쓴다. 결과는 네이티브 컨테이너로 받는다.</li><li><strong>NativeArray도 GC가 정리해 준다</strong> — 관리 힙 밖이라 <code>Dispose</code>를 빼먹으면 누수로 남는다.</li><li><strong>Job이 도는 중에도 같은 배열을 읽으면 된다</strong> — 안전 시스템이 막는다. <code>Complete</code>로 기다리거나 읽기 전용으로 선언한다.</li><li><strong>Burst를 붙이면 아무 코드나 빨라진다</strong> — 제한된 C# 부분집합만 다뤄서 관리 객체를 쓰는 코드에는 붙지 않는다.</li></ul>
+<div class="refs"><h2>참고 자료</h2><ul><li><a href="https://docs.unity3d.com/Manual/job-system.html" target="_blank" rel="noopener">Unity 매뉴얼 – Write multithreaded code with the job system</a></li><li><a href="https://docs.unity3d.com/Manual/job-system-native-container.html" target="_blank" rel="noopener">Unity 매뉴얼 – Introduction to NativeContainer</a></li><li><a href="https://docs.unity3d.com/Manual/Coroutines.html" target="_blank" rel="noopener">Unity 매뉴얼 – Write and run coroutines</a></li><li><a href="https://docs.unity3d.com/Packages/com.unity.burst@1.8/manual/index.html" target="_blank" rel="noopener">Unity Burst 매뉴얼 – Burst compiler</a></li></ul></div>
+</article>
+<div class="pager"><a href="08-07.html">← 비동기</a><span></span></div>
+<footer>정리 글은 Claude가 썼다. 틀린 내용이 있을 수 있으니 중요한 내용은 참고 자료 원문으로 확인한다.</footer>
+</main>
+</body>
+</html>

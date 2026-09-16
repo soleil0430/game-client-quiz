@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>STL · C++ 기초</title>
+<style>
+  :root {
+    --bg:#f2f5f7; --card:#fff; --panel:#f7f9fb; --text:#3c3c3c; --muted:#7a8b93; --line:#e2e8ea;
+    --green:#58cc02; --green-d:#46a302; --blue:#1cb0f6; --blue-d:#1899d6; --blue-bg:#ddf4ff;
+    --purple:#ce82ff; --purple-d:#a855f7; --purple-bg:#f5e8ff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#131f24; --card:#1b2b32; --panel:#16252b; --text:#eaf2f6; --muted:#8fa7b2; --line:#2c4048;
+      --blue-bg:#12303d; --purple-bg:#2e2036; --purple-d:#c99bec; --blue-d:#58c4f7; --green-d:#7ddc2a; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
+  a { color: var(--blue-d); }
+  .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
+  .nav a { text-decoration: none; }
+  .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
+    padding: 4px 12px; font-size: .8rem; font-weight: 800; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
+  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
+  p, ul, ol { margin: 10px 0; }
+  li { margin: 5px 0; }
+  .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
+  .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
+  .card { background: var(--card); border: 2px solid var(--line); border-radius: 20px; padding: 20px; margin-bottom: 14px; }
+  .list { display: grid; gap: 10px; }
+  .list a { display: block; background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px;
+    border-radius: 18px; padding: 14px 16px; text-decoration: none; color: inherit; }
+  .list a:hover { border-color: var(--purple); }
+  .list strong { display: block; font-size: 1.02rem; font-weight: 800; }
+  .list span { color: var(--muted); font-size: .86rem; font-weight: 600; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em;
+    background: var(--panel); border: 1px solid var(--line); padding: 1px 6px; border-radius: 6px; font-weight: 700; }
+  pre { background: var(--panel); border: 2px solid var(--line); padding: 14px; border-radius: 14px; overflow-x: auto; line-height: 1.65; }
+  pre code { background: none; border: 0; padding: 0; }
+  table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; font-size: .94rem; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; }
+  th { background: var(--panel); }
+  .refs { border-top: 2px solid var(--line); margin-top: 24px; padding-top: 14px; }
+  .refs ul { padding-left: 20px; }
+  .pager { display: flex; justify-content: space-between; gap: 10px; margin-top: 16px; }
+  .pager a { background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px; border-radius: 16px;
+    padding: 12px 16px; text-decoration: none; color: inherit; font-weight: 800; font-size: .9rem; max-width: 48%; }
+  .pager a:hover { border-color: var(--blue); }
+  footer { color: var(--muted); font-size: .8rem; font-weight: 600; margin-top: 28px; }
+</style>
+</head>
+<body>
+<main>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="10.html" class="badge">C++ 기초 목차</a></div>
+<article class="card">
+<h1>STL</h1>
+<p class="lead">메모리가 이어져 있는지와 정렬을 유지하는지, 두 축으로 컨테이너를 고른다</p>
+<h3>핵심 개념</h3><p>STL 컨테이너는 이름이 아니라 <strong>메모리 배치</strong>로 고르는 것이 빠르다. <code>vector</code>는 원소가 한 덩어리로 이어진 동적 배열이라 인덱스 접근이 O(1)이고 캐시에 잘 맞는다. 용량(capacity)을 넘기면 보통 1.5~2배 크기의 새 버퍼를 잡아 원소를 옮기고 옛 버퍼를 버리는데, 이 순간 <strong>기존 포인터·참조·반복자가 모두 무효</strong>가 된다. 그래서 push_back은 평균 O(1)이되 개별 호출은 튈 수 있다. 넣을 개수를 알면 <code>reserve</code>로 용량만 미리 잡는다. size는 그대로다.</p><pre><code>std::vector&lt;int&gt; v;
+v.reserve(1000);      // 용량만 확보한다. size는 여전히 0
+v.push_back(1);
+int* first = &amp;v[0];   // 재할당이 없는 동안에만 유효하다
+v.resize(2000);       // 용량 1000을 넘는 순간 재할당
+                      // first는 이제 버려진 옛 버퍼를 가리킨다
+</code></pre><table><thead><tr><th>컨테이너</th><th>메모리</th><th>임의 접근</th><th>중간 삽입·삭제</th><th>C# 대응</th></tr></thead><tbody><tr><td>vector</td><td>이어진 한 덩어리</td><td>O(1)</td><td>O(n) — 뒤를 민다</td><td>List&lt;T&gt;</td></tr><tr><td>list</td><td>흩어진 노드(이중 연결)</td><td>없음</td><td>위치를 알면 O(1)</td><td>LinkedList&lt;T&gt;</td></tr><tr><td>deque</td><td>여러 블록으로 나뉨</td><td>O(1)</td><td>앞뒤 O(1), 중간 O(n)</td><td>Queue&lt;T&gt;(구현은 다르다)</td></tr></tbody></table><p><code>push_back</code>과 <code>emplace_back</code>은 이미 만들어진 객체를 받아 복사·이동해 넣느냐, 생성자 인자를 받아 컨테이너 안 메모리에서 바로 만드느냐의 차이다. 임시 객체 한 번을 아끼는 것이라 이미 객체가 있으면 비용은 사실상 같다. 대신 emplace_back은 explicit 생성자도 통과시켜 의도치 않은 변환이 조용히 생길 수 있다.</p><p>연관 컨테이너는 <strong>정렬을 유지하느냐</strong>로 갈린다. <code>map</code>은 보통 레드-블랙 트리라 키가 늘 정렬돼 있고 탐색·삽입·삭제가 O(log n)이며, 순서대로 순회하거나 범위 질의를 할 수 있다. <code>unordered_map</code>은 해시 테이블이라 키를 버킷에 나눠 담아 평균 O(1)이지만 순회 순서가 정해져 있지 않고, 해시가 한 버킷에 몰리면 최악 O(n)까지 떨어진다. C#의 <code>Dictionary&lt;K,V&gt;</code>가 unordered_map, <code>SortedDictionary&lt;K,V&gt;</code>가 map 쪽이다. 조회가 잦고 순서가 필요 없으면 unordered_map, 정렬이나 범위 탐색이 필요하면 map을 고른다.</p><p>정렬 함수도 메모리 배치를 따라간다. <code>std::sort</code>는 인트로소트라 <strong>임의 접근 반복자</strong>를 요구해 vector와 배열에는 쓰지만 list에는 쓸 수 없고, 같은 값끼리의 원래 순서를 보장하지 않는다(불안정). <code>list::sort</code>는 값을 옮기는 대신 노드 연결만 바꾸는 병합 정렬이라 안정 정렬이고 반복자도 그대로 유효하다. 같은 값의 순서를 지켜야 하면 <code>std::stable_sort</code>를 쓴다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>vector는 어떻게 동작하나</strong> — 연속된 메모리를 쓰는 동적 배열이고 용량이 차면 더 큰 버퍼를 새로 잡아 원소를 옮긴다. 그래서 추가는 평균 O(1)이지만 재할당이 일어나면 기존 반복자와 포인터가 무효가 된다. 개수를 알면 reserve로 재할당을 없앤다.</li><li><strong>vector와 list 중 무엇을 쓰나</strong> — 대부분 vector를 기본으로 둔다. list는 삽입·삭제 자체는 O(1)이지만 위치를 찾으려면 노드를 따라가야 하고 원소가 흩어져 있어 캐시 미스가 많아, 실제 측정에서는 vector가 이기는 경우가 흔하다.</li><li><strong>map과 unordered_map의 차이는</strong> — map은 균형 이진 탐색 트리라 O(log n)이고 키 순서대로 순회할 수 있다. unordered_map은 해시 테이블이라 평균 O(1)이지만 순서가 없고 충돌이 몰리면 최악 O(n)이다. 순서가 필요한지로 고른다.</li><li><strong>push_back과 emplace_back은</strong> — emplace_back은 생성자 인자를 받아 컨테이너 안에서 바로 객체를 만들어 임시 객체 하나를 아낀다. 이미 만들어진 객체를 넣을 때는 차이가 거의 없다.</li></ul><h3>흔한 오해</h3><ul><li><strong>중간 삽입이 많으면 list가 항상 유리하다</strong> — 삽입 지점을 찾는 비용과 캐시 미스를 빼먹은 비교다. 원소가 작고 개수가 많으면 vector가 빠른 경우가 많다.</li><li><strong>reserve를 하면 그만큼 원소가 생긴다</strong> — reserve는 capacity만 늘리고 size는 그대로다. 원소까지 만들려면 resize다.</li><li><strong>emplace_back이 항상 더 빠르다</strong> — 아끼는 것은 임시 객체 한 번이라 이미 있는 객체를 넣으면 사실상 같다.</li><li><strong>map은 해시로 찾고 unordered_map은 언제나 O(1)이다</strong> — map은 트리라 O(log n)이고, unordered_map의 O(1)은 평균값이라 충돌이 몰리면 나빠진다.</li><li><strong>std::sort는 안정 정렬이고 list에도 쓸 수 있다</strong> — 안정성을 보장하지 않고 임의 접근 반복자를 요구한다. list는 멤버 함수 sort를, 안정성이 필요하면 stable_sort를 쓴다.</li></ul>
+<div class="refs"><h2>참고 자료</h2><ul><li><a href="https://en.cppreference.com/w/cpp/container/vector.html" target="_blank" rel="noopener">cppreference – std::vector</a></li><li><a href="https://en.cppreference.com/w/cpp/container/map.html" target="_blank" rel="noopener">cppreference – std::map</a></li><li><a href="https://en.cppreference.com/w/cpp/container/unordered_map.html" target="_blank" rel="noopener">cppreference – std::unordered_map</a></li><li><a href="https://en.cppreference.com/w/cpp/algorithm/sort.html" target="_blank" rel="noopener">cppreference – std::sort</a></li></ul></div>
+</article>
+<div class="pager"><a href="10-03.html">← 현대 C++</a><a href="10-05.html">컴파일과 링크 →</a></div>
+<footer>정리 글은 Claude가 썼다. 틀린 내용이 있을 수 있으니 중요한 내용은 참고 자료 원문으로 확인한다.</footer>
+</main>
+</body>
+</html>

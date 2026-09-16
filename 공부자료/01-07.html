@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>예외 처리 · C# 언어</title>
+<style>
+  :root {
+    --bg:#f2f5f7; --card:#fff; --panel:#f7f9fb; --text:#3c3c3c; --muted:#7a8b93; --line:#e2e8ea;
+    --green:#58cc02; --green-d:#46a302; --blue:#1cb0f6; --blue-d:#1899d6; --blue-bg:#ddf4ff;
+    --purple:#ce82ff; --purple-d:#a855f7; --purple-bg:#f5e8ff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#131f24; --card:#1b2b32; --panel:#16252b; --text:#eaf2f6; --muted:#8fa7b2; --line:#2c4048;
+      --blue-bg:#12303d; --purple-bg:#2e2036; --purple-d:#c99bec; --blue-d:#58c4f7; --green-d:#7ddc2a; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
+  a { color: var(--blue-d); }
+  .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
+  .nav a { text-decoration: none; }
+  .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
+    padding: 4px 12px; font-size: .8rem; font-weight: 800; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
+  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
+  p, ul, ol { margin: 10px 0; }
+  li { margin: 5px 0; }
+  .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
+  .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
+  .card { background: var(--card); border: 2px solid var(--line); border-radius: 20px; padding: 20px; margin-bottom: 14px; }
+  .list { display: grid; gap: 10px; }
+  .list a { display: block; background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px;
+    border-radius: 18px; padding: 14px 16px; text-decoration: none; color: inherit; }
+  .list a:hover { border-color: var(--purple); }
+  .list strong { display: block; font-size: 1.02rem; font-weight: 800; }
+  .list span { color: var(--muted); font-size: .86rem; font-weight: 600; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em;
+    background: var(--panel); border: 1px solid var(--line); padding: 1px 6px; border-radius: 6px; font-weight: 700; }
+  pre { background: var(--panel); border: 2px solid var(--line); padding: 14px; border-radius: 14px; overflow-x: auto; line-height: 1.65; }
+  pre code { background: none; border: 0; padding: 0; }
+  table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; font-size: .94rem; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; }
+  th { background: var(--panel); }
+  .refs { border-top: 2px solid var(--line); margin-top: 24px; padding-top: 14px; }
+  .refs ul { padding-left: 20px; }
+  .pager { display: flex; justify-content: space-between; gap: 10px; margin-top: 16px; }
+  .pager a { background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px; border-radius: 16px;
+    padding: 12px 16px; text-decoration: none; color: inherit; font-weight: 800; font-size: .9rem; max-width: 48%; }
+  .pager a:hover { border-color: var(--blue); }
+  footer { color: var(--muted); font-size: .8rem; font-weight: 600; margin-top: 28px; }
+</style>
+</head>
+<body>
+<main>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="01.html" class="badge">C# 언어 목차</a></div>
+<article class="card">
+<h1>예외 처리</h1>
+<p class="lead">throw와 throw ex는 스택 추적이 다르고, catch는 하나만 골라 실행되며 finally는 거의 언제나 실행된다</p>
+<h3>핵심 개념</h3><p>예외는 '여기서는 더 못 한다'를 호출 스택 위로 올려 보내는 장치다. 예외가 던져지면 런타임은 현재 메서드에 맞는 <code>catch</code>가 있는지 보고, 없으면 자신을 부른 메서드로 올라가며 계속 찾는다. 끝까지 못 찾으면 그 스레드가 죽는다.</p><p>여기서 중요한 사실 하나. <code>StackTrace</code>는 예외 객체가 만들어질 때가 아니라 <strong><code>throw</code> 문이 실행되는 지점에서</strong> 런타임이 채운다. 그래서 <code>catch</code> 안에서 <code>throw;</code>라고만 쓰면 잡은 예외가 원래 스택 추적을 그대로 달고 다시 올라가지만, <code>throw ex;</code>라고 쓰면 그 줄이 새 출발점이 되어 진짜 원인이 있던 위치가 지워진다. 로그만 보고 디버깅해야 하는 라이브 빌드에서는 이 차이가 크다. 원인을 감싸 올리고 싶으면 <code>throw new XxxException(message, ex)</code>로 <code>InnerException</code>에 원본을 담는다.</p><p><code>catch</code> 절은 위에서부터 차례로 검사해 타입이 맞는 <strong>첫 하나만</strong> 실행된다. 여러 개가 연달아 실행되는 일은 없다. 그래서 파생 예외를 위에, <code>Exception</code> 같은 기반 예외를 아래에 적어야 한다. 순서를 뒤집으면 아래 절이 영원히 도달할 수 없으므로 컴파일 오류가 난다. <code>finally</code>는 예외가 났든 안 났든, <code>catch</code>에서 다시 던졌든, <code>try</code> 안에서 <code>return</code>했든 제어가 블록을 떠날 때 실행된다. 그래서 자원 해제를 여기에 둔다.</p><pre><code>static void Load(string path)
+{
+    var file = File.OpenRead(path);
+    try
+    {
+        Parse(file);            // 여기서 FormatException이 났다고 하자
+    }
+    catch (FormatException ex)  // 구체적인 예외가 위
+    {
+        Debug.LogException(ex);
+        throw;                  // O: 원래 발생 위치가 StackTrace에 남는다
+        // throw ex;            // X: 스택 추적이 이 줄부터 다시 쌓인다
+    }
+    catch (Exception ex)        // 기반 예외가 아래
+    {
+        // 원인을 감싸 올린다. 원본은 InnerException에 남는다
+        throw new InvalidOperationException($&quot;{path} 로드 실패&quot;, ex);
+    }
+    finally
+    {
+        file.Dispose();         // 예외가 나든, return을 하든 실행된다
+    }
+}</code></pre><p>같은 예외 타입을 조건으로 나누고 싶으면 <code>catch (IOException e) when (조건)</code> 형태의 예외 필터를 쓴다. 필터 식은 스택을 되감기 <strong>전에</strong> 평가되므로, 조건이 맞지 않아 지나갈 때 원래 호출 스택과 지역 변수가 그대로 남는다. 잡아 놓고 <code>if</code>로 걸러 다시 던지는 방식보다 디버깅에 유리한 이유가 이것이다.</p><p>게임 클라이언트에서는 예외를 흐름 제어로 쓰지 않는다. 던지는 순간 스택 정보를 모으는 비용이 들어 매 프레임 도는 코드에서 반복되면 그대로 스파이크가 된다. 자주 일어나는 실패는 <code>int.TryParse</code>나 <code>Dictionary.TryGetValue</code>처럼 예외 없이 결과를 알려주는 형태로 처리한다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong><code>throw</code>와 <code>throw ex</code>의 차이</strong> — <code>throw;</code>는 잡은 예외를 그대로 다시 올려 원래 발생 위치의 스택 추적을 유지한다. <code>throw ex;</code>는 스택 추적이 그 <code>catch</code> 위치에서 다시 시작돼 진짜 원인을 잃어버린다. 재던질 때는 <code>throw;</code>를 쓰고, 문맥을 덧붙이고 싶으면 새 예외로 감싸 <code>InnerException</code>에 원본을 남긴다.</li><li><strong><code>try</code>-<code>catch</code>-<code>finally</code>의 실행 순서</strong> — <code>try</code>에서 예외가 나면 위에서부터 타입이 맞는 <code>catch</code> 하나만 실행되고, 그다음 <code>finally</code>가 실행된다. 여러 <code>catch</code>가 함께 실행되는 일은 없다.</li><li><strong><code>catch</code> 순서를 왜 신경 쓰나</strong> — 기반 예외를 위에 두면 아래 절이 절대 실행될 수 없어 컴파일러가 막는다. 구체적인 것부터 위에 쓴다.</li><li><strong><code>finally</code>가 실행되지 않는 경우가 있나</strong> — 거의 없다. <code>Environment.FailFast</code>처럼 프로세스가 그 자리에서 끝나는 경우뿐이라 자원 해제는 <code>finally</code>나 <code>using</code>에 맡겨도 된다. <code>using</code>은 컴파일러가 <code>try</code>-<code>finally</code>로 바꿔 준다.</li></ul><h3>흔한 오해</h3><ul><li><strong>타입이 맞는 <code>catch</code>가 여러 개면 전부 실행된다</strong> — 위에서부터 검사해 처음 맞는 하나만 실행하고 나머지는 건너뛴다.</li><li><strong><code>throw ex;</code>가 무엇을 던지는지 명시해서 더 낫다</strong> — 명시적으로 보일 뿐 스택 추적을 날린다. 같은 예외를 다시 올릴 거라면 <code>throw;</code>가 맞다.</li><li><strong><code>try</code>나 <code>catch</code> 안에서 <code>return</code>하면 <code>finally</code>를 건너뛴다</strong> — 반환값을 계산한 뒤 <code>finally</code>를 실행하고 나서 돌아간다.</li><li><strong><code>Exception</code> 하나로 다 잡아 두면 안전하다</strong> — 복구할 수 없는 예외까지 삼키면 잘못된 상태로 계속 돌다 엉뚱한 곳에서 터진다.</li><li><strong><code>try</code> 블록은 그 자체로 느리다</strong> — 예외가 나지 않으면 진입 비용은 사실상 없다. 비싼 것은 실제로 던지는 순간이다.</li></ul>
+<div class="refs"><h2>참고 자료</h2><ul><li><a href="https://learn.microsoft.com/ko-kr/dotnet/csharp/language-reference/statements/exception-handling-statements" target="_blank" rel="noopener">Microsoft Learn – 예외 처리 문(throw, try, catch, finally)</a></li><li><a href="https://learn.microsoft.com/ko-kr/dotnet/standard/exceptions/best-practices-for-exceptions" target="_blank" rel="noopener">Microsoft Learn – 예외에 대한 모범 사례</a></li><li><a href="https://learn.microsoft.com/ko-kr/dotnet/csharp/fundamentals/exceptions/creating-and-throwing-exceptions" target="_blank" rel="noopener">Microsoft Learn – 예외 생성 및 던지기</a></li></ul></div>
+</article>
+<div class="pager"><a href="01-06.html">← 런타임과 컴파일</a><a href="01-08.html">코드 문제 →</a></div>
+<footer>정리 글은 Claude가 썼다. 틀린 내용이 있을 수 있으니 중요한 내용은 참고 자료 원문으로 확인한다.</footer>
+</main>
+</body>
+</html>

@@ -5,56 +5,130 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>게임 클라이언트 면접 퀴즈</title>
 <style>
-  :root { --bg:#f7f7f5; --card:#fff; --text:#1f2328; --muted:#656d76; --line:#d0d7de; --accent:#2f6feb; --ok:#1a7f37; --bad:#cf222e; --robe:#2d333b; --wood:#9a6232; --wood-dark:#6e4424; }
-  @media (prefers-color-scheme: dark) {
-    :root { --bg:#0d1117; --card:#161b22; --text:#e6edf3; --muted:#8d96a0; --line:#30363d; --accent:#4493f8; --ok:#3fb950; --bad:#f85149; --robe:#05070a; --wood:#7a4c26; --wood-dark:#553418; }
+  :root {
+    --bg:#f2f5f7; --card:#fff; --panel:#f7f9fb; --text:#3c3c3c; --muted:#7a8b93; --line:#e2e8ea;
+    --green:#58cc02; --green-d:#46a302; --green-bg:#e7ffd1;
+    --blue:#1cb0f6; --blue-d:#1899d6; --blue-bg:#ddf4ff;
+    --red:#ff4b4b; --red-d:#e03131; --red-bg:#ffe3e3;
+    --gold:#ffc800; --gold-d:#e0ac00; --gold-bg:#fff6d6;
+    --purple:#ce82ff; --purple-d:#a855f7; --purple-bg:#f5e8ff;
+    --robe:#2d333b; --wood:#9a6232; --wood-dark:#6e4424;
   }
-  * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; }
-  main { max-width: 720px; margin: 0 auto; padding: 24px 16px 48px; }
-  h1 { font-size: 1.4rem; margin: 0; }
-  .top { justify-content: space-between; margin-bottom: 16px; }
-  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
-  .muted { color: var(--muted); font-size: .9rem; }
-  .row { display: flex; gap: 8px 12px; align-items: center; flex-wrap: wrap; }
-  .center { text-align: center; justify-content: center; }
-  .end { justify-content: flex-end; margin-top: 12px; }
-  .ok { color: var(--ok); }
-  .bad { color: var(--bad); }
-  button.primary { padding: 10px 20px; border: 0; border-radius: 10px; background: var(--accent); color: #fff; font: inherit; cursor: pointer; }
-  button.primary:disabled { opacity: .4; cursor: default; }
-  button.link { padding: 0; border: 0; background: none; color: var(--accent); font: inherit; font-size: .9rem; cursor: pointer; }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg:#131f24; --card:#1b2b32; --panel:#16252b; --text:#eaf2f6; --muted:#8fa7b2; --line:#2c4048;
+      --green:#58cc02; --green-d:#3f8f06; --green-bg:#1e3a15;
+      --blue:#1cb0f6; --blue-d:#1583b6; --blue-bg:#12303d;
+      --red:#ff5b5b; --red-d:#c73a3a; --red-bg:#3a1c1e;
+      --gold:#ffc800; --gold-d:#bd9200; --gold-bg:#3a2f12;
+      --purple:#ce82ff; --purple-d:#9b5fc0; --purple-bg:#2e2036;
+      --robe:#05070a; --wood:#7a4c26; --wood-dark:#553418;
+    }
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 600 16px/1.6 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  main { max-width: 680px; margin: 0 auto; padding: 16px 16px 40px; }
+  h1 { font-size: 1.15rem; font-weight: 800; margin: 0; letter-spacing: -.02em; }
+  h2 { font-size: 1.05rem; font-weight: 800; margin: 24px 0 10px; }
+  p { margin: 8px 0; }
+  .muted { color: var(--muted); font-weight: 600; font-size: .9rem; }
+  .center { text-align: center; }
+  .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .row.center { justify-content: center; }
+  .ok { color: var(--green-d); }
+  .bad { color: var(--red-d); }
+  [hidden] { display: none !important; }
 
-  /* 모드 선택 */
-  .modes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 16px 0; }
-  .mode { padding: 14px 12px; border: 1px solid var(--line); border-radius: 12px; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
-  .mode:hover { border-color: var(--accent); }
-  .mode strong, .mode span { display: block; }
-  .mode strong { font-size: 1.15rem; }
+  /* 맨 위 줄 */
+  .top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+  .icon-btn { border: 2px solid var(--line); background: var(--card); color: var(--muted); font: inherit; font-size: .85rem;
+    font-weight: 800; padding: 6px 12px; border-radius: 999px; cursor: pointer; }
+  .icon-btn:hover { border-color: var(--blue); color: var(--blue); }
 
-  /* 진행 표시줄: 모드, 목숨, 맞힌 문제 수 */
-  .hud { position: sticky; top: 0; z-index: 1; justify-content: space-between; padding: 10px 16px; }
-  .hud > * { white-space: nowrap; }
-  #giveUp.armed { color: var(--bad); }
-  .record { margin: 12px 0 0; padding: 10px 14px; border-radius: 10px; background: color-mix(in srgb, var(--accent) 14%, transparent); font-weight: 700; }
+  /* 버튼 */
+  .btn { border: 0; border-radius: 16px; padding: 14px 20px; font: inherit; font-weight: 800; font-size: 1rem;
+    color: #fff; background: var(--green); box-shadow: 0 4px 0 var(--green-d); cursor: pointer;
+    transition: transform .06s ease, box-shadow .06s ease; letter-spacing: -.01em; }
+  .btn:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 0 0 var(--green-d); }
+  .btn:disabled { background: var(--line); color: var(--muted); box-shadow: none; cursor: default; }
+  .btn.blue { background: var(--blue); box-shadow: 0 4px 0 var(--blue-d); }
+  .btn.blue:active { box-shadow: 0 0 0 var(--blue-d); }
+  .btn.red { background: var(--red); box-shadow: 0 4px 0 var(--red-d); }
+  .btn.red:active { box-shadow: 0 0 0 var(--red-d); }
+  .btn.wide { width: 100%; }
+  .link { border: 0; background: none; color: var(--blue); font: inherit; font-weight: 800; font-size: .9rem; cursor: pointer; padding: 6px; }
+
+  .card { background: var(--card); border: 2px solid var(--line); border-radius: 20px; padding: 18px; margin-bottom: 14px; }
+  .alert { background: var(--red-bg); color: var(--red-d); border-radius: 14px; padding: 12px 14px; font-weight: 700; }
+
+  /* 로비 */
+  .banner { display: flex; align-items: center; gap: 12px; background: var(--gold-bg); border: 2px solid var(--gold);
+    border-radius: 20px; padding: 14px 18px; font-weight: 800; margin-bottom: 14px; }
+  .banner .big { font-size: 1.6rem; }
+  .tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+  .tile { background: var(--panel); border: 2px solid var(--line); border-radius: 18px; padding: 12px 14px; text-align: center; }
+  .tile b { display: block; font-size: 1.5rem; font-weight: 800; }
+  .tile span { color: var(--muted); font-size: .82rem; font-weight: 700; }
+  .modes { display: grid; gap: 12px; }
+  .mode { display: flex; gap: 14px; align-items: center; text-align: left; width: 100%; background: var(--card);
+    border: 2px solid var(--line); border-bottom-width: 5px; border-radius: 20px; padding: 16px; font: inherit;
+    color: inherit; cursor: pointer; transition: transform .06s ease; }
+  .mode:hover { border-color: var(--blue); }
+  .mode:active { transform: translateY(2px); border-bottom-width: 3px; }
+  .mode .emoji { flex: none; width: 52px; height: 52px; border-radius: 16px; display: grid; place-items: center; font-size: 1.7rem; }
+  .mode.free .emoji { background: var(--blue-bg); }
+  .mode.exam .emoji { background: var(--red-bg); }
+  .mode.library .emoji { background: var(--purple-bg); }
+  .mode.resume { border-color: var(--green); }
+  .mode.resume .emoji { background: var(--green-bg); color: var(--green-d); }
+  .mode strong { display: block; font-size: 1.15rem; font-weight: 800; }
+  .mode .desc { display: block; color: var(--muted); font-size: .86rem; font-weight: 600; line-height: 1.45; margin-top: 2px; }
+  .mode .rec { display: inline-block; margin-top: 6px; background: var(--panel); border-radius: 999px;
+    padding: 2px 10px; font-size: .78rem; font-weight: 800; color: var(--muted); }
+
+  /* 진행 표시줄 */
+  #hud { position: sticky; top: 0; z-index: 5; background: var(--bg); padding: 8px 0 10px; margin-bottom: 6px; }
+  .hud-row { display: flex; align-items: center; gap: 12px; }
+  .quit-link { display: block; margin: 16px auto 0; border: 0; background: none; color: var(--muted);
+    font: inherit; font-weight: 800; font-size: .9rem; padding: 10px 16px; border-radius: 12px; cursor: pointer; }
+  .quit-link:hover { color: var(--red); }
+  .quit-link.armed { background: var(--red-bg); color: var(--red-d); }
+  .bar { flex: 1; height: 16px; background: var(--line); border-radius: 999px; overflow: hidden; }
+  .bar div { height: 100%; width: 0; background: var(--green); border-radius: 999px; transition: width .35s ease; }
+  .hearts { flex: none; color: var(--red); font-weight: 800; display: flex; align-items: center; gap: 4px; }
   #heart { display: inline-block; }
   #heart.break { animation: break .7s ease-out; }
   @keyframes break { 20% { transform: scale(1.6) rotate(-14deg); } 40% { transform: scale(1.4) rotate(14deg); } 60% { transform: scale(1.2) rotate(-8deg); } }
+  .hud-note { display: flex; justify-content: space-between; gap: 8px; margin-top: 6px; color: var(--muted);
+    font-size: .8rem; font-weight: 700; }
+  .hud-note span { white-space: nowrap; }
 
-  /* 먼저 풀 분야 (좁은 화면에서는 접힌 채로 시작) */
-  summary { cursor: pointer; padding: 4px 0; }
-  details[open] summary { margin-bottom: 6px; }
+  /* 접이식 패널 */
+  .panel { background: var(--card); border: 2px solid var(--line); border-radius: 18px; padding: 12px 16px; margin-bottom: 10px; }
+  .panel summary { cursor: pointer; font-weight: 800; list-style: none; display: flex; justify-content: space-between; gap: 8px; }
+  .panel summary::-webkit-details-marker { display: none; }
+  .panel summary::after { content: "▾"; color: var(--muted); }
+  .panel[open] summary::after { content: "▴"; }
   .topics { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 4px; }
-  .topic { display: flex; align-items: center; gap: 6px; padding: 5px 10px; border: 1px solid var(--line); border-radius: 999px; font-size: .9rem; cursor: pointer; user-select: none; }
-  .topic input { margin: 0; accent-color: var(--accent); }
-  .topic small { color: var(--muted); }
-  .topic.done { border-color: var(--ok); }
-  .topic.done small { color: var(--ok); }
+  .topic { display: flex; align-items: center; gap: 6px; padding: 7px 12px; border: 2px solid var(--line);
+    border-radius: 999px; font-size: .86rem; font-weight: 700; cursor: pointer; user-select: none; }
+  .topic:hover { border-color: var(--blue); }
+  .topic input { margin: 0; accent-color: var(--blue); }
+  .topic small { color: var(--muted); font-weight: 800; }
+  .topic.done { border-color: var(--green); background: var(--green-bg); }
+  .topic.done small { color: var(--green-d); }
+  .recent { list-style: none; margin: 10px 0 0; padding: 0; font-size: .88rem; font-weight: 600; }
+  .recent li { display: flex; gap: 8px; align-items: baseline; padding: 6px 0; border-top: 1px solid var(--line); }
+  .recent li:first-child { border-top: 0; }
+  .recent a { text-decoration: none; }
 
   /* 면접관 */
-  .stage { display: flex; flex-direction: column; align-items: center; margin-top: 12px; }
-  .bubble { position: relative; min-height: 2.2em; padding: 4px 14px; border: 1px solid var(--line); border-radius: 14px; background: var(--card); font-weight: 700; visibility: hidden; }
-  .bubble::after { content: ""; position: absolute; left: 50%; bottom: -7px; width: 12px; height: 12px; margin-left: -6px; background: var(--card); border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); transform: rotate(45deg); }
+  .stage { display: flex; flex-direction: column; align-items: center; margin-top: 6px; }
+  .bubble { position: relative; min-height: 2.4em; padding: 8px 16px; border: 2px solid var(--line); border-radius: 16px;
+    background: var(--card); font-weight: 800; visibility: hidden; }
+  .bubble::after { content: ""; position: absolute; left: 50%; bottom: -8px; width: 12px; height: 12px; margin-left: -6px;
+    background: var(--card); border-right: 2px solid var(--line); border-bottom: 2px solid var(--line); transform: rotate(45deg); }
   .bubble.show { visibility: visible; animation: pop .25s ease-out; }
   @keyframes pop { from { opacity: 0; transform: translateY(6px) scale(.9); } }
   #npc { width: 300px; max-width: 85%; margin-top: 8px; cursor: pointer; outline: none; overflow: visible; }
@@ -76,108 +150,167 @@
   #gavel { transform-box: view-box; transform-origin: 214px 128px; transform: rotate(35deg); }
   #npc.knock #gavel { animation: knock .6s ease-in; }
   @keyframes knock { 0%, 50%, 100% { transform: rotate(35deg); } 25%, 75% { transform: rotate(0deg); } }
-  #result p { margin: 12px 0 16px; }
+
+  /* 결과 */
+  .result { text-align: center; }
+  .result .title { font-size: 1.4rem; font-weight: 800; margin: 6px 0 12px; }
 
   /* 문제 */
-  #quiz:not([hidden]) { animation: appear .35s ease-out; }
-  @keyframes appear { from { opacity: 0; transform: translateY(12px) scale(.97); } }
-  .question { white-space: pre-wrap; font-size: 1.05rem; margin: 8px 0 16px; }
-  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .92em; background: color-mix(in srgb, var(--line) 45%, transparent); padding: 1px 5px; border-radius: 4px; }
-  .choice { display: block; width: 100%; text-align: left; white-space: pre-wrap; margin: 8px 0; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; background: transparent; color: inherit; font: inherit; cursor: pointer; }
-  .choice:not(:disabled):hover { border-color: var(--accent); }
+  #quiz { animation: appear .3s ease-out; }
+  @keyframes appear { from { opacity: 0; transform: translateY(10px); } }
+  .qhead { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; margin-bottom: 8px; }
+  .chip { background: var(--blue-bg); color: var(--blue-d); border-radius: 999px; padding: 4px 12px; font-size: .8rem; font-weight: 800; }
+  .question { white-space: pre-wrap; font-size: 1.15rem; font-weight: 800; line-height: 1.55; margin: 6px 0 16px; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em;
+    background: var(--panel); border: 1px solid var(--line); padding: 1px 6px; border-radius: 6px; font-weight: 700; }
+  .choice { display: flex; gap: 12px; align-items: center; width: 100%; text-align: left; white-space: pre-wrap;
+    margin: 10px 0; padding: 14px 16px; border: 2px solid var(--line); border-bottom-width: 4px; border-radius: 16px;
+    background: var(--card); color: inherit; font: inherit; font-weight: 600; cursor: pointer; transition: transform .06s ease; }
+  .choice:not(:disabled):hover { border-color: var(--blue); }
+  .choice:not(:disabled):active { transform: translateY(2px); border-bottom-width: 2px; }
   .choice:disabled { cursor: default; }
-  .choice.picked { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); }
-  .choice.right { border-color: var(--ok); background: color-mix(in srgb, var(--ok) 14%, transparent); }
-  .choice.wrong { border-color: var(--bad); background: color-mix(in srgb, var(--bad) 14%, transparent); }
-  .choice.dim { opacity: .55; }
-  .choice b { color: var(--muted); margin-right: 8px; }
-  .feedback { margin-top: 12px; padding: 12px 14px; border-radius: 10px; background: color-mix(in srgb, var(--line) 30%, transparent); }
-  .feedback p { margin: 6px 0 0; }
-  .study { display: inline-block; margin-top: 4px; padding: 6px 12px; border: 1px solid var(--accent); border-radius: 999px; color: var(--accent); text-decoration: none; font-size: .9rem; }
-  footer { color: var(--muted); font-size: .8rem; margin-top: 24px; }
-  [hidden] { display: none !important; }
-  @media (prefers-reduced-motion: reduce) { * { animation-duration: .01ms !important; animation-delay: 0s !important; } }
+  .choice b { flex: none; width: 28px; height: 28px; border: 2px solid var(--line); border-radius: 9px;
+    display: grid; place-items: center; font-size: .8rem; color: var(--muted); }
+  .choice.picked { border-color: var(--blue); background: var(--blue-bg); color: var(--blue-d); }
+  .choice.picked b { border-color: var(--blue); color: var(--blue-d); }
+  .choice.right { border-color: var(--green); background: var(--green-bg); color: var(--green-d); }
+  .choice.right b { border-color: var(--green); color: var(--green-d); }
+  .choice.wrong { border-color: var(--red); background: var(--red-bg); color: var(--red-d); }
+  .choice.wrong b { border-color: var(--red); color: var(--red-d); }
+  .choice.dim { opacity: .5; }
+
+  /* 아래 붙는 채점 막대 */
+  .actions { position: sticky; bottom: 0; margin: 16px -16px -40px; padding: 14px 16px 20px; background: var(--card);
+    border-top: 2px solid var(--line); }
+  .actions.ok { background: var(--green-bg); border-color: transparent; }
+  .actions.bad { background: var(--red-bg); border-color: transparent; }
+  #feedback { max-height: 42vh; overflow-y: auto; margin-bottom: 12px; }
+  #feedback .head { display: flex; align-items: center; gap: 10px; font-size: 1.1rem; font-weight: 800; }
+  #feedback .head .mark { width: 34px; height: 34px; border-radius: 999px; display: grid; place-items: center;
+    background: var(--card); font-size: 1.1rem; }
+  #feedback p { font-size: .93rem; font-weight: 600; margin: 8px 0 0; }
+  .study { display: inline-block; margin-top: 10px; padding: 8px 14px; border-radius: 999px; background: var(--card);
+    color: var(--blue-d); text-decoration: none; font-size: .86rem; font-weight: 800; }
+
+  /* 도서관 */
+  .lib-topic { margin-bottom: 14px; }
+  .lib-topic h3 { display: flex; justify-content: space-between; align-items: baseline; gap: 8px;
+    font-size: 1rem; font-weight: 800; margin: 0 0 10px; }
+  .lib-topic h3 a { color: var(--purple-d); text-decoration: none; font-size: .82rem; }
+  .lib-list { display: flex; flex-wrap: wrap; gap: 8px; }
+  .lib-list a { display: flex; gap: 6px; align-items: baseline; padding: 8px 14px; border: 2px solid var(--line);
+    border-radius: 999px; text-decoration: none; color: inherit; font-size: .88rem; font-weight: 700; }
+  .lib-list a:hover { border-color: var(--purple); background: var(--purple-bg); }
+  .lib-list small { color: var(--muted); font-weight: 800; }
+
+  footer { color: var(--muted); font-size: .78rem; font-weight: 600; margin-top: 28px; line-height: 1.6; }
+  @media (prefers-reduced-motion: reduce) { * { animation-duration: .01ms !important; animation-delay: 0s !important; transition: none !important; } }
 </style>
 </head>
 <body>
 <main>
-  <div class="row top"><h1>게임 클라이언트 면접 퀴즈</h1><button id="sound" class="link"></button></div>
-  <p id="loadError" class="bad" hidden>문제 목록을 불러오지 못했습니다. 문제 목록에 문법 오류가 있는지 확인하세요.</p>
-  <p id="invalid" class="bad" hidden></p>
+  <div class="top">
+    <h1>게임 클라이언트 면접 퀴즈</h1>
+    <button id="sound" class="icon-btn"></button>
+  </div>
+  <p id="loadError" class="alert" hidden>문제 목록을 불러오지 못했습니다. 문제 목록에 문법 오류가 있는지 확인하세요.</p>
+  <p id="invalid" class="alert" hidden></p>
 
-  <section id="modes" class="card" hidden>
-    <strong>모드를 고르세요</strong>
-    <p class="muted">면접관을 누르면 문제를 하나씩 냅니다. 틀리면 목숨이 하나 줄고, 틀린 문제는 나중에 다시 나옵니다. 목숨이 남아 있는 동안 모든 문제를 맞히면 합격입니다.</p>
-    <p id="bestLine" class="record" hidden></p>
-    <p id="stat" class="muted" hidden></p>
+  <section id="modes" hidden>
+    <div id="bestLine" class="banner" hidden></div>
+    <div id="tiles" class="tiles" hidden>
+      <div class="tile"><b id="tileDone">0</b><span>푼 문제</span></div>
+      <div class="tile"><b id="tileRate">0%</b><span>정답률</span></div>
+    </div>
     <div id="modeList" class="modes"></div>
     <div class="row center"><button id="download" class="link">기록 파일 받기</button></div>
   </section>
 
-  <div id="hud" class="card row hud" hidden>
-    <span id="modeName"></span>
-    <span><span id="heart">❤️</span> <strong id="lives"></strong></span>
-    <span id="progress"></span>
-    <button id="giveUp" class="link">포기</button>
+  <section id="library" hidden>
+    <div class="row"><button id="libBack" class="link">← 처음으로</button></div>
+    <h2>도서관</h2>
+    <p class="muted">퀴즈에 나오는 개념을 분야별로 정리해 뒀다. 소주제를 누르면 새 탭에서 열린다.</p>
+    <div id="libList"></div>
+  </section>
+
+  <div id="hud" hidden>
+    <div class="hud-row">
+      <div class="bar"><div id="barFill"></div></div>
+      <span id="hearts" class="hearts"><span id="heart">❤️</span><strong id="lives"></strong></span>
+    </div>
+    <div class="hud-note"><span id="modeName"></span><span id="progress"></span></div>
   </div>
 
-  <section id="office" class="card" hidden>
-    <details id="topicBox">
-      <summary><strong>먼저 풀 분야</strong> <span id="topicSummary" class="muted"></span></summary>
+  <section id="office" hidden>
+    <details id="topicBox" class="panel">
+      <summary><span>분야 고르기</span> <span id="topicSummary" class="muted"></span></summary>
       <div class="row"><button id="toggleAll" class="link"></button></div>
       <div id="topics" class="topics"></div>
     </details>
-    <div class="stage">
-      <div id="bubble" class="bubble"></div>
-      <svg id="npc" viewBox="0 0 240 220" role="button" tabindex="0" aria-label="면접관에게 질문 받기">
-        <path class="robe" d="M56 170 C56 118 82 96 120 96 C158 96 184 118 184 170 Z"/>
-        <path class="collar" d="M108 97 L120 122 L132 97 Z"/>
-        <path class="sleeve" d="M74 118 Q54 136 68 148"/>
-        <path class="sleeve" d="M166 118 Q196 118 210 127"/>
-        <rect class="skin" x="112" y="84" width="16" height="12"/>
-        <circle class="skin" cx="120" cy="62" r="28"/>
-        <path class="hair" d="M92 60 C92 28 148 28 148 60 C140 47 131 43 120 43 C109 43 100 47 92 60 Z"/>
-        <circle class="hair" cx="93" cy="64" r="7"/>
-        <circle class="hair" cx="147" cy="64" r="7"/>
-        <path class="ink" d="M101 51 L114 50 M126 50 L139 51"/>
-        <circle class="lens" cx="109" cy="64" r="9"/>
-        <circle class="lens" cx="131" cy="64" r="9"/>
-        <path class="ink" d="M100 64 A9 9 0 1 0 118 64 A9 9 0 1 0 100 64 M122 64 A9 9 0 1 0 140 64 A9 9 0 1 0 122 64 M118 64 H122"/>
-        <circle class="eye" cx="109" cy="65" r="2"/>
-        <circle class="eye" cx="131" cy="65" r="2"/>
-        <path class="ink mouth flat" d="M112 80 H128"/>
-        <path class="ink mouth smile" d="M110 77 Q120 87 130 77"/>
-        <path class="ink mouth frown" d="M111 83 Q120 75 129 83"/>
-        <rect class="wood" x="16" y="156" width="208" height="64"/>
-        <rect x="36" y="172" width="168" height="36" rx="4" fill="none" stroke="var(--wood-dark)" stroke-width="3"/>
-        <rect class="wood-dark" x="8" y="148" width="224" height="12" rx="3"/>
-        <circle class="skin" cx="70" cy="146" r="7"/>
-        <rect class="plate" x="85" y="124" width="70" height="24" rx="3"/>
-        <text x="120" y="141" text-anchor="middle">면접관</text>
-        <rect class="wood-dark" x="160" y="142" width="32" height="7" rx="2"/>
-        <g id="gavel">
-          <rect class="wood" x="182" y="124" width="32" height="7" rx="3.5"/>
-          <rect class="wood-dark" x="164" y="112" width="20" height="30" rx="4"/>
-        </g>
-        <circle class="skin" cx="214" cy="128" r="8"/>
-      </svg>
-    </div>
-    <p id="status" class="muted center"></p>
-    <div id="result" class="center" hidden>
-      <p id="resultText"></p>
-      <button id="again" class="primary">다시 도전</button>
+    <details id="recentBox" class="panel" hidden>
+      <summary><span>최근 문제</span> <span class="muted">최근에 푼 10문제</span></summary>
+      <ul id="recent" class="recent"></ul>
+    </details>
+    <div class="card">
+      <div class="stage">
+        <div id="bubble" class="bubble"></div>
+        <svg id="npc" viewBox="0 0 240 220" role="button" tabindex="0" aria-label="면접관에게 질문 받기">
+<path class="robe" d="M56 170 C56 118 82 96 120 96 C158 96 184 118 184 170 Z"/>
+<path class="collar" d="M108 97 L120 122 L132 97 Z"/>
+<path class="sleeve" d="M74 118 Q54 136 68 148"/>
+<path class="sleeve" d="M166 118 Q196 118 210 127"/>
+<rect class="skin" x="112" y="84" width="16" height="12"/>
+<circle class="skin" cx="120" cy="62" r="28"/>
+<path class="hair" d="M92 60 C92 28 148 28 148 60 C140 47 131 43 120 43 C109 43 100 47 92 60 Z"/>
+<circle class="hair" cx="93" cy="64" r="7"/>
+<circle class="hair" cx="147" cy="64" r="7"/>
+<path class="ink" d="M101 51 L114 50 M126 50 L139 51"/>
+<circle class="lens" cx="109" cy="64" r="9"/>
+<circle class="lens" cx="131" cy="64" r="9"/>
+<path class="ink" d="M100 64 A9 9 0 1 0 118 64 A9 9 0 1 0 100 64 M122 64 A9 9 0 1 0 140 64 A9 9 0 1 0 122 64 M118 64 H122"/>
+<circle class="eye" cx="109" cy="65" r="2"/>
+<circle class="eye" cx="131" cy="65" r="2"/>
+<path class="ink mouth flat" d="M112 80 H128"/>
+<path class="ink mouth smile" d="M110 77 Q120 87 130 77"/>
+<path class="ink mouth frown" d="M111 83 Q120 75 129 83"/>
+<rect class="wood" x="16" y="156" width="208" height="64"/>
+<rect x="36" y="172" width="168" height="36" rx="4" fill="none" stroke="var(--wood-dark)" stroke-width="3"/>
+<rect class="wood-dark" x="8" y="148" width="224" height="12" rx="3"/>
+<circle class="skin" cx="70" cy="146" r="7"/>
+<rect class="plate" x="85" y="124" width="70" height="24" rx="3"/>
+<text x="120" y="141" text-anchor="middle">면접관</text>
+<rect class="wood-dark" x="160" y="142" width="32" height="7" rx="2"/>
+<g id="gavel">
+<rect class="wood" x="182" y="124" width="32" height="7" rx="3.5"/>
+<rect class="wood-dark" x="164" y="112" width="20" height="30" rx="4"/>
+</g>
+<circle class="skin" cx="214" cy="128" r="8"/>
+</svg>
+      </div>
+      <p id="status" class="muted center"></p>
+      <div class="row center"><button id="askBtn" class="btn wide">문제 받기</button></div>
+      <button id="giveUp" class="quit-link">← 그만두고 나가기</button>
+      <div id="result" class="result" hidden>
+        <p id="resultText"></p>
+        <button id="retry" class="btn wide" hidden>한 번 더 도전</button>
+        <button id="again" class="btn wide">로비로 이동</button>
+      </div>
     </div>
   </section>
 
-  <section id="quiz" class="card" hidden>
-    <div class="row muted"><span id="topic"></span><span id="source"></span></div>
-    <div id="question" class="question"></div>
-    <div id="choices"></div>
-    <div id="feedback" class="feedback" hidden></div>
-    <div class="row end"><button id="next" class="primary" disabled>제출</button></div>
+  <section id="quiz" hidden>
+    <div class="card">
+      <div class="qhead"><span id="topic" class="chip"></span><span id="source" class="muted"></span></div>
+      <div id="question" class="question"></div>
+      <div id="choices"></div>
+      <div id="actions" class="actions">
+        <div id="feedback" hidden></div>
+        <button id="next" class="btn wide" disabled>제출</button>
+      </div>
+    </div>
   </section>
 
-  <footer>공개된 면접 질문 목록을 참고해 새로 만든 문제입니다. 정답과 해설이 틀릴 수 있습니다. 면접관을 누르거나 Enter로 문제를 받고, 숫자 키 1~5로 고른 뒤 Enter로 제출할 수 있습니다. 진행 중인 게임과 최고 기록은 이 브라우저에 저장됩니다. 효과음: Kenney (CC0).</footer>
+  <footer>공개된 면접 질문 목록을 참고해 새로 만든 문제입니다. 정답과 해설이 틀릴 수 있습니다. 면접관을 누르거나 Enter로 문제를 받고, 숫자 키 1~5로 고른 뒤 Enter로 제출할 수 있습니다. 진행 중인 게임과 기록은 이 브라우저에 저장됩니다. 효과음: Kenney (CC0).</footer>
 </main>
 
 <script>
@@ -6291,13 +6424,14 @@ window.QUESTIONS = [
 ];
 </script>
 <script>
-const LABELS = ["①", "②", "③", "④", "⑤"];
+const LABELS = ["1", "2", "3", "4", "5"];
 const STORE = "game-client-quiz";
+// 모드는 둘뿐이다. limit: 그만큼 풀면 끝난다, allTopics: 분야를 고를 수 없다, endless: 목숨도 끝도 없다
 const MODES = [
-  { id: "easy", name: "이지", lives: 20 },
-  { id: "normal", name: "노멀", lives: 10 },
-  { id: "hard", name: "하드", lives: 5 },
-  { id: "extreme", name: "극한", lives: 1 },
+  { id: "free", name: "빠른대전", icon: "⚡", lives: 0, endless: true,
+    desc: "목숨 없이 연습한다. 고른 분야에서 중복 없이 나오고, 한 바퀴를 돌면 다시 섞는다" },
+  { id: "exam", name: "실전", icon: "🎯", lives: 2, limit: 10, allTopics: true,
+    desc: "목숨 2개로 10문제. 분야를 고를 수 없고, 같은 문제는 다시 나오지 않는다" },
 ];
 const $ = (id) => document.getElementById(id);
 
@@ -6343,19 +6477,38 @@ const QUESTIONS = (window.QUESTIONS || []).filter((q, i) => {
 });
 const TOPICS = [...new Set(QUESTIONS.map((q) => q.topic))];
 
-// 저장하는 것: 먼저 풀 분야, 푼 기록 전체, 소리 설정, 모드별 최고 기록, 진행 중인 게임(run)
-// run = { mode, lives, correct: 맞힌 문제 id 목록, wrong: 틀린 횟수 }
+// 도서관 목록: 분야 → 소주제(공부 자료 한 편)와 그 소주제의 문제 수
+const LIBRARY = TOPICS.map((topic) => {
+  const subs = [];
+  QUESTIONS.filter((q) => q.topic === topic).forEach((q) => {
+    const [file, sub] = q.source.split(" · ");
+    const found = subs.find((s) => s.sub === sub);
+    if (found) found.count++;
+    else subs.push({ file, sub, count: 1 });
+  });
+  return { topic, subs };
+});
+const STUDY_COUNT = LIBRARY.reduce((n, t) => n + t.subs.length, 0);
+const STUDY = {"01-CSharp.md · 타입과 메모리":"01-01.html","01-CSharp.md · 객체지향 문법":"01-02.html","01-CSharp.md · 델리게이트·이벤트·람다":"01-03.html","01-CSharp.md · 컬렉션·문자열·LINQ":"01-04.html","01-CSharp.md · 가비지 컬렉션":"01-05.html","01-CSharp.md · 런타임과 컴파일":"01-06.html","01-CSharp.md · 예외 처리":"01-07.html","01-CSharp.md · 코드 문제":"01-08.html","02-Unity-엔진.md · 기본 구조":"02-01.html","02-Unity-엔진.md · 생명주기와 스크립팅":"02-02.html","02-Unity-엔진.md · 직렬화와 데이터":"02-03.html","02-Unity-엔진.md · 스크립팅 백엔드":"02-04.html","02-Unity-엔진.md · 에셋과 리소스 관리":"02-05.html","02-Unity-엔진.md · UI":"02-06.html","02-Unity-엔진.md · 물리":"02-07.html","02-Unity-엔진.md · 애니메이션·카메라·입력":"02-08.html","02-Unity-엔진.md · AI와 길찾기":"02-09.html","02-Unity-엔진.md · 빌드와 플랫폼":"02-10.html","02-Unity-엔진.md · DOTS와 최신 기능":"02-11.html","03-최적화-메모리.md · 접근법":"03-01.html","03-최적화-메모리.md · 프로파일링과 병목 진단":"03-02.html","03-최적화-메모리.md · CPU 쪽 최적화":"03-03.html","03-최적화-메모리.md · 메모리와 GC":"03-04.html","03-최적화-메모리.md · 캐시 친화와 데이터 지향":"03-05.html","03-최적화-메모리.md · 모바일과 상황형 질문":"03-06.html","04-그래픽스-렌더링.md · 렌더링 파이프라인":"04-01.html","04-그래픽스-렌더링.md · 컬링과 가시성":"04-02.html","04-그래픽스-렌더링.md · 드로우 콜과 배칭":"04-03.html","04-그래픽스-렌더링.md · 텍스처":"04-04.html","04-그래픽스-렌더링.md · 투명도와 버퍼":"04-05.html","04-그래픽스-렌더링.md · 조명과 그림자":"04-06.html","04-그래픽스-렌더링.md · Unity 렌더 파이프라인과 셰이더":"04-07.html","04-그래픽스-렌더링.md · 모바일 GPU와 그래픽스 API":"04-08.html","04-그래픽스-렌더링.md · 디버깅과 설계":"04-09.html","05-게임수학-물리.md · 벡터":"05-01.html","05-게임수학-물리.md · 행렬과 좌표계":"05-02.html","05-게임수학-물리.md · 회전":"05-03.html","05-게임수학-물리.md · 보간":"05-04.html","05-게임수학-물리.md · 충돌과 교차 판정":"05-05.html","05-게임수학-물리.md · 물리 시뮬레이션":"05-06.html","05-게임수학-물리.md · 기초 수학":"05-07.html","06-설계-아키텍처.md · 객체지향":"06-01.html","06-설계-아키텍처.md · 디자인 패턴":"06-02.html","06-설계-아키텍처.md · 아키텍처":"06-03.html","06-설계-아키텍처.md · 게임 시스템 설계":"06-04.html","07-자료구조-알고리즘.md · 복잡도":"07-01.html","07-자료구조-알고리즘.md · 배열과 리스트":"07-02.html","07-자료구조-알고리즘.md · 스택·큐·우선순위 큐":"07-03.html","07-자료구조-알고리즘.md · 해시":"07-04.html","07-자료구조-알고리즘.md · 트리와 힙":"07-05.html","07-자료구조-알고리즘.md · 그래프와 경로 탐색":"07-06.html","07-자료구조-알고리즘.md · 정렬과 탐색":"07-07.html","07-자료구조-알고리즘.md · 공간 분할":"07-08.html","07-자료구조-알고리즘.md · 풀이 기법":"07-09.html","07-자료구조-알고리즘.md · 코딩 테스트와 실기 유형":"07-10.html","08-운영체제-동시성.md · 프로세스와 스레드":"08-01.html","08-운영체제-동시성.md · 메모리 구조":"08-02.html","08-운영체제-동시성.md · 가상 메모리":"08-03.html","08-운영체제-동시성.md · 스케줄링과 커널":"08-04.html","08-운영체제-동시성.md · 컴퓨터 구조":"08-05.html","08-운영체제-동시성.md · 동기화":"08-06.html","08-운영체제-동시성.md · 비동기":"08-07.html","08-운영체제-동시성.md · Unity와 멀티스레딩":"08-08.html","09-네트워크.md · 계층 모델":"09-01.html","09-네트워크.md · TCP와 UDP":"09-02.html","09-네트워크.md · 소켓과 HTTP":"09-03.html","09-네트워크.md · 멀티플레이 구조":"09-04.html","09-네트워크.md · 동기화 기법":"09-05.html","09-네트워크.md · 클라이언트-서버 신뢰성":"09-06.html","09-네트워크.md · 보안":"09-07.html","10-CPP-기초.md · 클래스와 가상 함수":"10-01.html","10-CPP-기초.md · 메모리와 포인터":"10-02.html","10-CPP-기초.md · 현대 C++":"10-03.html","10-CPP-기초.md · STL":"10-04.html","10-CPP-기초.md · 컴파일과 링크":"10-05.html"};
+const studyLink = (file, sub) => `공부자료/${STUDY[`${file} · ${sub}`] || `${file.slice(0, 2)}.html`}`;
+const studyUrl = (q) => studyLink(...q.source.split(" · "));
+
+// 저장하는 것: 고른 분야, 푼 기록 전체, 소리 설정, 모드별 최고 기록, 진행 중인 게임(run)
+// run = { mode, lives, correct: 맞힌 문제 id, asked: 이번 바퀴에 낸 문제 id, wrong, cycle }
 let state = { selected: TOPICS, history: [], sound: true, best: {}, run: null };
 try { state = { ...state, ...JSON.parse(localStorage.getItem(STORE)) }; } catch {}
 delete state.solved; // 뽑기 기계 시절의 회차 기록
 state.selected = state.selected.filter((t) => TOPICS.includes(t));
+if (state.run && !modeOf(state.run.mode)) state.run = null; // 없어진 모드(이지·노멀 등)로 하던 판은 버린다
+if (state.run && !state.run.asked) state.run.asked = [...state.run.correct];
 const save = () => { try { localStorage.setItem(STORE, JSON.stringify(state)); } catch {} };
 
 let current = null; // 지금 푸는 문제 { q, order, selected, chosen }
-let lastId = null;  // 방금 낸 문제. 틀린 문제를 곧바로 다시 내지 않으려고 기억한다
-let result = null;  // 끝난 게임 { mode, cleared, correct, wrong, lives, record }
+let lastId = null;  // 방금 낸 문제. 같은 문제를 바로 다시 내지 않으려고 기억한다
+let result = null;  // 끝난 게임 { kind, mode, correct, asked, wrong, lives, record }
 let busy = false;   // 의사봉을 두드리는 중
 
+function modeOf(id) { return MODES.find((m) => m.id === id); }
 function shuffle(arr) {
   for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -6369,25 +6522,20 @@ const format = (text) => String(text)
   .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
   .replace(/`([^`]+)`/g, "<code>$1</code>");
 
-// 공부 자료: 문제의 근거가 "03-최적화-메모리.md · 스크립트 최적화"면 공부자료/03.html#스크립트-최적화 를 연다
-const STUDY_READY = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10"];
-function studyUrl(q) {
-  const [file, subtopic] = q.source.split(" · ");
-  const num = file.slice(0, 2);
-  return STUDY_READY.includes(num) ? `공부자료/${num}.html#${encodeURIComponent(subtopic.replace(/ /g, "-"))}` : "";
-}
-
-// "2026-09-15 14:32:05" 형식의 현지 시각
+// "2026-09-16 14:32:05" 형식의 현지 시각
 const now = () => new Date().toLocaleString("sv-SE");
 
-const modeOf = (id) => MODES.find((m) => m.id === id);
-const solved = (run) => QUESTIONS.filter((q) => run.correct.includes(q.id)).length;
-// 면접관이 낼 수 있는 문제: 먼저 풀 분야에서 아직 맞히지 못한 문제
-const left = () => QUESTIONS.filter((q) => state.selected.includes(q.topic) && !state.run.correct.includes(q.id));
+// 면접관이 낼 수 있는 문제. 실전은 분야를 가리지 않고, 빠른대전은 한 바퀴 안에서 중복을 막는다
+function left(run = state.run) {
+  const mode = modeOf(run.mode);
+  const pool = mode.allTopics ? QUESTIONS : QUESTIONS.filter((q) => state.selected.includes(q.topic));
+  return pool.filter((q) => !run.asked.includes(q.id));
+}
+const poolSize = () => QUESTIONS.filter((q) => state.selected.includes(q.topic)).length;
 
 function showScreen(id) {
-  for (const screen of ["modes", "office", "quiz"]) $(screen).hidden = screen !== id;
-  $("hud").hidden = id === "modes" || (id === "office" && !state.run);
+  for (const screen of ["modes", "library", "office", "quiz"]) $(screen).hidden = screen !== id;
+  $("hud").hidden = !state.run || (id !== "office" && id !== "quiz");
   window.scrollTo(0, 0);
 }
 
@@ -6416,44 +6564,65 @@ function knock(then) {
   }, reduced ? 0 : 900);
 }
 
-function recordText(best) {
+function recordText(mode, best) {
   if (!best) return "기록 없음";
-  return best.cleared ? `합격 · 남은 목숨 최고 ${best.lives}` : `최고 ${best.correct} / ${QUESTIONS.length}`;
-}
-
-// 역대 최고 기록: 합격이 먼저, 합격끼리는 어려운 모드가 먼저(같으면 남은 목숨), 아니면 맞힌 문제가 많은 쪽
-function topRecord() {
-  const hard = (id) => MODES.findIndex((m) => m.id === id);
-  const score = ([id, best]) => [best.cleared ? 1 : 0, best.cleared ? hard(id) : best.correct, best.cleared ? best.lives : hard(id)];
-  return Object.entries(state.best).filter(([id]) => modeOf(id))
-    .sort((a, b) => { const x = score(a), y = score(b); return y[0] - x[0] || y[1] - x[1] || y[2] - x[2]; })[0];
+  return best.cleared ? `합격 · 남은 목숨 ${best.lives}개` : `최고 ${best.correct} / ${mode.limit}`;
 }
 
 function renderModes() {
-  const top = topRecord();
-  $("bestLine").hidden = !top;
-  if (top) {
-    const [id, best] = top;
-    $("bestLine").textContent = `🏆 역대 최고 기록 · ${modeOf(id).name} 모드 `
-      + (best.cleared ? `합격, 남은 목숨 ${best.lives}개` : `맞힌 문제 ${best.correct} / ${QUESTIONS.length}`);
-  }
+  const best = state.best.exam;
+  $("bestLine").hidden = !best;
+  if (best) $("bestLine").innerHTML = `<span class="big">🏆</span><span>실전 최고 기록<br>${recordText(modeOf("exam"), best)}</span>`;
   const done = state.history.length, hit = state.history.filter((h) => h.correct).length;
-  $("stat").hidden = !done;
-  if (done) $("stat").textContent = `지금까지 푼 문제 ${done}개 · 정답률 ${Math.round((hit / done) * 100)}%`;
+  $("tiles").hidden = !done;
+  if (done) {
+    $("tileDone").textContent = done;
+    $("tileRate").textContent = `${Math.round((hit / done) * 100)}%`;
+  }
   $("modeList").innerHTML = "";
+  if (state.run) {
+    const mode = modeOf(state.run.mode);
+    const resume = document.createElement("button");
+    resume.className = "mode resume";
+    resume.innerHTML = `<span class="emoji">▶</span><span><strong>이어서 하기</strong>`
+      + `<span class="desc">${mode.name} · ` + (mode.limit
+        ? `문제 ${state.run.asked.length} / ${mode.limit} · 남은 목숨 ${state.run.lives}개`
+        : `이번 바퀴 ${state.run.asked.length} / ${poolSize()} · 정답 ${state.run.correct.length}`) + "</span></span>";
+    resume.onclick = () => enterOffice("이어서 하겠습니다");
+    $("modeList").append(resume);
+  }
   MODES.forEach((mode) => {
     const button = document.createElement("button");
-    button.className = "mode";
-    button.innerHTML = `<strong>${mode.name}</strong><span>목숨 ${mode.lives}개</span><span class="muted">${recordText(state.best[mode.id])}</span>`;
+    button.className = `mode ${mode.id}`;
+    button.innerHTML = `<span class="emoji">${mode.icon}</span><span><strong>${mode.name}</strong>`
+      + `<span class="desc">${mode.desc}</span>`
+      + (mode.endless ? "" : `<span class="rec">${recordText(mode, state.best[mode.id])}</span>`) + "</span>";
     button.onclick = () => start(mode);
     $("modeList").append(button);
   });
+  const lib = document.createElement("button");
+  lib.className = "mode library";
+  lib.innerHTML = `<span class="emoji">📚</span><span><strong>도서관</strong>`
+    + `<span class="desc">분야별 공부 자료 ${STUDY_COUNT}편을 골라 읽는다. 문제를 풀지 않아도 된다</span></span>`;
+  lib.onclick = renderLibrary;
+  $("modeList").append(lib);
   $("download").hidden = !state.history.length;
   showScreen("modes");
 }
 
+function renderLibrary() {
+  $("libList").innerHTML = LIBRARY.map(({ topic, subs }) => {
+    const items = subs.map((s) =>
+      `<a href="${studyLink(s.file, s.sub)}" target="_blank" rel="noopener">${format(s.sub)} <small>${s.count}문제</small></a>`).join("");
+    return `<div class="lib-topic card"><h3>${format(topic)}`
+      + `<a href="공부자료/${subs[0].file.slice(0, 2)}.html" target="_blank" rel="noopener">분야 목차 →</a></h3>`
+      + `<div class="lib-list">${items}</div></div>`;
+  }).join("");
+  showScreen("library");
+}
+
 function start(mode) {
-  state.run = { mode: mode.id, lives: mode.lives, correct: [], wrong: 0 };
+  state.run = { mode: mode.id, lives: mode.lives, correct: [], asked: [], wrong: 0, cycle: 1 };
   result = null;
   lastId = null;
   save();
@@ -6462,11 +6631,16 @@ function start(mode) {
 }
 
 function renderHud(run) {
-  $("modeName").textContent = `${modeOf(run.mode).name} 모드`;
+  const mode = modeOf(run.mode);
+  const total = mode.limit || poolSize();
+  $("modeName").textContent = mode.name;
+  $("hearts").hidden = !mode.lives;
   $("heart").textContent = run.lives ? "❤️" : "💔";
   $("lives").textContent = run.lives;
-  $("progress").textContent = `맞힌 문제 ${solved(run)} / ${QUESTIONS.length}`;
-  $("giveUp").hidden = !state.run;
+  $("barFill").style.width = total ? `${Math.min(100, (run.asked.length / total) * 100)}%` : "0%";
+  $("progress").textContent = mode.limit
+    ? `문제 ${run.asked.length} / ${mode.limit} · 정답 ${run.correct.length}`
+    : `이번 바퀴 ${run.asked.length} / ${total} · 정답 ${run.correct.length}`;
   resetGiveUp();
 }
 
@@ -6480,7 +6654,7 @@ function breakHeart() {
 }
 
 function enterOffice(text, mood) {
-  $("topicBox").hidden = $("status").hidden = false;
+  $("status").hidden = $("askBtn").hidden = $("giveUp").hidden = false;
   $("result").hidden = true;
   $("npc").classList.remove("off");
   showScreen("office");
@@ -6489,11 +6663,14 @@ function enterOffice(text, mood) {
 }
 
 function renderOffice() {
-  renderHud(state.run);
+  const run = state.run, mode = modeOf(run.mode);
+  renderHud(run);
+  $("topicBox").hidden = mode.allTopics;
+  renderRecent(mode);
   $("topics").innerHTML = "";
   TOPICS.forEach((topic) => {
     const all = QUESTIONS.filter((q) => q.topic === topic);
-    const done = all.filter((q) => state.run.correct.includes(q.id)).length;
+    const done = all.filter((q) => run.asked.includes(q.id)).length;
     const label = document.createElement("label");
     label.className = done === all.length ? "topic done" : "topic";
     label.innerHTML = `<input type="checkbox"${state.selected.includes(topic) ? " checked" : ""}>${format(topic)} <small>${done}/${all.length}</small>`;
@@ -6506,19 +6683,46 @@ function renderOffice() {
     $("topics").append(label);
   });
   $("toggleAll").textContent = state.selected.length === TOPICS.length ? "전체 해제" : "전체 선택";
-  $("topicSummary").textContent = `${TOPICS.length}개 중 ${state.selected.length}개 선택`;
+  $("topicSummary").textContent = `${TOPICS.length}개 중 ${state.selected.length}개`;
   const count = left().length;
-  $("status").textContent = !state.selected.length ? "먼저 풀 분야를 하나 이상 고르세요"
-    : count ? `고른 분야에서 남은 문제 ${count}개 · 면접관을 누르면 질문을 받습니다`
-    : "고른 분야의 문제를 모두 맞혔습니다. 남은 분야를 골라 주세요";
+  $("status").textContent = mode.limit ? `남은 목숨 ${run.lives}개 · 문제 ${run.asked.length} / ${mode.limit}`
+    : !state.selected.length ? "분야를 하나 이상 고르세요"
+    : count ? `고른 분야에서 남은 문제 ${count}개`
+    : "이번 바퀴를 다 돌았습니다. 문제 받기를 누르면 다시 섞습니다";
+  $("askBtn").textContent = !mode.endless || count ? "문제 받기" : "다시 섞기";
 }
 
-// 면접관을 누르면 먼저 풀 분야에서 아직 맞히지 못한 문제를 하나 낸다
+// 빠른대전에서만 보여주는 최근에 푼 문제 목록
+function renderRecent(mode) {
+  $("recentBox").hidden = !mode.endless;
+  if (!mode.endless) return;
+  const rows = state.history.slice(-10).reverse().map((h) => {
+    const q = QUESTIONS.find((x) => x.id === h.id);
+    if (!q) return "";
+    const text = q.question.replace(/`/g, "");
+    return `<li><span class="${h.correct ? "ok" : "bad"}">${h.correct ? "✓" : "✗"}</span>`
+      + `<span>${format(text.slice(0, 40))}${text.length > 40 ? "…" : ""}</span>`
+      + `<a href="${studyUrl(q)}" target="_blank" rel="noopener">📚</a></li>`;
+  }).join("");
+  $("recent").innerHTML = rows || '<li class="muted">아직 푼 문제가 없습니다</li>';
+}
+
+// 면접관을 누르면 문제를 하나 낸다
 function ask() {
   if (!state.run || busy) return;
+  const mode = modeOf(state.run.mode);
   const pool = left();
+  if (!pool.length && mode.endless && state.selected.length) {
+    state.run.asked = [];
+    state.run.cycle++;
+    save();
+    renderOffice();
+    say(`${state.run.cycle}바퀴째입니다`);
+    play("clear");
+    return;
+  }
   if (!pool.length) {
-    say(state.selected.length ? "다른 분야를 골라 주세요" : "어떤 분야부터 볼까요?");
+    say("어떤 분야부터 볼까요?");
     $("topicBox").open = true;
     return;
   }
@@ -6528,7 +6732,7 @@ function ask() {
   current = { q, order: shuffle([0, 1, 2, 3, 4]), selected: null, chosen: null };
   say("다음 질문입니다");
   knock(() => {
-    if (!state.run) return; // 두드리는 사이에 포기했으면 문제를 내지 않는다
+    if (!state.run) return; // 두드리는 사이에 그만뒀으면 문제를 내지 않는다
     showScreen("quiz");
     show();
   });
@@ -6537,30 +6741,33 @@ function ask() {
 function show() {
   const { q, order, selected, chosen } = current;
   const answered = chosen !== null;
+  const correct = answered && chosen === q.answer;
+  const mode = modeOf(state.run ? state.run.mode : result.mode);
   $("topic").textContent = q.topic;
-  $("source").textContent = q.source;
+  $("source").textContent = q.source.split(" · ")[1];
   $("question").innerHTML = format(q.question);
   $("choices").innerHTML = "";
   order.forEach((original, i) => {
-    // 제출 전: 고른 보기만 강조. 제출 후: 정답은 초록 ✓, 고른 오답은 빨강 ✗, 나머지는 흐리게
+    // 제출 전: 고른 보기만 강조. 제출 후: 정답은 초록, 고른 오답은 빨강, 나머지는 흐리게
     const mood = !answered ? (original === selected ? "picked" : "")
       : original === q.answer ? "right" : original === chosen ? "wrong" : "dim";
-    const mark = { right: ' <span class="ok">✓</span>', wrong: ' <span class="bad">✗</span>' }[mood] || "";
     const button = document.createElement("button");
     button.className = `choice ${mood}`;
     button.disabled = answered;
-    button.innerHTML = `<b>${LABELS[i]}</b>${format(q.choices[original])}${mark}`;
+    button.innerHTML = `<b>${LABELS[i]}</b><span>${format(q.choices[original])}</span>`;
     button.onclick = () => pick(original);
     $("choices").append(button);
   });
+  $("actions").className = `actions ${answered ? (correct ? "ok" : "bad") : ""}`;
   $("feedback").hidden = !answered;
   if (answered) {
-    const correct = chosen === q.answer;
-    const study = studyUrl(q);
-    $("feedback").innerHTML = `<strong class="${correct ? "ok" : "bad"}">${correct ? "정답입니다" : "오답입니다 · 목숨 -1"}</strong><p>${format(q.explanation)}</p>`
-      + (study ? `<p><a class="study" href="${study}" target="_blank" rel="noopener">📚 ${format(q.source.split(" · ")[1])} 공부 자료 보기</a></p>` : "");
+    const title = correct ? "정답입니다" : `오답입니다${mode.lives ? " · 목숨 -1" : ""}`;
+    $("feedback").innerHTML = `<div class="head ${correct ? "ok" : "bad"}"><span class="mark">${correct ? "✓" : "✕"}</span>${title}</div>`
+      + `<p>${format(q.explanation)}</p>`
+      + `<a class="study" href="${studyUrl(q)}" target="_blank" rel="noopener">📚 ${format(q.source.split(" · ")[1])} 공부 자료</a>`;
   }
-  $("next").textContent = !answered ? "제출" : state.run ? "다음" : "결과 보기";
+  $("next").className = `btn wide${answered && !correct ? " red" : ""}`;
+  $("next").textContent = !answered ? "제출" : state.run ? "계속" : "결과 보기";
   $("next").disabled = !answered && selected === null;
 }
 
@@ -6572,47 +6779,55 @@ function pick(original) {
   show();
 }
 
-// 고른 보기를 채점한다. 틀리면 목숨을 잃고, 목숨이 다하거나 모든 문제를 맞히면 게임이 끝난다
+// 고른 보기를 채점한다. 실전은 10문제를 다 풀거나 목숨이 떨어지면 끝난다
 function submit() {
   const { q, selected } = current;
-  const run = state.run, correct = selected === q.answer;
+  const run = state.run, mode = modeOf(run.mode), correct = selected === q.answer;
   current.chosen = selected;
+  run.asked.push(q.id);
   if (correct) run.correct.push(q.id);
-  else { run.lives--; run.wrong++; }
+  else { if (mode.lives) run.lives--; run.wrong++; }
   state.history.push({ at: now(), mode: run.mode, id: q.id, topic: q.topic, chosen: selected, answer: q.answer, correct });
-  const cleared = solved(run) === QUESTIONS.length;
-  if (cleared || !run.lives) finish(cleared);
+  const done = mode.limit ? run.asked.length >= mode.limit : false;
+  const over = mode.lives > 0 && run.lives <= 0;
+  if (done || over) finish(over ? "over" : "clear");
   else save();
   play(correct ? "right" : "wrong");
   renderHud(run);
-  if (!correct) breakHeart();
+  if (!correct && mode.lives) breakHeart();
   show();
-  $("feedback").scrollIntoView({ block: "nearest" });
 }
 
-// 게임을 끝내고 모드별 최고 기록을 갱신한다. 포기도 같은 규칙으로 처리한다
-// 최고 기록: 합격했으면 남은 목숨이 많을수록, 아니면 맞힌 문제가 많을수록 좋은 기록이다
-function finish(cleared) {
-  const run = state.run, best = state.best[run.mode], correct = solved(run);
-  const record = cleared
+// 게임을 끝내고 기록을 갱신한다. 그만두기도 같은 규칙으로 처리한다
+function finish(kind) { // "clear"(합격) | "over"(게임 오버) | "end"(빠른대전 그만두기)
+  const run = state.run, mode = modeOf(run.mode), best = state.best[run.mode];
+  const correct = run.correct.length, cleared = kind === "clear";
+  const record = mode.endless ? false : cleared
     ? !best || !best.cleared || run.lives > best.lives
     : !best?.cleared && correct > (best?.correct || 0);
   if (record) state.best[run.mode] = { correct, cleared, lives: cleared ? run.lives : 0 };
-  result = { mode: run.mode, cleared, correct, wrong: run.wrong, lives: run.lives, record };
+  result = { kind, mode: run.mode, cleared, correct, asked: correct + run.wrong, wrong: run.wrong, lives: run.lives, record };
   state.run = null;
   save();
 }
 
 function renderResult() {
-  $("topicBox").hidden = $("status").hidden = true;
+  const mode = modeOf(result.mode);
+  $("topicBox").hidden = $("recentBox").hidden = $("status").hidden = $("askBtn").hidden = $("giveUp").hidden = true;
   $("result").hidden = false;
   $("npc").classList.add("off");
   showScreen("office");
-  say(result.cleared ? "합격입니다!" : "여기까지 하겠습니다", result.cleared ? "happy" : "sad");
-  $("resultText").innerHTML = `<strong>${result.cleared ? "클리어" : "게임 오버"}</strong> · ${modeOf(result.mode).name} 모드<br>`
-    + `맞힌 문제 ${result.correct} / ${QUESTIONS.length} · 틀린 횟수 ${result.wrong}${result.cleared ? ` · 남은 목숨 ${result.lives}` : ""}<br>`
-    + (result.record ? '<span class="ok">최고 기록을 새로 세웠습니다</span>' : `최고 기록: ${recordText(state.best[result.mode])}`);
-  play(result.cleared ? "clear" : "over");
+  const line = { clear: ["합격입니다!", "happy", "🎉 합격"], over: ["여기까지 하겠습니다", "sad", "💔 게임 오버"],
+                 end: ["수고하셨습니다", "happy", "👏 연습 종료"] }[result.kind];
+  say(line[0], line[1]);
+  const total = mode.limit || result.asked;
+  $("resultText").innerHTML = `<div class="title">${line[2]} · ${mode.name}</div>`
+    + `<div class="tiles"><div class="tile"><b>${result.correct} / ${total}</b><span>맞힌 문제</span></div>`
+    + `<div class="tile"><b>${mode.lives ? result.lives : result.wrong}</b><span>${mode.lives ? "남은 목숨" : "틀린 횟수"}</span></div></div>`
+    + (mode.endless ? "" : `<p class="muted">${result.record ? "최고 기록을 새로 세웠습니다" : `최고 기록: ${recordText(mode, state.best[result.mode])}`}</p>`);
+  $("retry").hidden = mode.endless;
+  $("again").className = mode.endless ? "btn wide" : "quit-link";
+  play(result.kind === "over" ? "over" : "clear");
 }
 
 // 제출 전에는 제출, 제출 후에는 면접관 화면(게임이 끝났으면 결과)으로 간다
@@ -6629,26 +6844,30 @@ $("next").onclick = () => {
 };
 
 $("npc").onclick = ask;
+$("askBtn").onclick = ask;
 $("again").onclick = renderModes;
+$("retry").onclick = () => start(modeOf(result.mode));
+$("libBack").onclick = renderModes;
 
-// 포기는 두 번 눌러 확인한다. 브라우저 확인 창(confirm)은 막아 둔 사용자에게 아무 일도 일어나지 않아 쓰지 않는다
+// 그만두기는 두 번 눌러 확인한다. 브라우저 확인 창(confirm)은 막아 둔 사용자에게 아무 일도 일어나지 않아 쓰지 않는다
 let giveUpArmed = false;
 function resetGiveUp() {
   giveUpArmed = false;
-  $("giveUp").textContent = "포기";
   $("giveUp").classList.remove("armed");
+  if (state.run) $("giveUp").textContent = modeOf(state.run.mode).endless ? "← 그만두고 나가기" : "← 포기하고 나가기";
 }
 $("giveUp").onclick = () => {
   if (!state.run) return;
   if (!giveUpArmed) {
     giveUpArmed = true;
-    $("giveUp").textContent = "정말 포기?";
     $("giveUp").classList.add("armed");
-    setTimeout(resetGiveUp, 4000);
+    $("giveUp").textContent = "한 번 더 누르면 나갑니다";
+    setTimeout(() => { if (giveUpArmed) resetGiveUp(); }, 4000);
     return;
   }
+  const kind = modeOf(state.run.mode).endless ? "end" : "over";
   resetGiveUp();
-  finish(false);
+  finish(kind);
   current = null;
   renderResult();
 };
@@ -6690,7 +6909,7 @@ if (invalid.length) {
   $("invalid").hidden = false;
   $("invalid").textContent = `형식이 잘못된 문제 ${invalid.length}개를 뺐습니다. ${invalid.join(" / ")}`;
 }
-if (state.run) enterOffice("이어서 하겠습니다");
+if (location.hash === "#library") renderLibrary();
 else renderModes();
 </script>
 </body>

@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>동기화 · 운영체제·동시성</title>
+<style>
+  :root {
+    --bg:#f2f5f7; --card:#fff; --panel:#f7f9fb; --text:#3c3c3c; --muted:#7a8b93; --line:#e2e8ea;
+    --green:#58cc02; --green-d:#46a302; --blue:#1cb0f6; --blue-d:#1899d6; --blue-bg:#ddf4ff;
+    --purple:#ce82ff; --purple-d:#a855f7; --purple-bg:#f5e8ff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#131f24; --card:#1b2b32; --panel:#16252b; --text:#eaf2f6; --muted:#8fa7b2; --line:#2c4048;
+      --blue-bg:#12303d; --purple-bg:#2e2036; --purple-d:#c99bec; --blue-d:#58c4f7; --green-d:#7ddc2a; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
+  a { color: var(--blue-d); }
+  .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
+  .nav a { text-decoration: none; }
+  .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
+    padding: 4px 12px; font-size: .8rem; font-weight: 800; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
+  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
+  p, ul, ol { margin: 10px 0; }
+  li { margin: 5px 0; }
+  .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
+  .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
+  .card { background: var(--card); border: 2px solid var(--line); border-radius: 20px; padding: 20px; margin-bottom: 14px; }
+  .list { display: grid; gap: 10px; }
+  .list a { display: block; background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px;
+    border-radius: 18px; padding: 14px 16px; text-decoration: none; color: inherit; }
+  .list a:hover { border-color: var(--purple); }
+  .list strong { display: block; font-size: 1.02rem; font-weight: 800; }
+  .list span { color: var(--muted); font-size: .86rem; font-weight: 600; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em;
+    background: var(--panel); border: 1px solid var(--line); padding: 1px 6px; border-radius: 6px; font-weight: 700; }
+  pre { background: var(--panel); border: 2px solid var(--line); padding: 14px; border-radius: 14px; overflow-x: auto; line-height: 1.65; }
+  pre code { background: none; border: 0; padding: 0; }
+  table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; font-size: .94rem; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; }
+  th { background: var(--panel); }
+  .refs { border-top: 2px solid var(--line); margin-top: 24px; padding-top: 14px; }
+  .refs ul { padding-left: 20px; }
+  .pager { display: flex; justify-content: space-between; gap: 10px; margin-top: 16px; }
+  .pager a { background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px; border-radius: 16px;
+    padding: 12px 16px; text-decoration: none; color: inherit; font-weight: 800; font-size: .9rem; max-width: 48%; }
+  .pager a:hover { border-color: var(--blue); }
+  footer { color: var(--muted); font-size: .8rem; font-weight: 600; margin-top: 28px; }
+</style>
+</head>
+<body>
+<main>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="08.html" class="badge">운영체제·동시성 목차</a></div>
+<article class="card">
+<h1>동기화</h1>
+<p class="lead">공유 자원이 왜 깨지는지 알고 lock·Interlocked·CAS 중 상황에 맞는 것을 고른다</p>
+<h3>핵심 개념</h3><p>동기화는 <strong>여러 스레드가 같은 데이터를 건드릴 때 중간 상태를 보지 못하게 막는 일</strong>이다. 문제의 뿌리는 소스 한 줄이 기계 명령 한 개가 아니라는 점이다. <code>count++</code>는 읽고, 1을 더하고, 다시 쓰는 세 단계다. 두 스레드가 같은 값을 읽어 각자 더해 쓰면 증가 한 번이 사라진다. 100만 번씩 돌렸는데 200만보다 작게 나오는 경쟁 상태가 이것이다.</p><p>그래서 이 세 단계를 쪼개지지 않는 하나로 묶어야 한다. 임계 구역을 락으로 감싸거나 하드웨어의 원자적 명령 하나로 처리한다. 임계 구역 해법의 조건은 상호 배제, 진행(비어 있으면 대기자 중에서 진입자가 정해진다), 한정 대기(무한정 밀리지 않는다) 셋이며, 한정 대기는 FIFO 고정이 아니라 굶주림이 없어야 한다는 뜻이다.</p><table><thead><tr><th>도구</th><th>보장</th><th>쓰는 자리</th></tr></thead><tbody><tr><td><code>lock</code>(Monitor)</td><td>하나만 진입, 소유권 있음</td><td>여러 줄짜리 갱신</td></tr><tr><td><code>Interlocked</code>(CAS)</td><td>한 변수의 읽기·갱신이 원자적</td><td>카운터·플래그</td></tr><tr><td>세마포어</td><td>동시 진입 수를 카운트로 제한</td><td>동시 다운로드 5개 제한</td></tr></tbody></table><pre><code>private int _count;
+private readonly object _lock = new object();
+
+public void AddByLock()
+{
+    lock (_lock) { _count++; }   // Monitor.Enter/Exit + try-finally로 펼쳐진다
+}
+
+public void AddByInterlocked()
+{
+    Interlocked.Increment(ref _count);  // 경합이 없으면 커널로 가지 않는다
+}
+
+public void DoubleIt()   // 계산이 낀 갱신을 락 없이 처리하는 CAS 재시도
+{
+    int old, want;
+    do
+    {
+        old = Volatile.Read(ref _count);
+        want = old * 2;
+    }
+    while (Interlocked.CompareExchange(ref _count, want, old) != old);
+}</code></pre><p>CAS는 이 값이 아직 내가 읽은 값이면 새 값으로 바꾸라는 동작을 하드웨어가 한 번에 처리한다. 실패하면 커널로 가지 않고 다시 읽어 재시도하지만, 경합이 심하면 재시도가 늘어 손해다. 값이 A에서 B로 갔다 다시 A가 되면 못 알아채는 ABA 문제도 있다.</p><p>락이 여러 개면 데드락이 따라온다. 상호 배제, 점유 대기, 비선점, 순환 대기 <strong>네 조건이 모두 성립할 때만</strong> 생기므로 하나만 깨면 막힌다. 실무에서는 락을 늘 같은 순서로 잡아 순환 대기를 없애거나 <code>Monitor.TryEnter</code>로 제한 시간을 둔다.</p><p>코어를 늘려도 기대만큼 빨라지지 않으면 거짓 공유를 의심한다. CPU는 메모리를 64바이트 캐시 라인 단위로 다뤄서, 다른 카운터라도 한 배열에 붙어 있으면 한쪽이 쓸 때 다른 쪽 캐시 라인이 무효화된다. 스레드별 지역 변수에 모았다 합치면 사라진다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>경쟁 상태란</strong> — 실행 순서에 따라 결과가 달라지는 버그다. <code>count++</code>가 세 단계라 중간에 선점되면 증가가 사라진다. 락으로 감싸거나 <code>Interlocked.Increment</code>로 바꿔 해결한다.</li><li><strong>뮤텍스와 세마포어의 차이</strong> — 뮤텍스는 소유권이 있어 잠근 스레드가 풀고 하나만 들어간다. 세마포어는 카운트만큼 동시에 들어가고 소유 개념이 없다.</li><li><strong>데드락 조건과 예방</strong> — 네 조건이 모두 성립해야 생기므로 하나만 깨면 된다. 실무에서는 락 순서를 정해 순환 대기를 없앤다. 회피는 은행원 알고리즘처럼 할당 전에 따지는 쪽이다.</li><li><strong>락 없이 스레드 안전을 만들려면</strong> — CAS로 읽고 계산한 뒤 값이 그대로일 때만 바꾸고 실패하면 재시도한다. 경합이 심하면 락보다 비쌀 수 있다.</li><li><strong>스레드 수 기준</strong> — CPU를 계속 쓰는 작업은 코어 수 안팎, 입출력 작업은 더 많이 둔다. 스레드 풀은 미리 만든 스레드를 재사용해 생성 비용을 아낀다.</li><li><strong>Lock-Free와 Wait-Free</strong> — Lock-Free는 최소 한 스레드는 진행한다는 보장이라 특정 스레드가 굶을 수 있고, Wait-Free는 모든 스레드가 유한 단계에 끝난다는 보장이다.</li></ul><h3>흔한 오해</h3><ul><li><strong>int 증가는 원자적이다</strong> — 읽기·더하기·쓰기 세 단계라 중간에 끊긴다. 값의 크기나 오버플로 문제가 아니다.</li><li><strong>기아도 데드락 조건이다</strong> — 기아는 계속 밀려 실행되지 못하는 다른 문제다.</li><li><strong>이진 세마포어는 뮤텍스와 같다</strong> — 동시 진입 수만 같고 소유권 규칙이 다르다.</li><li><strong>스핀락이 항상 빠르다</strong> — 임계 구역이 아주 짧고 코어가 여럿일 때만 이득이고, 코어가 하나거나 대기가 길면 CPU만 태운다.</li><li><strong>lock(this)면 충분하다</strong> — 외부가 같은 객체를 잠글 수 있어 전용 <code>private readonly object</code>를 둔다.</li></ul>
+<div class="refs"><h2>참고 자료</h2><ul><li><a href="https://learn.microsoft.com/ko-kr/dotnet/csharp/language-reference/statements/lock" target="_blank" rel="noopener">Microsoft Learn – lock 문(공유 리소스에 대한 액세스 동기화)</a></li><li><a href="https://learn.microsoft.com/ko-kr/dotnet/api/system.threading.interlocked" target="_blank" rel="noopener">Microsoft Learn – Interlocked 클래스</a></li><li><a href="https://learn.microsoft.com/ko-kr/dotnet/standard/threading/managed-threading-best-practices" target="_blank" rel="noopener">Microsoft Learn – 관리되는 스레딩 모범 사례</a></li></ul></div>
+</article>
+<div class="pager"><a href="08-05.html">← 컴퓨터 구조</a><a href="08-07.html">비동기 →</a></div>
+<footer>정리 글은 Claude가 썼다. 틀린 내용이 있을 수 있으니 중요한 내용은 참고 자료 원문으로 확인한다.</footer>
+</main>
+</body>
+</html>

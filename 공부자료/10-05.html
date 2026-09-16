@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>컴파일과 링크 · C++ 기초</title>
+<style>
+  :root {
+    --bg:#f2f5f7; --card:#fff; --panel:#f7f9fb; --text:#3c3c3c; --muted:#7a8b93; --line:#e2e8ea;
+    --green:#58cc02; --green-d:#46a302; --blue:#1cb0f6; --blue-d:#1899d6; --blue-bg:#ddf4ff;
+    --purple:#ce82ff; --purple-d:#a855f7; --purple-bg:#f5e8ff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#131f24; --card:#1b2b32; --panel:#16252b; --text:#eaf2f6; --muted:#8fa7b2; --line:#2c4048;
+      --blue-bg:#12303d; --purple-bg:#2e2036; --purple-d:#c99bec; --blue-d:#58c4f7; --green-d:#7ddc2a; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
+  a { color: var(--blue-d); }
+  .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
+  .nav a { text-decoration: none; }
+  .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
+    padding: 4px 12px; font-size: .8rem; font-weight: 800; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
+  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
+  p, ul, ol { margin: 10px 0; }
+  li { margin: 5px 0; }
+  .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
+  .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
+  .card { background: var(--card); border: 2px solid var(--line); border-radius: 20px; padding: 20px; margin-bottom: 14px; }
+  .list { display: grid; gap: 10px; }
+  .list a { display: block; background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px;
+    border-radius: 18px; padding: 14px 16px; text-decoration: none; color: inherit; }
+  .list a:hover { border-color: var(--purple); }
+  .list strong { display: block; font-size: 1.02rem; font-weight: 800; }
+  .list span { color: var(--muted); font-size: .86rem; font-weight: 600; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em;
+    background: var(--panel); border: 1px solid var(--line); padding: 1px 6px; border-radius: 6px; font-weight: 700; }
+  pre { background: var(--panel); border: 2px solid var(--line); padding: 14px; border-radius: 14px; overflow-x: auto; line-height: 1.65; }
+  pre code { background: none; border: 0; padding: 0; }
+  table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; font-size: .94rem; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; }
+  th { background: var(--panel); }
+  .refs { border-top: 2px solid var(--line); margin-top: 24px; padding-top: 14px; }
+  .refs ul { padding-left: 20px; }
+  .pager { display: flex; justify-content: space-between; gap: 10px; margin-top: 16px; }
+  .pager a { background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px; border-radius: 16px;
+    padding: 12px 16px; text-decoration: none; color: inherit; font-weight: 800; font-size: .9rem; max-width: 48%; }
+  .pager a:hover { border-color: var(--blue); }
+  footer { color: var(--muted); font-size: .8rem; font-weight: 600; margin-top: 28px; }
+</style>
+</head>
+<body>
+<main>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="10.html" class="badge">C++ 기초 목차</a></div>
+<article class="card">
+<h1>컴파일과 링크</h1>
+<p class="lead">파일마다 따로 컴파일하고 마지막에 묶는 구조를 알면 오류만 보고 원인을 좁힌다</p>
+<h3>핵심 개념</h3><p>C#은 프로젝트를 통째로 컴파일해 어셈블리 하나를 만들고 헤더가 없다. C++은 <strong>파일 하나씩 따로 컴파일한 뒤 마지막에 묶는다</strong>. 이 차이가 헤더, 선언과 정의의 분리, 링크 오류라는 낯선 개념을 전부 설명한다.</p><p>순서는 전처리 → 컴파일 → 어셈블 → 링크다. 전처리기가 <code>#include</code>를 그 파일의 내용으로 치환하고 매크로를 펼쳐 <strong>번역 단위</strong> 하나를 만든다. 헤더는 그 자체로 컴파일되는 단위가 아니라 소스에 펼쳐지는 텍스트다. 컴파일러는 번역 단위 하나만 보고 목적 파일(.o/.obj)을 만드는데, 다른 파일에 있는 함수는 <strong>선언만 보이면 통과</strong>시키고 주소 자리는 비워 둔다. 링커가 목적 파일과 라이브러리를 모아 그 빈자리를 실제 정의로 채워 실행 파일을 만든다.</p><p>그래서 오류 메시지만으로 원인을 좁힐 수 있다. 타입이 안 맞거나 선언을 못 찾는 것은 컴파일 오류, <code>undefined reference</code>나 <code>unresolved external symbol</code>은 <strong>선언은 봤는데 정의가 어디에도 없다</strong>는 링크 오류다. 대개 .cpp를 빌드 목록에 넣지 않았거나, 라이브러리를 링크하지 않았거나, 선언과 정의의 시그니처가 미묘하게 다르다.</p><p>링커는 이름으로 짝을 맞추는데 C++은 이름이 같고 매개변수만 다른 오버로딩을 허용하므로 이름만으로는 구분이 되지 않는다. 그래서 컴파일러가 매개변수 타입·네임스페이스·클래스·const 여부를 섞어 고유한 심볼 이름을 만든다. 이것이 <strong>네임 맹글링</strong>이다. C에는 오버로딩이 없어 이름이 거의 그대로 남고, 맹글링 규칙은 표준이 아니라 컴파일러마다 달라서 다른 컴파일러로 만든 C++ 라이브러리가 그냥은 링크되지 않는 이유가 된다.</p><p><code>extern "C"</code>는 그 함수만 C 방식으로 이름을 붙이라는 선언이다. 이름을 붙이는 방식만 바꾸므로 함수 안에서는 C++ 기능을 그대로 쓴다. Unity 네이티브 플러그인에서 C# <code>DllImport</code>가 찾을 이름을 고정하려고 쓰는 것이 이것이다.</p><pre><code>// plugin.cpp — 구현은 C++이지만 이름은 C 방식으로 내보낸다
+extern "C" int AddDamage(int a, int b) { return a + b; }
+</code></pre><pre><code>// C# 쪽 (using System.Runtime.InteropServices;)
+[DllImport("plugin", CallingConvention = CallingConvention.Cdecl)]
+static extern int AddDamage(int a, int b);
+</code></pre><p>마지막 조각이 <strong>호출 규약</strong>이다. 인자를 어떤 순서로 놓고 스택은 누가 치우는지에 대한 약속으로, <code>__cdecl</code>은 부른 쪽이 정리해 인자 개수가 달라도 되므로 가변 인자 함수에 쓰이고, <code>__stdcall</code>은 불린 쪽이 정리해 호출 지점마다 정리 코드가 필요 없어 코드가 조금 작아지며 Win32 API가 쓴다. 둘 다 인자를 오른쪽부터 스택에 쌓는다. 양쪽이 서로 다른 규약으로 알고 부르면 스택이 어긋나 함수가 끝난 뒤 엉뚱한 자리에서 죽는다. x64 Windows는 규약이 하나로 통일돼 키워드가 대체로 무시되지만, 32비트 빌드나 <code>DllImport</code>를 맞출 때는 여전히 본다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>소스가 실행 파일이 되기까지</strong> — 전처리기가 include와 매크로를 펼쳐 번역 단위를 만들고, 컴파일러가 파일마다 목적 파일을 만들고, 링커가 목적 파일과 라이브러리를 묶어 심볼을 실제 주소로 잇는다. 헤더는 따로 컴파일되지 않고 소스에 펼쳐진다.</li><li><strong>undefined reference가 나면</strong> — 링크 단계 오류다. 선언은 있는데 정의가 없다는 뜻이라 해당 .cpp가 빌드에 들어갔는지, 라이브러리를 링크했는지, 선언과 정의의 시그니처가 같은지를 순서대로 본다.</li><li><strong>네임 맹글링이란</strong> — 오버로딩을 허용하려고 컴파일러가 매개변수 타입 같은 정보를 섞어 링커용 고유 이름을 만드는 것이다. C에는 오버로딩이 없어 일어나지 않고, 규칙이 컴파일러마다 달라 C와 섞을 때는 extern "C"로 끈다.</li><li><strong>호출 규약은 왜 맞춰야 하나</strong> — 인자를 놓는 순서와 스택을 치우는 쪽이 다르면 호출이 끝난 뒤 스택이 어긋나 원인을 찾기 어려운 크래시가 난다. Unity에서 네이티브 플러그인을 부를 때 DllImport의 CallingConvention을 플러그인 쪽과 맞추는 이유다.</li></ul><h3>흔한 오해</h3><ul><li><strong>undefined reference는 컴파일 오류다</strong> — 컴파일은 선언만 보고 통과한다. 정의를 찾는 것은 링커라 링크 단계에서 난다.</li><li><strong>C에서도 네임 맹글링이 일어난다</strong> — 오버로딩이 없어 이름이 거의 그대로 남는다. 그래서 C 라이브러리는 컴파일러가 달라도 링크가 된다.</li><li><strong>맹글링 규칙은 표준이다</strong> — 표준이 아니다. 컴파일러와 버전이 다르면 C++ 라이브러리는 그냥 링크되지 않는다.</li><li><strong>extern "C"를 붙이면 그 함수에서 C++ 기능을 못 쓴다</strong> — 바뀌는 것은 심볼 이름을 붙이는 방식뿐이고 구현은 C++ 그대로다.</li><li><strong>헤더에 함수 정의를 넣어도 상관없다</strong> — 여러 소스가 포함하면 정의가 여러 번 생겨 링크에서 중복 정의가 난다. inline을 붙이거나 정의를 .cpp로 옮긴다.</li></ul>
+<div class="refs"><h2>참고 자료</h2><ul><li><a href="https://en.cppreference.com/w/cpp/language/translation_phases.html" target="_blank" rel="noopener">cppreference – Phases of translation</a></li><li><a href="https://en.cppreference.com/w/cpp/language/language_linkage.html" target="_blank" rel="noopener">cppreference – Language linkage(extern &quot;C&quot;)</a></li><li><a href="https://learn.microsoft.com/ko-kr/cpp/cpp/argument-passing-and-naming-conventions" target="_blank" rel="noopener">Microsoft Learn – 인수 전달 및 명명 규칙(호출 규약)</a></li><li><a href="https://docs.unity3d.com/Manual/plug-ins-native.html" target="_blank" rel="noopener">Unity 매뉴얼 – Native plug-ins</a></li></ul></div>
+</article>
+<div class="pager"><a href="10-04.html">← STL</a><span></span></div>
+<footer>정리 글은 Claude가 썼다. 틀린 내용이 있을 수 있으니 중요한 내용은 참고 자료 원문으로 확인한다.</footer>
+</main>
+</body>
+</html>

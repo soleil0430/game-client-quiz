@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>접근법 · 최적화·메모리</title>
+<style>
+  :root {
+    --bg:#f2f5f7; --card:#fff; --panel:#f7f9fb; --text:#3c3c3c; --muted:#7a8b93; --line:#e2e8ea;
+    --green:#58cc02; --green-d:#46a302; --blue:#1cb0f6; --blue-d:#1899d6; --blue-bg:#ddf4ff;
+    --purple:#ce82ff; --purple-d:#a855f7; --purple-bg:#f5e8ff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#131f24; --card:#1b2b32; --panel:#16252b; --text:#eaf2f6; --muted:#8fa7b2; --line:#2c4048;
+      --blue-bg:#12303d; --purple-bg:#2e2036; --purple-d:#c99bec; --blue-d:#58c4f7; --green-d:#7ddc2a; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
+  a { color: var(--blue-d); }
+  .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
+  .nav a { text-decoration: none; }
+  .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
+    padding: 4px 12px; font-size: .8rem; font-weight: 800; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
+  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
+  p, ul, ol { margin: 10px 0; }
+  li { margin: 5px 0; }
+  .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
+  .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
+  .card { background: var(--card); border: 2px solid var(--line); border-radius: 20px; padding: 20px; margin-bottom: 14px; }
+  .list { display: grid; gap: 10px; }
+  .list a { display: block; background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px;
+    border-radius: 18px; padding: 14px 16px; text-decoration: none; color: inherit; }
+  .list a:hover { border-color: var(--purple); }
+  .list strong { display: block; font-size: 1.02rem; font-weight: 800; }
+  .list span { color: var(--muted); font-size: .86rem; font-weight: 600; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em;
+    background: var(--panel); border: 1px solid var(--line); padding: 1px 6px; border-radius: 6px; font-weight: 700; }
+  pre { background: var(--panel); border: 2px solid var(--line); padding: 14px; border-radius: 14px; overflow-x: auto; line-height: 1.65; }
+  pre code { background: none; border: 0; padding: 0; }
+  table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; font-size: .94rem; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; }
+  th { background: var(--panel); }
+  .refs { border-top: 2px solid var(--line); margin-top: 24px; padding-top: 14px; }
+  .refs ul { padding-left: 20px; }
+  .pager { display: flex; justify-content: space-between; gap: 10px; margin-top: 16px; }
+  .pager a { background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px; border-radius: 16px;
+    padding: 12px 16px; text-decoration: none; color: inherit; font-weight: 800; font-size: .9rem; max-width: 48%; }
+  .pager a:hover { border-color: var(--blue); }
+  footer { color: var(--muted); font-size: .8rem; font-weight: 600; margin-top: 28px; }
+</style>
+</head>
+<body>
+<main>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="03.html" class="badge">최적화·메모리 목차</a></div>
+<article class="card">
+<h1>접근법</h1>
+<p class="lead">감으로 고치지 않는다. 측정해서 병목을 찾고, 고치고, 다시 재는 순환이 최적화의 기본이다</p>
+<h3>핵심 개념</h3><p>최적화의 목표는 코드를 무조건 빠르게 만드는 것이 아니라 <strong>정해진 프레임 예산 안에 들어오게</strong> 하는 것이다. 60fps는 한 프레임에 16.7ms, 30fps는 33.3ms를 쓴다. 이 예산을 CPU와 GPU가 나눠 쓰므로 목표 기기와 목표 프레임을 정하지 않으면 무엇이 문제인지도 정의할 수 없다.</p><table><thead><tr><th>목표 프레임</th><th>한 프레임 예산</th><th>의미</th></tr></thead><tbody><tr><td>60fps</td><td>16.7ms</td><td>로직·렌더 준비·GPU가 모두 이 안에 끝나야 한다</td></tr><tr><td>30fps</td><td>33.3ms</td><td>모바일에서 현실적인 기본 목표</td></tr><tr><td>스파이크</td><td>1프레임 &gt; 예산</td><td>평균이 좋아도 그 순간 끊김으로 보인다</td></tr></tbody></table><p>그래서 최적화는 측정에서 시작한다. 전체 시간의 1%를 쓰는 코드를 두 배 빠르게 만들어도 전체는 0.5%만 좋아진다. 반대로 40%를 먹는 항목을 절반으로 줄이면 20%가 돌아온다. 어디에 시간이 쓰이는지 모르는 상태에서 고치면 대개 앞쪽에 시간을 버린다.</p><p>실무의 순환은 이렇다. 목표를 수치로 정하고(기준 기기에서 30fps, 메모리 1.5GB 이하), 실기기 개발 빌드에서 측정하고, 가장 비싼 항목 하나를 고치고, 다시 측정해 실제로 좋아졌는지 확인한다. 한 번에 여러 곳을 고치면 무엇이 효과였는지 알 수 없어 다음 판단의 근거가 남지 않는다.</p><p>언제 하느냐는 <strong>나중에 되돌릴 수 있는 결정인지</strong>로 나눈다. 텍스처 해상도 규격, 데이터 구조, 풀링을 전제로 한 오브젝트 생명주기, 씬과 에셋 분할은 나중에 바꾸기 비싸므로 처음에 정한다. 특정 함수의 미세 튜닝은 측정해서 병목으로 드러난 뒤에 해도 늦지 않다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>최적화할 때 가장 먼저 무엇을 보나</strong> — 목표 기기와 목표 프레임을 정한 뒤 그 기기에 개발 빌드를 올려 프로파일러로 잰다. CPU와 GPU 중 어느 쪽이 한계인지부터 가르고, 가장 큰 항목 순으로 손댄다.</li><li><strong>최적화 경험을 말해 보라</strong> — 수치로 시작해 수치로 끝낸다. 어떤 기기에서 몇 ms였고, 프로파일러에서 무엇이 몇 ms를 먹고 있었고, 무엇을 바꿔 몇 ms가 됐는지 순서로 말한다.</li><li><strong>언제 최적화해야 하나</strong> — 되돌리기 비싼 구조적 결정은 처음에 정하고, 국소 튜닝은 측정 뒤로 미룬다. 대신 프로파일링은 개발 내내 주기적으로 해서 언제 나빠졌는지 알 수 있게 한다.</li><li><strong>시간이 촉박할 때</strong> — 근본 해결과 임시 완화를 나눈다. 당장은 효과 대비 비용이 큰 것(품질 설정, 해상도 스케일, 스파이크 분산)으로 막고, 원인은 기록해 두고 다음 일정에 고친다.</li></ul><h3>흔한 오해</h3><ul><li><strong>빌드 용량을 줄이면 프레임이 오른다</strong> — 용량은 다운로드·설치와 로딩 시간에 영향을 주지만, 한 프레임에 드는 계산량과 직접 연결되지 않는다.</li><li><strong>품질 설정을 낮추면 해결된다</strong> — GPU 부하가 병목일 때만 듣는다. 스크립트나 물리가 병목이면 그림자를 꺼도 프레임은 그대로다.</li><li><strong>코드를 보면 어디가 느린지 안다</strong> — 실제 병목은 대개 예상 밖에 있다. 측정 없이 고치면 전체의 1%짜리 코드를 다듬게 된다.</li><li><strong>최적화는 출시 직전에 몰아서 한다</strong> — 그때는 구조를 바꿀 수 없어 선택지가 품질 하향뿐이다.</li></ul>
+<div class="refs"><h2>참고 자료</h2><ul><li><a href="https://docs.unity3d.com/Manual/analysis.html" target="_blank" rel="noopener">Unity 매뉴얼 – Optimization(분석과 디버깅)</a></li><li><a href="https://docs.unity3d.com/Manual/Profiler.html" target="_blank" rel="noopener">Unity 매뉴얼 – The Profiler window</a></li><li><a href="https://docs.unity3d.com/Manual/OptimizingGraphicsPerformance.html" target="_blank" rel="noopener">Unity 매뉴얼 – Optimizing graphics performance</a></li></ul></div>
+</article>
+<div class="pager"><span></span><a href="03-02.html">프로파일링과 병목 진단 →</a></div>
+<footer>정리 글은 Claude가 썼다. 틀린 내용이 있을 수 있으니 중요한 내용은 참고 자료 원문으로 확인한다.</footer>
+</main>
+</body>
+</html>

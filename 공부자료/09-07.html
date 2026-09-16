@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>보안 · 네트워크</title>
+<style>
+  :root {
+    --bg:#f2f5f7; --card:#fff; --panel:#f7f9fb; --text:#3c3c3c; --muted:#7a8b93; --line:#e2e8ea;
+    --green:#58cc02; --green-d:#46a302; --blue:#1cb0f6; --blue-d:#1899d6; --blue-bg:#ddf4ff;
+    --purple:#ce82ff; --purple-d:#a855f7; --purple-bg:#f5e8ff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#131f24; --card:#1b2b32; --panel:#16252b; --text:#eaf2f6; --muted:#8fa7b2; --line:#2c4048;
+      --blue-bg:#12303d; --purple-bg:#2e2036; --purple-d:#c99bec; --blue-d:#58c4f7; --green-d:#7ddc2a; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
+  a { color: var(--blue-d); }
+  .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
+  .nav a { text-decoration: none; }
+  .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
+    padding: 4px 12px; font-size: .8rem; font-weight: 800; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
+  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
+  p, ul, ol { margin: 10px 0; }
+  li { margin: 5px 0; }
+  .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
+  .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
+  .card { background: var(--card); border: 2px solid var(--line); border-radius: 20px; padding: 20px; margin-bottom: 14px; }
+  .list { display: grid; gap: 10px; }
+  .list a { display: block; background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px;
+    border-radius: 18px; padding: 14px 16px; text-decoration: none; color: inherit; }
+  .list a:hover { border-color: var(--purple); }
+  .list strong { display: block; font-size: 1.02rem; font-weight: 800; }
+  .list span { color: var(--muted); font-size: .86rem; font-weight: 600; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em;
+    background: var(--panel); border: 1px solid var(--line); padding: 1px 6px; border-radius: 6px; font-weight: 700; }
+  pre { background: var(--panel); border: 2px solid var(--line); padding: 14px; border-radius: 14px; overflow-x: auto; line-height: 1.65; }
+  pre code { background: none; border: 0; padding: 0; }
+  table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; font-size: .94rem; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; }
+  th { background: var(--panel); }
+  .refs { border-top: 2px solid var(--line); margin-top: 24px; padding-top: 14px; }
+  .refs ul { padding-left: 20px; }
+  .pager { display: flex; justify-content: space-between; gap: 10px; margin-top: 16px; }
+  .pager a { background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px; border-radius: 16px;
+    padding: 12px 16px; text-decoration: none; color: inherit; font-weight: 800; font-size: .9rem; max-width: 48%; }
+  .pager a:hover { border-color: var(--blue); }
+  footer { color: var(--muted); font-size: .8rem; font-weight: 600; margin-top: 28px; }
+</style>
+</head>
+<body>
+<main>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="09.html" class="badge">네트워크 목차</a></div>
+<article class="card">
+<h1>보안</h1>
+<p class="lead">클라이언트는 신뢰 대상이 아니다. 판정은 서버가 하고 입력은 서버가 검증한다</p>
+<h3>핵심 개념</h3><p>보안 설계의 출발점은 <strong>신뢰 경계</strong>를 긋는 일이다. 클라이언트 바이너리, 메모리, 세이브 파일, 오가는 패킷은 모두 사용자 기기 안에 있어 값을 바꾸고 가로채는 것을 막을 방법이 없다. 서버가 믿을 수 있는 것은 자신이 계산한 값과 자신이 발급한 토큰뿐이고, 클라이언트가 보낸 값은 전부 <strong>사용자가 임의로 적어 넣은 값</strong>으로 취급해야 한다.</p><p>그래서 판정의 자리를 옮긴다. 피해량, 재화 증감, 드랍, 쿨다운, 이동 가능 여부처럼 결과를 정하는 계산은 서버가 하고, 클라이언트는 "무엇을 했다"가 아니라 <strong>"무엇을 하려 한다"</strong>만 보낸다. "몬스터를 잡았으니 골드 100을 달라"가 아니라 "스킬 3을 12번 몬스터에게 썼다"를 보내고 골드는 서버가 정해 통보한다. 이것이 서버 권위(authority)다.</p><pre><code>using System.Collections.Generic;
+
+public class Player  { public float Attack; public double LastUseTime; }
+public class Monster { public int Hp; }
+
+public class CombatServer
+{
+    readonly Dictionary&lt;int, Player&gt; _players = new Dictionary&lt;int, Player&gt;();
+    readonly Dictionary&lt;int, Monster&gt; _monsters = new Dictionary&lt;int, Monster&gt;();
+    const double Cooldown = 1.5;
+
+    // playerId는 로그인 토큰에서 꺼낸 값이다. 패킷 안의 id를 쓰면 남의 계정이 조작된다
+    public int UseSkill(int playerId, int targetId, double serverNow)
+    {
+        if (!_players.TryGetValue(playerId, out Player p)) return 0;
+        if (!_monsters.TryGetValue(targetId, out Monster m) || m.Hp &lt;= 0) return 0;
+        if (serverNow - p.LastUseTime &lt; Cooldown) return 0;   // 시각은 서버 시계로 잰다
+        int damage = (int)(p.Attack * 1.5f);                  // 피해량도 서버가 계산한다
+        m.Hp -= damage;
+        p.LastUseTime = serverNow;
+        return damage;
+    }
+}</code></pre><p>의도만 받아도 그 값을 그대로 믿지는 않는다. 좌표가 맵 안인지, 직전 위치와의 거리가 경과 시간 대비 최대 속도를 넘지 않는지, 쿨다운이 지났는지, 그 아이템을 가졌는지, 대상이 살아 있는지를 서버가 확인한다. 기준 시각은 서버 시계다. 클라이언트가 보낸 시각으로 쿨다운을 재면 그 값을 고쳐 무한 연타가 된다. 다만 지연 보상 탓에 서버도 클라이언트 말을 어느 정도 받아들일 수밖에 없어, 실무는 허용 오차 안이면 받아들이고 벗어나면 보정하거나 거절하고 기록을 남긴다. 획득량과 승률 통계로 사후에 걸러 내는 것이 마지막 방어선이다.</p><p>통신 보안은 다른 문제를 푼다. TLS(HTTPS, WSS)는 인증서로 상대가 진짜 그 서버인지 확인하고 공개키로 대칭키를 합의한 뒤 본문은 값싼 대칭키로 암호화한다. 이렇게 막는 것은 <strong>도청과 중간 변조, 서버 위장</strong>이고, 공용 와이파이에서 로그인 토큰이 새는 사고가 여기 해당한다. 반대로 <strong>사용자가 조작한 클라이언트는 막지 못한다</strong>. 암호화가 기기 안에서 풀리기 때문이다. 같은 이유로 앱에 심은 비밀키는 공개된 값으로 봐야 한다. 신원은 서버가 발급한 수명 짧은 토큰에서 꺼내 쓰고 요청 본문의 userId로 권한을 판단하지 않는다. 결제도 클라이언트의 "성공했다"는 말이 아니라 영수증을 서버가 스토어에 직접 확인한 뒤 재화를 지급한다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>치트와 패킷 변조를 어떻게 막나</strong> — 클라이언트를 신뢰 대상에서 빼는 것이 먼저다. 판정과 재화 계산은 서버가 하고, 입력은 범위와 쿨다운, 이동 거리, 소유 여부로 검증한다. 난독화는 보조 수단이다.</li><li><strong>클라이언트는 무엇을 믿으면 안 되나</strong> — 보내온 결과값, 시각, 신원, 로컬 저장 데이터 전부다. 신원은 로그인 토큰에서 꺼내고, 세이브 파일은 원본이 아니라 캐시로 다룬다.</li><li><strong>민감한 데이터의 통신 보안은</strong> — 전 구간을 TLS 1.2 이상으로 암호화하고 버전과 암호 그룹은 OS 기본값에 맡긴다. 인증서 검증을 끄지 않고, 토큰은 수명을 짧게 둔다.</li></ul><h3>흔한 오해</h3><ul><li><strong>통신을 암호화하면 치트가 막힌다</strong> — TLS는 중간자의 도청과 변조를 막을 뿐이다. 변조된 클라이언트는 정상 연결로 조작된 값을 보내므로 검증이 없으면 통과한다.</li><li><strong>난독화와 패킷 암호화로 충분하다</strong> — 복호화 키가 클라이언트 안에 있으니 시간이 걸릴 뿐 열린다. 인증서 피닝을 포함해 모두 분석 비용을 올릴 뿐 서버 판정을 대신하지 못한다.</li><li><strong>클라이언트가 검사하니 서버는 안 봐도 된다</strong> — 클라이언트 검사는 사용자 경험용이다. 같은 검사를 서버가 다시 해야 방어가 된다.</li><li><strong>쿨다운은 클라이언트가 보낸 시각으로 재면 된다</strong> — 조작 가능한 값이다. 서버 시계와 서버가 기록한 마지막 사용 시각으로만 판단한다.</li></ul>
+<div class="refs"><h2>참고 자료</h2><ul><li><a href="https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Security_Cheat_Sheet.html" target="_blank" rel="noopener">OWASP – Transport Layer Security Cheat Sheet</a></li><li><a href="https://learn.microsoft.com/ko-kr/dotnet/core/extensions/sslstream-best-practices" target="_blank" rel="noopener">Microsoft Learn – TLS/SSL 모범 사례(.NET)</a></li><li><a href="https://developer.mozilla.org/ko/docs/Glossary/TLS" target="_blank" rel="noopener">MDN – 전송 계층 보안(TLS)</a></li></ul></div>
+</article>
+<div class="pager"><a href="09-06.html">← 클라이언트-서버 신뢰성</a><span></span></div>
+<footer>정리 글은 Claude가 썼다. 틀린 내용이 있을 수 있으니 중요한 내용은 참고 자료 원문으로 확인한다.</footer>
+</main>
+</body>
+</html>

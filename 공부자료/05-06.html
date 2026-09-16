@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>물리 시뮬레이션 · 게임 수학·물리</title>
+<style>
+  :root {
+    --bg:#f2f5f7; --card:#fff; --panel:#f7f9fb; --text:#3c3c3c; --muted:#7a8b93; --line:#e2e8ea;
+    --green:#58cc02; --green-d:#46a302; --blue:#1cb0f6; --blue-d:#1899d6; --blue-bg:#ddf4ff;
+    --purple:#ce82ff; --purple-d:#a855f7; --purple-bg:#f5e8ff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#131f24; --card:#1b2b32; --panel:#16252b; --text:#eaf2f6; --muted:#8fa7b2; --line:#2c4048;
+      --blue-bg:#12303d; --purple-bg:#2e2036; --purple-d:#c99bec; --blue-d:#58c4f7; --green-d:#7ddc2a; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
+  a { color: var(--blue-d); }
+  .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
+  .nav a { text-decoration: none; }
+  .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
+    padding: 4px 12px; font-size: .8rem; font-weight: 800; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
+  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
+  p, ul, ol { margin: 10px 0; }
+  li { margin: 5px 0; }
+  .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
+  .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
+  .card { background: var(--card); border: 2px solid var(--line); border-radius: 20px; padding: 20px; margin-bottom: 14px; }
+  .list { display: grid; gap: 10px; }
+  .list a { display: block; background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px;
+    border-radius: 18px; padding: 14px 16px; text-decoration: none; color: inherit; }
+  .list a:hover { border-color: var(--purple); }
+  .list strong { display: block; font-size: 1.02rem; font-weight: 800; }
+  .list span { color: var(--muted); font-size: .86rem; font-weight: 600; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em;
+    background: var(--panel); border: 1px solid var(--line); padding: 1px 6px; border-radius: 6px; font-weight: 700; }
+  pre { background: var(--panel); border: 2px solid var(--line); padding: 14px; border-radius: 14px; overflow-x: auto; line-height: 1.65; }
+  pre code { background: none; border: 0; padding: 0; }
+  table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; font-size: .94rem; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; }
+  th { background: var(--panel); }
+  .refs { border-top: 2px solid var(--line); margin-top: 24px; padding-top: 14px; }
+  .refs ul { padding-left: 20px; }
+  .pager { display: flex; justify-content: space-between; gap: 10px; margin-top: 16px; }
+  .pager a { background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px; border-radius: 16px;
+    padding: 12px 16px; text-decoration: none; color: inherit; font-weight: 800; font-size: .9rem; max-width: 48%; }
+  .pager a:hover { border-color: var(--blue); }
+  footer { color: var(--muted); font-size: .8rem; font-weight: 600; margin-top: 28px; }
+</style>
+</head>
+<body>
+<main>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="05.html" class="badge">게임 수학·물리 목차</a></div>
+<article class="card">
+<h1>물리 시뮬레이션</h1>
+<p class="lead">고정 간격과 세미 임플리싯 오일러가 왜 표준인지, 지터와 터널링은 어디서 오는지 안다</p>
+<h3>핵심 개념</h3><p>물리 엔진의 한 스텝은 순서가 정해져 있다. 힘을 모아 가속도를 구하고, 속도와 위치를 <strong>적분</strong>하고, 충돌을 찾고(넓은 단계 → 좁은 단계), 접촉과 조인트를 솔버로 풀어 겹침과 속도를 고치고, 거의 멈춘 물체를 재운다. 이 중 물체를 실제로 옮기는 것은 적분이라, 적분 방식과 시간 간격이 시뮬레이션 전체의 안정성을 정한다.</p><p>가속도를 속도로, 속도를 위치로 옮기는 1차 적분에는 두 가지가 쓰인다. 비용은 같은데 결과가 다르다.</p><pre><code>Vector3 position, velocity, acceleration;
+
+void StepExplicit(float dt)       // 명시적 오일러: 옛 속도로 위치를 옮긴다
+{
+    position += velocity * dt;
+    velocity += acceleration * dt;
+}
+
+void StepSemiImplicit(float dt)   // 세미 임플리싯: 속도를 먼저 갱신해 새 속도로 옮긴다
+{
+    velocity += acceleration * dt;
+    position += velocity * dt;
+}</code></pre><p>명시적 오일러는 스프링·진자·궤도처럼 되돌리는 힘이 있는 계에서 매 스텝 에너지를 조금씩 더한다. 증상이 분명하다. 스프링에 매단 상자의 진폭이 서서히 커지다 화면 밖으로 날아가고, 공전하는 물체의 궤도가 점점 벌어진다. 세미 임플리싯은 갱신한 속도로 위치를 옮기는 덕에 에너지가 일정 범위 안에 갇혀, 오래 돌려도 진폭이 유지된다. 대부분의 게임 물리 엔진이 이 순서를 쓰는 이유다. 다만 둘 다 1차라 오차는 dt에 비례하고, dt가 커지면 같은 중력에서도 점프 높이가 달라진다.</p><p>그래서 물리는 <strong>고정 간격</strong>으로 돌린다. 렌더 프레임 간격은 기기와 상황에 따라 8ms에서 50ms까지 흔들린다. 그 값을 dt로 그대로 넣으면 같은 입력에도 점프 높이와 스프링 반응이 기기마다 달라지고, 로딩 직후처럼 dt가 크게 튄 프레임에서는 물체가 한 번에 멀리 이동해 벽을 뚫거나 겹침 해소가 폭주한다. Unity는 Time.fixedDeltaTime(기본 0.02초, 초당 50회) 간격으로 FixedUpdate와 물리 스텝을 돌리고 남는 시간을 누적하므로, 한 프레임에 스텝이 없을 수도 여러 번일 수도 있다. 계속 밀리면 따라잡느라 스텝이 늘고 그래서 더 느려지는 악순환에 빠지므로, Maximum Allowed Timestep으로 한 프레임에 소화할 상한을 둔다.</p><p>대신 화면이 떨린다. 물리가 50Hz인데 화면이 120Hz면 같은 위치가 두세 프레임 반복되다 툭 튄다. 이건 Rigidbody의 Interpolate(직전 두 물리 위치 사이를 그린다, 한 스텝 지연)나 Extrapolate(현재 속도로 앞을 예측한다)로 렌더 위치만 부드럽게 만드는 문제다. 입력은 Update에서 받아 두고 힘은 FixedUpdate에서 준다. Update마다 AddForce하면 프레임률이 곧 힘의 크기가 된다.</p><p>접촉은 겹친 뒤 고치는 방식이 기본이다. 좁은 단계가 접촉점·법선·침투 깊이를 주면 솔버가 반복을 돌며 접촉마다 충격량을 넣어 파고드는 상대 속도를 없애고, 남은 침투는 한 번에 밀지 않고 조금씩 민다. 한 번에 밀면 튀어 오르기 때문이다. 지터는 대개 솔버 반복이 모자라 중력과 접촉 반력이 매 스텝 싸우거나, 질량비가 큰 물체를 쌓거나 연결했거나, 콜라이더 스케일이 극단적이거나, 원점에서 아주 멀어 float 간격이 벌어진 탓이다. 빠른 물체가 얇은 벽을 뚫는 터널링은 fixedDeltaTime을 줄이기 전에 Collision Detection을 Continuous 계열로 바꾸는 편이 싸다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>물리를 고정 시간 간격으로 돌리는 이유</strong> — 적분 오차가 dt에 좌우되기 때문이다. 간격이 들쭉날쭉하면 점프 높이나 스프링이 기기마다 달라지고 큰 dt에서는 발산한다. 고정 간격은 결과를 안정시키고 재현할 수 있게 만든다.</li><li><strong>세미 임플리싯 오일러를 쓰는 이유</strong> — 속도를 먼저 갱신하고 그 속도로 위치를 옮기면 진동하는 계에서 에너지가 갇힌다. 순서만 뒤집은 명시적 오일러는 비용이 같은데도 에너지가 늘어 스프링이 점점 크게 흔들리다 발산한다.</li><li><strong>강체 시뮬레이터를 설계해 보라</strong> — 한 스텝을 힘 적용 → 적분 → 브로드 페이즈 → 내로 페이즈 → 제약 솔버 → 슬립으로 나눈다고 말한다. 접촉은 충격량 기반 솔버로 반복해 풀고, 남은 침투는 조금씩 밀어 되돌린다.</li><li><strong>지터를 해결한 경험</strong> — 원인부터 나눈다. 렌더만 떨리는지 시뮬레이션이 실제로 떨리는지 확인하고, 전자는 Rigidbody 보간으로, 후자는 솔버 반복·질량비·스케일·월드 원점 거리를 차례로 점검해 잡았다고 말한다.</li></ul><h3>흔한 오해</h3><ul><li><strong>FixedUpdate는 매 프레임 한 번 호출된다</strong> — 누적 시간에 따라 한 프레임에 0번일 수도 여러 번일 수도 있다. 여기에 이펙트 생성 같은 연출을 넣으면 프레임률에 따라 개수가 달라진다.</li><li><strong>고정 간격은 성능 때문에 쓴다</strong> — 목적은 안정성과 재현성이다. 오히려 간격을 줄이면 스텝 수가 늘어 CPU를 더 쓴다.</li><li><strong>떨리면 fixedDeltaTime부터 낮춘다</strong> — 화면만 떨리는 것이라면 Rigidbody 보간으로 거의 공짜로 해결된다. 간격부터 낮추면 부하만 늘고 원인은 남는다.</li><li><strong>적분 순서는 취향 차이다</strong> — 두 줄의 순서가 곧 안정성이다. 비용이 같은데 한쪽만 에너지가 발산한다.</li></ul>
+<div class="refs"><h2>참고 자료</h2><ul><li><a href="https://docs.unity3d.com/Manual/fixed-updates.html" target="_blank" rel="noopener">Unity 매뉴얼 – Fixed updates</a></li><li><a href="https://docs.unity3d.com/Manual/rigidbody-interpolation.html" target="_blank" rel="noopener">Unity 매뉴얼 – Apply interpolation to a Rigidbody</a></li><li><a href="https://docs.unity3d.com/Manual/execution-order.html" target="_blank" rel="noopener">Unity 매뉴얼 – Event function execution order</a></li><li><a href="https://docs.unity3d.com/Manual/ContinuousCollisionDetection.html" target="_blank" rel="noopener">Unity 매뉴얼 – Continuous collision detection (CCD)</a></li></ul></div>
+</article>
+<div class="pager"><a href="05-05.html">← 충돌과 교차 판정</a><a href="05-07.html">기초 수학 →</a></div>
+<footer>정리 글은 Claude가 썼다. 틀린 내용이 있을 수 있으니 중요한 내용은 참고 자료 원문으로 확인한다.</footer>
+</main>
+</body>
+</html>

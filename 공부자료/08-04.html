@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>스케줄링과 커널 · 운영체제·동시성</title>
+<style>
+  :root {
+    --bg:#f2f5f7; --card:#fff; --panel:#f7f9fb; --text:#3c3c3c; --muted:#7a8b93; --line:#e2e8ea;
+    --green:#58cc02; --green-d:#46a302; --blue:#1cb0f6; --blue-d:#1899d6; --blue-bg:#ddf4ff;
+    --purple:#ce82ff; --purple-d:#a855f7; --purple-bg:#f5e8ff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#131f24; --card:#1b2b32; --panel:#16252b; --text:#eaf2f6; --muted:#8fa7b2; --line:#2c4048;
+      --blue-bg:#12303d; --purple-bg:#2e2036; --purple-d:#c99bec; --blue-d:#58c4f7; --green-d:#7ddc2a; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
+  a { color: var(--blue-d); }
+  .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
+  .nav a { text-decoration: none; }
+  .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
+    padding: 4px 12px; font-size: .8rem; font-weight: 800; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
+  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
+  p, ul, ol { margin: 10px 0; }
+  li { margin: 5px 0; }
+  .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
+  .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
+  .card { background: var(--card); border: 2px solid var(--line); border-radius: 20px; padding: 20px; margin-bottom: 14px; }
+  .list { display: grid; gap: 10px; }
+  .list a { display: block; background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px;
+    border-radius: 18px; padding: 14px 16px; text-decoration: none; color: inherit; }
+  .list a:hover { border-color: var(--purple); }
+  .list strong { display: block; font-size: 1.02rem; font-weight: 800; }
+  .list span { color: var(--muted); font-size: .86rem; font-weight: 600; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em;
+    background: var(--panel); border: 1px solid var(--line); padding: 1px 6px; border-radius: 6px; font-weight: 700; }
+  pre { background: var(--panel); border: 2px solid var(--line); padding: 14px; border-radius: 14px; overflow-x: auto; line-height: 1.65; }
+  pre code { background: none; border: 0; padding: 0; }
+  table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; font-size: .94rem; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; }
+  th { background: var(--panel); }
+  .refs { border-top: 2px solid var(--line); margin-top: 24px; padding-top: 14px; }
+  .refs ul { padding-left: 20px; }
+  .pager { display: flex; justify-content: space-between; gap: 10px; margin-top: 16px; }
+  .pager a { background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px; border-radius: 16px;
+    padding: 12px 16px; text-decoration: none; color: inherit; font-weight: 800; font-size: .9rem; max-width: 48%; }
+  .pager a:hover { border-color: var(--blue); }
+  footer { color: var(--muted); font-size: .8rem; font-weight: 600; margin-top: 28px; }
+</style>
+</head>
+<body>
+<main>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="08.html" class="badge">운영체제·동시성 목차</a></div>
+<article class="card">
+<h1>스케줄링과 커널</h1>
+<p class="lead">문맥 전환·시스템 콜·인터럽트는 모두 상태를 저장하고 돌아오는 값을 치른다</p>
+<h3>핵심 개념</h3><p>코어 수보다 스레드가 많으니 운영체제는 짧은 간격으로 실행할 스레드를 바꿔 끼운다. 이 교체가 <strong>문맥 전환</strong>이고 순서는 늘 같다. 돌던 스레드의 레지스터와 PC를 커널 자료구조에 저장하고, 다음 스레드의 저장해 둔 값을 복원하고, 그 지점부터 이어 실행한다. 전환이 일어나는 이유는 셋이다. 타임 퀀텀이 끝났거나, 더 높은 우선순위 스레드가 준비됐거나, 돌던 스레드가 입출력이나 락을 기다리며 스스로 CPU를 놓았을 때다.</p><p>비용은 저장·복원 시간만이 아니다. 새 스레드가 다른 메모리를 쓰면 CPU 캐시와 TLB에 쌓아 둔 것이 쓸모없어져 한동안 미스가 쏟아지는데, 이쪽이 대체로 더 비싸다. 프로세스 전환은 주소 공간까지 바꿔 TLB를 통째로 갈아 끼우므로 스레드 전환보다 훨씬 비싸다. 그래서 백그라운드 작업을 스레드 200개로 뿌리면 병렬로 빨라지는 것이 아니라 전환과 캐시 미스만 늘어난다. 코어 수에 맞춘 스레드 풀이나 유니티 Job System을 쓰는 이유가 이것이다.</p><table><thead><tr><th>알고리즘</th><th>다음 차례를 고르는 기준</th><th>약점</th></tr></thead><tbody><tr><td>FCFS</td><td>도착한 순서</td><td>앞의 긴 작업이 뒤를 다 막는다</td></tr><tr><td>SJF</td><td>남은 실행 시간이 짧은 것</td><td>실행 시간을 미리 알 수 없고 긴 작업이 굶는다</td></tr><tr><td>라운드 로빈</td><td>정해진 시간씩 돌아가며</td><td>퀀텀이 작으면 전환 낭비, 크면 FCFS와 같아진다</td></tr><tr><td>MLFQ</td><td>여러 큐를 두고 오래 쓰면 아래 큐로 강등</td><td>설정값이 많아 튜닝이 어렵다</td></tr></tbody></table><p>라운드 로빈의 타임 퀀텀에는 절충이 그대로 드러난다. 너무 작으면 응답은 빨라지지만 전환 횟수가 늘어 순수 낭비가 커지고, 너무 크면 앞의 긴 작업 뒤로 줄이 길어진다. 그래서 전환 시간보다 충분히 크되 응답을 해치지 않는 값을 고른다. 무거운 계산을 프레임마다 조금씩 끊어 돌리는 게임 코드가 정확히 같은 고민이다. 한 프레임에 너무 적게 처리하면 끝나지 않고, 너무 많이 처리하면 그 프레임이 튄다.</p><p>유저 모드와 커널 모드를 나눈 것은 보호 장치다. 하드웨어를 직접 건드리거나 남의 메모리를 읽는 일은 커널 모드에서만 되고, 응용 프로그램은 <strong>시스템 콜</strong>로 요청한다. 이 전환에는 상태 저장과 권한 검사가 따라와 일반 함수 호출과 비용이 자릿수로 다르다. 파일을 조금씩 수만 번 읽는 코드가 느린 이유가 이것이고, 버퍼에 모아 한 번에 처리하는 것이 답이다. 매 프레임 로그를 파일에 flush하는 코드가 프레임을 갉아먹는 것도 같은 이유다.</p><p><strong>인터럽트</strong>는 하드웨어나 타이머가 CPU에 지금 봐 달라고 거는 신호다. CPU는 하던 일의 레지스터와 PC를 저장하고 인터럽트 벡터가 가리키는 핸들러로 뛴 뒤, 끝나면 저장해 둔 자리로 돌아온다. 계속 물어보는 폴링과 달리 기다리는 동안 CPU를 쓰지 않는다. 핸들러는 짧게 끝내고 긴 일은 뒤로 미루는 것이 원칙인데, 핸들러가 길면 그동안 다른 인터럽트가 밀리기 때문이다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>문맥 전환 때 무슨 일이 일어나나</strong> — 실행 중이던 스레드의 레지스터와 PC를 저장하고 다음 스레드의 값을 복원한다. 비용은 그 저장·복원 시간과, 캐시·TLB가 새 작업 것으로 갈리면서 생기는 미스이며 후자가 대체로 더 크다.</li><li><strong>프로세스와 스레드 전환은 무엇이 다른가</strong> — 스레드 전환은 주소 공간이 그대로라 레지스터와 스택 포인터만 바꾸면 되지만, 프로세스 전환은 페이지 테이블까지 바꿔 TLB가 무효화된다. 그래서 프로세스 전환이 훨씬 비싸다.</li><li><strong>전환 비용을 어떻게 줄이나</strong> — 스레드 수를 코어 수 근처로 맞춘 풀을 쓰고, 락 경합과 불필요한 대기를 줄인다. 유니티에서는 Job System이 워커 스레드 수를 코어에 맞춰 관리한다.</li><li><strong>시스템 콜이 왜 비싼가</strong> — 유저 모드에서 커널 모드로 넘어가며 상태 저장과 권한 검사가 붙기 때문이다. 그래서 입출력은 버퍼에 모아 호출 횟수 자체를 줄인다.</li></ul><h3>흔한 오해</h3><ul><li><strong>스레드를 많이 만들수록 빨라진다</strong> — 코어 수를 넘으면 실제 병렬도는 늘지 않고 전환과 캐시 오염만 늘어 오히려 느려진다.</li><li><strong>타임 퀀텀은 작을수록 좋다</strong> — 응답성은 좋아지지만 전환 오버헤드가 커진다. 전환 시간보다 충분히 크게 잡는 것이 기본이다.</li><li><strong>시스템 콜은 그냥 함수 호출이다</strong> — 모드 전환이 끼어들어 비용이 다르다. 호출 횟수를 줄이는 것이 최적화의 기본이 되는 이유다.</li><li><strong>인터럽트 핸들러에서 다 처리하면 된다</strong> — 핸들러가 길면 그동안 다른 인터럽트가 밀려 응답성이 무너진다. 긴 작업은 큐에 넣고 나중에 처리한다.</li></ul>
+<div class="refs"><h2>참고 자료</h2><ul><li><a href="https://learn.microsoft.com/en-us/windows/win32/procthread/context-switches" target="_blank" rel="noopener">Microsoft Learn – Context Switches(Win32)</a></li><li><a href="https://learn.microsoft.com/en-us/windows/win32/procthread/scheduling-priorities" target="_blank" rel="noopener">Microsoft Learn – Scheduling Priorities(Win32)</a></li><li><a href="https://learn.microsoft.com/ko-kr/dotnet/standard/threading/the-managed-thread-pool" target="_blank" rel="noopener">Microsoft Learn – 관리되는 스레드 풀(.NET)</a></li></ul></div>
+</article>
+<div class="pager"><a href="08-03.html">← 가상 메모리</a><a href="08-05.html">컴퓨터 구조 →</a></div>
+<footer>정리 글은 Claude가 썼다. 틀린 내용이 있을 수 있으니 중요한 내용은 참고 자료 원문으로 확인한다.</footer>
+</main>
+</body>
+</html>

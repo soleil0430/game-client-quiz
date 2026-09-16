@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>계층 모델 · 네트워크</title>
+<style>
+  :root {
+    --bg:#f2f5f7; --card:#fff; --panel:#f7f9fb; --text:#3c3c3c; --muted:#7a8b93; --line:#e2e8ea;
+    --green:#58cc02; --green-d:#46a302; --blue:#1cb0f6; --blue-d:#1899d6; --blue-bg:#ddf4ff;
+    --purple:#ce82ff; --purple-d:#a855f7; --purple-bg:#f5e8ff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#131f24; --card:#1b2b32; --panel:#16252b; --text:#eaf2f6; --muted:#8fa7b2; --line:#2c4048;
+      --blue-bg:#12303d; --purple-bg:#2e2036; --purple-d:#c99bec; --blue-d:#58c4f7; --green-d:#7ddc2a; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
+  a { color: var(--blue-d); }
+  .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
+  .nav a { text-decoration: none; }
+  .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
+    padding: 4px 12px; font-size: .8rem; font-weight: 800; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
+  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
+  p, ul, ol { margin: 10px 0; }
+  li { margin: 5px 0; }
+  .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
+  .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
+  .card { background: var(--card); border: 2px solid var(--line); border-radius: 20px; padding: 20px; margin-bottom: 14px; }
+  .list { display: grid; gap: 10px; }
+  .list a { display: block; background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px;
+    border-radius: 18px; padding: 14px 16px; text-decoration: none; color: inherit; }
+  .list a:hover { border-color: var(--purple); }
+  .list strong { display: block; font-size: 1.02rem; font-weight: 800; }
+  .list span { color: var(--muted); font-size: .86rem; font-weight: 600; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em;
+    background: var(--panel); border: 1px solid var(--line); padding: 1px 6px; border-radius: 6px; font-weight: 700; }
+  pre { background: var(--panel); border: 2px solid var(--line); padding: 14px; border-radius: 14px; overflow-x: auto; line-height: 1.65; }
+  pre code { background: none; border: 0; padding: 0; }
+  table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; font-size: .94rem; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; }
+  th { background: var(--panel); }
+  .refs { border-top: 2px solid var(--line); margin-top: 24px; padding-top: 14px; }
+  .refs ul { padding-left: 20px; }
+  .pager { display: flex; justify-content: space-between; gap: 10px; margin-top: 16px; }
+  .pager a { background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px; border-radius: 16px;
+    padding: 12px 16px; text-decoration: none; color: inherit; font-weight: 800; font-size: .9rem; max-width: 48%; }
+  .pager a:hover { border-color: var(--blue); }
+  footer { color: var(--muted); font-size: .8rem; font-weight: 600; margin-top: 28px; }
+</style>
+</head>
+<body>
+<main>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="09.html" class="badge">네트워크 목차</a></div>
+<article class="card">
+<h1>계층 모델</h1>
+<p class="lead">계층을 나눈 이유부터 계층별 역할과 데이터 단위, 게임 패킷이 앉는 자리까지 잡는다</p>
+<h3>핵심 개념</h3><p>네트워크를 계층으로 나눈 이유는 <strong>관심사 분리</strong>다. 게임 클라이언트가 소켓에 "이 바이트를 저 주소로 보내라"고 넘기면, 그 아래에서 Wi-Fi를 쓰는지 LTE를 쓰는지, 중간에 라우터를 몇 개 거치는지는 게임 코드가 알 필요가 없다. 한 계층의 구현을 갈아 끼워도 위아래가 영향을 받지 않고, 계층마다 표준과 장비를 따로 만들 수 있다는 것이 계층 분리의 값어치다.</p><table><thead><tr><th>OSI 7계층</th><th>TCP/IP 4계층</th><th>데이터 단위</th><th>게임에서 닿는 곳</th></tr></thead><tbody><tr><td>응용·표현·세션</td><td>응용</td><td>메시지</td><td>직접 정한 패킷 구조, HTTP, JSON·Protobuf</td></tr><tr><td>전송</td><td>전송</td><td>세그먼트(TCP)·데이터그램(UDP)</td><td>소켓 API, 포트 번호, 소켓 옵션</td></tr><tr><td>네트워크</td><td>인터넷</td><td>패킷</td><td>IP 주소, 라우터, MTU</td></tr><tr><td>데이터링크·물리</td><td>네트워크 접근</td><td>프레임·비트</td><td>MAC 주소, 이더넷·Wi-Fi</td></tr></tbody></table><p>단위 이름이 계층마다 바뀌는 것은 <strong>캡슐화</strong> 때문이다. 위에서 내려온 데이터에 계층마다 자기 헤더를 붙여 아래로 보내고, 받는 쪽은 반대로 헤더를 떼며 위로 올린다. 그래서 계층을 나눈 대가로 전송량은 오히려 늘어난다. 위치 값 16바이트를 UDP로 보내도 IP 헤더 20바이트와 UDP 헤더 8바이트가 더 붙는다. 작은 패킷을 초당 수십 번 뿌리는 게임에서 헤더가 본문보다 커지는 일이 흔한 이유고, 여러 갱신을 한 패킷에 묶어 보내는 이유이기도 하다.</p><p>세션 계층은 통신의 시작·유지·종료와 대화 단위를 관리하는 자리다. 다만 실제 인터넷 구현은 TCP/IP 4계층을 따르고 OSI의 응용·표현·세션이 응용 계층 하나로 합쳐지므로, 세션 관리는 보통 응용 계층 코드(로그인 세션, 토큰 만료, 재접속 처리)가 직접 한다.</p><p>계층을 나눠 보면 장애 원인을 좁힐 수 있다는 것이 실무에서의 쓸모다. 핑은 가는데 접속이 안 되면 네트워크 계층까지는 살아 있으니 포트·방화벽·서버 프로세스(전송·응용 계층)를 보고, 특정 통신사에서만 끊기면 회선 쪽을 의심하는 식으로 나눠 들어간다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>OSI 7계층과 계층을 나눈 이유</strong> — 아래부터 물리·데이터링크·네트워크·전송·세션·표현·응용이다. 나눈 이유는 관심사를 분리해 한 계층의 구현이 바뀌어도 다른 계층이 영향을 받지 않게 하고, 계층별로 표준과 장비를 따로 발전시킬 수 있게 하기 위해서다.</li><li><strong>TCP/IP 4계층과의 대응</strong> — 응용·표현·세션이 응용 계층으로, 물리·데이터링크가 네트워크 접근 계층으로 합쳐지고 전송과 네트워크(인터넷)는 그대로 대응한다. 실제 구현과 표준 문서는 TCP/IP를 따르고 OSI는 개념을 설명할 때 쓰는 참조 모델이다.</li><li><strong>계층별 데이터 단위</strong> — 전송 계층은 세그먼트(UDP는 데이터그램), 네트워크 계층은 패킷, 데이터링크는 프레임, 물리는 비트다. 캡슐화로 헤더가 붙으면서 이름이 바뀐다.</li><li><strong>게임 클라이언트는 어느 계층을 다루나</strong> — 응용 계층에서 패킷 구조와 직렬화 방식을 정하고, 전송 계층은 TCP냐 UDP냐와 소켓 옵션 수준에서 고른다. 그 아래는 OS와 네트워크 장비의 몫이라 코드로 손대지 않는다.</li></ul><h3>흔한 오해</h3><ul><li><strong>계층을 나누면 전송 효율이 좋아진다</strong> — 계층마다 헤더가 붙어 전송량은 늘어난다. 얻는 것은 표준화와 교체 용이성이지 대역폭이 아니다.</li><li><strong>라우터가 TCP 연결을 관리한다</strong> — 라우터는 네트워크 계층에서 IP를 보고 경로를 정한다. TCP 연결 상태는 양 끝 호스트의 OS가 들고 있다.</li><li><strong>OSI 7계층이 실제 인터넷 구조다</strong> — 실제로 돌아가는 것은 TCP/IP 스택이다. OSI는 설명과 비교에 쓰는 모델이라 세션·표현 계층에 딱 맞는 구현이 따로 있지 않다.</li><li><strong>UDP의 전송 단위도 세그먼트다</strong> — UDP는 데이터그램이라고 부른다. 세그먼트는 연결과 순서를 전제한 TCP 쪽 용어다.</li></ul>
+<div class="refs"><h2>참고 자료</h2><ul><li><a href="https://www.rfc-editor.org/rfc/rfc1122" target="_blank" rel="noopener">RFC 1122 – Requirements for Internet Hosts: Communication Layers</a></li><li><a href="https://developer.mozilla.org/ko/docs/Learn_web_development/Howto/Web_mechanics/How_does_the_Internet_work" target="_blank" rel="noopener">MDN – 인터넷은 어떻게 동작하는가?</a></li><li><a href="https://www.rfc-editor.org/rfc/rfc9293.html" target="_blank" rel="noopener">RFC 9293 – Transmission Control Protocol (TCP)</a></li></ul></div>
+</article>
+<div class="pager"><span></span><a href="09-02.html">TCP와 UDP →</a></div>
+<footer>정리 글은 Claude가 썼다. 틀린 내용이 있을 수 있으니 중요한 내용은 참고 자료 원문으로 확인한다.</footer>
+</main>
+</body>
+</html>

@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>텍스처 · 그래픽스·렌더링</title>
+<style>
+  :root {
+    --bg:#f2f5f7; --card:#fff; --panel:#f7f9fb; --text:#3c3c3c; --muted:#7a8b93; --line:#e2e8ea;
+    --green:#58cc02; --green-d:#46a302; --blue:#1cb0f6; --blue-d:#1899d6; --blue-bg:#ddf4ff;
+    --purple:#ce82ff; --purple-d:#a855f7; --purple-bg:#f5e8ff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#131f24; --card:#1b2b32; --panel:#16252b; --text:#eaf2f6; --muted:#8fa7b2; --line:#2c4048;
+      --blue-bg:#12303d; --purple-bg:#2e2036; --purple-d:#c99bec; --blue-d:#58c4f7; --green-d:#7ddc2a; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
+  a { color: var(--blue-d); }
+  .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
+  .nav a { text-decoration: none; }
+  .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
+    padding: 4px 12px; font-size: .8rem; font-weight: 800; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
+  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
+  p, ul, ol { margin: 10px 0; }
+  li { margin: 5px 0; }
+  .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
+  .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
+  .card { background: var(--card); border: 2px solid var(--line); border-radius: 20px; padding: 20px; margin-bottom: 14px; }
+  .list { display: grid; gap: 10px; }
+  .list a { display: block; background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px;
+    border-radius: 18px; padding: 14px 16px; text-decoration: none; color: inherit; }
+  .list a:hover { border-color: var(--purple); }
+  .list strong { display: block; font-size: 1.02rem; font-weight: 800; }
+  .list span { color: var(--muted); font-size: .86rem; font-weight: 600; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em;
+    background: var(--panel); border: 1px solid var(--line); padding: 1px 6px; border-radius: 6px; font-weight: 700; }
+  pre { background: var(--panel); border: 2px solid var(--line); padding: 14px; border-radius: 14px; overflow-x: auto; line-height: 1.65; }
+  pre code { background: none; border: 0; padding: 0; }
+  table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; font-size: .94rem; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; }
+  th { background: var(--panel); }
+  .refs { border-top: 2px solid var(--line); margin-top: 24px; padding-top: 14px; }
+  .refs ul { padding-left: 20px; }
+  .pager { display: flex; justify-content: space-between; gap: 10px; margin-top: 16px; }
+  .pager a { background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px; border-radius: 16px;
+    padding: 12px 16px; text-decoration: none; color: inherit; font-weight: 800; font-size: .9rem; max-width: 48%; }
+  .pager a:hover { border-color: var(--blue); }
+  footer { color: var(--muted); font-size: .8rem; font-weight: 600; margin-top: 28px; }
+</style>
+</head>
+<body>
+<main>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="04.html" class="badge">그래픽스·렌더링 목차</a></div>
+<article class="card">
+<h1>텍스처</h1>
+<p class="lead">압축 포맷·밉맵·해상도가 메모리와 대역폭을 어떻게 정하는지 숫자로 잡아 둔다</p>
+<h3>핵심 개념</h3><p>텍스처 비용은 두 가지다. <strong>메모리 점유</strong>와 샘플링할 때 읽어 오는 <strong>대역폭</strong>이고, 둘 다 픽셀 수에 비례한다. 그래서 가로세로를 두 배로 키우면 메모리는 네 배가 된다. 화면에서 작게 보이는 텍스처의 Max Size를 낮추는 것이 가장 싸고 확실한 절감인 이유다.</p><p>PNG·JPG는 파일을 작게 보관하는 저장용 압축이라, 로드하면 풀려서 RGBA32 같은 원래 크기로 메모리에 올라간다. 반면 ASTC·ETC2 같은 GPU 압축 포맷은 <strong>압축된 상태 그대로 샘플링</strong>할 수 있어 메모리와 대역폭을 함께 줄인다. 모바일에서 포맷 선택이 곧 메모리 예산인 이유가 여기 있다.</p><table><thead><tr><th>포맷</th><th>픽셀당 비트</th><th>1024x1024 크기</th><th>쓰임</th></tr></thead><tbody><tr><td>RGBA32(무압축)</td><td>32</td><td>4MB</td><td>기준값. 런타임 생성 텍스처 정도</td></tr><tr><td>ASTC 4x4</td><td>8</td><td>1MB</td><td>품질이 중요한 캐릭터·주요 UI</td></tr><tr><td>ASTC 6x6</td><td>약 3.6</td><td>약 0.45MB</td><td>일반 소품·배경의 기본값</td></tr><tr><td>ASTC 8x8</td><td>2</td><td>0.25MB</td><td>큰 배경, 디테일이 적은 면</td></tr><tr><td>ETC2 RGBA</td><td>8</td><td>1MB</td><td>ASTC를 못 쓰는 구형 안드로이드 대응</td></tr></tbody></table><p>밉맵은 원본을 가로세로 절반씩 줄인 이미지를 미리 만들어 두는 것이다. GPU는 인접 픽셀 사이의 UV 변화율을 보고 화면에서 텍셀이 얼마나 촘촘히 찍히는지 판단해 알맞은 레벨을 고른다. 멀리 있는 표면에서 원본을 그대로 읽으면 텍셀을 건너뛰며 샘플링해 반짝임이 생기는데, 밉맵은 이를 막고 작은 이미지를 읽어 텍스처 캐시 적중률도 올린다. 대신 전체 메모리가 약 33% 는다. 항상 같은 크기로 보이는 UI에는 보통 끈다.</p><p>필터링은 한 레벨 안에서 어떻게 섞느냐의 문제다. 포인트는 가장 가까운 텍셀 하나, 바이리니어는 이웃 네 텍셀, 트라이리니어는 거기에 인접한 두 밉 레벨까지 섞어 밉 경계의 띠를 없앤다. 아니소트로픽은 비스듬히 보이는 면에서 방향에 맞춰 샘플을 더 뽑아 흐려짐을 막는다. 샘플이 늘수록 비싸므로 바닥처럼 필요한 곳에만 올린다. 픽셀 아트는 일부러 포인트로 둔다.</p><p><strong>모바일(타일 기반 GPU)</strong>에서 가장 귀한 자원은 대역폭이다. 타일 GPU는 색·깊이 버퍼를 칩 안에서 다뤄 아끼지만 텍스처 읽기는 여전히 메인 메모리에서 오므로, 압축과 밉맵이 곧 프레임과 발열·배터리로 직결된다. 주의할 점이 하나 더 있다. Crunch 압축은 배포 파일 크기만 줄이고 런타임에는 ASTC·ETC2로 풀리므로 메모리 사용량은 그대로다. 또 텍스처 변이 2의 거듭제곱이 아니면 블록 정렬이 어긋나 압축 효율이 떨어질 수 있다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>모바일 텍스처 압축 포맷은 무엇을 쓰나</strong> — 기본은 ASTC고, 블록 크기로 품질과 용량을 맞춘다. 캐릭터나 주요 UI는 4x4, 일반 소품은 6x6, 큰 배경은 8x8 식으로 나누고, ASTC를 못 쓰는 구형 안드로이드 대응이 필요하면 ETC2를 함께 굽는다.</li><li><strong>밉맵 레벨은 어떻게 고르나</strong> — GPU가 인접 픽셀 사이의 UV 변화율로 화면 대비 텍셀 밀도를 계산해 레벨을 고른다. 멀리 있는 표면의 반짝임을 막고 캐시에도 유리한 대신 메모리가 약 33% 는다.</li><li><strong>텍스처 크기가 주는 영향</strong> — 메모리는 가로x세로에 비례하므로 변을 두 배로 키우면 네 배가 된다. 그래서 최적화는 화면에서 작게 보이는 것부터 Max Size를 내리는 것으로 시작한다.</li><li><strong>아틀라스로 묶는 기준</strong> — 같은 화면에 함께 나오는 것끼리 묶는다. 아틀라스는 배칭 단위이면서 로드 단위라, 여러 화면 것을 섞으면 쓰지 않는 이미지까지 메모리에 올라온다.</li></ul><h3>흔한 오해</h3><ul><li><strong>PNG로 넣으면 압축된 채로 메모리에 올라간다</strong> — PNG·JPG는 저장용 압축이라 로드하면 풀린다. GPU 메모리를 줄이려면 ASTC·ETC2 같은 GPU 압축 포맷으로 임포트해야 한다.</li><li><strong>밉맵은 메모리를 줄여 준다</strong> — 레벨을 다 들고 있으므로 오히려 약 33% 늘어난다. 줄어드는 것은 샘플링 대역폭과 반짝임이다.</li><li><strong>밉맵을 끄면 더 선명해서 이득이다</strong> — 멀어질수록 반짝이고 텍스처 캐시 적중률이 떨어져 느려진다. 끄는 것은 항상 원본 크기로 보이는 UI 정도다.</li><li><strong>Crunch 압축이 런타임 메모리를 줄인다</strong> — 줄어드는 것은 빌드·다운로드 용량이다.</li><li><strong>해상도를 절반으로 줄이면 메모리도 절반</strong> — 가로세로가 함께 줄어 1/4이 된다.</li></ul>
+<div class="refs"><h2>참고 자료</h2><ul><li><a href="https://docs.unity3d.com/Manual/texture-choose-format-by-platform.html" target="_blank" rel="noopener">Unity 매뉴얼 – Choose a GPU texture format by platform</a></li><li><a href="https://docs.unity3d.com/Manual/texture-mipmaps-introduction.html" target="_blank" rel="noopener">Unity 매뉴얼 – Mipmaps</a></li><li><a href="https://docs.unity3d.com/Manual/class-TextureImporter.html" target="_blank" rel="noopener">Unity 매뉴얼 – Texture Import Settings window</a></li><li><a href="https://docs.unity3d.com/Manual/sprite/atlas/atlas-landing.html" target="_blank" rel="noopener">Unity 매뉴얼 – Packing sprites into atlas textures</a></li></ul></div>
+</article>
+<div class="pager"><a href="04-03.html">← 드로우 콜과 배칭</a><a href="04-05.html">투명도와 버퍼 →</a></div>
+<footer>정리 글은 Claude가 썼다. 틀린 내용이 있을 수 있으니 중요한 내용은 참고 자료 원문으로 확인한다.</footer>
+</main>
+</body>
+</html>

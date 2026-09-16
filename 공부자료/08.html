@@ -3,176 +3,62 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>운영체제·동시성 · 공부 자료</title>
+<title>운영체제·동시성 공부 자료</title>
 <style>
-  :root { --bg:#f7f7f5; --card:#fff; --text:#1f2328; --muted:#656d76; --line:#d0d7de; --accent:#2f6feb; }
+  :root {
+    --bg:#f2f5f7; --card:#fff; --panel:#f7f9fb; --text:#3c3c3c; --muted:#7a8b93; --line:#e2e8ea;
+    --green:#58cc02; --green-d:#46a302; --blue:#1cb0f6; --blue-d:#1899d6; --blue-bg:#ddf4ff;
+    --purple:#ce82ff; --purple-d:#a855f7; --purple-bg:#f5e8ff;
+  }
   @media (prefers-color-scheme: dark) {
-    :root { --bg:#0d1117; --card:#161b22; --text:#e6edf3; --muted:#8d96a0; --line:#30363d; --accent:#4493f8; }
+    :root { --bg:#131f24; --card:#1b2b32; --panel:#16252b; --text:#eaf2f6; --muted:#8fa7b2; --line:#2c4048;
+      --blue-bg:#12303d; --purple-bg:#2e2036; --purple-d:#c99bec; --blue-d:#58c4f7; --green-d:#7ddc2a; }
   }
   * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.75 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; }
-  main { max-width: 720px; margin: 0 auto; padding: 24px 16px 64px; }
-  a { color: var(--accent); }
-  h1 { font-size: 1.5rem; margin: 8px 0 4px; }
-  h2 { font-size: 1.25rem; margin: 0 0 4px; scroll-margin-top: 16px; }
-  h3 { font-size: 1.02rem; margin: 22px 0 6px; }
-  p, ul, ol { margin: 8px 0; }
-  li { margin: 4px 0; }
-  .muted { color: var(--muted); font-size: .9rem; }
-  .toc { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px 20px; margin: 16px 0 24px; }
-  .toc ol { margin: 6px 0 0; padding-left: 20px; }
-  article { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
-  .lead { color: var(--muted); margin: 0 0 8px; }
-  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .92em; background: color-mix(in srgb, var(--line) 45%, transparent); padding: 1px 5px; border-radius: 4px; }
-  pre { background: color-mix(in srgb, var(--line) 30%, transparent); padding: 12px 14px; border-radius: 10px; overflow-x: auto; }
-  pre code { background: none; padding: 0; line-height: 1.6; }
-  table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; }
-  th, td { border: 1px solid var(--line); padding: 6px 10px; text-align: left; }
-  .refs { border-top: 1px solid var(--line); margin-top: 20px; padding-top: 12px; }
-  footer { color: var(--muted); font-size: .85rem; margin-top: 32px; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
+  a { color: var(--blue-d); }
+  .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
+  .nav a { text-decoration: none; }
+  .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
+    padding: 4px 12px; font-size: .8rem; font-weight: 800; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
+  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
+  p, ul, ol { margin: 10px 0; }
+  li { margin: 5px 0; }
+  .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
+  .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
+  .card { background: var(--card); border: 2px solid var(--line); border-radius: 20px; padding: 20px; margin-bottom: 14px; }
+  .list { display: grid; gap: 10px; }
+  .list a { display: block; background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px;
+    border-radius: 18px; padding: 14px 16px; text-decoration: none; color: inherit; }
+  .list a:hover { border-color: var(--purple); }
+  .list strong { display: block; font-size: 1.02rem; font-weight: 800; }
+  .list span { color: var(--muted); font-size: .86rem; font-weight: 600; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em;
+    background: var(--panel); border: 1px solid var(--line); padding: 1px 6px; border-radius: 6px; font-weight: 700; }
+  pre { background: var(--panel); border: 2px solid var(--line); padding: 14px; border-radius: 14px; overflow-x: auto; line-height: 1.65; }
+  pre code { background: none; border: 0; padding: 0; }
+  table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; font-size: .94rem; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; }
+  th { background: var(--panel); }
+  .refs { border-top: 2px solid var(--line); margin-top: 24px; padding-top: 14px; }
+  .refs ul { padding-left: 20px; }
+  .pager { display: flex; justify-content: space-between; gap: 10px; margin-top: 16px; }
+  .pager a { background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px; border-radius: 16px;
+    padding: 12px 16px; text-decoration: none; color: inherit; font-weight: 800; font-size: .9rem; max-width: 48%; }
+  .pager a:hover { border-color: var(--blue); }
+  footer { color: var(--muted); font-size: .8rem; font-weight: 600; margin-top: 28px; }
 </style>
 </head>
 <body>
 <main>
-  <p><a href="../index.html">← 퀴즈로 돌아가기</a></p>
-  <h1>운영체제·동시성 공부 자료</h1>
-  <p class="muted">면접 퀴즈에서 나온 개념을 소주제별로 정리했다. 근거가 된 질문 목록은 질문은행 08-운영체제-동시성.md에 있다.</p>
-  <nav class="toc"><strong>목차</strong><ol>
-    <li><a href="#프로세스와-스레드">프로세스와 스레드</a></li>
-    <li><a href="#메모리-구조">메모리 구조</a></li>
-    <li><a href="#가상-메모리">가상 메모리</a></li>
-    <li><a href="#스케줄링과-커널">스케줄링과 커널</a></li>
-    <li><a href="#컴퓨터-구조">컴퓨터 구조</a></li>
-    <li><a href="#동기화">동기화</a></li>
-    <li><a href="#비동기">비동기</a></li>
-    <li><a href="#Unity와-멀티스레딩">Unity와 멀티스레딩</a></li>
-  </ol></nav>
-  <article>
-    <h2 id="프로세스와-스레드">프로세스와 스레드</h2>
-    <p class="lead">프로세스는 자원의 울타리, 스레드는 그 안의 실행 흐름이다. 무엇을 공유하는지가 전부다</p>
-    <h3>핵심 개념</h3><p>운영체제가 메모리와 파일 핸들 같은 자원을 떼어 주는 단위가 <strong>프로세스</strong>이고, 그 자원 위에서 CPU를 받아 실제로 코드를 실행하는 흐름이 <strong>스레드</strong>다. 게임을 실행하면 프로세스 하나가 뜨고, 그 안에서 메인 스레드가 Update를 돌리는 동안 다른 스레드가 에셋을 읽는다. 프로그램은 아직 디스크에 있는 실행 파일이고, 그걸 올려 자원을 받은 순간부터 프로세스다. 둘을 가르는 기준은 하나다. <strong>주소 공간을 같이 쓰느냐</strong>.</p><table><thead><tr><th>영역</th><th>같은 프로세스의 스레드끼리</th><th>왜 그런가</th></tr></thead><tbody><tr><td>코드·전역 데이터·힙</td><td>공유</td><td>같은 프로그램이고, 객체를 주고받아야 한다</td></tr><tr><td>스택</td><td>각자</td><td>스레드마다 호출 관계와 지역 변수가 다르다</td></tr><tr><td>PC·레지스터</td><td>각자</td><td>지금 어느 줄을 실행 중인지가 다르다</td></tr><tr><td>파일 핸들·소켓</td><td>공유</td><td>프로세스 단위로 열린 자원이다</td></tr></tbody></table><p>커널은 프로세스마다 <strong>PCB</strong>(Process Control Block)를 하나씩 두고 ID, 상태, PC와 레지스터 값, 메모리·파일 정보를 담는다. 문맥 전환 때 돌던 값을 PCB에 저장했다가 다음 프로세스의 PCB에서 복원한다. 스레드에도 같은 역할의 TCB가 있는데 주소 공간 정보가 빠져 담을 것이 훨씬 적고, 그래서 스레드 전환이 프로세스 전환보다 싸다.</p><p>게임 클라이언트가 멀티프로세스 대신 멀티스레드를 쓰는 이유도 이 표에서 나온다. 메시를 백그라운드에서 파싱해 메인 스레드에 넘길 때, 프로세스끼리는 파이프나 공유 메모리 같은 IPC로 실어 보내야 하지만 스레드끼리는 같은 힙에 있는 배열을 그대로 가리키면 끝이다. 대가도 분명하다. 같은 메모리를 건드리니 경쟁 상태가 생기고, 한 스레드에서 터진 예외가 프로세스 전체를 내린다. 브라우저가 탭마다 프로세스를 쓰는 것은 그 반대 선택이다. 비싸지만 한 탭이 죽어도 나머지는 산다.</p><p>사용자 수준 스레드와 커널 수준 스레드도 같은 맥락이다. 사용자 수준 스레드는 라이브러리가 스케줄링해 커널을 거치지 않으니 생성·전환이 싸지만, 커널이 존재를 몰라서 하나가 블로킹 시스템 콜에 걸리면 프로세스 전체가 멈추고 코어 여러 개에 나눠 돌릴 수도 없다. 유니티 코루틴이 여기서 더 극단적인 쪽이다. 코루틴은 스레드가 아니라 메인 스레드가 프레임마다 이어서 돌려 주는 상태 기계라, 안에서 무거운 계산을 하면 그대로 프레임이 튄다. 진짜 병렬이 필요하면 커널 스레드 위에서 도는 Job System이나 <code>Thread</code>를 써야 한다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>프로그램·프로세스·스레드의 차이는</strong> — 프로그램은 디스크의 실행 파일, 프로세스는 그것을 메모리에 올려 자원을 할당받은 실행 단위, 스레드는 프로세스 안에서 CPU를 받아 도는 실행 흐름이다. 프로세스는 주소 공간이 독립이고 스레드는 그 주소 공간을 공유한다.</li><li><strong>왜 멀티프로세스가 아니라 멀티스레드인가</strong> — 게임은 로딩 결과나 경로 탐색 결과를 메인 스레드와 계속 주고받는데, 스레드는 같은 힙을 쓰니 복사 없이 넘길 수 있고 전환 비용도 싸다. 대신 동기화 비용과 장애 격리를 포기한 것이고, 격리가 더 중요하면 프로세스를 나눈다.</li><li><strong>스레드마다 스택과 PC를 따로 두는 이유는</strong> — 스레드마다 호출 경로와 지역 변수가 다르기 때문이다. 공유하면 한 스레드의 함수 반환이 다른 스레드의 호출 관계를 망가뜨린다. 반대로 코드·전역·힙은 같아도 되니 공유해 통신에 쓴다.</li><li><strong>IPC에는 어떤 것이 있나</strong> — 파이프, 공유 메모리, 메시지 큐, 소켓, 시그널이다. 공유 메모리는 복사가 없어 가장 빠른 대신 동기화를 직접 해야 하고, 소켓은 느린 만큼 다른 기기까지 확장된다.</li></ul><h3>흔한 오해</h3><ul><li><strong>주소만 알면 다른 프로세스의 변수를 읽을 수 있다</strong> — 프로세스마다 가상 주소 공간이 따로라 같은 숫자 주소가 서로 다른 물리 메모리를 가리킨다. 커널이 마련한 IPC를 거쳐야 한다.</li><li><strong>스레드는 메모리를 전부 공유한다</strong> — 스택은 스레드마다 따로다. 다른 스레드의 지역 변수를 가리키는 참조를 넘겨 쓰는 코드는 그래서 위험하다.</li><li><strong>코루틴은 스레드다</strong> — 유니티 코루틴은 메인 스레드에서 나눠 실행되는 상태 기계라 병렬이 아니다. 안에서 무거운 계산을 하면 프레임이 그대로 멈춘다.</li><li><strong>사용자 수준 스레드가 언제나 낫다</strong> — 전환은 싸지만 커널이 몰라서 블로킹 콜 하나에 프로세스 전체가 멈추고 멀티코어도 못 쓴다.</li></ul>
-    <div class="refs"><strong>참고 자료</strong><ul><li><a href="https://learn.microsoft.com/ko-kr/dotnet/standard/threading/threads-and-threading" target="_blank" rel="noopener">Microsoft Learn – 스레드 및 스레드 처리(.NET)</a></li><li><a href="https://learn.microsoft.com/en-us/windows/win32/procthread/about-processes-and-threads" target="_blank" rel="noopener">Microsoft Learn – About Processes and Threads(Win32)</a></li><li><a href="https://docs.unity3d.com/Manual/job-system.html" target="_blank" rel="noopener">Unity 매뉴얼 – Write multithreaded code with the job system</a></li></ul></div>
-  </article>
-  <article>
-    <h2 id="메모리-구조">메모리 구조</h2>
-    <p class="lead">코드·데이터·힙·스택이 무엇을 담고 언제 정리되는지 알면 크래시 로그가 읽힌다</p>
-    <h3>핵심 개념</h3><p>프로세스의 주소 공간은 성격이 다른 네 구역으로 나뉜다. <strong>코드</strong>에는 컴파일된 기계어가, <strong>데이터</strong>에는 전역·정적 변수가, <strong>힙</strong>에는 실행 중에 잡는 동적 할당이, <strong>스택</strong>에는 함수 호출마다 쌓이는 지역 변수와 매개변수와 복귀 주소가 들어간다. 나눠 둔 이유는 <strong>수명이 다르기 때문</strong>이다. 코드와 전역은 프로그램이 도는 내내 살아 있고, 스택은 함수가 끝나면 사라지고, 힙은 놓아 줄 때까지 남는다.</p><table><thead><tr><th>영역</th><th>무엇이 들어가나</th><th>언제 정리되나</th><th>크기가 정해지는 때</th></tr></thead><tbody><tr><td>코드</td><td>기계어</td><td>프로세스 종료</td><td>빌드 시점</td></tr><tr><td>데이터</td><td>전역·static 변수</td><td>프로세스 종료</td><td>빌드 시점</td></tr><tr><td>스택</td><td>지역 변수, 매개변수, 복귀 주소</td><td>함수 반환 때 자동</td><td>스레드를 만들 때 고정</td></tr><tr><td>힙</td><td><code>new</code>·<code>malloc</code>으로 잡은 것</td><td>해제 또는 GC 수거</td><td>실행 중 늘었다 줄었다</td></tr></tbody></table><p>스택이 빠른 이유는 알고리즘이 좋아서가 아니라 <strong>정리 방식이 단순해서</strong>다. 스택 포인터를 올렸다 내리는 것이 할당과 해제의 전부라 빈 자리를 찾을 일도, 단편화도 없다. 게다가 방금 건드린 영역을 다시 쓰니 CPU 캐시에 거의 항상 올라와 있다. 힙은 원하는 크기를 원하는 시점에 잡는 자유를 주는 대신 빈 블록을 찾아야 하고, 잡았다 놓기를 반복하면 빈 공간이 흩어져 총량은 남는데 큰 덩어리를 못 잡는 상태가 된다.</p><p>스택 오버플로는 그 고정 크기를 넘겼다는 뜻이다. 종료 조건 없는 재귀가 대표적이지만, 깊은 계층을 재귀로 훑거나 큰 배열을 지역 변수로 잡아도 난다. 힙이 모자라는 OutOfMemory와는 아예 다른 사고다. 게임에서는 노드가 많은 UI 계층이나 씬 그래프를 재귀로 순회할 때 에디터에서는 멀쩡하다가 실기기에서만 터지는 일이 있는데, 스레드 스택 크기가 플랫폼마다 다르기 때문이다. 깊이가 커질 수 있으면 반복문과 명시적 스택으로 바꾸는 편이 안전하다.</p><pre><code>void Traverse(Transform root)               // 깊으면 스택 오버플로
-{
-    foreach (Transform c in root) Traverse(c);
-}
-
-void TraverseIterative(Transform root)      // 호출 스택 대신 힙의 스택을 쓴다
-{
-    var stack = new Stack&lt;Transform&gt;();
-    stack.Push(root);
-    while (stack.Count &gt; 0)
-    {
-        Transform t = stack.Pop();
-        foreach (Transform c in t) stack.Push(c);
-    }
-}</code></pre><p>C#에는 한 겹이 더 붙는다. 클래스 인스턴스는 관리 힙에 놓여 GC가 수거하고, 구조체는 <strong>지역 변수일 때만</strong> 스택에 놓인다. 클래스의 필드이거나 박싱되면 구조체라도 힙으로 간다. "구조체는 스택, 클래스는 힙"이라고 외운 문장이 자주 틀리는 지점이다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>프로세스 메모리 구조를 설명하라</strong> — 코드·데이터·힙·스택 네 구역이고, 나눈 기준은 수명과 정리 방식이다. 스택은 함수 반환 때 통째로 걷히고 힙은 해제나 GC가 필요하다. 힙과 스택은 보통 주소 공간의 양끝에서 서로를 향해 자란다.</li><li><strong>스택과 힙 중 어느 쪽 접근이 빠른가</strong> — 스택이다. 할당·해제가 포인터 이동뿐이고 방금 건드린 영역이라 캐시 적중률이 높다. 힙은 빈 블록 탐색과 단편화가 따라오고, C#이면 GC 부담까지 붙는다.</li><li><strong>스택 오버플로는 언제 나나</strong> — 스레드마다 고정된 스택 크기를 넘길 때다. 무한 재귀가 대표적이고 깊은 계층 순회나 큰 지역 배열도 원인이 된다. 힙 고갈인 OutOfMemory와는 구분해서 말해야 한다.</li><li><strong>스택과 힙의 크기는 언제 정해지나</strong> — 스택은 스레드를 만들 때 예약 크기가 정해져 실행 중에 늘지 않는다. 힙은 실행 중 OS에서 더 받아 오며 늘어난다.</li></ul><h3>흔한 오해</h3><ul><li><strong>전역 변수는 힙에 있다</strong> — 전역·static은 데이터 영역에 잡혀 프로그램이 끝날 때까지 산다. 힙은 실행 중에 요청해 받는 영역이다.</li><li><strong>C#에서 구조체는 언제나 스택이다</strong> — 클래스의 필드이거나 박싱되면 힙에 함께 놓인다. 어디에 놓이는지는 타입이 아니라 어디에 선언됐는지가 정한다.</li><li><strong>힙이 부족하면 스택 오버플로가 난다</strong> — 힙 고갈은 OutOfMemoryException이다. 두 영역은 한계가 따로 있다.</li><li><strong>스택 크기는 늘리면 그만이다</strong> — 스레드마다 주소 공간을 예약하므로 무작정 키우면 스레드를 많이 만들지 못한다. 깊은 재귀를 반복문으로 바꾸는 쪽이 낫다.</li></ul>
-    <div class="refs"><strong>참고 자료</strong><ul><li><a href="https://en.cppreference.com/w/cpp/language/storage_duration" target="_blank" rel="noopener">cppreference – Storage class specifiers(저장 기간)</a></li><li><a href="https://learn.microsoft.com/en-us/windows/win32/procthread/thread-stack-size" target="_blank" rel="noopener">Microsoft Learn – Thread Stack Size(Win32)</a></li><li><a href="https://learn.microsoft.com/ko-kr/dotnet/api/system.stackoverflowexception" target="_blank" rel="noopener">Microsoft Learn – StackOverflowException 클래스</a></li></ul></div>
-  </article>
-  <article>
-    <h2 id="가상-메모리">가상 메모리</h2>
-    <p class="lead">프로세스마다 가짜 주소를 주고 필요한 페이지만 올린다. 모바일 메모리 크래시의 배경이다</p>
-    <h3>핵심 개념</h3><p>가상 메모리는 프로세스마다 "이 주소 공간은 네가 혼자 쓴다"고 <strong>거짓말을 해 주는 장치</strong>다. 프로그램이 다루는 주소는 전부 가상 주소이고, CPU 안의 MMU가 페이지 테이블을 보고 실제 물리 주소로 바꾼다. 한 겹을 끼워 넣어 얻는 것이 셋이다. 프로세스끼리 남의 메모리를 못 건드리게 격리하고, 물리 메모리보다 큰 프로그램을 돌리고, 같은 공유 라이브러리를 물리적으로 한 벌만 두고 여러 프로세스가 같이 쓴다.</p><p>주소 공간은 고정 크기 <strong>페이지</strong>(보통 4KB)로 잘라 관리한다. 접근한 페이지가 물리 메모리에 없으면 <strong>페이지 폴트</strong>가 나고, 운영체제가 그 페이지를 올린 뒤 멈췄던 명령을 다시 실행한다. 즉 페이지 폴트는 오류가 아니라 요구 페이징의 정상 동작이고, 유효하지 않은 주소일 때만 진짜 오류가 된다. 다만 저장 장치까지 내려가는 하드 폴트는 메모리 접근보다 자릿수로 느려서, 게임에서는 그 한 번이 프레임 스파이크로 보인다. 매번 페이지 테이블을 읽으면 메모리 접근이 두 번이 되므로, 최근 변환 결과를 담아 두는 작은 캐시가 <strong>TLB</strong>다. 문맥 전환 때 TLB가 무효화되는 것도 전환 비용이 커지는 이유 중 하나다.</p><table><thead><tr><th></th><th>페이징</th><th>세그멘테이션</th></tr></thead><tbody><tr><td>나누는 기준</td><td>고정 크기(보통 4KB)</td><td>코드·스택 같은 논리 단위</td></tr><tr><td>외부 단편화</td><td>없다 — 빈 프레임 아무 곳에나 들어간다</td><td>생긴다 — 크기가 제각각이다</td></tr><tr><td>내부 단편화</td><td>마지막 페이지에 자투리가 남는다</td><td>거의 없다</td></tr></tbody></table><p>내부 단편화는 필요한 양보다 크게 떼어 준 탓에 블록 안에 남는 공간이고, 외부 단편화는 빈 공간이 흩어져 총량은 충분한데 연속된 큰 블록을 못 잡는 상황이다. 실제 시스템은 둘을 섞어 쓴다. 게임을 몇 시간 돌린 뒤 텍스처 한 장 할당이 실패하는 것이 외부 단편화의 전형이다.</p><p>필요한 페이지 수보다 물리 프레임이 모자라면 올리자마자 다시 내보내기를 반복하는 <strong>스래싱</strong>에 빠져, CPU가 대부분의 시간을 입출력 대기로 보낸다. 모바일 게임의 메모리 크래시가 여기 닿아 있다. iOS에는 스왑이 없어 메모리를 과하게 쓰면 페이징이 아니라 OS의 강제 종료로 끝나고, 안드로이드도 비슷하게 앱을 정리한다. 그래서 클라이언트의 답은 "교체를 잘한다"가 아니라 <strong>한 번에 참조하는 양(워킹 세트) 자체를 줄이는 것</strong>이다. 텍스처 해상도와 압축 포맷 정리, 안 쓰는 번들 언로드, 씬 단위 상주 메모리 예산이 그 수단이다.</p><p>교체가 필요할 때 무엇을 내보낼지가 페이지 교체 알고리즘이다. LRU는 가장 오래 참조되지 않은 것을, FIFO는 들어온 지 오래된 것을, LFU는 참조 횟수가 적은 것을 내보낸다. 앞으로 쓸 시점을 아는 OPT는 구현할 수 없는 이론적 기준이다. 참고로 32비트 프로세스가 4GB를 못 넘는 것도 가상 주소의 문제다. 포인터가 32비트면 서로 다른 번지를 2^32개, 바이트 단위로 4GB까지만 가리킬 수 있다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>가상 메모리가 왜 필요한가</strong> — 프로세스를 서로 격리하고, 물리 메모리보다 큰 프로그램을 돌리고, 공유 라이브러리를 물리 한 벌로 같이 쓰기 위해서다. 대가는 주소 변환 비용과 페이지 폴트 지연이고, TLB가 앞쪽 비용을 줄인다.</li><li><strong>페이지 폴트를 줄이려면</strong> — 한 번에 참조하는 범위를 줄이고 접근을 순차적으로 만든다. 게임에서는 필요한 에셋을 로딩 구간에 몰아 올리고, 상주 메모리 예산을 정해 지키는 식이다.</li><li><strong>페이징과 세그멘테이션의 차이는</strong> — 페이징은 고정 크기라 외부 단편화가 없고 내부 단편화가 남는다. 세그멘테이션은 논리 단위라 보호와 공유를 걸기 좋지만 크기가 달라 외부 단편화가 생긴다.</li><li><strong>모바일에서 메모리 한도를 넘기면</strong> — 스왑이 없거나 제한적이라 스래싱 대신 OS가 앱을 종료시킨다. 그래서 기기별 상주 예산을 정하고 텍스처·번들 단위로 지키는 것이 실제 대응이다.</li></ul><h3>흔한 오해</h3><ul><li><strong>페이지 폴트는 버그다</strong> — 요구 페이징의 정상 동작이다. 잘못된 주소 접근만 오류가 되고, 문제는 폴트의 존재가 아니라 빈도다.</li><li><strong>페이징에도 외부 단편화가 있다</strong> — 크기가 모두 같아 빈 프레임 어디에나 들어가므로 외부 단편화가 없다. 남는 것은 페이지 안의 내부 단편화다.</li><li><strong>TLB는 데이터를 캐시한다</strong> — TLB가 담는 것은 데이터가 아니라 주소 변환 결과다. L1·L2 같은 데이터 캐시와는 다른 장치다.</li><li><strong>프레임을 늘리면 페이지 폴트는 반드시 준다</strong> — FIFO에서는 늘렸는데 늘어나는 경우가 있다(벨라디의 역설). LRU 같은 스택 알고리즘에서는 이런 일이 없다.</li><li><strong>32비트 프로세스는 4GB를 다 쓴다</strong> — 커널이 절반 안팎을 가져가므로 실제로 쓸 수 있는 양은 그보다 적다.</li></ul>
-    <div class="refs"><strong>참고 자료</strong><ul><li><a href="https://learn.microsoft.com/en-us/windows/win32/memory/virtual-address-space" target="_blank" rel="noopener">Microsoft Learn – Virtual Address Space(Win32)</a></li><li><a href="https://learn.microsoft.com/en-us/windows/win32/memory/working-set" target="_blank" rel="noopener">Microsoft Learn – Working Set(Win32, 페이지 폴트)</a></li><li><a href="https://docs.unity3d.com/Manual/performance-memory-overview.html" target="_blank" rel="noopener">Unity 매뉴얼 – Memory in Unity introduction</a></li></ul></div>
-  </article>
-  <article>
-    <h2 id="스케줄링과-커널">스케줄링과 커널</h2>
-    <p class="lead">문맥 전환·시스템 콜·인터럽트는 모두 상태를 저장하고 돌아오는 값을 치른다</p>
-    <h3>핵심 개념</h3><p>코어 수보다 스레드가 많으니 운영체제는 짧은 간격으로 실행할 스레드를 바꿔 끼운다. 이 교체가 <strong>문맥 전환</strong>이고 순서는 늘 같다. 돌던 스레드의 레지스터와 PC를 커널 자료구조에 저장하고, 다음 스레드의 저장해 둔 값을 복원하고, 그 지점부터 이어 실행한다. 전환이 일어나는 이유는 셋이다. 타임 퀀텀이 끝났거나, 더 높은 우선순위 스레드가 준비됐거나, 돌던 스레드가 입출력이나 락을 기다리며 스스로 CPU를 놓았을 때다.</p><p>비용은 저장·복원 시간만이 아니다. 새 스레드가 다른 메모리를 쓰면 CPU 캐시와 TLB에 쌓아 둔 것이 쓸모없어져 한동안 미스가 쏟아지는데, 이쪽이 대체로 더 비싸다. 프로세스 전환은 주소 공간까지 바꿔 TLB를 통째로 갈아 끼우므로 스레드 전환보다 훨씬 비싸다. 그래서 백그라운드 작업을 스레드 200개로 뿌리면 병렬로 빨라지는 것이 아니라 전환과 캐시 미스만 늘어난다. 코어 수에 맞춘 스레드 풀이나 유니티 Job System을 쓰는 이유가 이것이다.</p><table><thead><tr><th>알고리즘</th><th>다음 차례를 고르는 기준</th><th>약점</th></tr></thead><tbody><tr><td>FCFS</td><td>도착한 순서</td><td>앞의 긴 작업이 뒤를 다 막는다</td></tr><tr><td>SJF</td><td>남은 실행 시간이 짧은 것</td><td>실행 시간을 미리 알 수 없고 긴 작업이 굶는다</td></tr><tr><td>라운드 로빈</td><td>정해진 시간씩 돌아가며</td><td>퀀텀이 작으면 전환 낭비, 크면 FCFS와 같아진다</td></tr><tr><td>MLFQ</td><td>여러 큐를 두고 오래 쓰면 아래 큐로 강등</td><td>설정값이 많아 튜닝이 어렵다</td></tr></tbody></table><p>라운드 로빈의 타임 퀀텀에는 절충이 그대로 드러난다. 너무 작으면 응답은 빨라지지만 전환 횟수가 늘어 순수 낭비가 커지고, 너무 크면 앞의 긴 작업 뒤로 줄이 길어진다. 그래서 전환 시간보다 충분히 크되 응답을 해치지 않는 값을 고른다. 무거운 계산을 프레임마다 조금씩 끊어 돌리는 게임 코드가 정확히 같은 고민이다. 한 프레임에 너무 적게 처리하면 끝나지 않고, 너무 많이 처리하면 그 프레임이 튄다.</p><p>유저 모드와 커널 모드를 나눈 것은 보호 장치다. 하드웨어를 직접 건드리거나 남의 메모리를 읽는 일은 커널 모드에서만 되고, 응용 프로그램은 <strong>시스템 콜</strong>로 요청한다. 이 전환에는 상태 저장과 권한 검사가 따라와 일반 함수 호출과 비용이 자릿수로 다르다. 파일을 조금씩 수만 번 읽는 코드가 느린 이유가 이것이고, 버퍼에 모아 한 번에 처리하는 것이 답이다. 매 프레임 로그를 파일에 flush하는 코드가 프레임을 갉아먹는 것도 같은 이유다.</p><p><strong>인터럽트</strong>는 하드웨어나 타이머가 CPU에 지금 봐 달라고 거는 신호다. CPU는 하던 일의 레지스터와 PC를 저장하고 인터럽트 벡터가 가리키는 핸들러로 뛴 뒤, 끝나면 저장해 둔 자리로 돌아온다. 계속 물어보는 폴링과 달리 기다리는 동안 CPU를 쓰지 않는다. 핸들러는 짧게 끝내고 긴 일은 뒤로 미루는 것이 원칙인데, 핸들러가 길면 그동안 다른 인터럽트가 밀리기 때문이다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>문맥 전환 때 무슨 일이 일어나나</strong> — 실행 중이던 스레드의 레지스터와 PC를 저장하고 다음 스레드의 값을 복원한다. 비용은 그 저장·복원 시간과, 캐시·TLB가 새 작업 것으로 갈리면서 생기는 미스이며 후자가 대체로 더 크다.</li><li><strong>프로세스와 스레드 전환은 무엇이 다른가</strong> — 스레드 전환은 주소 공간이 그대로라 레지스터와 스택 포인터만 바꾸면 되지만, 프로세스 전환은 페이지 테이블까지 바꿔 TLB가 무효화된다. 그래서 프로세스 전환이 훨씬 비싸다.</li><li><strong>전환 비용을 어떻게 줄이나</strong> — 스레드 수를 코어 수 근처로 맞춘 풀을 쓰고, 락 경합과 불필요한 대기를 줄인다. 유니티에서는 Job System이 워커 스레드 수를 코어에 맞춰 관리한다.</li><li><strong>시스템 콜이 왜 비싼가</strong> — 유저 모드에서 커널 모드로 넘어가며 상태 저장과 권한 검사가 붙기 때문이다. 그래서 입출력은 버퍼에 모아 호출 횟수 자체를 줄인다.</li></ul><h3>흔한 오해</h3><ul><li><strong>스레드를 많이 만들수록 빨라진다</strong> — 코어 수를 넘으면 실제 병렬도는 늘지 않고 전환과 캐시 오염만 늘어 오히려 느려진다.</li><li><strong>타임 퀀텀은 작을수록 좋다</strong> — 응답성은 좋아지지만 전환 오버헤드가 커진다. 전환 시간보다 충분히 크게 잡는 것이 기본이다.</li><li><strong>시스템 콜은 그냥 함수 호출이다</strong> — 모드 전환이 끼어들어 비용이 다르다. 호출 횟수를 줄이는 것이 최적화의 기본이 되는 이유다.</li><li><strong>인터럽트 핸들러에서 다 처리하면 된다</strong> — 핸들러가 길면 그동안 다른 인터럽트가 밀려 응답성이 무너진다. 긴 작업은 큐에 넣고 나중에 처리한다.</li></ul>
-    <div class="refs"><strong>참고 자료</strong><ul><li><a href="https://learn.microsoft.com/en-us/windows/win32/procthread/context-switches" target="_blank" rel="noopener">Microsoft Learn – Context Switches(Win32)</a></li><li><a href="https://learn.microsoft.com/en-us/windows/win32/procthread/scheduling-priorities" target="_blank" rel="noopener">Microsoft Learn – Scheduling Priorities(Win32)</a></li><li><a href="https://learn.microsoft.com/ko-kr/dotnet/standard/threading/the-managed-thread-pool" target="_blank" rel="noopener">Microsoft Learn – 관리되는 스레드 풀(.NET)</a></li></ul></div>
-  </article>
-  <article>
-    <h2 id="컴퓨터-구조">컴퓨터 구조</h2>
-    <p class="lead">캐시 라인·엔디언·float 정밀도는 프레임 튐과 좌표 떨림으로 눈앞에 나타난다</p>
-    <h3>핵심 개념</h3><p>메모리 계층은 빠르고 작고 비싼 것에서 느리고 크고 싼 것으로 내려간다. 레지스터에서 L1, L2, L3, 메인 메모리, 저장 장치 순이고 L1은 코어마다 붙어 있으며 L3는 보통 코어들이 공유한다. L1과 메인 메모리의 지연 차이가 100배쯤 되기 때문에, 요즘 게임 코드의 속도는 연산 횟수보다 <strong>메모리 접근 패턴</strong>이 정한다.</p><table><thead><tr><th>계층</th><th>대략 크기</th><th>대략 지연</th></tr></thead><tbody><tr><td>L1(코어 전용)</td><td>수십 KB</td><td>수 사이클</td></tr><tr><td>L2</td><td>수백 KB ~ 수 MB</td><td>십수 사이클</td></tr><tr><td>L3(코어 공유)</td><td>수 MB 이상</td><td>수십 사이클</td></tr><tr><td>메인 메모리</td><td>GB 단위</td><td>수백 사이클</td></tr></tbody></table><p>캐시는 바이트 하나가 아니라 <strong>캐시 라인</strong>(보통 64바이트) 단위로 퍼 온다. 여기서 두 가지 지역성이 나온다. 방금 쓴 데이터를 곧 다시 쓰는 <strong>시간 지역성</strong>과, 가까운 주소를 잇따라 쓰는 <strong>공간 지역성</strong>이다. C/C++의 2차원 배열은 행 우선으로 저장되므로 안쪽 반복이 열을 도는 순회는 한 번 퍼 온 라인을 끝까지 쓰고, 열을 바깥에 두면 매 접근마다 새 라인을 읽어 미스가 난다. 연산 횟수는 같은데 몇 배가 차이 나는 이유다.</p><pre><code>// 캐시 친화: 안쪽 반복이 이어 붙은 주소를 훑는다
-for (int y = 0; y &lt; H; y++)
-    for (int x = 0; x &lt; W; x++)
-        sum += grid[y][x];
-
-// 캐시 적대: 한 번 읽을 때마다 새 캐시 라인
-for (int x = 0; x &lt; W; x++)
-    for (int y = 0; y &lt; H; y++)
-        sum += grid[y][x];</code></pre><p>클라이언트에서 이 이야기는 데이터 배치로 이어진다. 파티클 1만 개의 위치만 갱신하는데 구조체 하나에 색·수명·머티리얼까지 들어 있으면 라인마다 쓰지 않을 값이 딸려 와 대역폭을 버린다. 필요한 필드만 따로 배열로 모으는 배치(SoA)가 빠른 이유이고, 유니티 DOTS가 컴포넌트 조합별로 메모리를 묶는 것도 같은 계산이다.</p><p><strong>엔디언</strong>은 여러 바이트로 된 수를 메모리에 놓는 순서다. 리틀 엔디언은 낮은 자리 바이트를 낮은 주소에 두고 x86과 대부분의 ARM이 쓴다. 네트워크 바이트 순서는 빅 엔디언으로 정해져 있어서, 정수를 그대로 패킷에 실으면 기종이 다를 때 값이 뒤집힌다. 바이트 단위인 문자열은 영향이 없고 여러 바이트 수를 보낼 때만 변환한다. 음수를 담는 2의 보수도 같은 결의 약속이다. 양수의 비트를 뒤집고 1을 더하므로 8비트에서 -3은 <code>11111101</code>이 되고, 덕분에 뺄셈을 덧셈 회로로 처리할 수 있다.</p><p><strong>float</strong>은 부호·지수·가수로 나뉘고 단정밀도의 가수는 암시 비트를 포함해 24비트뿐이다. 그래서 값이 커질수록 표현할 수 있는 간격이 넓어진다. 좌표가 수십만 단위가 되면 작은 이동이 아예 반영되지 않거나 값이 튀어 오브젝트가 떨린다. 오픈 월드에서 플레이어가 멀어지면 월드 전체를 원점 쪽으로 되돌리는 <strong>원점 이동</strong>을 쓰는 이유다. 64비트 빌드로 바꿔도 해결되지 않는다. 포인터가 8바이트가 될 뿐 float은 여전히 4바이트다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>캐시 지역성이란</strong> — 시간 지역성은 방금 쓴 데이터를 곧 다시 쓰는 성질, 공간 지역성은 가까운 주소를 잇따라 쓰는 성질이다. 캐시는 라인 단위로 퍼 오므로 붙어 있는 데이터를 순서대로 훑으면 미스가 줄고, 찾으면 히트, 없어서 아래 계층까지 내려가면 미스다.</li><li><strong>행 우선과 열 우선 순회의 성능이 왜 다른가</strong> — 배열이 행 단위로 이어 붙어 있어서다. 행을 따라 돌면 한 캐시 라인을 여러 번 쓰고, 열을 따라 돌면 매 접근이 새 라인이라 미스가 난다.</li><li><strong>엔디언을 언제 신경 쓰나</strong> — 여러 바이트 정수를 네트워크나 파일로 주고받을 때다. 네트워크 바이트 순서는 빅 엔디언이라 보낼 때 변환하거나, 직렬화 포맷의 규약을 맞춘다.</li><li><strong>먼 좌표에서 오브젝트가 떨리는 이유는</strong> — float의 가수가 24비트라 값이 클수록 표현 간격이 넓어지기 때문이다. 원점 이동으로 좌표 크기 자체를 줄이거나, 꼭 필요한 계산만 double로 다룬다.</li></ul><h3>흔한 오해</h3><ul><li><strong>L1이 L3보다 크다</strong> — 반대다. 코어에 가까울수록 작고 빠르다. L1은 코어 전용이고 L3는 보통 코어들이 공유한다.</li><li><strong>캐시는 필요한 바이트만 가져온다</strong> — 라인(보통 64바이트) 단위로 가져온다. 쓰지 않는 필드가 섞여 있으면 그만큼 대역폭이 버려진다.</li><li><strong>64비트로 빌드하면 float 정밀도가 올라간다</strong> — 달라지는 것은 포인터 크기와 주소 한계다. float은 그대로 4바이트이고 C#의 <code>int</code>도 플랫폼과 무관하게 4바이트다.</li><li><strong>-3은 부호 비트만 1로 세우면 된다</strong> — 그것은 부호-크기 표현이다. 2의 보수에서는 비트를 뒤집고 1을 더해 <code>11111101</code>이 된다.</li><li><strong>64비트가 무조건 빠르다</strong> — 포인터가 커져 참조가 많은 자료구조는 캐시에 덜 담긴다. 주소 공간과 레지스터를 얻는 대신 치르는 비용이다.</li></ul>
-    <div class="refs"><strong>참고 자료</strong><ul><li><a href="https://learn.microsoft.com/ko-kr/dotnet/csharp/language-reference/builtin-types/floating-point-numeric-types" target="_blank" rel="noopener">Microsoft Learn – 부동 소수점 숫자 형식(C#)</a></li><li><a href="https://learn.microsoft.com/ko-kr/dotnet/api/system.bitconverter.islittleendian" target="_blank" rel="noopener">Microsoft Learn – BitConverter.IsLittleEndian 필드</a></li><li><a href="https://learn.microsoft.com/ko-kr/dotnet/api/system.net.ipaddress.hosttonetworkorder" target="_blank" rel="noopener">Microsoft Learn – IPAddress.HostToNetworkOrder 메서드</a></li><li><a href="https://docs.unity3d.com/Packages/com.unity.entities@1.4/manual/concepts-archetypes.html" target="_blank" rel="noopener">Unity Entities 매뉴얼 – Archetypes concepts</a></li></ul></div>
-  </article>
-  <article>
-    <h2 id="동기화">동기화</h2>
-    <p class="lead">공유 자원이 왜 깨지는지 알고 lock·Interlocked·CAS 중 상황에 맞는 것을 고른다</p>
-    <h3>핵심 개념</h3><p>동기화는 <strong>여러 스레드가 같은 데이터를 건드릴 때 중간 상태를 보지 못하게 막는 일</strong>이다. 문제의 뿌리는 소스 한 줄이 기계 명령 한 개가 아니라는 점이다. <code>count++</code>는 읽고, 1을 더하고, 다시 쓰는 세 단계다. 두 스레드가 같은 값을 읽어 각자 더해 쓰면 증가 한 번이 사라진다. 100만 번씩 돌렸는데 200만보다 작게 나오는 경쟁 상태가 이것이다.</p><p>그래서 이 세 단계를 쪼개지지 않는 하나로 묶어야 한다. 임계 구역을 락으로 감싸거나 하드웨어의 원자적 명령 하나로 처리한다. 임계 구역 해법의 조건은 상호 배제, 진행(비어 있으면 대기자 중에서 진입자가 정해진다), 한정 대기(무한정 밀리지 않는다) 셋이며, 한정 대기는 FIFO 고정이 아니라 굶주림이 없어야 한다는 뜻이다.</p><table><thead><tr><th>도구</th><th>보장</th><th>쓰는 자리</th></tr></thead><tbody><tr><td><code>lock</code>(Monitor)</td><td>하나만 진입, 소유권 있음</td><td>여러 줄짜리 갱신</td></tr><tr><td><code>Interlocked</code>(CAS)</td><td>한 변수의 읽기·갱신이 원자적</td><td>카운터·플래그</td></tr><tr><td>세마포어</td><td>동시 진입 수를 카운트로 제한</td><td>동시 다운로드 5개 제한</td></tr></tbody></table><pre><code>private int _count;
-private readonly object _lock = new object();
-
-public void AddByLock()
-{
-    lock (_lock) { _count++; }   // Monitor.Enter/Exit + try-finally로 펼쳐진다
-}
-
-public void AddByInterlocked()
-{
-    Interlocked.Increment(ref _count);  // 경합이 없으면 커널로 가지 않는다
-}
-
-public void DoubleIt()   // 계산이 낀 갱신을 락 없이 처리하는 CAS 재시도
-{
-    int old, want;
-    do
-    {
-        old = Volatile.Read(ref _count);
-        want = old * 2;
-    }
-    while (Interlocked.CompareExchange(ref _count, want, old) != old);
-}</code></pre><p>CAS는 이 값이 아직 내가 읽은 값이면 새 값으로 바꾸라는 동작을 하드웨어가 한 번에 처리한다. 실패하면 커널로 가지 않고 다시 읽어 재시도하지만, 경합이 심하면 재시도가 늘어 손해다. 값이 A에서 B로 갔다 다시 A가 되면 못 알아채는 ABA 문제도 있다.</p><p>락이 여러 개면 데드락이 따라온다. 상호 배제, 점유 대기, 비선점, 순환 대기 <strong>네 조건이 모두 성립할 때만</strong> 생기므로 하나만 깨면 막힌다. 실무에서는 락을 늘 같은 순서로 잡아 순환 대기를 없애거나 <code>Monitor.TryEnter</code>로 제한 시간을 둔다.</p><p>코어를 늘려도 기대만큼 빨라지지 않으면 거짓 공유를 의심한다. CPU는 메모리를 64바이트 캐시 라인 단위로 다뤄서, 다른 카운터라도 한 배열에 붙어 있으면 한쪽이 쓸 때 다른 쪽 캐시 라인이 무효화된다. 스레드별 지역 변수에 모았다 합치면 사라진다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>경쟁 상태란</strong> — 실행 순서에 따라 결과가 달라지는 버그다. <code>count++</code>가 세 단계라 중간에 선점되면 증가가 사라진다. 락으로 감싸거나 <code>Interlocked.Increment</code>로 바꿔 해결한다.</li><li><strong>뮤텍스와 세마포어의 차이</strong> — 뮤텍스는 소유권이 있어 잠근 스레드가 풀고 하나만 들어간다. 세마포어는 카운트만큼 동시에 들어가고 소유 개념이 없다.</li><li><strong>데드락 조건과 예방</strong> — 네 조건이 모두 성립해야 생기므로 하나만 깨면 된다. 실무에서는 락 순서를 정해 순환 대기를 없앤다. 회피는 은행원 알고리즘처럼 할당 전에 따지는 쪽이다.</li><li><strong>락 없이 스레드 안전을 만들려면</strong> — CAS로 읽고 계산한 뒤 값이 그대로일 때만 바꾸고 실패하면 재시도한다. 경합이 심하면 락보다 비쌀 수 있다.</li><li><strong>스레드 수 기준</strong> — CPU를 계속 쓰는 작업은 코어 수 안팎, 입출력 작업은 더 많이 둔다. 스레드 풀은 미리 만든 스레드를 재사용해 생성 비용을 아낀다.</li><li><strong>Lock-Free와 Wait-Free</strong> — Lock-Free는 최소 한 스레드는 진행한다는 보장이라 특정 스레드가 굶을 수 있고, Wait-Free는 모든 스레드가 유한 단계에 끝난다는 보장이다.</li></ul><h3>흔한 오해</h3><ul><li><strong>int 증가는 원자적이다</strong> — 읽기·더하기·쓰기 세 단계라 중간에 끊긴다. 값의 크기나 오버플로 문제가 아니다.</li><li><strong>기아도 데드락 조건이다</strong> — 기아는 계속 밀려 실행되지 못하는 다른 문제다.</li><li><strong>이진 세마포어는 뮤텍스와 같다</strong> — 동시 진입 수만 같고 소유권 규칙이 다르다.</li><li><strong>스핀락이 항상 빠르다</strong> — 임계 구역이 아주 짧고 코어가 여럿일 때만 이득이고, 코어가 하나거나 대기가 길면 CPU만 태운다.</li><li><strong>lock(this)면 충분하다</strong> — 외부가 같은 객체를 잠글 수 있어 전용 <code>private readonly object</code>를 둔다.</li></ul>
-    <div class="refs"><strong>참고 자료</strong><ul><li><a href="https://learn.microsoft.com/ko-kr/dotnet/csharp/language-reference/statements/lock" target="_blank" rel="noopener">Microsoft Learn – lock 문(공유 리소스에 대한 액세스 동기화)</a></li><li><a href="https://learn.microsoft.com/ko-kr/dotnet/api/system.threading.interlocked" target="_blank" rel="noopener">Microsoft Learn – Interlocked 클래스</a></li><li><a href="https://learn.microsoft.com/ko-kr/dotnet/standard/threading/managed-threading-best-practices" target="_blank" rel="noopener">Microsoft Learn – 관리되는 스레딩 모범 사례</a></li></ul></div>
-  </article>
-  <article>
-    <h2 id="비동기">비동기</h2>
-    <p class="lead">async/await는 스레드를 늘리는 장치가 아니라 기다리는 동안 스레드를 놓아주는 장치다</p>
-    <h3>핵심 개념</h3><p>비동기는 <strong>기다리는 동안 스레드를 붙잡고 있지 않기 위한 장치</strong>다. 블로킹·논블로킹은 호출한 함수가 제어권을 바로 돌려주느냐의 문제이고, 동기·비동기는 완료를 호출자가 직접 기다려 확인하느냐 통보받느냐의 문제다. 논블로킹은 바로 돌아오지만 아직 안 됐다는 응답일 수 있어, 결과가 완성되어 오는 비동기와 다르다.</p><p><code>async</code>/<code>await</code>는 이것을 상태 기계로 해낸다. 컴파일러가 <code>async</code> 메서드를 <code>await</code>마다 번호가 붙은 상태로 쪼개고, 지역 변수를 필드로 옮기고, 기다리던 대상이 끝나면 이어 실행할 조각을 콜백으로 등록한 뒤 즉시 반환한다. 그래서 대기 중에는 스레드가 풀려 다른 일을 한다. <strong><code>async</code>는 스레드를 새로 만들지 않는다.</strong> 계산을 옮기려면 <code>Task.Run</code>을 명시해야 한다.</p><p>이어 실행할 조각을 어디서 돌릴지는 동기화 컨텍스트가 정한다. Unity는 <code>UnitySynchronizationContext</code>를 걸어 두므로 <code>await</code> 뒤 코드가 메인 스레드에서 이어지고, 덕분에 Unity API를 그대로 쓸 수 있다. 다만 <code>Task</code>는 참조 형식이라 호출마다 할당이 생겨, 모바일에서는 UniTask나 Unity 2023 이후의 <code>Awaitable</code>을 쓴다.</p><pre><code>private TaskCompletionSource&lt;bool&gt; _tcs;   // 팝업 버튼이 눌릴 때까지 기다린다
-
-public Task&lt;bool&gt; WaitForAnswerAsync()
-{
-    _tcs = new TaskCompletionSource&lt;bool&gt;();
-    return _tcs.Task;
-}
-
-public void OnYesClicked() =&gt; _tcs?.TrySetResult(true);
-
-private async Task ShowAsync()
-{
-    bool ok = await WaitForAnswerAsync();   // 기다리는 동안 프레임은 계속 돈다
-    if (!ok) return;
-    await Task.WhenAll(LoadAsync("a"), LoadAsync("b"));   // 동시에 시작해 모두 기다린다
-    transform.position = Vector3.zero;   // 여기는 다시 메인 스레드다
-}</code></pre><p><code>Thread.Sleep(1000)</code>은 그 스레드를 통째로 재우므로 메인 스레드에서 부르면 화면이 1초 멈춘다. <code>await Task.Delay(1000)</code>은 타이머를 걸고 제어권을 돌려주므로 그동안 다른 일이 돈다(타이머 해상도만큼 오차는 있다). 한 프레임만 쉬려면 코루틴의 <code>yield return null</code>이 더 알맞다.</p><p><code>async void</code>를 피하는 이유는 돌려줄 <code>Task</code>가 없다는 한 가지에서 다 나온다. 호출자가 완료를 기다릴 수 없고, 안에서 난 예외가 호출자의 try-catch에 잡히지 않는다. <code>ValueTask</code>는 구조체라 동기로 끝나는 경로에서 할당을 아끼지만, 두 번 <code>await</code>하거나 저장해 두고 돌려쓰면 안 된다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>동기·비동기와 블로킹·논블로킹</strong> — 블로킹 여부는 제어권을 언제 돌려주느냐, 동기 여부는 완료를 직접 확인하느냐 통보받느냐다. 축이 달라 논블로킹이면서 동기인 폴링 같은 조합도 있다.</li><li><strong>async/await 내부 동작</strong> — 컴파일러가 메서드를 await마다 멈췄다 이어갈 수 있는 상태 기계로 바꾸고, 완료되면 이어갈 부분을 콜백으로 등록한다. 대기 중에는 스레드가 풀리며 async 자체가 스레드를 만들지는 않는다.</li><li><strong>Unity에서 언제 쓰나</strong> — 네트워크 요청이나 에셋 로드처럼 대기가 있는 흐름에 쓴다. 동기화 컨텍스트 덕에 await 뒤가 메인 스레드라 Unity API를 그대로 쓰고, 할당이 문제면 UniTask로 바꾼다.</li><li><strong>async void를 피하는 이유</strong> — 반환할 Task가 없어 완료를 기다릴 수도, 예외를 호출자가 잡을 수도 없다. 시그니처가 void로 고정된 이벤트 핸들러에서만 쓴다.</li><li><strong>버튼이 눌릴 때까지 기다리는 로직</strong> — Update 폴링은 상태 변수가 흩어지고 콜백은 단계가 늘수록 중첩된다. TaskCompletionSource로 감싸 await하면 흐름이 한 함수에 남는다. 수 프레임짜리 연출이면 코루틴도 괜찮다.</li></ul><h3>흔한 오해</h3><ul><li><strong>async를 붙이면 별도 스레드에서 돈다</strong> — 아니다. 대기 지점에서 제어권을 돌려줄 뿐이고 계산을 옮기려면 <code>Task.Run</code>이 필요하다.</li><li><strong>await 뒤 코드는 다른 스레드다</strong> — 동기화 컨텍스트가 있으면 원래 컨텍스트로 돌아온다. Unity에서는 메인 스레드로 복귀한다.</li><li><strong>Task.Delay와 Thread.Sleep은 같다</strong> — Sleep은 스레드를 붙잡고 자고, Delay는 놓아준다.</li><li><strong>ValueTask가 언제나 빠르다</strong> — 실제로 비동기로 진행되는 경로가 대부분이면 이득이 없다.</li><li><strong>결과는 .Result로 받으면 된다</strong> — 메인 스레드에서 블로킹하면 컨텍스트가 묶여 데드락이 나기 쉽다.</li></ul>
-    <div class="refs"><strong>참고 자료</strong><ul><li><a href="https://learn.microsoft.com/ko-kr/dotnet/csharp/asynchronous-programming/async-scenarios" target="_blank" rel="noopener">Microsoft Learn – 비동기 프로그래밍 시나리오(C#)</a></li><li><a href="https://learn.microsoft.com/ko-kr/dotnet/api/system.threading.tasks.valuetask-1" target="_blank" rel="noopener">Microsoft Learn – ValueTask 구조체</a></li><li><a href="https://docs.unity3d.com/ScriptReference/Awaitable.html" target="_blank" rel="noopener">Unity 스크립팅 API – Awaitable</a></li></ul></div>
-  </article>
-  <article>
-    <h2 id="Unity와-멀티스레딩">Unity와 멀티스레딩</h2>
-    <p class="lead">무거운 계산은 워커 스레드나 Job으로 넘기고 Unity API 호출은 메인 스레드에 남긴다</p>
-    <h3>핵심 개념</h3><p>Unity 멀티스레딩의 규칙은 한 줄이다. <strong>순수 계산은 다른 스레드로 넘기고, 엔진을 만지는 호출은 메인 스레드에 남긴다.</strong> Transform, GameObject, UI 같은 대부분의 Unity API는 메인 스레드 전용이라, 다른 스레드에서 부르면 예외가 나거나 동작이 보장되지 않는다. 엔진 내부 상태가 단일 스레드 접근을 전제로 설계돼 있고, 전부 락을 걸면 흔한 호출 하나가 그만큼 비싸지기 때문이다.</p><p>그래서 난수 100만 개 생성이나 경로 탐색, 데이터 파싱처럼 엔진을 안 건드리는 계산만 워커 스레드로 보내고 결과만 메인 스레드에서 반영한다. 넘길 때는 <code>ConcurrentQueue</code>에 담아 <code>Update</code>에서 꺼내거나 Unity 2023 이후면 <code>Awaitable.MainThreadAsync</code>를 쓴다. 텍스처도 같아서 픽셀 계산은 백그라운드로 빼도 <code>SetPixels</code>·<code>Apply</code>는 메인 스레드다.</p><p>선택지는 셋이다. 코루틴은 컴파일러가 만든 반복자를 <code>MonoBehaviour</code>가 매 프레임 한 칸씩 돌리는 것이라 Unity API를 그대로 쓰지만, 한 칸이 무거우면 그 프레임이 밀린다. <strong>일을 나눠 주는 장치이지 병렬로 만드는 장치가 아니다.</strong> 직접 만든 스레드는 병렬이지만 Unity API를 못 쓰고 수명 관리가 손에 남는다. Job System은 그 사이를 메운다. 엔진이 관리하는 워커 풀에 일을 올리고, 다룰 데이터를 blittable 값 형식과 네이티브 컨테이너로 제한해 레이스가 생길 여지를 줄인다. 두 Job이 같은 컨테이너에 동시에 쓰려 하면 안전 시스템이 알려 주므로 락을 직접 걸 일이 없다.</p><pre><code>[BurstCompile]
-struct MoveJob : IJobParallelFor
-{
-    [ReadOnly] public NativeArray&lt;float3&gt; Velocity;
-    public NativeArray&lt;float3&gt; Position;
-    public float Delta;
-
-    public void Execute(int i) =&gt; Position[i] += Velocity[i] * Delta;
-}
-
-void Update()
-{
-    var job = new MoveJob { Velocity = _v, Position = _p, Delta = Time.deltaTime };
-    JobHandle handle = job.Schedule(_p.Length, 64);   // 64개씩 워커에 나눈다
-    handle.Complete();   // 완료 전에는 _p를 건드릴 수 없다
-    for (int i = 0; i &lt; _p.Length; i++)
-        _transforms[i].position = _p[i];   // Unity API는 메인 스레드에서
-}</code></pre><p><code>NativeArray</code>를 쓰는 이유는 관리 힙 밖이라서다. Job과 Burst는 관리 객체를 다룰 수 없고, 값이 이어 붙어 캐시 효율도 좋다. 대신 GC가 치워 주지 않아 <code>Dispose</code>가 필요하고, 수명에 맞춰 <code>Allocator.Temp</code>·<code>TempJob</code>·<code>Persistent</code> 중에 고른다. Burst는 이 제한된 C# 부분집합을 LLVM으로 컴파일해 SIMD까지 쓴다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>왜 다른 스레드에서 Unity API를 못 쓰나</strong> — 엔진 내부 상태가 단일 스레드 접근을 전제로 만들어져 있어서다. 전부 락을 걸면 흔한 호출이 비싸진다.</li><li><strong>백그라운드 결과를 화면에 반영하려면</strong> — 계산만 워커 스레드에서 하고 결과 값만 넘긴다. <code>ConcurrentQueue</code>에 담아 <code>Update</code>에서 적용하거나 동기화 컨텍스트로 되돌린다.</li><li><strong>코루틴과 스레드의 차이</strong> — 코루틴은 메인 스레드에서 매 프레임 이어 실행되는 반복자라 Unity API를 쓰지만 병렬이 아니고, 스레드는 병렬이지만 Unity API를 못 쓴다.</li><li><strong>Job System은 어떻게 성능을 올리나</strong> — 워커 풀에 작업을 나눠 노는 코어를 쓰고, 데이터를 네이티브 컨테이너로 제한해 안전 시스템이 레이스를 잡아 준다. Burst를 붙이면 SIMD까지 써서 한 번 더 빨라진다.</li><li><strong>멀티스레드 코드를 어떻게 디버깅했나</strong> — 안전 검사를 켜 둔 채 개발하고 로그에 스레드와 프레임을 남겨 재현했다. 공유 상태를 줄이는 것이 근본 해결이었다.</li></ul><h3>흔한 오해</h3><ul><li><strong>코루틴은 별도 스레드에서 돈다</strong> — 메인 스레드에서 나눠 실행될 뿐이라 무거운 계산을 넣으면 프레임만 밀린다.</li><li><strong>Job 안에서도 Unity API를 쓸 수 있다</strong> — 관리 객체와 Unity 오브젝트는 못 쓴다. 결과는 네이티브 컨테이너로 받는다.</li><li><strong>NativeArray도 GC가 정리해 준다</strong> — 관리 힙 밖이라 <code>Dispose</code>를 빼먹으면 누수로 남는다.</li><li><strong>Job이 도는 중에도 같은 배열을 읽으면 된다</strong> — 안전 시스템이 막는다. <code>Complete</code>로 기다리거나 읽기 전용으로 선언한다.</li><li><strong>Burst를 붙이면 아무 코드나 빨라진다</strong> — 제한된 C# 부분집합만 다뤄서 관리 객체를 쓰는 코드에는 붙지 않는다.</li></ul>
-    <div class="refs"><strong>참고 자료</strong><ul><li><a href="https://docs.unity3d.com/Manual/job-system.html" target="_blank" rel="noopener">Unity 매뉴얼 – Write multithreaded code with the job system</a></li><li><a href="https://docs.unity3d.com/Manual/job-system-native-container.html" target="_blank" rel="noopener">Unity 매뉴얼 – Introduction to NativeContainer</a></li><li><a href="https://docs.unity3d.com/Manual/Coroutines.html" target="_blank" rel="noopener">Unity 매뉴얼 – Write and run coroutines</a></li><li><a href="https://docs.unity3d.com/Packages/com.unity.burst@1.8/manual/index.html" target="_blank" rel="noopener">Unity Burst 매뉴얼 – Burst compiler</a></li></ul></div>
-  </article>
-  <footer>정리 글은 Claude가 썼다. 틀린 내용이 있을 수 있으니 중요한 내용은 아래 참고 자료 원문으로 확인한다.</footer>
+<div class="nav"><a href="../index.html#library">← 도서관</a><span class="badge">운영체제·동시성</span></div>
+<h1>운영체제·동시성 공부 자료</h1>
+<p class="lead">글 8편. 근거가 된 질문 목록은 질문은행 08-운영체제-동시성.md에 있다.</p>
+<div class="list"><a href="08-01.html"><strong>프로세스와 스레드</strong><span>프로세스는 자원의 울타리, 스레드는 그 안의 실행 흐름이다. 무엇을 공유하는지가 전부다</span></a><a href="08-02.html"><strong>메모리 구조</strong><span>코드·데이터·힙·스택이 무엇을 담고 언제 정리되는지 알면 크래시 로그가 읽힌다</span></a><a href="08-03.html"><strong>가상 메모리</strong><span>프로세스마다 가짜 주소를 주고 필요한 페이지만 올린다. 모바일 메모리 크래시의 배경이다</span></a><a href="08-04.html"><strong>스케줄링과 커널</strong><span>문맥 전환·시스템 콜·인터럽트는 모두 상태를 저장하고 돌아오는 값을 치른다</span></a><a href="08-05.html"><strong>컴퓨터 구조</strong><span>캐시 라인·엔디언·float 정밀도는 프레임 튐과 좌표 떨림으로 눈앞에 나타난다</span></a><a href="08-06.html"><strong>동기화</strong><span>공유 자원이 왜 깨지는지 알고 lock·Interlocked·CAS 중 상황에 맞는 것을 고른다</span></a><a href="08-07.html"><strong>비동기</strong><span>async/await는 스레드를 늘리는 장치가 아니라 기다리는 동안 스레드를 놓아주는 장치다</span></a><a href="08-08.html"><strong>Unity와 멀티스레딩</strong><span>무거운 계산은 워커 스레드나 Job으로 넘기고 Unity API 호출은 메인 스레드에 남긴다</span></a></div>
 </main>
 </body>
 </html>

@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>가상 메모리 · 운영체제·동시성</title>
+<style>
+  :root {
+    --bg:#f2f5f7; --card:#fff; --panel:#f7f9fb; --text:#3c3c3c; --muted:#7a8b93; --line:#e2e8ea;
+    --green:#58cc02; --green-d:#46a302; --blue:#1cb0f6; --blue-d:#1899d6; --blue-bg:#ddf4ff;
+    --purple:#ce82ff; --purple-d:#a855f7; --purple-bg:#f5e8ff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#131f24; --card:#1b2b32; --panel:#16252b; --text:#eaf2f6; --muted:#8fa7b2; --line:#2c4048;
+      --blue-bg:#12303d; --purple-bg:#2e2036; --purple-d:#c99bec; --blue-d:#58c4f7; --green-d:#7ddc2a; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
+  a { color: var(--blue-d); }
+  .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
+  .nav a { text-decoration: none; }
+  .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
+    padding: 4px 12px; font-size: .8rem; font-weight: 800; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
+  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
+  p, ul, ol { margin: 10px 0; }
+  li { margin: 5px 0; }
+  .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
+  .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
+  .card { background: var(--card); border: 2px solid var(--line); border-radius: 20px; padding: 20px; margin-bottom: 14px; }
+  .list { display: grid; gap: 10px; }
+  .list a { display: block; background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px;
+    border-radius: 18px; padding: 14px 16px; text-decoration: none; color: inherit; }
+  .list a:hover { border-color: var(--purple); }
+  .list strong { display: block; font-size: 1.02rem; font-weight: 800; }
+  .list span { color: var(--muted); font-size: .86rem; font-weight: 600; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em;
+    background: var(--panel); border: 1px solid var(--line); padding: 1px 6px; border-radius: 6px; font-weight: 700; }
+  pre { background: var(--panel); border: 2px solid var(--line); padding: 14px; border-radius: 14px; overflow-x: auto; line-height: 1.65; }
+  pre code { background: none; border: 0; padding: 0; }
+  table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; font-size: .94rem; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; }
+  th { background: var(--panel); }
+  .refs { border-top: 2px solid var(--line); margin-top: 24px; padding-top: 14px; }
+  .refs ul { padding-left: 20px; }
+  .pager { display: flex; justify-content: space-between; gap: 10px; margin-top: 16px; }
+  .pager a { background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px; border-radius: 16px;
+    padding: 12px 16px; text-decoration: none; color: inherit; font-weight: 800; font-size: .9rem; max-width: 48%; }
+  .pager a:hover { border-color: var(--blue); }
+  footer { color: var(--muted); font-size: .8rem; font-weight: 600; margin-top: 28px; }
+</style>
+</head>
+<body>
+<main>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="08.html" class="badge">운영체제·동시성 목차</a></div>
+<article class="card">
+<h1>가상 메모리</h1>
+<p class="lead">프로세스마다 가짜 주소를 주고 필요한 페이지만 올린다. 모바일 메모리 크래시의 배경이다</p>
+<h3>핵심 개념</h3><p>가상 메모리는 프로세스마다 "이 주소 공간은 네가 혼자 쓴다"고 <strong>거짓말을 해 주는 장치</strong>다. 프로그램이 다루는 주소는 전부 가상 주소이고, CPU 안의 MMU가 페이지 테이블을 보고 실제 물리 주소로 바꾼다. 한 겹을 끼워 넣어 얻는 것이 셋이다. 프로세스끼리 남의 메모리를 못 건드리게 격리하고, 물리 메모리보다 큰 프로그램을 돌리고, 같은 공유 라이브러리를 물리적으로 한 벌만 두고 여러 프로세스가 같이 쓴다.</p><p>주소 공간은 고정 크기 <strong>페이지</strong>(보통 4KB)로 잘라 관리한다. 접근한 페이지가 물리 메모리에 없으면 <strong>페이지 폴트</strong>가 나고, 운영체제가 그 페이지를 올린 뒤 멈췄던 명령을 다시 실행한다. 즉 페이지 폴트는 오류가 아니라 요구 페이징의 정상 동작이고, 유효하지 않은 주소일 때만 진짜 오류가 된다. 다만 저장 장치까지 내려가는 하드 폴트는 메모리 접근보다 자릿수로 느려서, 게임에서는 그 한 번이 프레임 스파이크로 보인다. 매번 페이지 테이블을 읽으면 메모리 접근이 두 번이 되므로, 최근 변환 결과를 담아 두는 작은 캐시가 <strong>TLB</strong>다. 문맥 전환 때 TLB가 무효화되는 것도 전환 비용이 커지는 이유 중 하나다.</p><table><thead><tr><th></th><th>페이징</th><th>세그멘테이션</th></tr></thead><tbody><tr><td>나누는 기준</td><td>고정 크기(보통 4KB)</td><td>코드·스택 같은 논리 단위</td></tr><tr><td>외부 단편화</td><td>없다 — 빈 프레임 아무 곳에나 들어간다</td><td>생긴다 — 크기가 제각각이다</td></tr><tr><td>내부 단편화</td><td>마지막 페이지에 자투리가 남는다</td><td>거의 없다</td></tr></tbody></table><p>내부 단편화는 필요한 양보다 크게 떼어 준 탓에 블록 안에 남는 공간이고, 외부 단편화는 빈 공간이 흩어져 총량은 충분한데 연속된 큰 블록을 못 잡는 상황이다. 실제 시스템은 둘을 섞어 쓴다. 게임을 몇 시간 돌린 뒤 텍스처 한 장 할당이 실패하는 것이 외부 단편화의 전형이다.</p><p>필요한 페이지 수보다 물리 프레임이 모자라면 올리자마자 다시 내보내기를 반복하는 <strong>스래싱</strong>에 빠져, CPU가 대부분의 시간을 입출력 대기로 보낸다. 모바일 게임의 메모리 크래시가 여기 닿아 있다. iOS에는 스왑이 없어 메모리를 과하게 쓰면 페이징이 아니라 OS의 강제 종료로 끝나고, 안드로이드도 비슷하게 앱을 정리한다. 그래서 클라이언트의 답은 "교체를 잘한다"가 아니라 <strong>한 번에 참조하는 양(워킹 세트) 자체를 줄이는 것</strong>이다. 텍스처 해상도와 압축 포맷 정리, 안 쓰는 번들 언로드, 씬 단위 상주 메모리 예산이 그 수단이다.</p><p>교체가 필요할 때 무엇을 내보낼지가 페이지 교체 알고리즘이다. LRU는 가장 오래 참조되지 않은 것을, FIFO는 들어온 지 오래된 것을, LFU는 참조 횟수가 적은 것을 내보낸다. 앞으로 쓸 시점을 아는 OPT는 구현할 수 없는 이론적 기준이다. 참고로 32비트 프로세스가 4GB를 못 넘는 것도 가상 주소의 문제다. 포인터가 32비트면 서로 다른 번지를 2^32개, 바이트 단위로 4GB까지만 가리킬 수 있다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>가상 메모리가 왜 필요한가</strong> — 프로세스를 서로 격리하고, 물리 메모리보다 큰 프로그램을 돌리고, 공유 라이브러리를 물리 한 벌로 같이 쓰기 위해서다. 대가는 주소 변환 비용과 페이지 폴트 지연이고, TLB가 앞쪽 비용을 줄인다.</li><li><strong>페이지 폴트를 줄이려면</strong> — 한 번에 참조하는 범위를 줄이고 접근을 순차적으로 만든다. 게임에서는 필요한 에셋을 로딩 구간에 몰아 올리고, 상주 메모리 예산을 정해 지키는 식이다.</li><li><strong>페이징과 세그멘테이션의 차이는</strong> — 페이징은 고정 크기라 외부 단편화가 없고 내부 단편화가 남는다. 세그멘테이션은 논리 단위라 보호와 공유를 걸기 좋지만 크기가 달라 외부 단편화가 생긴다.</li><li><strong>모바일에서 메모리 한도를 넘기면</strong> — 스왑이 없거나 제한적이라 스래싱 대신 OS가 앱을 종료시킨다. 그래서 기기별 상주 예산을 정하고 텍스처·번들 단위로 지키는 것이 실제 대응이다.</li></ul><h3>흔한 오해</h3><ul><li><strong>페이지 폴트는 버그다</strong> — 요구 페이징의 정상 동작이다. 잘못된 주소 접근만 오류가 되고, 문제는 폴트의 존재가 아니라 빈도다.</li><li><strong>페이징에도 외부 단편화가 있다</strong> — 크기가 모두 같아 빈 프레임 어디에나 들어가므로 외부 단편화가 없다. 남는 것은 페이지 안의 내부 단편화다.</li><li><strong>TLB는 데이터를 캐시한다</strong> — TLB가 담는 것은 데이터가 아니라 주소 변환 결과다. L1·L2 같은 데이터 캐시와는 다른 장치다.</li><li><strong>프레임을 늘리면 페이지 폴트는 반드시 준다</strong> — FIFO에서는 늘렸는데 늘어나는 경우가 있다(벨라디의 역설). LRU 같은 스택 알고리즘에서는 이런 일이 없다.</li><li><strong>32비트 프로세스는 4GB를 다 쓴다</strong> — 커널이 절반 안팎을 가져가므로 실제로 쓸 수 있는 양은 그보다 적다.</li></ul>
+<div class="refs"><h2>참고 자료</h2><ul><li><a href="https://learn.microsoft.com/en-us/windows/win32/memory/virtual-address-space" target="_blank" rel="noopener">Microsoft Learn – Virtual Address Space(Win32)</a></li><li><a href="https://learn.microsoft.com/en-us/windows/win32/memory/working-set" target="_blank" rel="noopener">Microsoft Learn – Working Set(Win32, 페이지 폴트)</a></li><li><a href="https://docs.unity3d.com/Manual/performance-memory-overview.html" target="_blank" rel="noopener">Unity 매뉴얼 – Memory in Unity introduction</a></li></ul></div>
+</article>
+<div class="pager"><a href="08-02.html">← 메모리 구조</a><a href="08-04.html">스케줄링과 커널 →</a></div>
+<footer>정리 글은 Claude가 썼다. 틀린 내용이 있을 수 있으니 중요한 내용은 참고 자료 원문으로 확인한다.</footer>
+</main>
+</body>
+</html>

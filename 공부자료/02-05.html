@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>에셋과 리소스 관리 · Unity 엔진</title>
+<style>
+  :root {
+    --bg:#f2f5f7; --card:#fff; --panel:#f7f9fb; --text:#3c3c3c; --muted:#7a8b93; --line:#e2e8ea;
+    --green:#58cc02; --green-d:#46a302; --blue:#1cb0f6; --blue-d:#1899d6; --blue-bg:#ddf4ff;
+    --purple:#ce82ff; --purple-d:#a855f7; --purple-bg:#f5e8ff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#131f24; --card:#1b2b32; --panel:#16252b; --text:#eaf2f6; --muted:#8fa7b2; --line:#2c4048;
+      --blue-bg:#12303d; --purple-bg:#2e2036; --purple-d:#c99bec; --blue-d:#58c4f7; --green-d:#7ddc2a; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
+  a { color: var(--blue-d); }
+  .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
+  .nav a { text-decoration: none; }
+  .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
+    padding: 4px 12px; font-size: .8rem; font-weight: 800; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
+  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
+  p, ul, ol { margin: 10px 0; }
+  li { margin: 5px 0; }
+  .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
+  .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
+  .card { background: var(--card); border: 2px solid var(--line); border-radius: 20px; padding: 20px; margin-bottom: 14px; }
+  .list { display: grid; gap: 10px; }
+  .list a { display: block; background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px;
+    border-radius: 18px; padding: 14px 16px; text-decoration: none; color: inherit; }
+  .list a:hover { border-color: var(--purple); }
+  .list strong { display: block; font-size: 1.02rem; font-weight: 800; }
+  .list span { color: var(--muted); font-size: .86rem; font-weight: 600; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em;
+    background: var(--panel); border: 1px solid var(--line); padding: 1px 6px; border-radius: 6px; font-weight: 700; }
+  pre { background: var(--panel); border: 2px solid var(--line); padding: 14px; border-radius: 14px; overflow-x: auto; line-height: 1.65; }
+  pre code { background: none; border: 0; padding: 0; }
+  table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; font-size: .94rem; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; }
+  th { background: var(--panel); }
+  .refs { border-top: 2px solid var(--line); margin-top: 24px; padding-top: 14px; }
+  .refs ul { padding-left: 20px; }
+  .pager { display: flex; justify-content: space-between; gap: 10px; margin-top: 16px; }
+  .pager a { background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px; border-radius: 16px;
+    padding: 12px 16px; text-decoration: none; color: inherit; font-weight: 800; font-size: .9rem; max-width: 48%; }
+  .pager a:hover { border-color: var(--blue); }
+  footer { color: var(--muted); font-size: .8rem; font-weight: 600; margin-top: 28px; }
+</style>
+</head>
+<body>
+<main>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="02.html" class="badge">Unity 엔진 목차</a></div>
+<article class="card">
+<h1>에셋과 리소스 관리</h1>
+<p class="lead">무엇을 언제 메모리에 올리고 언제 내리는가 — Resources·AssetBundle·Addressables의 선택 기준</p>
+<h3>핵심 개념</h3><p>모바일 게임의 에셋은 기기 메모리보다 크다. 그래서 질문은 늘 하나다. <strong>지금 필요한 것만 올리고 나머지는 어떻게 미뤄 두는가.</strong> 방식은 셋이다.</p><table><thead><tr><th></th><th>Resources</th><th>AssetBundle</th><th>Addressables</th></tr></thead><tbody><tr><td>빌드 포함</td><td>폴더 전부</td><td>번들로 묶은 것만</td><td>그룹으로 묶은 것만</td></tr><tr><td>로드</td><td>경로 문자열</td><td>번들을 열고 이름으로</td><td>주소로 비동기</td></tr><tr><td>원격 배포</td><td>불가</td><td>직접 구현</td><td>기본 지원</td></tr><tr><td>의존성·해제</td><td>직접</td><td>직접</td><td>참조 카운트</td></tr></tbody></table><p>Resources를 지양하라는 이유는 둘이다. 폴더 안 에셋은 참조하지 않아도 전부 빌드에 들어가 용량을 먹고, 시작할 때 전체 목록을 인덱싱하느라 구동이 늦어진다. 문서는 1만 개면 저사양 모바일에서 수 초가 걸린다고 적고 있다.</p><p>AssetBundle은 에셋을 묶은 아카이브 파일이고, Addressables는 그 위에 주소 체계와 참조 카운트 관리를 얹은 상위 시스템이다. 번들을 직접 다루면 만나는 문제가 <strong>중복</strong>이다. 어느 번들에도 지정하지 않은 의존 에셋은 그것을 참조하는 모든 번들에 복사본으로 들어간다. 공유 텍스처가 번들 열 개에 들어가면 용량도 메모리도 열 배다. 해법은 공통 텍스처·머티리얼·셰이더를 별도 번들로 떼어 지정하는 것이고, Addressables는 Analyze 창의 중복 의존성 검사로 찾아 준다. 같은 이유로 로컬 프리팹이 원격 번들의 머티리얼을 참조하면 원격을 받기 전에는 로드가 실패한다.</p><p>해제도 직관과 다르다. 텍스처나 메시의 실제 데이터는 C# 힙이 아니라 네이티브 메모리에 있어서 C# 참조가 사라지고 GC가 돌아도 풀리지 않는다. <code>Resources.UnloadUnusedAssets</code>가 돌아야 아무도 참조하지 않는 에셋이 내려가고, Single 모드 씬 로드 때 이 호출이 일어난다. 전체를 훑는 비싼 작업이라 로딩 화면에서 부른다. Addressables는 <code>Release</code>만큼 참조 카운트가 줄고, 번들 안 에셋이 모두 해제돼야 번들이 내려간다.</p><p>로딩 화면에서 알아 둘 숫자는 0.9다. <code>LoadSceneAsync</code>의 progress는 데이터 로드가 끝나면 0.9까지만 오르고 나머지는 씬 활성화 몫이라, <code>allowSceneActivation</code>을 false로 두면 0.9에서 대기하다 true로 바꾸는 순간 활성화된다.</p><pre><code>AsyncOperation op = SceneManager.LoadSceneAsync(name);
+op.allowSceneActivation = false;        // 0.9에서 멈춰 기다린다
+
+while (op.progress &lt; 0.9f)
+{
+    bar.value = op.progress / 0.9f;     // 0~1로 정규화해 표시
+    yield return null;
+}
+
+op.allowSceneActivation = true;         // 연출이 끝나면 활성화</code></pre><h3>면접에서 이렇게 답한다</h3><ul><li><strong>셋의 차이는</strong> — Resources는 폴더 전부가 빌드에 박히고 인덱싱 비용이 든다. AssetBundle은 묶은 것만 넣고 원격 배포도 되지만 의존성과 해제를 직접 관리해야 한다. Addressables는 그 위에서 주소와 참조 카운트를 대신 관리한다.</li><li><strong>에셋이 번들에 중복되는 것을 어떻게 막나</strong> — 번들에 지정되지 않은 의존 에셋은 참조하는 번들마다 복사되므로 공유 에셋을 공통 번들로 떼어 지정한다. Analyze로 찾아낼 수 있다.</li><li><strong>참조를 끊으면 메모리가 바로 돌아오나</strong> — 아니다. 네이티브 메모리라 GC로 풀리지 않고 Resources.UnloadUnusedAssets가 돌아야 내려간다. Addressables는 Release로 참조 카운트를 줄인다.</li><li><strong>CDN 비용을 줄이려면</strong> — 클라이언트가 줄일 수 있는 건 전송량이다. 번들을 갱신 단위로 쪼개 바뀐 것만 받게 하고, 텍스처 압축과 해상도를 정리하고, 로컬 캐시와 해시 검사로 같은 파일을 두 번 받지 않게 한다.</li><li><strong>로비 진입이 15초라면</strong> — 먼저 구간을 나눠 잰다. 다운로드, 에셋 로드, 초기화 중 어디가 긴지에 따라 손댈 곳이 다르다. 첫 화면에 필요 없는 로드를 미루고, 순차로 하던 것을 겹치고, 초기화는 프레임에 나눈다.</li></ul><h3>흔한 오해</h3><ul><li><strong>Resources는 동기라 느리고 Addressables는 비동기라 빠르다</strong> — Resources에도 LoadAsync가 있다. 차이는 빌드 포함 방식과 의존성·해제 관리다.</li><li><strong>Addressables면 메모리 관리가 알아서 된다</strong> — 참조 카운트를 대신 셀 뿐이다. Release를 부르지 않으면 번들이 그대로 남는다.</li><li><strong>번들 하나로 크게 묶는 게 항상 낫다</strong> — 요청 수는 줄지만 일부만 바뀌어도 전체를 다시 받고 필요 없는 에셋까지 메모리에 올라온다. 갱신 빈도와 함께 쓰이는 단위로 묶는다.</li><li><strong>Destroy하면 그 텍스처도 함께 내려간다</strong> — 씬의 인스턴스만 사라지고 에셋은 언로드 전까지 남는다.</li></ul>
+<div class="refs"><h2>참고 자료</h2><ul><li><a href="https://docs.unity3d.com/Manual/LoadingResourcesatRuntime.html" target="_blank" rel="noopener">Unity 매뉴얼 – Introduction to the Resources system</a></li><li><a href="https://docs.unity3d.com/Manual/AssetBundles-Dependencies.html" target="_blank" rel="noopener">Unity 매뉴얼 – Handling dependencies between AssetBundles</a></li><li><a href="https://docs.unity3d.com/Manual/com.unity.addressables.html" target="_blank" rel="noopener">Unity 매뉴얼 – Addressables 패키지</a></li><li><a href="https://docs.unity3d.com/ScriptReference/AsyncOperation-allowSceneActivation.html" target="_blank" rel="noopener">Unity 스크립팅 API – AsyncOperation.allowSceneActivation</a></li></ul></div>
+</article>
+<div class="pager"><a href="02-04.html">← 스크립팅 백엔드</a><a href="02-06.html">UI →</a></div>
+<footer>정리 글은 Claude가 썼다. 틀린 내용이 있을 수 있으니 중요한 내용은 참고 자료 원문으로 확인한다.</footer>
+</main>
+</body>
+</html>

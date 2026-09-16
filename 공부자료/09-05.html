@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>동기화 기법 · 네트워크</title>
+<style>
+  :root {
+    --bg:#f2f5f7; --card:#fff; --panel:#f7f9fb; --text:#3c3c3c; --muted:#7a8b93; --line:#e2e8ea;
+    --green:#58cc02; --green-d:#46a302; --blue:#1cb0f6; --blue-d:#1899d6; --blue-bg:#ddf4ff;
+    --purple:#ce82ff; --purple-d:#a855f7; --purple-bg:#f5e8ff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#131f24; --card:#1b2b32; --panel:#16252b; --text:#eaf2f6; --muted:#8fa7b2; --line:#2c4048;
+      --blue-bg:#12303d; --purple-bg:#2e2036; --purple-d:#c99bec; --blue-d:#58c4f7; --green-d:#7ddc2a; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
+  a { color: var(--blue-d); }
+  .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
+  .nav a { text-decoration: none; }
+  .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
+    padding: 4px 12px; font-size: .8rem; font-weight: 800; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
+  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
+  p, ul, ol { margin: 10px 0; }
+  li { margin: 5px 0; }
+  .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
+  .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
+  .card { background: var(--card); border: 2px solid var(--line); border-radius: 20px; padding: 20px; margin-bottom: 14px; }
+  .list { display: grid; gap: 10px; }
+  .list a { display: block; background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px;
+    border-radius: 18px; padding: 14px 16px; text-decoration: none; color: inherit; }
+  .list a:hover { border-color: var(--purple); }
+  .list strong { display: block; font-size: 1.02rem; font-weight: 800; }
+  .list span { color: var(--muted); font-size: .86rem; font-weight: 600; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em;
+    background: var(--panel); border: 1px solid var(--line); padding: 1px 6px; border-radius: 6px; font-weight: 700; }
+  pre { background: var(--panel); border: 2px solid var(--line); padding: 14px; border-radius: 14px; overflow-x: auto; line-height: 1.65; }
+  pre code { background: none; border: 0; padding: 0; }
+  table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; font-size: .94rem; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; }
+  th { background: var(--panel); }
+  .refs { border-top: 2px solid var(--line); margin-top: 24px; padding-top: 14px; }
+  .refs ul { padding-left: 20px; }
+  .pager { display: flex; justify-content: space-between; gap: 10px; margin-top: 16px; }
+  .pager a { background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px; border-radius: 16px;
+    padding: 12px 16px; text-decoration: none; color: inherit; font-weight: 800; font-size: .9rem; max-width: 48%; }
+  .pager a:hover { border-color: var(--blue); }
+  footer { color: var(--muted); font-size: .8rem; font-weight: 600; margin-top: 28px; }
+</style>
+</head>
+<body>
+<main>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="09.html" class="badge">네트워크 목차</a></div>
+<article class="card">
+<h1>동기화 기법</h1>
+<p class="lead">입력을 맞출지 상태를 맞출지가 갈림길이다. 장르에 맞는 기법을 고르는 기준을 잡는다</p>
+<h3>핵심 개념</h3><p>동기화는 <strong>내 화면과 상대 화면 사이에 늘 왕복 시간만큼의 과거가 끼어 있다</strong>는 사실에서 출발한다. 대응은 둘이다. <strong>입력을 맞춰</strong> 각자 같은 시뮬레이션을 돌리거나(락스텝·롤백), <strong>상태를 맞춰</strong> 빈틈을 예측으로 메운다.</p><table><thead><tr><th>기법</th><th>보내는 것</th><th>맞는 장르</th><th>왜 맞나 / 대가</th></tr></thead><tbody><tr><td>락스텝</td><td>입력·명령</td><td>RTS, 유닛 많은 전략</td><td>유닛이 수백이어도 트래픽이 유닛 수와 무관 / 결정론 필요, 가장 느린 참가자만큼 입력 지연</td></tr><tr><td>롤백</td><td>입력 + 예측</td><td>격투, 2~4인 대전</td><td>내 입력이 지연 없이 반영된다 / 상태 스냅숏과 재시뮬레이션 비용</td></tr><tr><td>클라이언트 예측 + 서버 보정</td><td>입력과 권위 상태</td><td>FPS, 액션 MMO</td><td>서버가 판정해 치트에 강하고 조작은 즉시 반응 / 예측이 빗나가면 위치가 튄다</td></tr><tr><td>데드 레커닝·보간</td><td>위치·속도</td><td>원격 오브젝트 표시, 레이싱</td><td>전송 빈도를 낮춰도 끊기지 않는다 / 급한 방향 전환에서 오차가 커진다</td></tr></tbody></table><p><strong>락스텝</strong>은 입력만 보내고 모두가 같은 시뮬레이션을 돌린다. 유닛 수백 개의 위치를 보내지 않아도 되니 RTS처럼 개체가 많은 장르에 맞는다. 대신 모든 기기의 결과가 한 비트도 달라선 안 돼 고정소수점을 쓰고 난수 시드와 순회 순서를 고정한다. 한 번 갈라지면(desync) 복구가 어려워 상태 체크섬을 주기적으로 비교한다.</p><p><strong>롤백</strong>은 그 대기를 없앤 락스텝이다. 상대 입력을 예측해 진행하다 실제 입력이 다르면 그 프레임으로 되감아 현재까지 다시 돌린다. 상태를 통째로 저장·복원할 수 있고 재시뮬이 싸야 하므로, 참가자가 둘이고 1~2프레임 지연도 크게 느껴지는 격투 장르가 조건에 맞는다.</p><p><strong>클라이언트 예측과 서버 보정</strong>은 권위 서버를 둔 채 반응성을 사는 방법이다. 입력을 즉시 로컬에 적용하고, 서버 상태가 오면 그 시점에 맞춘 뒤 서버가 못 본 입력만 다시 돌린다(reconciliation).</p><pre><code>using System.Collections.Generic;
+using UnityEngine;
+
+public class PredictedMover : MonoBehaviour
+{
+    struct Cmd { public uint Seq; public Vector3 Move; }
+
+    readonly List&lt;Cmd&gt; _pending = new List&lt;Cmd&gt;();   // 서버가 아직 확인하지 않은 입력
+    uint _seq;
+
+    public void Push(Vector3 move)                  // 보내면서 먼저 내 화면에 적용
+    {
+        _pending.Add(new Cmd { Seq = ++_seq, Move = move });
+        transform.position += move;
+    }
+
+    public void OnServerState(Vector3 pos, uint ackSeq)
+    {
+        _pending.RemoveAll(c =&gt; c.Seq &lt;= ackSeq);   // 서버가 처리한 입력은 버리고
+        foreach (var c in _pending) pos += c.Move;  // 못 본 입력만 다시 적용
+        transform.position = pos;
+    }
+}</code></pre><p><strong>데드 레커닝</strong>은 남의 캐릭터를 그릴 때 쓴다. 받은 위치와 속도로 다음 위치를 추정해 패킷 사이를 메우고, 새 값이 오면 순간이동 대신 짧은 시간에 수렴시킨다. 손실을 전제해 상태는 델타보다 최신 값을 통째로 보낸다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>데드 레커닝이란</strong> — 받은 위치와 속도로 원격 오브젝트의 다음 위치를 추정해 갱신 사이를 메우는 기법이다. 전송 빈도를 낮춰도 부드럽다.</li><li><strong>락스텝은 어떤 장르에 맞나, 유닛 수백 개는 어떻게 동기화하나</strong> — 입력만 주고받고 각자 같은 시뮬레이션을 돌리므로 상태가 많은 RTS에 맞는다. 모든 기기의 결과가 같아야 해 고정소수점과 시드·순회 순서 고정이 필요하다.</li><li><strong>클라이언트 예측과 서버 보정</strong> — 입력에 순서 번호를 붙여 보내고 즉시 로컬에 적용한 뒤, 서버 상태가 오면 그 시점에 맞추고 남은 입력을 다시 적용한다. 판정 권한은 서버에 남는다.</li><li><strong>롤백 지연 보상</strong> — 상대 입력을 예측해 진행하고, 다르면 되감아 재시뮬레이션한다. 입력 지연이 없어 격투에 쓰지만 스냅숏 저장과 재계산 비용이 든다.</li></ul><h3>흔한 오해</h3><ul><li><strong>데드 레커닝은 서버가 과거로 되감는 것이다</strong> — 되감기는 히트스캔 슈터가 쓰는 서버 측 지연 보상이고, 데드 레커닝은 받은 값으로 앞을 추정하는 것이다. 같은 입력을 같은 턴에 쓰는 것은 락스텝이다.</li><li><strong>클라이언트 예측은 클라이언트에 판정을 맡기는 것이다</strong> — 미리 그려 볼 뿐 판정은 서버가 하고, 결과가 다르면 클라이언트가 맞춰진다.</li><li><strong>보간만 켜면 지연이 해결된다</strong> — 보간은 받은 값 사이를 채우느라 한 틱만큼 과거를 보여 준다. 내 캐릭터는 예측으로 메운다.</li></ul>
+<div class="refs"><h2>참고 자료</h2><ul><li><a href="https://www.gabrielgambetta.com/client-side-prediction-server-reconciliation.html" target="_blank" rel="noopener">Gabriel Gambetta – Fast-Paced Multiplayer (Part II): Client-Side Prediction and Server Reconciliation</a></li><li><a href="https://www.gabrielgambetta.com/lag-compensation.html" target="_blank" rel="noopener">Gabriel Gambetta – Fast-Paced Multiplayer: Lag Compensation</a></li><li><a href="https://docs.unity3d.com/Packages/com.unity.netcode@1.3/manual/intro-to-prediction.html" target="_blank" rel="noopener">Unity Netcode for Entities – Introduction to prediction</a></li><li><a href="https://docs.unity3d.com/Packages/com.unity.netcode.gameobjects@3.0/manual/learn/lagandpacketloss.html" target="_blank" rel="noopener">Unity Netcode for GameObjects – Understanding latency</a></li></ul></div>
+</article>
+<div class="pager"><a href="09-04.html">← 멀티플레이 구조</a><a href="09-06.html">클라이언트-서버 신뢰성 →</a></div>
+<footer>정리 글은 Claude가 썼다. 틀린 내용이 있을 수 있으니 중요한 내용은 참고 자료 원문으로 확인한다.</footer>
+</main>
+</body>
+</html>

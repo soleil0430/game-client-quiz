@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>컬링과 가시성 · 그래픽스·렌더링</title>
+<style>
+  :root {
+    --bg:#f2f5f7; --card:#fff; --panel:#f7f9fb; --text:#3c3c3c; --muted:#7a8b93; --line:#e2e8ea;
+    --green:#58cc02; --green-d:#46a302; --blue:#1cb0f6; --blue-d:#1899d6; --blue-bg:#ddf4ff;
+    --purple:#ce82ff; --purple-d:#a855f7; --purple-bg:#f5e8ff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#131f24; --card:#1b2b32; --panel:#16252b; --text:#eaf2f6; --muted:#8fa7b2; --line:#2c4048;
+      --blue-bg:#12303d; --purple-bg:#2e2036; --purple-d:#c99bec; --blue-d:#58c4f7; --green-d:#7ddc2a; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
+  a { color: var(--blue-d); }
+  .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
+  .nav a { text-decoration: none; }
+  .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
+    padding: 4px 12px; font-size: .8rem; font-weight: 800; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
+  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
+  p, ul, ol { margin: 10px 0; }
+  li { margin: 5px 0; }
+  .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
+  .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
+  .card { background: var(--card); border: 2px solid var(--line); border-radius: 20px; padding: 20px; margin-bottom: 14px; }
+  .list { display: grid; gap: 10px; }
+  .list a { display: block; background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px;
+    border-radius: 18px; padding: 14px 16px; text-decoration: none; color: inherit; }
+  .list a:hover { border-color: var(--purple); }
+  .list strong { display: block; font-size: 1.02rem; font-weight: 800; }
+  .list span { color: var(--muted); font-size: .86rem; font-weight: 600; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em;
+    background: var(--panel); border: 1px solid var(--line); padding: 1px 6px; border-radius: 6px; font-weight: 700; }
+  pre { background: var(--panel); border: 2px solid var(--line); padding: 14px; border-radius: 14px; overflow-x: auto; line-height: 1.65; }
+  pre code { background: none; border: 0; padding: 0; }
+  table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; font-size: .94rem; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; }
+  th { background: var(--panel); }
+  .refs { border-top: 2px solid var(--line); margin-top: 24px; padding-top: 14px; }
+  .refs ul { padding-left: 20px; }
+  .pager { display: flex; justify-content: space-between; gap: 10px; margin-top: 16px; }
+  .pager a { background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px; border-radius: 16px;
+    padding: 12px 16px; text-decoration: none; color: inherit; font-weight: 800; font-size: .9rem; max-width: 48%; }
+  .pager a:hover { border-color: var(--blue); }
+  footer { color: var(--muted); font-size: .8rem; font-weight: 600; margin-top: 28px; }
+</style>
+</head>
+<body>
+<main>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="04.html" class="badge">그래픽스·렌더링 목차</a></div>
+<article class="card">
+<h1>컬링과 가시성</h1>
+<p class="lead">안 그리는 것이 가장 싸다. 시야 밖·가려짐·뒷면·이미 가까운 픽셀을 어디서 거르는지 나눈다</p>
+<h3>핵심 개념</h3><p>가장 빠른 렌더링은 아예 그리지 않는 것이다. 파이프라인 곳곳에 안 보이는 것을 버리는 관문이 있고, 거르는 대상과 단위가 다르다.</p><table><thead><tr><th>기법</th><th>어디서</th><th>무엇을 거르나</th><th>단위</th></tr></thead><tbody><tr><td>프러스텀 컬링</td><td>CPU</td><td>카메라 시야 밖</td><td>오브젝트의 경계 볼륨</td></tr><tr><td>오클루전 컬링</td><td>CPU</td><td>다른 물체에 가려진 것</td><td>오브젝트</td></tr><tr><td>백페이스 컬링</td><td>GPU(래스터화 전)</td><td>뒤를 보는 삼각형</td><td>삼각형</td></tr><tr><td>깊이 테스트</td><td>GPU</td><td>더 가까운 것이 있는 자리</td><td>픽셀</td></tr></tbody></table><p>프러스텀 컬링은 Unity가 자동으로 하며, 오브젝트의 경계 상자가 절두체 여섯 평면 밖이면 목록에서 뺀다. 판정 단위가 오브젝트라서 지형 전체가 메시 하나면 귀퉁이만 보여도 전부 그려진다. 이런 메시는 쪼개야 컬링이 먹는다.</p><pre><code>using UnityEngine;
+
+// Renderer가 붙은 오브젝트에 함께 둔다
+public class VisibilityGate : MonoBehaviour
+{
+    readonly Plane[] _planes = new Plane[6];   // 매 프레임 새 배열을 만들지 않는다
+
+    public bool IsInFrustum(Camera cam, Renderer target)
+    {
+        GeometryUtility.CalculateFrustumPlanes(cam, _planes);   // 절두체 6평면을 채운다
+        return GeometryUtility.TestPlanesAABB(_planes, target.bounds);  // 경계 상자 단위 판정
+    }
+
+    void OnBecameInvisible() { enabled = false; }  // 보일 때만 필요한 로직을 끈다
+    void OnBecameVisible()   { enabled = true; }
+}</code></pre><p>오클루전 컬링은 벽 뒤처럼 가려진 오브젝트를 뺀다. Unity 기본 방식은 씬을 미리 구워(bake) 가시성 데이터를 만들고 런타임에 조회하므로, <strong>조회 비용과 구운 데이터를 내고 드로우 콜을 사는 것</strong>이다. 막힌 실내에서는 크게 남고 개활지에서는 비용만 남는다.</p><p>LOD는 화면에서 차지하는 비율에 따라 폴리곤이 적은 메시로 갈아 끼워 정점·셰이딩 비용을 줄인다(<code>LODGroup</code>). 대신 단계별 메시를 다 들고 있어야 해 메모리와 용량은 늘고, 전환 순간 형태가 튀는 팝핑이 보인다.</p><p>백페이스 컬링은 화면에 투영된 세 정점이 감기는 방향(와인딩 순서)으로 앞뒤를 가른다. Unity는 시계 방향이 앞면이고 기본이 <code>Cull Back</code>이다. 정점 순서가 뒤집힌 메시가 안쪽만 보이는 것이 이 때문이며, 나뭇잎처럼 양면이 필요하면 <code>Cull Off</code>로 끈다.</p><p>깊이 버퍼는 픽셀마다 현재 깊이를 적어 두고 더 가까운 조각만 통과시켜, 그리는 순서와 무관하게 앞뒤를 맞춘다. 값이 비선형으로 저장돼 정밀도가 근평면에 몰리므로 near를 너무 작게 잡거나 far를 과하게 키우면 Z-파이팅이 난다.</p><p><strong>모바일(타일 기반 GPU)</strong>은 타일 메모리 안에 깊이를 두어 깊이 테스트가 싸고, 가려질 픽셀의 셰이딩을 건너뛰는 하드웨어 기능(PowerVR의 HSR, Adreno의 LRZ)까지 있다. 그래서 데스크톱에서 쓰는 깊이 프리패스가 여기서는 지오메트리를 두 번 처리하는 손해가 되기 쉽다. 단 이 기능은 <code>discard</code>가 있으면 꺼진다. 반대로 CPU 예산이 빠듯해 오브젝트 수를 줄이는 컬링과 LOD는 더 중요하다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>프러스텀 컬링과 오클루전 컬링의 차이</strong> — 둘 다 CPU에서 그릴 목록을 줄이지만 프러스텀은 시야 밖을, 오클루전은 시야 안이지만 가려진 것을 뺀다. 프러스텀은 자동이고 오클루전은 베이크와 조회 비용이 들어 씬 구조를 보고 켠다.</li><li><strong>백페이스 컬링의 판정 기준</strong> — 화면에 투영된 정점이 감기는 방향으로 앞뒤를 가르고 뒷면을 버린다. 메시 노멀이나 정점 순서가 뒤집히면 판정도 뒤집혀 안쪽만 보인다.</li><li><strong>LOD의 장단점</strong> — 거리에 따라 단순한 메시로 바꿔 정점과 셰이딩을 아끼지만, 단계별 메시만큼 메모리와 용량이 늘고 전환 순간 팝핑이 생긴다.</li><li><strong>깊이 버퍼의 동작</strong> — 픽셀마다 깊이를 저장해 더 가까운 조각만 남기므로 순서와 무관하게 앞뒤가 맞는다. 정밀도가 근평면에 몰려 near/far 비율이 나쁘면 Z-파이팅이 난다.</li></ul><h3>흔한 오해</h3><ul><li><strong>오클루전 컬링은 켜기만 하면 이득이다</strong> — 베이크 데이터와 조회 비용이 있어 가릴 것이 없는 개활지에서는 비용만 남는다.</li><li><strong>백페이스 컬링이 뒤에 있는 오브젝트를 거른다</strong> — 거르는 것은 삼각형의 뒷면이다. 가려진 오브젝트는 오클루전 컬링, 가려진 픽셀은 깊이 테스트가 맡는다.</li><li><strong>프러스텀 컬링은 삼각형 단위다</strong> — 오브젝트의 경계 볼륨 단위라, 거대한 단일 메시는 컬링이 거의 듣지 않는다.</li><li><strong>LOD는 메모리도 줄여 준다</strong> — 단계마다 메시를 따로 들고 있으므로 메모리와 빌드 용량은 오히려 는다.</li></ul>
+<div class="refs"><h2>참고 자료</h2><ul><li><a href="https://docs.unity3d.com/Manual/OcclusionCulling.html" target="_blank" rel="noopener">Unity 매뉴얼 – Occlusion culling</a></li><li><a href="https://docs.unity3d.com/Manual/LevelOfDetail.html" target="_blank" rel="noopener">Unity 매뉴얼 – Introduction to level of detail</a></li><li><a href="https://docs.unity3d.com/Manual/SL-Cull.html" target="_blank" rel="noopener">Unity 매뉴얼 – Cull command in ShaderLab</a></li><li><a href="https://docs.unity3d.com/Manual/SL-ZWrite.html" target="_blank" rel="noopener">Unity 매뉴얼 – ZWrite command in ShaderLab</a></li></ul></div>
+</article>
+<div class="pager"><a href="04-01.html">← 렌더링 파이프라인</a><a href="04-03.html">드로우 콜과 배칭 →</a></div>
+<footer>정리 글은 Claude가 썼다. 틀린 내용이 있을 수 있으니 중요한 내용은 참고 자료 원문으로 확인한다.</footer>
+</main>
+</body>
+</html>

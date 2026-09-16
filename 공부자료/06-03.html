@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>아키텍처 · 설계·아키텍처</title>
+<style>
+  :root {
+    --bg:#f2f5f7; --card:#fff; --panel:#f7f9fb; --text:#3c3c3c; --muted:#7a8b93; --line:#e2e8ea;
+    --green:#58cc02; --green-d:#46a302; --blue:#1cb0f6; --blue-d:#1899d6; --blue-bg:#ddf4ff;
+    --purple:#ce82ff; --purple-d:#a855f7; --purple-bg:#f5e8ff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#131f24; --card:#1b2b32; --panel:#16252b; --text:#eaf2f6; --muted:#8fa7b2; --line:#2c4048;
+      --blue-bg:#12303d; --purple-bg:#2e2036; --purple-d:#c99bec; --blue-d:#58c4f7; --green-d:#7ddc2a; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
+  a { color: var(--blue-d); }
+  .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
+  .nav a { text-decoration: none; }
+  .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
+    padding: 4px 12px; font-size: .8rem; font-weight: 800; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
+  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
+  p, ul, ol { margin: 10px 0; }
+  li { margin: 5px 0; }
+  .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
+  .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
+  .card { background: var(--card); border: 2px solid var(--line); border-radius: 20px; padding: 20px; margin-bottom: 14px; }
+  .list { display: grid; gap: 10px; }
+  .list a { display: block; background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px;
+    border-radius: 18px; padding: 14px 16px; text-decoration: none; color: inherit; }
+  .list a:hover { border-color: var(--purple); }
+  .list strong { display: block; font-size: 1.02rem; font-weight: 800; }
+  .list span { color: var(--muted); font-size: .86rem; font-weight: 600; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em;
+    background: var(--panel); border: 1px solid var(--line); padding: 1px 6px; border-radius: 6px; font-weight: 700; }
+  pre { background: var(--panel); border: 2px solid var(--line); padding: 14px; border-radius: 14px; overflow-x: auto; line-height: 1.65; }
+  pre code { background: none; border: 0; padding: 0; }
+  table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; font-size: .94rem; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; }
+  th { background: var(--panel); }
+  .refs { border-top: 2px solid var(--line); margin-top: 24px; padding-top: 14px; }
+  .refs ul { padding-left: 20px; }
+  .pager { display: flex; justify-content: space-between; gap: 10px; margin-top: 16px; }
+  .pager a { background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px; border-radius: 16px;
+    padding: 12px 16px; text-decoration: none; color: inherit; font-weight: 800; font-size: .9rem; max-width: 48%; }
+  .pager a:hover { border-color: var(--blue); }
+  footer { color: var(--muted); font-size: .8rem; font-weight: 600; margin-top: 28px; }
+</style>
+</head>
+<body>
+<main>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="06.html" class="badge">설계·아키텍처 목차</a></div>
+<article class="card">
+<h1>아키텍처</h1>
+<p class="lead">시스템끼리 어떻게 찾고 부르는지를 정해, 다음 기능을 넣는 비용을 낮추는 일이다</p>
+<h3>핵심 개념</h3><p>아키텍처의 목적은 멋진 그림이 아니라 <strong>다음 기능을 넣는 비용을 낮추는 것</strong>이다. 그 비용을 정하는 것은 대개 "시스템끼리 서로를 어떻게 찾고 부르는가" 하나다. 방식은 셋뿐이고 결합도와 흐름 추적을 맞바꾼다.</p><table><thead><tr><th>방식</th><th>결합도</th><th>흐름 추적</th><th>어디에 쓰나</th></tr></thead><tbody><tr><td>구체 클래스 직접 참조</td><td>높다</td><td>가장 쉽다</td><td>늘 붙어 다니는 관계</td></tr><tr><td>인터페이스 + 주입</td><td>중간</td><td>코드에 보인다</td><td>교체·테스트가 필요한 협력</td></tr><tr><td>이벤트·메시지 버스</td><td>낮다</td><td>어렵다</td><td>먼 시스템에 던지는 알림</td></tr></tbody></table><p>의존성 주입은 쓸 협력 객체를 스스로 만들지 않고 밖에서 받는 것이다. 컨테이너가 있어야 주입인 것이 아니라 생성자나 메서드 인자로 넘기기만 해도 주입이고, 인스펙터 연결도 넓게 보면 밖에서 넣어 주는 것이다. 인터페이스는 "무엇을 해 줄 수 있는가"라는 계약만 남기고 구현을 감춘다.</p><pre><code>public interface ISaveStore { void Save(string json); }
+
+public class ScoreService
+{
+    private readonly ISaveStore store;
+
+    public ScoreService(ISaveStore store) =&gt; this.store = store;  // 생성자 주입
+
+    public void Record(int score) =&gt; store.Save(score.ToString());
+}
+
+// MonoBehaviour는 생성자를 쓸 수 없어 초기화 메서드로 주입한다
+public class ScoreView : MonoBehaviour
+{
+    private ScoreService service;
+
+    public void Init(ScoreService service) =&gt; this.service = service;
+}</code></pre><p>이벤트 버스는 발행자가 누가 받는지 모른 채 던지므로 결합이 가장 느슨하다. 대신 이벤트가 이벤트를 부르는 연쇄, 구독 순서 의존, 해제 누락이 겹치면 원인을 찾기 어렵다. 전부 버스로 통신하면 호출 흐름이 코드에 남지 않으니, 가까운 관계는 주입으로 먼 시스템 알림은 버스로 나눈다.</p><p>UI에는 MVC 계열을 쓴다. 모델은 데이터와 규칙, 뷰는 표시와 입력 전달, 컨트롤러는 입력을 받아 모델을 고친다. 핵심은 <strong>모델이 뷰를 모르게</strong> 해서 화면을 갈아엎어도 규칙 코드를 안 건드리는 것이다. MVP는 뷰를 더 얇게 두고 프레젠터가 중개하며, MVVM은 바인딩으로 그 연결을 자동화한다. 대신 클래스가 늘어 작은 팝업에는 과하다.</p><p>ECS는 방향 자체가 다르다. 엔티티에 순수 데이터인 컴포넌트를 붙이고 로직은 시스템에 두며, 같은 컴포넌트를 가진 엔티티를 메모리에 촘촘히 모아 한 번에 훑는다. 캐시 적중률이 높고 일감을 나누기 쉬워 수만 개를 반복할 때 유리하다. 상속 기반 구조는 데이터와 로직이 객체마다 흩어져 있고 가상 호출을 탄다.</p><p>정의를 정확히 해 둘 것 셋. 프레임워크와 라이브러리는 <strong>누가 누구를 부르나</strong>로 갈린다. <code>Update</code>가 엔진에 의해 불리면 프레임워크, 내가 부르는 수학 유틸리티는 라이브러리다. 순수 함수는 같은 입력에 늘 같은 결과를 내고 부수 효과가 없어 테스트와 멀티스레드에 유리하다. Lua로 콘텐츠 규칙을 빼면 재심사 없이 고칠 수 있지만, 인터프리터 비용 때문에 매 프레임 도는 계산은 C#에 남긴다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>전 회사 아키텍처를 설명하라</strong> — 레이어를 나열하지 말고 "무엇이 자주 바뀌었고 그래서 어디를 갈아 끼울 수 있게 뒀는지"로 말한다. 콘텐츠 데이터, UI, 서버 통신 중 무엇이 가장 자주 바뀌었는지부터 꺼낸다.</li><li><strong>의존성 주입이 왜 필요한가</strong> — 구체 클래스를 직접 <code>new</code>하면 교체할 수 없고 테스트에서 가짜를 넣을 수 없다. 인터페이스로 계약만 남기면 서버 연동을 로컬 스텁으로 바꿔 끼우는 일이 호출부 수정 없이 된다.</li><li><strong>이벤트가 많아지면</strong> — 연쇄 호출과 구독 순서 의존으로 추적이 어려워지고 해제 누락이 누수로 이어진다. 이벤트의 범위를 정하고 중요한 흐름은 직접 호출로 남긴다고 답한다.</li><li><strong>레거시 리팩터링</strong> — 한 번에 갈아엎지 않는다. 바꿀 곳 주변에 재현 절차를 먼저 만들고, 인터페이스로 경계를 그은 뒤 그 안에서 조금씩 교체한다.</li></ul><h3>흔한 오해</h3><ul><li><strong>의존성 주입은 성능 최적화</strong> — 목적은 결합도를 낮추는 설계다. 오히려 간접 호출이 한 겹 는다.</li><li><strong>이벤트 버스를 쓰면 결합이 사라진다</strong> — 직접 참조가 없어질 뿐 메시지 형식이라는 계약이 남고, 디버깅 비용은 올라간다.</li><li><strong>뷰가 데이터를 직접 읽고 써도 MVC다</strong> — 그 순간 분리가 무너진다. 모델이 뷰를 모르게 하는 것이 목적이다.</li><li><strong>ECS로 바꾸면 무조건 빨라진다</strong> — 같은 처리를 대량 반복할 때 유리하다. 종류가 제각각인 소수 오브젝트는 이득이 적고 전환 비용이 크다.</li><li><strong>순수 함수는 <code>static</code> 함수다</strong> — 상관없다. 기준은 같은 입력에 같은 결과인지와 부수 효과가 없는지다.</li></ul>
+<div class="refs"><h2>참고 자료</h2><ul><li><a href="https://learn.microsoft.com/ko-kr/dotnet/core/extensions/dependency-injection" target="_blank" rel="noopener">Microsoft Learn – 종속성 주입(.NET)</a></li><li><a href="https://learn.microsoft.com/ko-kr/dotnet/csharp/language-reference/keywords/event" target="_blank" rel="noopener">Microsoft Learn – &#x27;event&#x27; 키워드</a></li><li><a href="https://docs.unity3d.com/Manual/unity-events.html" target="_blank" rel="noopener">Unity 매뉴얼 – Inspector-configurable custom events(UnityEvent)</a></li><li><a href="https://docs.unity3d.com/Packages/com.unity.entities@1.3/manual/index.html" target="_blank" rel="noopener">Unity 매뉴얼 – Entities overview(ECS)</a></li></ul></div>
+</article>
+<div class="pager"><a href="06-02.html">← 디자인 패턴</a><a href="06-04.html">게임 시스템 설계 →</a></div>
+<footer>정리 글은 Claude가 썼다. 틀린 내용이 있을 수 있으니 중요한 내용은 참고 자료 원문으로 확인한다.</footer>
+</main>
+</body>
+</html>

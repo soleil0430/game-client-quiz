@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>벡터 · 게임 수학·물리</title>
+<style>
+  :root {
+    --bg:#f2f5f7; --card:#fff; --panel:#f7f9fb; --text:#3c3c3c; --muted:#7a8b93; --line:#e2e8ea;
+    --green:#58cc02; --green-d:#46a302; --blue:#1cb0f6; --blue-d:#1899d6; --blue-bg:#ddf4ff;
+    --purple:#ce82ff; --purple-d:#a855f7; --purple-bg:#f5e8ff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#131f24; --card:#1b2b32; --panel:#16252b; --text:#eaf2f6; --muted:#8fa7b2; --line:#2c4048;
+      --blue-bg:#12303d; --purple-bg:#2e2036; --purple-d:#c99bec; --blue-d:#58c4f7; --green-d:#7ddc2a; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
+  a { color: var(--blue-d); }
+  .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
+  .nav a { text-decoration: none; }
+  .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
+    padding: 4px 12px; font-size: .8rem; font-weight: 800; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
+  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
+  p, ul, ol { margin: 10px 0; }
+  li { margin: 5px 0; }
+  .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
+  .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
+  .card { background: var(--card); border: 2px solid var(--line); border-radius: 20px; padding: 20px; margin-bottom: 14px; }
+  .list { display: grid; gap: 10px; }
+  .list a { display: block; background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px;
+    border-radius: 18px; padding: 14px 16px; text-decoration: none; color: inherit; }
+  .list a:hover { border-color: var(--purple); }
+  .list strong { display: block; font-size: 1.02rem; font-weight: 800; }
+  .list span { color: var(--muted); font-size: .86rem; font-weight: 600; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em;
+    background: var(--panel); border: 1px solid var(--line); padding: 1px 6px; border-radius: 6px; font-weight: 700; }
+  pre { background: var(--panel); border: 2px solid var(--line); padding: 14px; border-radius: 14px; overflow-x: auto; line-height: 1.65; }
+  pre code { background: none; border: 0; padding: 0; }
+  table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; font-size: .94rem; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; }
+  th { background: var(--panel); }
+  .refs { border-top: 2px solid var(--line); margin-top: 24px; padding-top: 14px; }
+  .refs ul { padding-left: 20px; }
+  .pager { display: flex; justify-content: space-between; gap: 10px; margin-top: 16px; }
+  .pager a { background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px; border-radius: 16px;
+    padding: 12px 16px; text-decoration: none; color: inherit; font-weight: 800; font-size: .9rem; max-width: 48%; }
+  .pager a:hover { border-color: var(--blue); }
+  footer { color: var(--muted); font-size: .8rem; font-weight: 600; margin-top: 28px; }
+</style>
+</head>
+<body>
+<main>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="05.html" class="badge">게임 수학·물리 목차</a></div>
+<article class="card">
+<h1>벡터</h1>
+<p class="lead">내적으로 각도와 앞뒤를, 외적으로 좌우와 법선을 얻는다. 거리는 제곱끼리 비교한다</p>
+<h3>핵심 개념</h3><p>게임의 벡터 연산은 대부분 "두 벡터가 이루는 각"과 "한 벡터를 다른 방향으로 투영한 길이"에서 갈라져 나온다. 내적과 외적의 기하학적 의미만 잡으면 시야각 판정, 반사, 평면 거리, 면 법선이 모두 한 도구의 변형으로 보인다.</p><p><strong>내적</strong>은 두 길이의 곱에 사잇각의 코사인을 곱한 값이다. 둘 다 정규화돼 있으면 내적이 곧 코사인이라 값 하나로 각도를 읽는다. 0.5면 60도, 1이면 정면, 0이면 정확히 옆, 음수면 뒤쪽이다. 코사인은 0도에서 180도 구간에서 단조 감소하므로, 역코사인으로 각도를 구하는 대신 내적을 <code>cos(시야각/2)</code>와 바로 비교하면 결과가 같으면서 훨씬 싸다. 시야각 90도면 기준값이 약 0.707, 120도면 정확히 0.5다.</p><p>내적의 두 번째 얼굴은 <strong>투영</strong>이다. 정규화된 법선 N에 대해 <code>Dot(v, N) * N</code>이 v의 법선 방향 성분이고, 여기서 셋이 나온다. 한 번 빼면 <code>I - Dot(I, N) * N</code>으로 벽을 따라 미끄러지는 슬라이드 벡터, 두 배로 빼면 <code>I - 2 * Dot(I, N) * N</code>으로 법선 성분만 부호가 뒤집힌 반사 벡터가 된다. 평면 위 한 점 Q에 대한 <code>Abs(Dot(N, P - Q))</code>는 점과 평면의 최단 거리이고, 절댓값을 벗기면 부호가 앞뒤를 알려준다. 셋 다 N이 단위 길이여야 한다.</p><p><strong>외적</strong>은 두 벡터가 만드는 평면에 수직인 벡터를 준다. 방향은 회전 방향을, 길이는 평행사변형 넓이를 뜻한다. 삼각형 법선을 <code>(B - A)</code>와 <code>(C - A)</code>의 외적으로 구한 뒤 정규화하는 것도 길이가 삼각형 넓이의 두 배라서다. 순서를 바꾸면 부호가 뒤집혀 정점을 감는 방향이 앞뒷면을 정한다. Unity에서 <code>Cross(forward, toTarget).y</code>가 양수면 목표가 오른쪽인데, 정면 (0,0,1)과 오른쪽 (1,0,0)의 외적이 (0,1,0)인 것으로 확인된다.</p><p>길이에는 습관 둘이 따라붙는다. 입력 h, v로 <code>new Vector3(h, 0, v)</code>를 만들어 속도에 그대로 곱하면 대각선 길이가 약 1.41이라 41% 빨라지므로, 방향만 필요하면 정규화한다. 또 제곱근은 단조 증가라 대소 비교 결과를 바꾸지 않으니, 어느 적이 더 가까운지만 보면 될 때는 <code>sqrMagnitude</code>로 비교해 제곱근을 아낀다. 대신 사거리 같은 기준값도 제곱해야 한다.</p><pre><code>public class Sight : MonoBehaviour
+{
+    public float viewAngle = 90f;   // 시야각(도)
+    public float range = 10f;
+
+    public bool CanSee(Transform target)
+    {
+        Vector3 to = target.position - transform.position;
+        if (to.sqrMagnitude &gt; range * range) return false;         // 기준값도 제곱해서 비교
+        float cos = Vector3.Dot(transform.forward, to.normalized);
+        return cos &gt;= Mathf.Cos(viewAngle * 0.5f * Mathf.Deg2Rad); // 90도면 약 0.707
+    }
+
+    // 앞뒤는 내적, 좌우는 외적의 부호로 가른다
+    public bool IsOnRight(Transform target)
+        =&gt; Vector3.Cross(transform.forward, target.position - transform.position).y &gt; 0f;
+}</code></pre><h3>면접에서 이렇게 답한다</h3><ul><li><strong>내적이란? 어디에 쓰나</strong> — 두 벡터의 사잇각 코사인에 길이를 곱한 값이다. 정규화된 벡터끼리면 값이 곧 코사인이라 부호로 앞뒤를, 크기로 각도를 읽는다. 시야각 판정은 cos(시야각의 절반)과 비교해 역코사인 없이 처리한다.</li><li><strong>외적이란? 결과는 무엇을 뜻하나</strong> — 두 벡터가 이루는 평면에 수직인 벡터다. 방향은 회전 방향을, 길이는 평행사변형 넓이를 뜻해 삼각형 법선과 좌우 판정에 쓴다.</li><li><strong>벡터를 언제 정규화하나</strong> — 방향만 의미가 있고 길이가 결과에 섞이면 안 될 때다. 이동 입력을 정규화하지 않으면 대각선이 약 1.41배 빨라지고, 반사와 평면 거리 공식도 법선이 단위 길이라는 전제 위에 있다.</li><li><strong>거리 비교에 왜 sqrMagnitude를 쓰나</strong> — 제곱근은 단조 증가라 비교 결과를 바꾸지 않는데 계산은 비싸다. 매 프레임 많은 대상을 훑을 때 아끼고, 기준값은 미리 제곱해 둔다.</li></ul><h3>흔한 오해</h3><ul><li><strong>내적으로 좌우도 알 수 있다</strong> — 코사인은 왼쪽 30도와 오른쪽 30도에 같은 값을 준다. 좌우는 외적의 부호로 가른다.</li><li><strong>외적 결과가 곧 단위 법선이다</strong> — 길이가 넓이에 비례하므로 정규화해야 한다. 정점 셋이 거의 일직선이면 길이가 0에 가까워 불안정해진다.</li><li><strong>반사 벡터는 I - Dot(I, N) * N 이다</strong> — 그것은 벽을 따라 미끄러지는 성분이다. 반사는 법선 성분의 부호를 뒤집는 것이라 두 배로 빼야 한다.</li><li><strong>sqrMagnitude는 그냥 빠른 magnitude다</strong> — 값 자체가 다르다. 사거리 5와 비교하려면 25와 비교해야 한다.</li></ul>
+<div class="refs"><h2>참고 자료</h2><ul><li><a href="https://docs.unity3d.com/ScriptReference/Vector3.Dot.html" target="_blank" rel="noopener">Unity 스크립팅 API – Vector3.Dot</a></li><li><a href="https://docs.unity3d.com/ScriptReference/Vector3.Cross.html" target="_blank" rel="noopener">Unity 스크립팅 API – Vector3.Cross</a></li><li><a href="https://docs.unity3d.com/ScriptReference/Vector3.Reflect.html" target="_blank" rel="noopener">Unity 스크립팅 API – Vector3.Reflect</a></li><li><a href="https://docs.unity3d.com/ScriptReference/Vector3-sqrMagnitude.html" target="_blank" rel="noopener">Unity 스크립팅 API – Vector3.sqrMagnitude</a></li></ul></div>
+</article>
+<div class="pager"><span></span><a href="05-02.html">행렬과 좌표계 →</a></div>
+<footer>정리 글은 Claude가 썼다. 틀린 내용이 있을 수 있으니 중요한 내용은 참고 자료 원문으로 확인한다.</footer>
+</main>
+</body>
+</html>

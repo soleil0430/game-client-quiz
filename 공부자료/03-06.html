@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>모바일과 상황형 질문 · 최적화·메모리</title>
+<style>
+  :root {
+    --bg:#f2f5f7; --card:#fff; --panel:#f7f9fb; --text:#3c3c3c; --muted:#7a8b93; --line:#e2e8ea;
+    --green:#58cc02; --green-d:#46a302; --blue:#1cb0f6; --blue-d:#1899d6; --blue-bg:#ddf4ff;
+    --purple:#ce82ff; --purple-d:#a855f7; --purple-bg:#f5e8ff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#131f24; --card:#1b2b32; --panel:#16252b; --text:#eaf2f6; --muted:#8fa7b2; --line:#2c4048;
+      --blue-bg:#12303d; --purple-bg:#2e2036; --purple-d:#c99bec; --blue-d:#58c4f7; --green-d:#7ddc2a; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
+  a { color: var(--blue-d); }
+  .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
+  .nav a { text-decoration: none; }
+  .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
+    padding: 4px 12px; font-size: .8rem; font-weight: 800; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
+  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
+  p, ul, ol { margin: 10px 0; }
+  li { margin: 5px 0; }
+  .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
+  .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
+  .card { background: var(--card); border: 2px solid var(--line); border-radius: 20px; padding: 20px; margin-bottom: 14px; }
+  .list { display: grid; gap: 10px; }
+  .list a { display: block; background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px;
+    border-radius: 18px; padding: 14px 16px; text-decoration: none; color: inherit; }
+  .list a:hover { border-color: var(--purple); }
+  .list strong { display: block; font-size: 1.02rem; font-weight: 800; }
+  .list span { color: var(--muted); font-size: .86rem; font-weight: 600; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em;
+    background: var(--panel); border: 1px solid var(--line); padding: 1px 6px; border-radius: 6px; font-weight: 700; }
+  pre { background: var(--panel); border: 2px solid var(--line); padding: 14px; border-radius: 14px; overflow-x: auto; line-height: 1.65; }
+  pre code { background: none; border: 0; padding: 0; }
+  table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; font-size: .94rem; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; }
+  th { background: var(--panel); }
+  .refs { border-top: 2px solid var(--line); margin-top: 24px; padding-top: 14px; }
+  .refs ul { padding-left: 20px; }
+  .pager { display: flex; justify-content: space-between; gap: 10px; margin-top: 16px; }
+  .pager a { background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px; border-radius: 16px;
+    padding: 12px 16px; text-decoration: none; color: inherit; font-weight: 800; font-size: .9rem; max-width: 48%; }
+  .pager a:hover { border-color: var(--blue); }
+  footer { color: var(--muted); font-size: .8rem; font-weight: 600; margin-top: 28px; }
+</style>
+</head>
+<body>
+<main>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="03.html" class="badge">최적화·메모리 목차</a></div>
+<article class="card">
+<h1>모바일과 상황형 질문</h1>
+<p class="lead">모바일은 발열과 메모리 한도가 먼저 온다. 지속 가능한 부하로 낮추고 피크를 관리한다</p>
+<h3>핵심 개념</h3><p>모바일은 PC와 병목이 다르다. CPU와 GPU가 같은 메모리 대역폭을 나눠 쓰고, 전력 예산이 작아 부하가 계속되면 <strong>발열로 클럭을 스스로 낮춘다(서멀 스로틀링)</strong>. 그래서 처음 2분의 프레임이 아니라 10분 뒤에도 유지되는 프레임이 진짜 성능이다. 최적화 기준도 피크가 아니라 지속 가능한 부하가 된다.</p><p>발열을 낮추는 방법은 결국 일을 덜 시키는 것이다. 목표 프레임을 고정해 남는 성능을 굳이 태우지 않고, 메뉴나 정지 화면에서는 프레임을 더 낮추며, 렌더 해상도와 오버드로·후처리·실시간 그림자를 줄인다. 반대로 매 프레임 <code>GC.Collect()</code>를 부르는 식의 처리는 CPU 일을 늘려 열을 더 낸다.</p><pre><code>using UnityEngine;
+
+public class MobilePerformanceSetup : MonoBehaviour
+{
+    void Start()
+    {
+        QualitySettings.vSyncCount = 0;       // 모바일에서 targetFrameRate가 먹도록 둔다
+        Application.targetFrameRate = 30;     // 60을 못 지키면 30 고정이 체감이 낫다
+        Time.fixedDeltaTime = 0.02f;          // 물리 호출 횟수를 늘리지 않는다
+    }
+}</code></pre><p>메모리는 프레임과 다른 방식으로 앱을 죽인다. iOS는 앱이 기기별 한도를 넘으면 예외 없이 프로세스를 종료하므로, 시간이 지날수록 늘고 메모리가 적은 구형 기기에 몰리는 크래시는 <strong>누수나 과다 사용에 의한 강제 종료</strong>부터 의심한다. 해제하지 않은 에셋 번들, 참조가 남아 내려가지 않는 텍스처, 끝없이 커지는 캐시가 단골이다. Memory Profiler로 시작 직후와 10분 뒤 스냅샷을 비교해 무엇이 늘었는지 본다.</p><p>시야가 갑자기 트이는 상황(언덕 위에서 화면 회전)은 <strong>한 순간에 보이는 대상이 폭증</strong>하는 문제다. 가려져 있던 오브젝트가 한꺼번에 보이면서 드로우 콜이 뛰고 메시·텍스처가 몰려 로드되며 메모리 피크가 생긴다. 오브젝트 수를 줄이지 않고 푸는 정공법은 LOD로 먼 것을 가벼운 메시로 바꾸고, Layer Cull Distances와 오클루전 컬링으로 그릴 대상을 줄이고, 임포스터와 스트리밍으로 동시에 올라오는 양을 나누는 것이다.</p><p>물리는 호출 횟수와 충돌 쌍이 비용이다. Fixed Timestep을 줄이면 <code>FixedUpdate</code>와 시뮬레이션이 초당 더 여러 번 돌아 부담이 커지므로 모바일에서는 오히려 0.02~0.033초로 늘린다. 레이어 충돌 매트릭스에서 필요 없는 조합을 끄고, Mesh Collider 대신 기본 도형을 쓰며, 움직일 콜라이더에는 Kinematic Rigidbody를 붙인다. Rigidbody 없는 콜라이더를 움직이면 정적 충돌 구조를 다시 만들어 비싸기 때문이다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>모바일에서 성능과 메모리를 어떻게 잡나</strong> — 목표 기기에서 지속 프레임과 메모리 상한을 먼저 정한다. 프레임은 목표치로 고정해 열을 아끼고, 메모리는 텍스처 포맷과 해상도, 번들 언로드로 상한 안에 유지한다.</li><li><strong>발열은 왜 낮추나</strong> — 발열이 심하면 OS가 클럭을 낮춰 프레임이 떨어지고 배터리와 사용자 경험도 나빠진다. 목표 프레임 고정, 해상도 스케일, 오버드로와 후처리 축소로 부하 총량을 줄인다.</li><li><strong>10분 뒤 크래시가 급증한다면</strong> — 메모리 누수나 과다 사용으로 OS가 앱을 종료하는 경우를 먼저 본다. 시간대별 메모리 스냅샷을 비교하고 기기의 메모리 경고 로그를 확인한다.</li><li><strong>물리 오브젝트가 많은 모바일 게임은</strong> — Fixed Timestep을 늘려 호출 횟수를 줄이고, 충돌 매트릭스로 불필요한 검사와 Mesh Collider를 걷어낸다. 움직이는 콜라이더에는 Kinematic Rigidbody를 붙인다.</li></ul><h3>흔한 오해</h3><ul><li><strong>GC.Collect로 메모리를 비우면 발열이 준다</strong> — 수집 자체가 CPU 작업이라 열과 끊김을 모두 늘린다.</li><li><strong>프레임은 높을수록 좋다</strong> — 모바일에서는 남는 프레임이 열과 배터리로 나가고 결국 스로틀링으로 돌아온다.</li><li><strong>Fixed Timestep을 촘촘하게 하면 최적화다</strong> — 물리 정확도는 오르지만 CPU 부담이 커진다. 모바일에서는 반대로 늘린다.</li><li><strong>시야가 트일 때는 안개를 걷거나 그림자 거리를 늘려 본다</strong> — 둘 다 그릴 양을 늘리는 방향이라 상황을 악화시킨다.</li><li><strong>크래시는 코드 예외 때문이다</strong> — OOM 종료는 스택 트레이스 없이 죽는 경우가 많아 로그만 봐서는 원인을 못 찾는다.</li></ul>
+<div class="refs"><h2>참고 자료</h2><ul><li><a href="https://docs.unity3d.com/Manual/LevelOfDetail.html" target="_blank" rel="noopener">Unity 매뉴얼 – Level of Detail (LOD)</a></li><li><a href="https://docs.unity3d.com/Manual/OcclusionCulling.html" target="_blank" rel="noopener">Unity 매뉴얼 – Occlusion culling</a></li><li><a href="https://docs.unity3d.com/Manual/class-TimeManager.html" target="_blank" rel="noopener">Unity 매뉴얼 – Time 설정(Fixed Timestep)</a></li><li><a href="https://docs.unity3d.com/Manual/class-PhysicsManager.html" target="_blank" rel="noopener">Unity 매뉴얼 – Physics 설정</a></li></ul></div>
+</article>
+<div class="pager"><a href="03-05.html">← 캐시 친화와 데이터 지향</a><span></span></div>
+<footer>정리 글은 Claude가 썼다. 틀린 내용이 있을 수 있으니 중요한 내용은 참고 자료 원문으로 확인한다.</footer>
+</main>
+</body>
+</html>

@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>풀이 기법 · 자료구조·알고리즘</title>
+<style>
+  :root {
+    --bg:#f2f5f7; --card:#fff; --panel:#f7f9fb; --text:#3c3c3c; --muted:#7a8b93; --line:#e2e8ea;
+    --green:#58cc02; --green-d:#46a302; --blue:#1cb0f6; --blue-d:#1899d6; --blue-bg:#ddf4ff;
+    --purple:#ce82ff; --purple-d:#a855f7; --purple-bg:#f5e8ff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#131f24; --card:#1b2b32; --panel:#16252b; --text:#eaf2f6; --muted:#8fa7b2; --line:#2c4048;
+      --blue-bg:#12303d; --purple-bg:#2e2036; --purple-d:#c99bec; --blue-d:#58c4f7; --green-d:#7ddc2a; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
+  a { color: var(--blue-d); }
+  .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
+  .nav a { text-decoration: none; }
+  .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
+    padding: 4px 12px; font-size: .8rem; font-weight: 800; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
+  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
+  p, ul, ol { margin: 10px 0; }
+  li { margin: 5px 0; }
+  .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
+  .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
+  .card { background: var(--card); border: 2px solid var(--line); border-radius: 20px; padding: 20px; margin-bottom: 14px; }
+  .list { display: grid; gap: 10px; }
+  .list a { display: block; background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px;
+    border-radius: 18px; padding: 14px 16px; text-decoration: none; color: inherit; }
+  .list a:hover { border-color: var(--purple); }
+  .list strong { display: block; font-size: 1.02rem; font-weight: 800; }
+  .list span { color: var(--muted); font-size: .86rem; font-weight: 600; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em;
+    background: var(--panel); border: 1px solid var(--line); padding: 1px 6px; border-radius: 6px; font-weight: 700; }
+  pre { background: var(--panel); border: 2px solid var(--line); padding: 14px; border-radius: 14px; overflow-x: auto; line-height: 1.65; }
+  pre code { background: none; border: 0; padding: 0; }
+  table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; font-size: .94rem; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; }
+  th { background: var(--panel); }
+  .refs { border-top: 2px solid var(--line); margin-top: 24px; padding-top: 14px; }
+  .refs ul { padding-left: 20px; }
+  .pager { display: flex; justify-content: space-between; gap: 10px; margin-top: 16px; }
+  .pager a { background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px; border-radius: 16px;
+    padding: 12px 16px; text-decoration: none; color: inherit; font-weight: 800; font-size: .9rem; max-width: 48%; }
+  .pager a:hover { border-color: var(--blue); }
+  footer { color: var(--muted); font-size: .8rem; font-weight: 600; margin-top: 28px; }
+</style>
+</head>
+<body>
+<main>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="07.html" class="badge">자료구조·알고리즘 목차</a></div>
+<article class="card">
+<h1>풀이 기법</h1>
+<p class="lead">재귀·DP·그리디·비트 연산은 각각 언제 성립하는지가 핵심이다. 조건과 반례로 외운다</p>
+<h3>핵심 개념</h3><p>풀이 기법 질문은 "무엇인가"보다 <strong>언제 성립하는가</strong>를 본다.</p><p><strong>재귀</strong>는 호출할 때마다 매개변수·지역 변수·복귀 주소가 스택 프레임으로 쌓인다. 깊이가 곧 메모리라 깊어지면 스택 오버플로가 난다. 재귀 호출이 함수의 마지막 동작이면(꼬리 호출) 돌아와서 할 일이 없으니 프레임을 재사용할 수 있는데, <code>return n * Fact(n - 1);</code>처럼 결과에 무언가를 더 하면 꼬리 호출이 아니다. C#과 .NET JIT은 이 최적화를 <strong>보장하지 않으므로</strong> 깊은 재귀는 반복문이나 <code>Stack&lt;T&gt;</code>로 바꾸는 편이 안전하다.</p><p><strong>동적 계획법</strong>은 두 조건이 모두 맞을 때만 쓴다. 같은 부분 문제가 여러 번 나오고(겹치는 부분 문제), 부분 문제의 최적해로 전체 최적해를 만들 수 있어야(최적 부분 구조) 한다. 메모이제이션은 시간을 공간과 맞바꾸는 것이다. 부분 문제가 겹치지 않으면 저장할 이유가 없고 그냥 <strong>분할 정복</strong>(나누고, 풀고, 합친다)이다.</p><p><strong>그리디</strong>는 지금의 최선이 전체 최선으로 이어질 때만 옳다. 동전이 1원·3원·4원뿐일 때 6원을 큰 것부터 집으면 4+1+1로 세 개지만 3+3이면 두 개다. 큰 단위가 작은 단위의 배수로 떨어지면 그리디가 최적해와 일치한다.</p><p><strong>비트 연산</strong>은 켜기 <code>x | (1 &lt;&lt; n)</code>, 끄기 <code>x &amp; ~(1 &lt;&lt; n)</code>, 뒤집기 <code>x ^ (1 &lt;&lt; n)</code>, 확인 <code>(x &gt;&gt; n) &amp; 1</code>이 한 묶음이다. 시프트가 2의 거듭제곱 곱셈을 대신하므로 8을 곱하려면 <code>x &lt;&lt; 3</code>이다. 단 int의 시프트 횟수는 하위 5비트만 쓰여 <code>x &lt;&lt; 32</code>는 제자리이고, 음수의 <code>&gt;&gt;</code>는 부호 비트를 채운다.</p><pre><code>using UnityEngine;
+
+public static class MaskExample
+{
+    // 비트 켜기·끄기·확인. Unity의 LayerMask가 이 규칙을 그대로 쓴다
+    public static int Build()
+    {
+        int enemy = LayerMask.NameToLayer("Enemy");
+        int water = LayerMask.NameToLayer("Water");
+
+        int mask = 0;
+        mask |= 1 &lt;&lt; enemy;                      // 켜기
+        mask |= 1 &lt;&lt; water;
+        mask &amp;= ~(1 &lt;&lt; water);                   // 끄기
+        mask ^= 1 &lt;&lt; water;                      // 뒤집기
+
+        bool hasEnemy = ((mask &gt;&gt; enemy) &amp; 1) == 1;   // 확인
+        Debug.Log(hasEnemy);
+        return mask;
+    }
+}</code></pre><p><strong>LRU 캐시</strong>는 조회와 갱신을 모두 O(1)로 만드는 게 핵심이다. 해시 맵만 쓰면 버릴 항목을 찾는 데, 리스트만 쓰면 키로 노드를 찾는 데 O(N)이 남는다. 둘을 겹쳐야 양쪽이 O(1)이 된다. C#이면 <code>Dictionary&lt;TKey, LinkedListNode&lt;TKey&gt;&gt;</code>로 노드를 찾고, <code>LinkedList&lt;TKey&gt;</code>로 최근 사용 순서를 유지해 앞으로 옮기거나 꼬리를 버리는 일을 링크 교체로 끝낸다. 텍스처·에셋 캐시가 이 구조다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>재귀는 콜 스택에서 어떻게 도나</strong> — 호출마다 매개변수·지역 변수·복귀 주소가 프레임으로 쌓이고 반환하며 걷힌다. 깊이가 곧 메모리라 한계를 넘으면 스택 오버플로다. 꼬리 호출은 프레임 재사용이 가능하지만 C#은 보장하지 않는다.</li><li><strong>동적 계획법의 적용 조건</strong> — 겹치는 부분 문제와 최적 부분 구조 두 가지다. 같은 계산이 반복되지 않으면 저장할 이유가 없고, 부분 최적해로 전체 최적해가 안 만들어지면 표를 채워도 답이 아니다.</li><li><strong>그리디와 DP를 어떻게 가르나</strong> — 반례를 찾아본다. 1·3·4원으로 6원을 만들 때 그리디는 세 개, 최적은 두 개라 깨진다. 반례가 없다고 볼 근거가 서면 그리디, 아니면 DP다.</li><li><strong>LRU 캐시 구현</strong> — 해시 맵과 이중 연결 리스트를 함께 쓴다. 맵으로 키에서 노드를 O(1)에 찾고, 리스트로 최근 사용 순서를 유지해 링크 교체만으로 앞으로 옮기거나 꼬리를 버린다.</li></ul><h3>흔한 오해</h3><ul><li><strong>C#도 꼬리 재귀를 최적화해 준다</strong> — IL에 꼬리 호출 명령은 있지만 JIT이 적용한다는 보장은 없다.</li><li><strong>호출 결과를 곱해 반환해도 꼬리 호출이다</strong> — 돌아와서 할 일이 남아 프레임을 재사용할 수 없다.</li><li><strong>메모이제이션은 공짜다</strong> — 시간을 줄이는 대신 표만큼 공간을 쓴다. 상태가 많으면 메모리가 먼저 터진다.</li><li><strong>Dictionary만으로 LRU를 O(1)에 만들 수 있다</strong> — 버릴 항목을 찾는 순서 정보가 없어 O(N)이 남는다.</li></ul>
+<div class="refs"><h2>참고 자료</h2><ul><li><a href="https://learn.microsoft.com/ko-kr/dotnet/csharp/language-reference/operators/bitwise-and-shift-operators" target="_blank" rel="noopener">Microsoft Learn – 비트 및 시프트 연산자(C# 참조)</a></li><li><a href="https://learn.microsoft.com/ko-kr/dotnet/api/system.collections.generic.linkedlist-1" target="_blank" rel="noopener">Microsoft Learn – LinkedList 클래스(이중 연결 리스트)</a></li><li><a href="https://learn.microsoft.com/ko-kr/dotnet/api/system.collections.generic.dictionary-2" target="_blank" rel="noopener">Microsoft Learn – Dictionary 클래스(해시 테이블)</a></li></ul></div>
+</article>
+<div class="pager"><a href="07-08.html">← 공간 분할</a><a href="07-10.html">코딩 테스트와 실기 유형 →</a></div>
+<footer>정리 글은 Claude가 썼다. 틀린 내용이 있을 수 있으니 중요한 내용은 참고 자료 원문으로 확인한다.</footer>
+</main>
+</body>
+</html>

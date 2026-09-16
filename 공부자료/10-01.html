@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>클래스와 가상 함수 · C++ 기초</title>
+<style>
+  :root {
+    --bg:#f2f5f7; --card:#fff; --panel:#f7f9fb; --text:#3c3c3c; --muted:#7a8b93; --line:#e2e8ea;
+    --green:#58cc02; --green-d:#46a302; --blue:#1cb0f6; --blue-d:#1899d6; --blue-bg:#ddf4ff;
+    --purple:#ce82ff; --purple-d:#a855f7; --purple-bg:#f5e8ff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#131f24; --card:#1b2b32; --panel:#16252b; --text:#eaf2f6; --muted:#8fa7b2; --line:#2c4048;
+      --blue-bg:#12303d; --purple-bg:#2e2036; --purple-d:#c99bec; --blue-d:#58c4f7; --green-d:#7ddc2a; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
+  a { color: var(--blue-d); }
+  .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
+  .nav a { text-decoration: none; }
+  .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
+    padding: 4px 12px; font-size: .8rem; font-weight: 800; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
+  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
+  p, ul, ol { margin: 10px 0; }
+  li { margin: 5px 0; }
+  .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
+  .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
+  .card { background: var(--card); border: 2px solid var(--line); border-radius: 20px; padding: 20px; margin-bottom: 14px; }
+  .list { display: grid; gap: 10px; }
+  .list a { display: block; background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px;
+    border-radius: 18px; padding: 14px 16px; text-decoration: none; color: inherit; }
+  .list a:hover { border-color: var(--purple); }
+  .list strong { display: block; font-size: 1.02rem; font-weight: 800; }
+  .list span { color: var(--muted); font-size: .86rem; font-weight: 600; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em;
+    background: var(--panel); border: 1px solid var(--line); padding: 1px 6px; border-radius: 6px; font-weight: 700; }
+  pre { background: var(--panel); border: 2px solid var(--line); padding: 14px; border-radius: 14px; overflow-x: auto; line-height: 1.65; }
+  pre code { background: none; border: 0; padding: 0; }
+  table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; font-size: .94rem; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; }
+  th { background: var(--panel); }
+  .refs { border-top: 2px solid var(--line); margin-top: 24px; padding-top: 14px; }
+  .refs ul { padding-left: 20px; }
+  .pager { display: flex; justify-content: space-between; gap: 10px; margin-top: 16px; }
+  .pager a { background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px; border-radius: 16px;
+    padding: 12px 16px; text-decoration: none; color: inherit; font-weight: 800; font-size: .9rem; max-width: 48%; }
+  .pager a:hover { border-color: var(--blue); }
+  footer { color: var(--muted); font-size: .8rem; font-weight: 600; margin-top: 28px; }
+</style>
+</head>
+<body>
+<main>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="10.html" class="badge">C++ 기초 목차</a></div>
+<article class="card">
+<h1>클래스와 가상 함수</h1>
+<p class="lead">vtable이 무엇을 대가로 다형성을 주는지 알면 가상 소멸자와 생성 순서가 따라온다</p>
+<h3>핵심 개념</h3><p>C++에서 C#과 크게 갈리는 지점은 <strong>기본이 정적 바인딩</strong>이라는 것이다. <code>virtual</code>을 붙이지 않으면 호출 대상이 컴파일 시점에 <strong>포인터·참조의 타입</strong>으로 정해진다. 자식이 같은 이름의 함수를 만들어도 그것은 재정의가 아니라 부모 함수를 가리는 것(name hiding)이라, 부모 포인터로 부르면 부모 버전이 불린다.</p><p><code>virtual</code>을 붙이면 컴파일러는 클래스마다 함수 주소 표(vtable)를 하나 만들고 객체에는 그 표를 가리키는 포인터(vptr)를 심는다. 호출할 때 vptr → vtable → 실제 함수로 한 번 더 건너뛰므로 부모 포인터로도 실제 객체의 함수가 불린다. 비용은 객체마다 포인터 하나(64비트에서 8바이트)와 간접 호출 한 번, 그리고 <strong>인라인이 안 된다</strong>는 점이다. 표는 클래스당 하나라 객체 수만큼 복사되지 않는다.</p><p>이 구조가 나머지를 설명한다. 생성자는 vptr을 세우는 주체라 virtual일 수 없고, Base 생성자가 도는 동안 vptr은 아직 Base를 가리키므로 생성자 안에서 부른 가상 함수는 Derived 버전이 불리지 않는다. 생성은 Base → Derived 멤버 → Derived 생성자 순이고 소멸은 그 역순이다. <strong>가상 소멸자</strong>가 필요한 이유도 같다. 부모 포인터로 delete할 때 소멸자가 virtual이 아니면 정의되지 않은 동작이고, 보통 Base 소멸자만 불려 Derived가 들고 있던 자원이 샌다.</p><pre><code>struct Base {
+    virtual ~Base() = default;   // 다형적으로 쓸 기반 클래스의 규칙
+    virtual void Update() {}
+};
+struct Derived : Base {
+    void Update() override {}    // override를 적어야 오타를 컴파일러가 잡는다
+};
+Base* p = new Derived();
+p-&gt;Update();                     // Derived::Update
+delete p;                        // Derived → Base 순으로 소멸
+</code></pre><p>vtable에는 타입 정보(RTTI)도 달려 있어 <code>dynamic_cast</code>와 <code>typeid</code>가 실행 중에 실제 타입을 확인한다. 그래서 <strong>부모에 가상 함수가 하나도 없으면 다운캐스트용 dynamic_cast를 쓸 수 없고</strong>, 검사 비용도 든다.</p><table><thead><tr><th>캐스트</th><th>하는 일</th><th>C#에서 비슷한 것</th></tr></thead><tbody><tr><td>static_cast</td><td>컴파일 타임 변환. 잘못된 다운캐스트를 못 막는다</td><td>(Derived)x — 단 C#은 실행 중 검사</td></tr><tr><td>dynamic_cast</td><td>RTTI로 확인해 실패하면 nullptr(참조면 예외)</td><td>as / is</td></tr><tr><td>reinterpret_cast</td><td>비트를 그대로 재해석</td><td>unsafe 포인터 변환</td></tr><tr><td>const_cast</td><td>const를 떼거나 붙인다. 원래 const면 UB</td><td>없음</td></tr></tbody></table><p>나머지는 C#과 짝지으면 정리된다. 순수 가상 함수(<code>virtual void F() = 0;</code>)가 하나라도 있으면 추상 클래스라 객체를 만들 수 없고, C#의 <code>abstract</code> 메서드와 같다. <code>struct</code>와 <code>class</code>는 기본 접근 지정자만 다르다(struct는 public). 다중 상속에서 A를 상속한 B와 C를 D가 함께 상속하면 A가 두 벌 생겨 모호해지는데(다이아몬드), <code>class B : virtual public A</code>로 가상 상속하면 한 벌만 남는다. C#은 클래스 다중 상속을 막아 이 문제를 피한다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>가상 함수는 어떻게 동작하나</strong> — 클래스마다 함수 주소 표인 vtable이 하나 생기고 객체에는 그 표를 가리키는 vptr이 들어간다. 호출할 때 vptr을 따라가 실제 함수로 가므로 부모 포인터로도 자식 구현이 불린다. 대신 간접 호출이라 인라인이 안 되고 객체가 포인터 하나만큼 커진다.</li><li><strong>가상 소멸자는 왜 필요한가</strong> — 부모 포인터로 delete할 때 소멸자가 virtual이 아니면 정의되지 않은 동작이고 자식 소멸자가 불리지 않아 자원이 샌다. 다형적으로 쓸 기반 클래스는 소멸자를 public virtual로 두고, 그럴 일이 없으면 protected non-virtual로 막는다.</li><li><strong>struct와 class의 차이는</strong> — C++에서는 기본 접근 지정자만 다르고 기능은 같다. 스택인지 힙인지는 지역 변수로 선언했는지 new로 만들었는지가 정하며, C#의 값 형식·참조 형식 구분과는 다른 이야기다.</li><li><strong>생성과 소멸 순서는</strong> — 생성은 부모부터, 소멸은 자식부터다. 부모 생성자가 도는 동안에는 자식이 아직 없어 그 안에서 부른 가상 함수는 부모 버전이 불린다. 멤버는 초기화 리스트에 적은 순서가 아니라 선언 순서로 초기화된다.</li></ul><h3>흔한 오해</h3><ul><li><strong>vtable은 객체마다 하나씩 들어간다</strong> — 표는 클래스당 하나이고 객체가 갖는 것은 그 표를 가리키는 포인터 하나다.</li><li><strong>자식에 같은 이름 함수를 만들면 재정의된다</strong> — 부모에 virtual이 없으면 가리기일 뿐이라 부모 포인터로는 부모 함수가 불린다.</li><li><strong>생성자에서 가상 함수를 부르면 자식 버전이 불린다</strong> — 그 시점에는 자식이 만들어지지 않았다. 초기화가 끝난 뒤 따로 부르게 설계한다.</li><li><strong>C++ struct는 값 형식이라 스택에 잡힌다</strong> — C#과 섞은 오해다. new로 만들면 struct도 힙에 잡힌다.</li><li><strong>static_cast로 다운캐스트하면 안전하다</strong> — 실제 타입이 달라도 조용히 통과해 잘못된 포인터가 된다. 확인이 필요하면 dynamic_cast의 결과가 nullptr인지 본다.</li></ul>
+<div class="refs"><h2>참고 자료</h2><ul><li><a href="https://en.cppreference.com/w/cpp/language/virtual.html" target="_blank" rel="noopener">cppreference – virtual 함수 지정자</a></li><li><a href="https://en.cppreference.com/w/cpp/language/destructor.html" target="_blank" rel="noopener">cppreference – Destructors(가상 소멸자)</a></li><li><a href="https://en.cppreference.com/w/cpp/language/dynamic_cast" target="_blank" rel="noopener">cppreference – dynamic_cast conversion</a></li><li><a href="https://en.cppreference.com/w/cpp/language/derived_class.html" target="_blank" rel="noopener">cppreference – Derived classes(가상 상속)</a></li></ul></div>
+</article>
+<div class="pager"><span></span><a href="10-02.html">메모리와 포인터 →</a></div>
+<footer>정리 글은 Claude가 썼다. 틀린 내용이 있을 수 있으니 중요한 내용은 참고 자료 원문으로 확인한다.</footer>
+</main>
+</body>
+</html>

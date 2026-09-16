@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>컬렉션·문자열·LINQ · C# 언어</title>
+<style>
+  :root {
+    --bg:#f2f5f7; --card:#fff; --panel:#f7f9fb; --text:#3c3c3c; --muted:#7a8b93; --line:#e2e8ea;
+    --green:#58cc02; --green-d:#46a302; --blue:#1cb0f6; --blue-d:#1899d6; --blue-bg:#ddf4ff;
+    --purple:#ce82ff; --purple-d:#a855f7; --purple-bg:#f5e8ff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#131f24; --card:#1b2b32; --panel:#16252b; --text:#eaf2f6; --muted:#8fa7b2; --line:#2c4048;
+      --blue-bg:#12303d; --purple-bg:#2e2036; --purple-d:#c99bec; --blue-d:#58c4f7; --green-d:#7ddc2a; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
+  a { color: var(--blue-d); }
+  .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
+  .nav a { text-decoration: none; }
+  .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
+    padding: 4px 12px; font-size: .8rem; font-weight: 800; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
+  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
+  p, ul, ol { margin: 10px 0; }
+  li { margin: 5px 0; }
+  .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
+  .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
+  .card { background: var(--card); border: 2px solid var(--line); border-radius: 20px; padding: 20px; margin-bottom: 14px; }
+  .list { display: grid; gap: 10px; }
+  .list a { display: block; background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px;
+    border-radius: 18px; padding: 14px 16px; text-decoration: none; color: inherit; }
+  .list a:hover { border-color: var(--purple); }
+  .list strong { display: block; font-size: 1.02rem; font-weight: 800; }
+  .list span { color: var(--muted); font-size: .86rem; font-weight: 600; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em;
+    background: var(--panel); border: 1px solid var(--line); padding: 1px 6px; border-radius: 6px; font-weight: 700; }
+  pre { background: var(--panel); border: 2px solid var(--line); padding: 14px; border-radius: 14px; overflow-x: auto; line-height: 1.65; }
+  pre code { background: none; border: 0; padding: 0; }
+  table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; font-size: .94rem; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; }
+  th { background: var(--panel); }
+  .refs { border-top: 2px solid var(--line); margin-top: 24px; padding-top: 14px; }
+  .refs ul { padding-left: 20px; }
+  .pager { display: flex; justify-content: space-between; gap: 10px; margin-top: 16px; }
+  .pager a { background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px; border-radius: 16px;
+    padding: 12px 16px; text-decoration: none; color: inherit; font-weight: 800; font-size: .9rem; max-width: 48%; }
+  .pager a:hover { border-color: var(--blue); }
+  footer { color: var(--muted); font-size: .8rem; font-weight: 600; margin-top: 28px; }
+</style>
+</head>
+<body>
+<main>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="01.html" class="badge">C# 언어 목차</a></div>
+<article class="card">
+<h1>컬렉션·문자열·LINQ</h1>
+<p class="lead">컬렉션의 내부 자료구조를 알아야 무엇이 O(1)이고 어디서 할당이 생기는지 보인다</p>
+<h3>핵심 개념</h3><p>컬렉션 질문은 사실상 <strong>내부 자료구조를 아느냐</strong>를 묻는 것이다. 배열은 길이가 고정된 연속 메모리라 인덱스 접근이 가장 빠르고, <code>List&lt;T&gt;</code>는 그 배열을 안에 품고 크기가 모자라면 보통 두 배짜리 새 배열로 옮겨 담는다. 그래서 <code>Add</code>는 평균 O(1)이지만 늘어나는 순간에는 복사 비용과 버려진 배열만큼의 가비지가 생긴다. 개수를 대충이라도 알면 생성자에 용량을 넘겨 재할당을 줄인다. 참고로 <code>Remove</code>를 해도 <code>Capacity</code>는 줄지 않는다.</p><p><code>Dictionary&lt;TKey, TValue&gt;</code>는 키의 <code>GetHashCode()</code>로 버킷을 정하고 그 안에서 <code>Equals</code>로 비교한다. 그래서 평균 O(1)이고, 해시가 한쪽으로 몰리면 최악 O(n)이다. 열거 순서는 보장되지 않으며, 커스텀 타입을 키로 쓰면 <code>GetHashCode</code>와 <code>Equals</code>를 함께 재정의해야 하고 그 기준 필드는 넣은 뒤에 바뀌지 않아야 한다. 정렬된 순회가 필요하면 균형 이진 탐색 트리인 <code>SortedDictionary</code>·<code>SortedSet</code>을 쓰는 대신 조회가 O(log n)이 된다는 것을 감수한다.</p><pre><code>var names = new List&lt;string&gt;(capacity: 64);   // 재할당과 복사를 미리 줄인다
+
+var sb = new StringBuilder();
+foreach (var n in names)
+{
+    sb.Append(n).Append(", ");   // 이어 붙일 때마다 새 문자열을 만들지 않는다
+}
+string line = sb.ToString();
+
+string s = "hello";
+s.ToUpper();        // 반환값을 버렸으므로 s는 그대로 "hello"
+s = s.ToUpper();    // 새 문자열을 다시 담아야 바뀐다</code></pre><p>string은 <strong>불변</strong>이다. <code>Replace</code>나 <code>ToUpper</code>는 원본을 고치지 않고 바뀐 새 문자열을 돌려주므로 반환값을 다시 담지 않으면 아무 일도 일어나지 않는다. 같은 이유로 반복문에서 <code>+=</code>로 이어 붙이면 매번 새 문자열이 생기고 이전 것은 가비지가 된다. 조각이 많으면 <code>StringBuilder</code>로 버퍼에 이어 쓰고, <code>Split</code>처럼 배열과 문자열을 한꺼번에 만드는 메서드는 매 프레임 도는 코드에서 피한다.</p><p>LINQ는 대부분 <strong>지연 실행</strong>이다. <code>Where</code>나 <code>Select</code>는 호출하는 순간 계산하지 않고, <code>foreach</code>로 돌리거나 <code>ToList()</code>, <code>Count()</code>처럼 결과를 요구할 때 비로소 계산된다. 원본은 바뀌지 않고 새 시퀀스가 나온다. 읽기 좋은 대신 이터레이터 객체와 람다(캡처가 있으면 클로저)가 힙에 생기므로, 초기화나 로딩처럼 가끔 도는 코드에는 마음껏 쓰고 매 프레임 도는 코드에서는 <code>for</code> 문으로 풀어 쓰는 편이 안전하다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>배열과 List의 차이</strong> — List는 내부에 배열을 두고 자동으로 늘리는 동적 배열이다. 크기가 고정이고 성능이 예민한 자리는 배열, 개수가 변하는 자리는 List를 쓰되 예상 개수를 용량으로 미리 준다.</li><li><strong>Dictionary는 어떻게 O(1)인가</strong> — 키의 해시로 버킷을 바로 찾고 그 안에서만 비교하기 때문이다. 해시가 몰리면 한 버킷을 훑게 돼 최악 O(n)이고, 그래서 키 타입의 <code>GetHashCode</code> 품질이 성능을 좌우한다.</li><li><strong>문자열 연결이 왜 문제인가</strong> — string이 불변이라 이어 붙일 때마다 새 객체가 생기고 이전 것이 가비지가 된다. 매 프레임 UI 텍스트를 이렇게 만들면 GC 끊김의 원인이 되므로 <code>StringBuilder</code>나 보간을 쓴다.</li><li><strong>LINQ를 실무에서 쓰나</strong> — 읽기 쉬워서 초기화·에디터 도구·로딩 코드에는 적극적으로 쓰고, 매 프레임 도는 경로에서는 할당 때문에 걷어낸다고 답한다. 판단 근거는 프로파일러의 GC Alloc 수치다.</li></ul><h3>흔한 오해</h3><ul><li><strong><code>s.ToUpper();</code>를 호출하면 s가 바뀐다</strong> — string은 불변이라 새 문자열이 반환될 뿐이다. <code>s = s.ToUpper();</code>처럼 다시 담아야 한다.</li><li><strong>List는 연결 리스트다</strong> — <code>List&lt;T&gt;</code>는 내부가 배열인 동적 배열이다. 중간 삽입·삭제가 잦으면 뒤 원소를 밀어야 해서 오히려 비싸다.</li><li><strong>Dictionary는 넣은 순서대로 열거된다</strong> — 순서는 보장되지 않는다. 순서가 필요하면 <code>SortedDictionary</code>나 별도의 리스트를 함께 둔다.</li><li><strong>LINQ는 호출하는 순간 결과가 만들어진다</strong> — 대부분 지연 실행이라 열거할 때 계산된다. 원본을 바꾼 뒤에 열거하면 결과가 달라지는 것도 이 때문이다.</li></ul>
+<div class="refs"><h2>참고 자료</h2><ul><li><a href="https://learn.microsoft.com/ko-kr/dotnet/standard/collections/hashtable-and-dictionary-collection-types" target="_blank" rel="noopener">Microsoft Learn – 해시 테이블 및 사전 컬렉션 형식</a></li><li><a href="https://learn.microsoft.com/ko-kr/dotnet/csharp/how-to/concatenate-multiple-strings" target="_blank" rel="noopener">Microsoft Learn – C#에서 문자열 연결</a></li><li><a href="https://learn.microsoft.com/ko-kr/dotnet/csharp/linq/" target="_blank" rel="noopener">Microsoft Learn – LINQ(언어 통합 쿼리)</a></li></ul></div>
+</article>
+<div class="pager"><a href="01-03.html">← 델리게이트·이벤트·람다</a><a href="01-05.html">가비지 컬렉션 →</a></div>
+<footer>정리 글은 Claude가 썼다. 틀린 내용이 있을 수 있으니 중요한 내용은 참고 자료 원문으로 확인한다.</footer>
+</main>
+</body>
+</html>

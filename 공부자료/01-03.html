@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>델리게이트·이벤트·람다 · C# 언어</title>
+<style>
+  :root {
+    --bg:#f2f5f7; --card:#fff; --panel:#f7f9fb; --text:#3c3c3c; --muted:#7a8b93; --line:#e2e8ea;
+    --green:#58cc02; --green-d:#46a302; --blue:#1cb0f6; --blue-d:#1899d6; --blue-bg:#ddf4ff;
+    --purple:#ce82ff; --purple-d:#a855f7; --purple-bg:#f5e8ff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#131f24; --card:#1b2b32; --panel:#16252b; --text:#eaf2f6; --muted:#8fa7b2; --line:#2c4048;
+      --blue-bg:#12303d; --purple-bg:#2e2036; --purple-d:#c99bec; --blue-d:#58c4f7; --green-d:#7ddc2a; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
+  a { color: var(--blue-d); }
+  .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
+  .nav a { text-decoration: none; }
+  .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
+    padding: 4px 12px; font-size: .8rem; font-weight: 800; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
+  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
+  p, ul, ol { margin: 10px 0; }
+  li { margin: 5px 0; }
+  .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
+  .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
+  .card { background: var(--card); border: 2px solid var(--line); border-radius: 20px; padding: 20px; margin-bottom: 14px; }
+  .list { display: grid; gap: 10px; }
+  .list a { display: block; background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px;
+    border-radius: 18px; padding: 14px 16px; text-decoration: none; color: inherit; }
+  .list a:hover { border-color: var(--purple); }
+  .list strong { display: block; font-size: 1.02rem; font-weight: 800; }
+  .list span { color: var(--muted); font-size: .86rem; font-weight: 600; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em;
+    background: var(--panel); border: 1px solid var(--line); padding: 1px 6px; border-radius: 6px; font-weight: 700; }
+  pre { background: var(--panel); border: 2px solid var(--line); padding: 14px; border-radius: 14px; overflow-x: auto; line-height: 1.65; }
+  pre code { background: none; border: 0; padding: 0; }
+  table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; font-size: .94rem; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; }
+  th { background: var(--panel); }
+  .refs { border-top: 2px solid var(--line); margin-top: 24px; padding-top: 14px; }
+  .refs ul { padding-left: 20px; }
+  .pager { display: flex; justify-content: space-between; gap: 10px; margin-top: 16px; }
+  .pager a { background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px; border-radius: 16px;
+    padding: 12px 16px; text-decoration: none; color: inherit; font-weight: 800; font-size: .9rem; max-width: 48%; }
+  .pager a:hover { border-color: var(--blue); }
+  footer { color: var(--muted); font-size: .8rem; font-weight: 600; margin-top: 28px; }
+</style>
+</head>
+<body>
+<main>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="01.html" class="badge">C# 언어 목차</a></div>
+<article class="card">
+<h1>델리게이트·이벤트·람다</h1>
+<p class="lead">메서드를 값처럼 넘기는 문법과, 그 때문에 생기는 힙 할당·구독 해제 누수를 함께 본다</p>
+<h3>핵심 개념</h3><p>델리게이트는 <strong>메서드를 담는 변수</strong>다. 타입이 맞는 메서드를 담아 두었다가 나중에 호출하므로, “무슨 일이 생기면 누가 처리할지”를 실행 중에 갈아 끼울 수 있다. <code>Action</code>은 반환값이 없는 델리게이트, <code>Func</code>는 마지막 타입 인자가 반환 타입인 델리게이트로, 매개변수 개수별 오버로드가 미리 준비돼 있어 직접 <code>delegate</code> 타입을 선언할 일이 거의 없다.</p><p><code>event</code>는 새로운 타입이 아니라 델리게이트 필드에 붙는 한정자다. 붙이면 밖에서는 <code>+=</code>와 <code>-=</code>만 할 수 있고, 통째로 대입하거나 직접 호출하는 것은 선언한 클래스만 할 수 있다. 남이 내 이벤트를 대신 발생시키거나 다른 구독자를 실수로 날려 버리는 일을 문법으로 막는 장치다.</p><p>델리게이트 하나에 <code>+=</code>로 여러 메서드를 담을 수 있는데(멀티캐스트) 등록한 순서대로 불리고, 반환값은 <strong>마지막 호출의 결과만</strong> 남는다. 중간에서 예외가 나면 그 뒤에 등록된 대상은 호출되지 않으므로, 각각의 결과나 예외가 중요하면 <code>GetInvocationList()</code>로 직접 순회한다.</p><pre><code>static class GameEvents
+{
+    public static event Action&lt;int&gt; ScoreChanged;   // 밖에서는 += , -= 만 된다
+
+    // 델리게이트를 한 번만 읽어 호출하므로 검사와 호출 사이에 null이 되는 틈이 없다
+    public static void Raise(int score) =&gt; ScoreChanged?.Invoke(score);
+}
+
+var actions = new List&lt;Action&gt;();
+for (int i = 0; i &lt; 3; i++)
+{
+    int copy = i;                            // 복사본을 캡처해야 0 1 2가 나온다
+    actions.Add(() =&gt; Console.Write(copy));  // i를 그대로 캡처하면 3 3 3이 나온다
+}</code></pre><p>람다는 그 자리에서 만드는 이름 없는 메서드다. 주의할 것은 <strong>캡처가 값이 아니라 변수 자체를 붙잡는다</strong>는 점이다. <code>for</code>의 루프 변수는 루프 전체에서 하나뿐이라 그것을 캡처한 람다들은 모두 마지막 값을 본다(<code>foreach</code>의 반복 변수는 C# 5부터 반복마다 새로 만들어져 이 문제가 없다). 캡처가 있으면 컴파일러가 만든 클로저 객체가 힙에 생겨 호출할 때마다 할당이 쌓인다. 반대로 캡처가 없는 람다는 컴파일러가 델리게이트 인스턴스를 정적 필드에 캐싱해 사실상 한 번만 할당하므로, 매 프레임 도는 코드에서는 캡처를 피하거나 델리게이트를 필드에 담아 재사용한다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>delegate와 event의 차이</strong> — event는 델리게이트 필드에 접근 제한을 거는 한정자다. 밖에서는 구독과 해제만 되고 발생은 선언한 클래스만 할 수 있어, 알림을 공개하되 통제권은 발행자가 쥐는 구조를 만든다.</li><li><strong>이벤트로 메모리 누수가 나는 이유</strong> — 이벤트가 구독자 메서드와 그 객체를 참조하므로, 해제하지 않으면 구독자는 루트에 매달려 수거되지 않는다. 구독한 곳과 대칭이 되는 지점에서 반드시 <code>-=</code> 한다.</li><li><strong>클로저의 단점</strong> — 캡처한 변수를 담을 객체가 힙에 생겨 할당이 되고, 캡처한 대상의 수명이 람다만큼 늘어난다. 매 프레임 도는 코드에서는 캡처 없는 람다나 미리 만들어 둔 델리게이트를 쓴다.</li><li><strong>델리게이트를 안전하게 호출하려면</strong> — <code>OnDie?.Invoke()</code>를 쓴다. null 검사와 호출 사이에 마지막 구독자가 해제되면 예외가 나는데, <code>?.</code>는 델리게이트를 한 번만 읽어 임시 변수로 호출하므로 그 틈이 없다.</li></ul><h3>흔한 오해</h3><ul><li><strong>event는 델리게이트와 다른 별개의 타입이다</strong> — 타입이 아니라 필드에 붙는 한정자다. 내부는 그대로 델리게이트다.</li><li><strong>멀티캐스트 델리게이트는 모든 반환값을 받을 수 있다</strong> — 마지막 호출의 결과만 남는다. 전부 필요하면 <code>GetInvocationList()</code>로 하나씩 부른다.</li><li><strong><code>if (e != null) e();</code>면 충분하다</strong> — 검사와 호출 사이에 구독이 해제되면 그대로 <code>NullReferenceException</code>이다. <code>?.Invoke()</code>가 안전하다.</li><li><strong>람다는 가벼우니 할당이 없다</strong> — 바깥 지역 변수나 <code>this</code>를 캡처하면 클로저 객체가 힙에 생긴다. C# 9의 <code>static</code> 람다는 캡처 자체를 막아 이 실수를 컴파일 오류로 잡아 준다.</li></ul>
+<div class="refs"><h2>참고 자료</h2><ul><li><a href="https://learn.microsoft.com/ko-kr/dotnet/csharp/programming-guide/delegates/" target="_blank" rel="noopener">Microsoft Learn – C#에서 대리자 형식을 사용하는 방법</a></li><li><a href="https://learn.microsoft.com/ko-kr/dotnet/csharp/programming-guide/events/" target="_blank" rel="noopener">Microsoft Learn – 이벤트</a></li><li><a href="https://learn.microsoft.com/ko-kr/dotnet/csharp/language-reference/operators/lambda-expressions" target="_blank" rel="noopener">Microsoft Learn – 람다 식</a></li></ul></div>
+</article>
+<div class="pager"><a href="01-02.html">← 객체지향 문법</a><a href="01-04.html">컬렉션·문자열·LINQ →</a></div>
+<footer>정리 글은 Claude가 썼다. 틀린 내용이 있을 수 있으니 중요한 내용은 참고 자료 원문으로 확인한다.</footer>
+</main>
+</body>
+</html>

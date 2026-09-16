@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CPU 쪽 최적화 · 최적화·메모리</title>
+<style>
+  :root {
+    --bg:#f2f5f7; --card:#fff; --panel:#f7f9fb; --text:#3c3c3c; --muted:#7a8b93; --line:#e2e8ea;
+    --green:#58cc02; --green-d:#46a302; --blue:#1cb0f6; --blue-d:#1899d6; --blue-bg:#ddf4ff;
+    --purple:#ce82ff; --purple-d:#a855f7; --purple-bg:#f5e8ff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#131f24; --card:#1b2b32; --panel:#16252b; --text:#eaf2f6; --muted:#8fa7b2; --line:#2c4048;
+      --blue-bg:#12303d; --purple-bg:#2e2036; --purple-d:#c99bec; --blue-d:#58c4f7; --green-d:#7ddc2a; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
+  a { color: var(--blue-d); }
+  .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
+  .nav a { text-decoration: none; }
+  .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
+    padding: 4px 12px; font-size: .8rem; font-weight: 800; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
+  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
+  p, ul, ol { margin: 10px 0; }
+  li { margin: 5px 0; }
+  .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
+  .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
+  .card { background: var(--card); border: 2px solid var(--line); border-radius: 20px; padding: 20px; margin-bottom: 14px; }
+  .list { display: grid; gap: 10px; }
+  .list a { display: block; background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px;
+    border-radius: 18px; padding: 14px 16px; text-decoration: none; color: inherit; }
+  .list a:hover { border-color: var(--purple); }
+  .list strong { display: block; font-size: 1.02rem; font-weight: 800; }
+  .list span { color: var(--muted); font-size: .86rem; font-weight: 600; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em;
+    background: var(--panel); border: 1px solid var(--line); padding: 1px 6px; border-radius: 6px; font-weight: 700; }
+  pre { background: var(--panel); border: 2px solid var(--line); padding: 14px; border-radius: 14px; overflow-x: auto; line-height: 1.65; }
+  pre code { background: none; border: 0; padding: 0; }
+  table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; font-size: .94rem; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; }
+  th { background: var(--panel); }
+  .refs { border-top: 2px solid var(--line); margin-top: 24px; padding-top: 14px; }
+  .refs ul { padding-left: 20px; }
+  .pager { display: flex; justify-content: space-between; gap: 10px; margin-top: 16px; }
+  .pager a { background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px; border-radius: 16px;
+    padding: 12px 16px; text-decoration: none; color: inherit; font-weight: 800; font-size: .9rem; max-width: 48%; }
+  .pager a:hover { border-color: var(--blue); }
+  footer { color: var(--muted); font-size: .8rem; font-weight: 600; margin-top: 28px; }
+</style>
+</head>
+<body>
+<main>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="03.html" class="badge">최적화·메모리 목차</a></div>
+<article class="card">
+<h1>CPU 쪽 최적화</h1>
+<p class="lead">매 프레임 도는 코드의 탐색·호출 비용을 참조 캐싱과 매니저 일괄 처리로 걷어낸다</p>
+<h3>핵심 개념</h3><p>매 프레임 도는 코드에서 비싼 것은 대개 계산이 아니라 <strong>찾는 비용과 넘나드는 비용</strong>이다. <code>GetComponent&lt;T&gt;()</code>는 그 게임오브젝트의 컴포넌트 목록을 훑어 타입이 맞는 것을 찾는 네이티브 호출이고, <code>GameObject.Find</code>는 씬 전체의 오브젝트를 훑으며 이름을 비교한다. 결과가 바뀌지 않는데 매 프레임 다시 찾는 것은 같은 답을 매번 새로 계산하는 셈이다.</p><p>그래서 참조는 한 번만 구해 필드에 담는다. 가장 싼 방법은 인스펙터로 미리 넣어 두거나 생성한 쪽에서 넘겨 주는 것이고, 그럴 수 없으면 <code>Awake</code>나 <code>Start</code>에서 한 번 찾아 캐싱한다. <code>GameObject.Find</code>는 비활성 오브젝트를 찾지 못한다는 제약도 있어, 공용 객체는 매니저에 등록·조회하는 방식이 더 안전하다.</p><pre><code>using System.Collections.Generic;
+using UnityEngine;
+
+public class Bullet : MonoBehaviour
+{
+    [SerializeField] float _speed = 20f;
+    Rigidbody _body;
+
+    void Awake()
+    {
+        _body = GetComponent&lt;Rigidbody&gt;();   // 매 프레임이 아니라 한 번만 찾는다
+    }
+
+    public void Tick(float dt)
+    {
+        _body.MovePosition(_body.position + transform.forward * (_speed * dt));
+    }
+}
+
+public class BulletManager : MonoBehaviour
+{
+    readonly List&lt;Bullet&gt; _bullets = new List&lt;Bullet&gt;(1024);
+
+    void Update()                              // Update는 매니저에 하나만 둔다
+    {
+        float dt = Time.deltaTime;
+        for (int i = 0; i &lt; _bullets.Count; i++)
+            _bullets[i].Tick(dt);
+    }
+}</code></pre><p>위에서 <code>Bullet</code>에 <code>Update</code>를 두지 않은 이유가 핵심이다. <code>Update</code>가 있는 스크립트는 개수만큼 엔진(C++)에서 스크립트(C#)로 넘어오는 호출이 발생하고, 이 경계 비용은 함수 본문이 비어 있어도 든다. 매니저 하나가 리스트를 순회하면 경계를 한 번만 넘고 데이터도 연속으로 놓여 캐시에 유리하다. 더 밀어붙이면 Job System과 Burst로 병렬화하거나, 매 프레임 볼 필요가 없는 대상은 여러 프레임에 나눠 처리한다.</p><p>UGUI의 Canvas 분리도 같은 이야기다. UGUI는 Canvas 단위로 자식 요소의 메시를 하나로 합쳐 그리기 때문에, 요소 하나가 바뀌면 그 Canvas 전체의 레이아웃과 배치를 다시 만든다. 매 프레임 바뀌는 타이머 텍스트가 정적인 HUD와 한 Canvas에 있으면 정적인 부분까지 매 프레임 재구성된다. 자주 바뀌는 요소를 별도 Canvas로 떼면 그 작은 Canvas만 다시 만든다. 다만 Canvas가 늘면 배칭이 나뉘어 드로우 콜이 늘 수 있으므로 <strong>갱신 빈도 기준</strong>으로 나눈다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>GetComponent를 캐싱하는 이유</strong> — 컴포넌트를 찾는 탐색 비용이 매 프레임 반복되기 때문이다. 참조가 바뀌지 않으면 Awake에서 한 번 받아 필드에 두고 재사용한다.</li><li><strong>GameObject.Find를 피하는 이유와 대안</strong> — 씬 전체를 훑고 이름을 비교해 오브젝트가 많을수록 느려지고 비활성 오브젝트는 찾지도 못한다. 인스펙터 주입이나 생성 시점 전달이 가장 싸고, 공용 객체는 매니저에 등록해 조회한다.</li><li><strong>같은 로직의 오브젝트가 수천 개일 때</strong> — 개별 Update를 없애고 매니저가 배열을 순회하며 일괄 처리한다. 그래도 모자라면 Job System과 Burst로 넘기거나 갱신 주기를 나눈다.</li><li><strong>Canvas를 왜 나누나</strong> — 요소 하나만 바뀌어도 그 Canvas 전체를 다시 구성하기 때문이다. 자주 바뀌는 UI를 분리해 재구성 범위를 줄이되, 드로우 콜이 늘지 않는 선에서 나눈다.</li></ul><h3>흔한 오해</h3><ul><li><strong>GetComponent는 내부에서 캐싱되니 매 프레임 불러도 된다</strong> — 호출할 때마다 컴포넌트 목록을 다시 찾는다.</li><li><strong>SendMessage가 간단해서 쓸 만하다</strong> — 문자열로 메서드를 찾아 호출하는 방식이라 직접 호출보다 훨씬 느리고 오타를 컴파일러가 잡아 주지도 못한다.</li><li><strong>빈 Update는 공짜다</strong> — 본문이 비어도 엔진이 호출 목록에 넣고 매 프레임 부른다. 안 쓰면 지운다.</li><li><strong>Canvas는 잘게 나눌수록 좋다</strong> — 나눌수록 배칭이 끊겨 드로우 콜이 늘어난다. 정적 UI와 동적 UI를 가르는 정도가 기준이다.</li></ul>
+<div class="refs"><h2>참고 자료</h2><ul><li><a href="https://docs.unity3d.com/ScriptReference/GameObject.Find.html" target="_blank" rel="noopener">Unity 스크립팅 API – GameObject.Find</a></li><li><a href="https://docs.unity3d.com/Packages/com.unity.ugui@2.0/manual/UICanvas.html" target="_blank" rel="noopener">Unity uGUI 매뉴얼 – Canvas</a></li><li><a href="https://docs.unity3d.com/Manual/job-system.html" target="_blank" rel="noopener">Unity 매뉴얼 – Write multithreaded code with the job system</a></li></ul></div>
+</article>
+<div class="pager"><a href="03-02.html">← 프로파일링과 병목 진단</a><a href="03-04.html">메모리와 GC →</a></div>
+<footer>정리 글은 Claude가 썼다. 틀린 내용이 있을 수 있으니 중요한 내용은 참고 자료 원문으로 확인한다.</footer>
+</main>
+</body>
+</html>

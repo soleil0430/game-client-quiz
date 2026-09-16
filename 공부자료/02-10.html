@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>빌드와 플랫폼 · Unity 엔진</title>
+<style>
+  :root {
+    --bg:#f2f5f7; --card:#fff; --panel:#f7f9fb; --text:#3c3c3c; --muted:#7a8b93; --line:#e2e8ea;
+    --green:#58cc02; --green-d:#46a302; --blue:#1cb0f6; --blue-d:#1899d6; --blue-bg:#ddf4ff;
+    --purple:#ce82ff; --purple-d:#a855f7; --purple-bg:#f5e8ff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#131f24; --card:#1b2b32; --panel:#16252b; --text:#eaf2f6; --muted:#8fa7b2; --line:#2c4048;
+      --blue-bg:#12303d; --purple-bg:#2e2036; --purple-d:#c99bec; --blue-d:#58c4f7; --green-d:#7ddc2a; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
+  a { color: var(--blue-d); }
+  .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
+  .nav a { text-decoration: none; }
+  .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
+    padding: 4px 12px; font-size: .8rem; font-weight: 800; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
+  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
+  p, ul, ol { margin: 10px 0; }
+  li { margin: 5px 0; }
+  .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
+  .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
+  .card { background: var(--card); border: 2px solid var(--line); border-radius: 20px; padding: 20px; margin-bottom: 14px; }
+  .list { display: grid; gap: 10px; }
+  .list a { display: block; background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px;
+    border-radius: 18px; padding: 14px 16px; text-decoration: none; color: inherit; }
+  .list a:hover { border-color: var(--purple); }
+  .list strong { display: block; font-size: 1.02rem; font-weight: 800; }
+  .list span { color: var(--muted); font-size: .86rem; font-weight: 600; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em;
+    background: var(--panel); border: 1px solid var(--line); padding: 1px 6px; border-radius: 6px; font-weight: 700; }
+  pre { background: var(--panel); border: 2px solid var(--line); padding: 14px; border-radius: 14px; overflow-x: auto; line-height: 1.65; }
+  pre code { background: none; border: 0; padding: 0; }
+  table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; font-size: .94rem; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; }
+  th { background: var(--panel); }
+  .refs { border-top: 2px solid var(--line); margin-top: 24px; padding-top: 14px; }
+  .refs ul { padding-left: 20px; }
+  .pager { display: flex; justify-content: space-between; gap: 10px; margin-top: 16px; }
+  .pager a { background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px; border-radius: 16px;
+    padding: 12px 16px; text-decoration: none; color: inherit; font-weight: 800; font-size: .9rem; max-width: 48%; }
+  .pager a:hover { border-color: var(--blue); }
+  footer { color: var(--muted); font-size: .8rem; font-weight: 600; margin-top: 28px; }
+</style>
+</head>
+<body>
+<main>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="02.html" class="badge">Unity 엔진 목차</a></div>
+<article class="card">
+<h1>빌드와 플랫폼</h1>
+<p class="lead">빌드 용량은 대부분 텍스처와 오디오이고, 설치 실패는 대부분 아키텍처 설정 문제다</p>
+<h3>핵심 개념</h3><p>빌드 크기를 줄이는 이유는 저장 공간이 아니라 <strong>설치 전에 이탈하는 사람</strong>이다. 용량이 커질수록 설치 전환율이 떨어지고, 구글 플레이는 App Bundle 크기에 상한이 있어(초과분은 Play Asset Delivery로 분리) 넘기면 아예 올리지 못한다. 무엇부터 줄일지는 감이 아니라 빌드 리포트로 정한다. 빌드 직후 Editor.log에 에셋 종류별 용량이 남는다.</p><table><thead><tr><th>항목</th><th>방법</th><th>보통 효과</th></tr></thead><tbody><tr><td>텍스처</td><td>ASTC 등 플랫폼 압축, Max Size 하향, 불필요한 밉맵·알파 제거</td><td>가장 크다</td></tr><tr><td>오디오</td><td>BGM은 Vorbis + Streaming, 짧은 효과음은 ADPCM, 샘플레이트 하향</td><td>크다</td></tr><tr><td>코드</td><td>Managed Stripping Level 상향, 안 쓰는 패키지 제거</td><td>중간</td></tr><tr><td>배포 구조</td><td>Addressables로 빼서 나중에 내려받기</td><td>초기 용량만 준다</td></tr></tbody></table><p>텍스처가 1등인 이유는 압축 포맷 하나로 몇 배가 갈리기 때문이다. 같은 2048 크기라도 RGBA32 무압축은 16MB, ASTC 6x6은 1MB 수준이다. 코드 쪽 Managed Stripping은 진입점에서 도달 가능한 코드만 남기는데, 리플렉션으로만 부르는 타입은 도달 불가로 보여 같이 지워진다. 이걸 막는 것이 link.xml이다.</p><p>Resources 폴더는 이 맥락에서 함정이다. <strong>참조가 하나도 없어도 폴더 안의 모든 에셋이 빌드에 들어가고</strong>, 앱 시작 시 인덱스를 만드느라 기동도 느려진다. 필요한 것만 그때 불러오려면 Addressables를 쓴다. 반대로 주석이나 변수 이름을 줄이는 것은 컴파일 결과에 남지 않아 용량과 무관하다.</p><p>안드로이드 아키텍처는 ARMv7이 32비트, ARM64가 64비트 명령어 집합이다. 구글 플레이는 2019년 8월부터 64비트 지원을 요구해 ARMv7만 올리면 등록이 거부된다. <strong>ARM64는 IL2CPP 백엔드에서만 빌드된다</strong>는 점이 중요한데, Mono로 두면 Player Settings에서 ARM64 체크박스 자체가 비활성이다. "최신 기기에 APK가 설치되지 않는다"는 문제는 대개 ARM64 미포함이거나 Target API Level이 스토어 요구치보다 낮은 경우다. 둘 다 체크하면 APK 하나에 두 벌이 들어가 커지므로, 스토어 배포는 App Bundle로 올려 기기에 맞는 것만 내려가게 한다.</p><p>기기에서 도는 빌드의 로그는 <code>adb logcat</code>으로 본다. Android Logcat 패키지를 깔면 에디터 창에서 패키지 이름과 로그 레벨로 걸러 볼 수 있다. Development Build를 켜면 스택 트레이스가 온전히 남고 프로파일러도 붙지만 오버헤드가 있어 성능 수치는 상대 비교로만 쓴다. 서드파티 SDK는 대개 Gradle 의존성 충돌과 매니페스트 병합에서 사고가 나고, 결제는 <strong>영수증 검증을 반드시 서버에서</strong> 해야 한다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>빌드 크기를 왜, 어떻게 줄이나</strong> — 설치 전환율과 스토어 상한 때문이다. 먼저 빌드 리포트로 무엇이 큰지 확인하고, 대개 텍스처 압축 포맷과 Max Size에서 가장 큰 폭이 나온다. 그다음이 오디오 설정, 코드 스트리핑, Addressables 분리 순이다.</li><li><strong>ARMv7과 ARM64의 차이는</strong> — 32비트와 64비트 명령어 집합이고, 구글 플레이가 64비트를 필수로 요구한다. ARM64는 IL2CPP에서만 빌드되므로 백엔드를 IL2CPP로 바꾸고 두 아키텍처를 모두 체크한 뒤 App Bundle로 배포한다.</li><li><strong>최신 기기에 설치가 안 된다면</strong> — 먼저 ARM64가 빠졌는지, Target API Level이 스토어 요구치보다 낮은지를 본다. 그다음 minSdkVersion과 서명, 설치 로그를 adb logcat으로 확인한다.</li><li><strong>기기 로그는 어떻게 보나</strong> — adb logcat이나 Unity의 Android Logcat 창으로 본다. 개발 중에는 Development Build로 스택 트레이스를 살리고, 출시 빌드는 크래시 리포팅으로 모아서 본다.</li><li><strong>서드파티 SDK와 결제는</strong> — Gradle 의존성 충돌과 매니페스트 병합이 주된 사고 지점이라 버전을 맞추고 병합 결과를 확인한다. 결제는 영수증을 서버에서 검증해 클라이언트 변조로 아이템이 나가지 않게 한다.</li></ul><h3>흔한 오해</h3><ul><li><strong>주석과 변수 이름을 줄이면 빌드가 작아진다</strong> — 컴파일 결과에 남지 않는다. 용량은 에셋과 컴파일된 코드가 차지한다.</li><li><strong>Resources 폴더에 넣으면 관리가 편하다</strong> — 참조가 없어도 전부 빌드에 들어가고 시작 속도까지 느려진다. 동적 로딩이 필요하면 Addressables를 쓴다.</li><li><strong>IL2CPP로 바꾸면 빌드가 작아진다</strong> — 네이티브 코드로 변환하므로 오히려 커질 수 있다. 얻는 것은 실행 속도와 ARM64 지원이다.</li><li><strong>빌드 크기를 줄이면 프레임도 오른다</strong> — 용량은 다운로드와 로딩 시간에 영향을 줄 뿐 한 프레임의 계산량과는 다른 축이다.</li><li><strong>ARMv7만 올려도 요즘 기기는 다 돌아간다</strong> — 기기가 실행은 해도 구글 플레이가 등록을 거부한다.</li></ul>
+<div class="refs"><h2>참고 자료</h2><ul><li><a href="https://docs.unity3d.com/Manual/ReducingFilesize.html" target="_blank" rel="noopener">Unity 매뉴얼 – Reducing the file size of a build</a></li><li><a href="https://docs.unity3d.com/Manual/managed-code-stripping.html" target="_blank" rel="noopener">Unity 매뉴얼 – Managed code stripping</a></li><li><a href="https://docs.unity3d.com/Manual/class-PlayerSettingsAndroid.html" target="_blank" rel="noopener">Unity 매뉴얼 – Android Player settings</a></li><li><a href="https://docs.unity3d.com/Packages/com.unity.mobile.android-logcat@1.4/manual/index.html" target="_blank" rel="noopener">Unity 매뉴얼 – Android Logcat 패키지</a></li></ul></div>
+</article>
+<div class="pager"><a href="02-09.html">← AI와 길찾기</a><a href="02-11.html">DOTS와 최신 기능 →</a></div>
+<footer>정리 글은 Claude가 썼다. 틀린 내용이 있을 수 있으니 중요한 내용은 참고 자료 원문으로 확인한다.</footer>
+</main>
+</body>
+</html>

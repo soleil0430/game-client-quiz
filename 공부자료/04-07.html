@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Unity 렌더 파이프라인과 셰이더 · 그래픽스·렌더링</title>
+<style>
+  :root {
+    --bg:#f2f5f7; --card:#fff; --panel:#f7f9fb; --text:#3c3c3c; --muted:#7a8b93; --line:#e2e8ea;
+    --green:#58cc02; --green-d:#46a302; --blue:#1cb0f6; --blue-d:#1899d6; --blue-bg:#ddf4ff;
+    --purple:#ce82ff; --purple-d:#a855f7; --purple-bg:#f5e8ff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#131f24; --card:#1b2b32; --panel:#16252b; --text:#eaf2f6; --muted:#8fa7b2; --line:#2c4048;
+      --blue-bg:#12303d; --purple-bg:#2e2036; --purple-d:#c99bec; --blue-d:#58c4f7; --green-d:#7ddc2a; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
+  a { color: var(--blue-d); }
+  .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
+  .nav a { text-decoration: none; }
+  .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
+    padding: 4px 12px; font-size: .8rem; font-weight: 800; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
+  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
+  p, ul, ol { margin: 10px 0; }
+  li { margin: 5px 0; }
+  .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
+  .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
+  .card { background: var(--card); border: 2px solid var(--line); border-radius: 20px; padding: 20px; margin-bottom: 14px; }
+  .list { display: grid; gap: 10px; }
+  .list a { display: block; background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px;
+    border-radius: 18px; padding: 14px 16px; text-decoration: none; color: inherit; }
+  .list a:hover { border-color: var(--purple); }
+  .list strong { display: block; font-size: 1.02rem; font-weight: 800; }
+  .list span { color: var(--muted); font-size: .86rem; font-weight: 600; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em;
+    background: var(--panel); border: 1px solid var(--line); padding: 1px 6px; border-radius: 6px; font-weight: 700; }
+  pre { background: var(--panel); border: 2px solid var(--line); padding: 14px; border-radius: 14px; overflow-x: auto; line-height: 1.65; }
+  pre code { background: none; border: 0; padding: 0; }
+  table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; font-size: .94rem; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; }
+  th { background: var(--panel); }
+  .refs { border-top: 2px solid var(--line); margin-top: 24px; padding-top: 14px; }
+  .refs ul { padding-left: 20px; }
+  .pager { display: flex; justify-content: space-between; gap: 10px; margin-top: 16px; }
+  .pager a { background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px; border-radius: 16px;
+    padding: 12px 16px; text-decoration: none; color: inherit; font-weight: 800; font-size: .9rem; max-width: 48%; }
+  .pager a:hover { border-color: var(--blue); }
+  footer { color: var(--muted); font-size: .8rem; font-weight: 600; margin-top: 28px; }
+</style>
+</head>
+<body>
+<main>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="04.html" class="badge">그래픽스·렌더링 목차</a></div>
+<article class="card">
+<h1>Unity 렌더 파이프라인과 셰이더</h1>
+<p class="lead">URP는 C#으로 짠 렌더 파이프라인이다. 확장은 Renderer Feature, 비용은 배리언트로 돌아온다</p>
+<h3>핵심 개념</h3><p>Built-in 렌더 파이프라인은 프레임을 그리는 순서가 엔진 내부(C++)에 고정돼 있어, 개발자는 이미지 이펙트나 커맨드 버퍼처럼 정해진 구멍으로만 끼어들 수 있었다. <strong>SRP(Scriptable Render Pipeline)</strong>는 그 순서를 C#으로 짜게 연 틀이고, URP와 HDRP는 유니티가 SRP 위에 만들어 둔 구현이다. URP는 모바일부터 PC까지, HDRP는 고사양 PC·콘솔용이다.</p><table><thead><tr><th>주제</th><th>Built-in</th><th>URP</th></tr></thead><tbody><tr><td>셰이더 인클루드</td><td>UnityCG.cginc</td><td>Core.hlsl</td></tr><tr><td>패스 태그</td><td>ForwardBase</td><td>UniversalForward</td></tr><tr><td>확장 지점</td><td>이미지 이펙트, GrabPass</td><td>Renderer Feature</td></tr><tr><td>포스트 프로세싱</td><td>별도 패키지</td><td>Volume 내장</td></tr></tbody></table><p>그래서 Built-in용 조명 셰이더는 URP에서 그대로 돌지 않는 경우가 많다. 표준 셰이더를 쓰던 머티리얼은 URP의 자동 변환 도구가 바꿔 주지만, 직접 쓴 셰이더는 사람이 다시 쓴다. Shader Graph는 URP와 HDRP 양쪽에서 쓸 수 있다.</p><p><strong>Renderer Feature</strong>는 URP 렌더러의 정해진 시점(예: 불투명을 그린 뒤)에 패스를 하나 더 끼워 넣는 확장점이다. 외곽선 그리기, 화면을 복사해 왜곡에 쓰기, 특정 레이어 재렌더가 대표적이다.</p><p>셰이더 성능에서 자주 걸리는 것이 <strong>분기</strong>다. GPU는 수십 개 스레드를 한 묶음(워프·웨이브)으로 묶어 같은 명령을 실행하므로, 묶음 안에서 조건이 갈리면 양쪽을 모두 실행하고 결과만 골라 쓴다. 머티리얼 상수처럼 묶음 전체가 같은 값으로 갈리는 분기는 싸다. 키워드로 배리언트를 나누면 분기가 사라지는 대신 배리언트 수가 문제가 된다.</p><pre><code>#pragma multi_compile _ _MAIN_LIGHT_SHADOWS  // 항상 컴파일, 런타임 토글
+#pragma shader_feature_local _EMISSION       // 안 쓰면 빌드에서 빠짐
+
+half4 frag(Varyings i) : SV_Target
+{
+    half4 c = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, i.uv);
+    #ifdef _EMISSION
+        c.rgb += _EmissionColor.rgb;
+    #endif
+    return c;
+}</code></pre><p>키워드 조합마다 셰이더가 따로 컴파일되므로 키워드가 늘면 조합이 곱으로 폭발한다. 빌드 시간과 용량이 커지고, 처음 쓰는 배리언트를 GPU에 올리는 순간 프레임이 튄다. 안 쓰는 조합이 빠지도록 <code>shader_feature</code>를 쓰고, 빌드 스트리핑으로 잘라 내고, 나머지는 Shader Variant Collection으로 로딩 중에 미리 워밍업한다.</p><p><strong>컴퓨트 셰이더</strong>는 렌더링 파이프라인 밖에서 GPU 병렬 연산을 쓰는 프로그램이라, 서로 독립적인 데이터 수만 건에 같은 계산을 하는 입자 시뮬레이션·컬링·이미지 처리에 맞는다. 결과를 CPU로 되읽으면 동기화 대기가 생긴다. 파티클 시스템(CPU 갱신, 스크립트·물리 연동)과 VFX Graph(컴퓨트 셰이더로 GPU 갱신)를 나눠 쓰는 것도 같은 이유다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>Built-in, URP, HDRP 중 무엇을 고르나</strong> — 모바일이 타깃이면 URP다. 다만 Built-in용 커스텀 셰이더는 다시 써야 하는 경우가 많아 전환 비용을 일정에 잡는다.</li><li><strong>Renderer Feature는 언제 쓰나</strong> — 불투명을 그린 뒤 외곽선을 얹는 식으로 정해진 시점에 패스를 더 넣을 때 쓴다. 커스텀 SRP는 유지 비용이 커서 구조 자체를 갈아야 할 때만 고려한다.</li><li><strong>셰이더 분기가 느린 이유</strong> — GPU는 워프 단위로 같은 명령을 실행해서, 워프 안에서 조건이 갈리면 양쪽을 다 돌고 결과만 고른다.</li><li><strong>배리언트가 많아지면</strong> — 빌드 시간과 용량이 늘고 처음 쓰는 배리언트를 올릴 때 히칭이 생긴다. shader_feature와 스트리핑으로 줄이고 남는 건 미리 워밍업한다.</li><li><strong>컴퓨트 셰이더는 언제 쓰나</strong> — 수만 건의 독립적인 데이터에 같은 계산을 반복할 때 쓴다. 결과를 GPU 안에서 소비해야 이득이 남는다.</li></ul><h3>흔한 오해</h3><ul><li><strong>URP로 바꾸면 셰이더는 그대로 돈다</strong> — 인클루드 파일과 패스 태그가 달라 Built-in용 조명 셰이더는 대개 재작성이 필요하다.</li><li><strong>셰이더 분기도 CPU의 if처럼 한쪽만 실행된다</strong> — 워프 안에서 갈리면 양쪽을 다 돈다.</li><li><strong>배리언트는 GPU만 느려지게 한다</strong> — 실제 문제는 빌드 시간, 용량, 첫 사용 시점의 히칭이다.</li><li><strong>VFX Graph가 파티클 시스템의 상위 호환이다</strong> — CPU 쪽 상호작용이 제한적이고 컴퓨트 셰이더 지원 기기가 필요하다. 게임플레이에 얽힌 효과는 파티클 시스템이 낫다.</li><li><strong>포스트 프로세싱은 공짜에 가깝다</strong> — 화면 픽셀 수에 비례하는 패스이고, 모바일에서는 타일 메모리를 비웠다 채우는 비용까지 붙는다.</li></ul>
+<div class="refs"><h2>참고 자료</h2><ul><li><a href="https://docs.unity3d.com/Manual/render-pipelines.html" target="_blank" rel="noopener">Unity 매뉴얼 – Render pipelines</a></li><li><a href="https://docs.unity3d.com/6000.0/Documentation/Manual/urp/urp-renderer-feature.html" target="_blank" rel="noopener">Unity 매뉴얼(URP) – Add a Renderer Feature to a URP Renderer</a></li><li><a href="https://docs.unity3d.com/Manual/SL-MultipleProgramVariants.html" target="_blank" rel="noopener">Unity 매뉴얼 – Changing how shaders work using keywords</a></li><li><a href="https://docs.unity3d.com/Manual/class-ComputeShader.html" target="_blank" rel="noopener">Unity 매뉴얼 – Compute shaders</a></li></ul></div>
+</article>
+<div class="pager"><a href="04-06.html">← 조명과 그림자</a><a href="04-08.html">모바일 GPU와 그래픽스 API →</a></div>
+<footer>정리 글은 Claude가 썼다. 틀린 내용이 있을 수 있으니 중요한 내용은 참고 자료 원문으로 확인한다.</footer>
+</main>
+</body>
+</html>

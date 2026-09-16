@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>코드 문제 · C# 언어</title>
+<style>
+  :root {
+    --bg:#f2f5f7; --card:#fff; --panel:#f7f9fb; --text:#3c3c3c; --muted:#7a8b93; --line:#e2e8ea;
+    --green:#58cc02; --green-d:#46a302; --blue:#1cb0f6; --blue-d:#1899d6; --blue-bg:#ddf4ff;
+    --purple:#ce82ff; --purple-d:#a855f7; --purple-bg:#f5e8ff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#131f24; --card:#1b2b32; --panel:#16252b; --text:#eaf2f6; --muted:#8fa7b2; --line:#2c4048;
+      --blue-bg:#12303d; --purple-bg:#2e2036; --purple-d:#c99bec; --blue-d:#58c4f7; --green-d:#7ddc2a; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
+  a { color: var(--blue-d); }
+  .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
+  .nav a { text-decoration: none; }
+  .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
+    padding: 4px 12px; font-size: .8rem; font-weight: 800; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
+  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
+  p, ul, ol { margin: 10px 0; }
+  li { margin: 5px 0; }
+  .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
+  .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
+  .card { background: var(--card); border: 2px solid var(--line); border-radius: 20px; padding: 20px; margin-bottom: 14px; }
+  .list { display: grid; gap: 10px; }
+  .list a { display: block; background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px;
+    border-radius: 18px; padding: 14px 16px; text-decoration: none; color: inherit; }
+  .list a:hover { border-color: var(--purple); }
+  .list strong { display: block; font-size: 1.02rem; font-weight: 800; }
+  .list span { color: var(--muted); font-size: .86rem; font-weight: 600; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em;
+    background: var(--panel); border: 1px solid var(--line); padding: 1px 6px; border-radius: 6px; font-weight: 700; }
+  pre { background: var(--panel); border: 2px solid var(--line); padding: 14px; border-radius: 14px; overflow-x: auto; line-height: 1.65; }
+  pre code { background: none; border: 0; padding: 0; }
+  table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; font-size: .94rem; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; }
+  th { background: var(--panel); }
+  .refs { border-top: 2px solid var(--line); margin-top: 24px; padding-top: 14px; }
+  .refs ul { padding-left: 20px; }
+  .pager { display: flex; justify-content: space-between; gap: 10px; margin-top: 16px; }
+  .pager a { background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px; border-radius: 16px;
+    padding: 12px 16px; text-decoration: none; color: inherit; font-weight: 800; font-size: .9rem; max-width: 48%; }
+  .pager a:hover { border-color: var(--blue); }
+  footer { color: var(--muted); font-size: .8rem; font-weight: 600; margin-top: 28px; }
+</style>
+</head>
+<body>
+<main>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="01.html" class="badge">C# 언어 목차</a></div>
+<article class="card">
+<h1>코드 문제</h1>
+<p class="lead">출력 예측 문제는 기본값과 초기화 순서, 클로저 캡처 이 세 군데에서 답이 갈린다</p>
+<h3>핵심 개념</h3><p>출력을 맞히는 문제는 문법 지식이 아니라 '언어가 언제 무엇을 하는가'를 묻는다. 실무에서 버그를 만드는 지점이 그대로 문제가 된다. 함정은 대개 세 갈래다.</p><p><strong>첫째, 초기화하지 않은 필드의 기본값.</strong> 참조 형식은 <code>null</code>이지만 값 형식은 null이 될 수 없고 모든 필드가 0으로 채워진 값을 갖는다. <code>DateTime</code>의 기본값은 <code>DateTime.MinValue</code>다.</p><pre><code>class A { public string S; public DateTime D; }
+
+var a = new A();
+Console.WriteLine(a.S == null);     // True  - 참조 형식의 기본값은 null
+Console.WriteLine(a.D == null);     // False - 값 형식은 null이 될 수 없다
+Console.WriteLine(a.D == default);  // True  - &quot;설정 안 됨&quot;은 이렇게 본다</code></pre><p>두 번째 줄이 컴파일되는 이유는 <code>a.D == null</code>이 <code>DateTime?</code> 비교로 승격되기 때문이다. 문법은 통과하지만 결과가 언제나 <code>False</code>라 컴파일러가 '항상 false'라는 경고를 붙인다. 값이 들어왔는지를 정말 구분하려면 필드를 <code>DateTime?</code>로 선언한다.</p><p><strong>둘째, 초기화 순서.</strong> 정적 필드 이니셜라이저 → 정적 생성자 → 인스턴스 필드 이니셜라이저 → 인스턴스 생성자 순이다. 정적 쪽은 타입을 처음 쓸 때 한 번 돌고, 인스턴스 쪽은 객체를 만들 때마다 돈다.</p><pre><code>class Counter
+{
+    static int total = Log(&quot;1 정적 필드 이니셜라이저&quot;);
+    int id = Log(&quot;3 인스턴스 필드 이니셜라이저&quot;);
+
+    static Counter() { Console.WriteLine(&quot;2 정적 생성자&quot;); }
+    public Counter() { Console.WriteLine(&quot;4 인스턴스 생성자&quot;); }
+
+    static int Log(string what) { Console.WriteLine(what); return 0; }
+}
+
+new Counter();   // 1, 2, 3, 4가 차례로 찍힌다
+new Counter();   // 3, 4만 찍힌다. 정적 초기화는 한 번뿐이다</code></pre><p><strong>셋째, 클로저 캡처.</strong> 람다는 변수의 <strong>값</strong>이 아니라 <strong>변수 자체</strong>를 잡는다. <code>for</code>의 반복 변수는 루프 전체에서 하나뿐이라 모든 람다가 같은 변수를 보고, 나중에 호출하면 루프가 끝난 뒤의 값을 읽는다. <code>foreach</code>의 반복 변수는 매 반복 새로 만들어지도록 언어가 바뀌어 기대한 대로 나온다.</p><pre><code>var actions = new List&lt;Action&gt;();
+
+for (int i = 0; i &lt; 3; i++)
+    actions.Add(() =&gt; Console.Write(i));   // 3 3 3 - i는 루프 전체에서 변수 하나다
+
+foreach (var n in new[] { 0, 1, 2 })
+    actions.Add(() =&gt; Console.Write(n));   // 0 1 2 - n은 반복마다 새로 만들어진다
+
+for (int i = 0; i &lt; 3; i++)
+{
+    int captured = i;                      // 반복 안에서 새 변수를 만들어 고친다
+    actions.Add(() =&gt; Console.Write(captured));   // 0 1 2
+}</code></pre><p>캡처는 성능 문제이기도 하다. 변수를 잡는 람다는 그 변수를 담을 클래스를 힙에 만든다. 잡을 것이 없으면 <code>static</code> 람다로 선언해 실수로 캡처하는 것을 컴파일러가 막게 한다.</p><p>짧은 메서드를 써 보라는 문제도 같이 나온다. 답보다 경계 조건을 챙기는지를 본다.</p><pre><code>static int SumEven(int[] numbers)
+{
+    int sum = 0;
+    foreach (int n in numbers)
+        if (n % 2 == 0) sum += n;   // n % 2 == 1로 홀수를 찾으면 음수에서 틀린다
+    return sum;
+}
+
+static string KeepFirstDollar(string s)
+{
+    int first = s.IndexOf(&#x27;$&#x27;);
+    if (first &lt; 0) return s;
+    return s.Substring(0, first + 1)
+         + s.Substring(first + 1).Replace(&quot;$&quot;, string.Empty);
+}</code></pre><h3>면접에서 이렇게 답한다</h3><ul><li><strong>초기화하지 않은 <code>string</code>과 <code>DateTime</code>을 null과 비교하면</strong> — <code>string</code>은 참조 형식이라 <code>True</code>, <code>DateTime</code>은 값 형식이라 <code>False</code>다. 값 형식 비교는 <code>DateTime?</code>로 승격돼 컴파일은 되지만 결과가 항상 false라서 경고가 붙는다.</li><li><strong>정적 생성자와 인스턴스 생성자 중 무엇이 먼저인가</strong> — 정적 쪽이 먼저다. 타입을 처음 쓰는 시점에 정적 필드 이니셜라이저와 정적 생성자가 한 번 돌고, 이후 객체를 만들 때마다 인스턴스 필드 이니셜라이저와 인스턴스 생성자가 돈다.</li><li><strong>루프에서 만든 람다가 전부 같은 값을 출력하는 이유</strong> — 값을 복사하는 게 아니라 변수를 붙잡고 있기 때문이다. <code>for</code>의 반복 변수는 루프에 하나뿐이라 모두 같은 것을 본다. 반복 안에서 지역 변수를 새로 만들어 캡처하면 해결된다. 버튼을 루프로 만들며 인덱스를 캡처한 콜백을 붙일 때 실무에서 그대로 나온다.</li></ul><h3>흔한 오해</h3><ul><li><strong>값 형식도 초기화 전에는 null이다</strong> — 값 형식에 null 상태는 없다. 0으로 채워진 기본값이 들어 있다.</li><li><strong><code>a.D == null</code>은 컴파일 오류다</strong> — <code>DateTime?</code>로 승격돼 컴파일된다. 경고만 나고 결과는 항상 <code>False</code>다.</li><li><strong>정적 생성자는 프로그램이 시작할 때 실행된다</strong> — 타입을 처음 쓰는 시점에 실행된다. 시점을 코드로 제어할 수 없으므로 무거운 작업을 넣지 않는다.</li><li><strong>홀짝 판정은 <code>n % 2 == 1</code>로 하면 된다</strong> — 음수에서 <code>-1</code>이 나와 홀수를 놓친다. <code>== 0</code>이나 <code>!= 0</code>으로 쓴다.</li></ul>
+<div class="refs"><h2>참고 자료</h2><ul><li><a href="https://learn.microsoft.com/ko-kr/dotnet/csharp/language-reference/builtin-types/default-values" target="_blank" rel="noopener">Microsoft Learn – 기본 제공 형식의 기본값</a></li><li><a href="https://learn.microsoft.com/ko-kr/dotnet/csharp/programming-guide/classes-and-structs/static-constructors" target="_blank" rel="noopener">Microsoft Learn – 정적 생성자</a></li><li><a href="https://learn.microsoft.com/ko-kr/dotnet/csharp/language-reference/operators/lambda-expressions" target="_blank" rel="noopener">Microsoft Learn – 람다 식(외부 변수 캡처)</a></li><li><a href="https://learn.microsoft.com/ko-kr/dotnet/csharp/programming-guide/strings/" target="_blank" rel="noopener">Microsoft Learn – 문자열</a></li></ul></div>
+</article>
+<div class="pager"><a href="01-07.html">← 예외 처리</a><span></span></div>
+<footer>정리 글은 Claude가 썼다. 틀린 내용이 있을 수 있으니 중요한 내용은 참고 자료 원문으로 확인한다.</footer>
+</main>
+</body>
+</html>

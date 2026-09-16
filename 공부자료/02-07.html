@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>물리 · Unity 엔진</title>
+<style>
+  :root {
+    --bg:#f2f5f7; --card:#fff; --panel:#f7f9fb; --text:#3c3c3c; --muted:#7a8b93; --line:#e2e8ea;
+    --green:#58cc02; --green-d:#46a302; --blue:#1cb0f6; --blue-d:#1899d6; --blue-bg:#ddf4ff;
+    --purple:#ce82ff; --purple-d:#a855f7; --purple-bg:#f5e8ff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#131f24; --card:#1b2b32; --panel:#16252b; --text:#eaf2f6; --muted:#8fa7b2; --line:#2c4048;
+      --blue-bg:#12303d; --purple-bg:#2e2036; --purple-d:#c99bec; --blue-d:#58c4f7; --green-d:#7ddc2a; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
+  a { color: var(--blue-d); }
+  .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
+  .nav a { text-decoration: none; }
+  .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
+    padding: 4px 12px; font-size: .8rem; font-weight: 800; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
+  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
+  p, ul, ol { margin: 10px 0; }
+  li { margin: 5px 0; }
+  .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
+  .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
+  .card { background: var(--card); border: 2px solid var(--line); border-radius: 20px; padding: 20px; margin-bottom: 14px; }
+  .list { display: grid; gap: 10px; }
+  .list a { display: block; background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px;
+    border-radius: 18px; padding: 14px 16px; text-decoration: none; color: inherit; }
+  .list a:hover { border-color: var(--purple); }
+  .list strong { display: block; font-size: 1.02rem; font-weight: 800; }
+  .list span { color: var(--muted); font-size: .86rem; font-weight: 600; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em;
+    background: var(--panel); border: 1px solid var(--line); padding: 1px 6px; border-radius: 6px; font-weight: 700; }
+  pre { background: var(--panel); border: 2px solid var(--line); padding: 14px; border-radius: 14px; overflow-x: auto; line-height: 1.65; }
+  pre code { background: none; border: 0; padding: 0; }
+  table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; font-size: .94rem; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; }
+  th { background: var(--panel); }
+  .refs { border-top: 2px solid var(--line); margin-top: 24px; padding-top: 14px; }
+  .refs ul { padding-left: 20px; }
+  .pager { display: flex; justify-content: space-between; gap: 10px; margin-top: 16px; }
+  .pager a { background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px; border-radius: 16px;
+    padding: 12px 16px; text-decoration: none; color: inherit; font-weight: 800; font-size: .9rem; max-width: 48%; }
+  .pager a:hover { border-color: var(--blue); }
+  footer { color: var(--muted); font-size: .8rem; font-weight: 600; margin-top: 28px; }
+</style>
+</head>
+<body>
+<main>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="02.html" class="badge">Unity 엔진 목차</a></div>
+<article class="card">
+<h1>물리</h1>
+<p class="lead">Rigidbody가 있느냐 없느냐로 충돌 이벤트와 비용이 갈린다는 것이 물리의 출발점이다</p>
+<h3>핵심 개념</h3><p>물리 엔진은 모든 콜라이더를 매 틱 서로 비교하지 않는다. <strong>Rigidbody가 없는 콜라이더는 영영 움직이지 않는다고 보고</strong> 정적 구조에 미리 구워 둔다. 그래서 Rigidbody 없는 콜라이더끼리는 겹쳐도 아무 이벤트가 오지 않는다. Collider는 모양이고 Rigidbody는 그 모양이 시뮬레이션에 참여한다는 표시다.</p><table><thead><tr><th>조합</th><th>OnCollisionEnter</th><th>OnTriggerEnter</th></tr></thead><tbody><tr><td>Collider ↔ Collider (Rigidbody 없음)</td><td>없음</td><td>없음</td></tr><tr><td>Rigidbody ↔ Collider</td><td>발생</td><td>발생</td></tr><tr><td>Kinematic Rigidbody ↔ Collider</td><td>없음</td><td>발생</td></tr><tr><td>Rigidbody ↔ Rigidbody</td><td>발생</td><td>발생</td></tr><tr><td>Kinematic ↔ Kinematic</td><td>없음</td><td>발생</td></tr></tbody></table><p>Trigger와 Collision의 갈림길은 <strong>밀어내느냐</strong>다. Is Trigger를 켜면 서로 통과하며 들어옴·나감만 알려주므로 획득 범위나 인식 범위에 쓴다. 꺼져 있으면 엔진이 겹침을 풀며 반발력을 계산해 접촉점·상대 속도·충격량을 Collision 객체로 넘긴다. 트리거는 밀어낼 게 없으니 이 정보도 없다. 정적 콜라이더를 옮기면 정적이라 믿고 만든 구조를 다시 만들어야 해 비싸므로, 움직일 물체에는 Is Kinematic Rigidbody를 붙여 엔진이 이동을 인지하게 한다.</p><p>콜라이더 모양은 판정 공식이 단순한 순서대로 싸다. Sphere·Capsule·Box 다음이 Convex Mesh이고, 볼록하지 않은 MeshCollider는 서로 충돌시킬 수 없어 지형 전용이다.</p><p>이동은 셋으로 갈린다. <code>transform.Translate</code>는 물리를 건너뛰고 좌표만 바꿔 벽을 통과한다. <code>AddForce</code>는 힘을 줘 F=ma로 가속을 만들므로 질량이 클수록 덜 움직인다. <code>MovePosition</code>은 "다음 틱에 여기로 간다"고 알려주는 이동이라 충돌 검사와 보간이 유지돼, 조작감을 직접 잡는 캐릭터에 쓴다.</p><pre><code>// 입력은 Update에서 읽는다. FixedUpdate에서 읽으면 짧게 누른 키를 통째로 놓친다
+void Update() =&gt; input = new Vector3(Input.GetAxisRaw("Horizontal"), 0f, Input.GetAxisRaw("Vertical"));
+
+void FixedUpdate()   // 이동은 물리 틱에 맞춘다 (rb는 Is Kinematic)
+{
+    rb.MovePosition(rb.position + input.normalized * (speed * Time.fixedDeltaTime));
+}</code></pre><p>탐지는 Raycast와 SphereCast다. Raycast는 굵기가 없는 선이라 얇은 물체나 틈을 통과해 버리고, SphereCast는 반지름을 가진 구를 쓸어 보내 그 굵기 안의 충돌을 잡는 대신 비싸다. 비용을 줄이는 가장 값싼 수단은 Layer Collision Matrix라, 레이어 쌍 체크를 끄면 그 조합은 검사에서 통째로 빠진다. Physic Material은 성능이 아니라 마찰과 반발, 즉 촉감을 정하는 에셋이고 질량은 Rigidbody의 Mass에서 정한다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>두 오브젝트가 충돌하려면</strong> — 양쪽에 Collider가 있고 적어도 한쪽에 Rigidbody가 있어야 한다. Rigidbody 없는 콜라이더끼리는 정적으로 취급돼 이벤트가 오지 않는다.</li><li><strong>Trigger와 Collision의 차이는</strong> — 트리거는 통과시키며 들어옴과 나감만 알려주고, 충돌은 밀어낸 뒤 접촉점과 충격량까지 넘긴다.</li><li><strong>Kinematic Rigidbody와 Static Collider는</strong> — 둘 다 힘에 반응하지 않지만, 정적 콜라이더를 옮기면 정적이라 가정하고 만든 구조를 재구축해야 해서 비싸다.</li><li><strong>Translate와 AddForce의 차이는</strong> — Translate는 물리를 건너뛴 순간 이동이라 벽을 통과하고, AddForce는 질량에 따라 가속이 정해지는 물리 이동이다.</li><li><strong>물리 기반 캐릭터 이동을 만든다면</strong> — Kinematic Rigidbody에 캡슐 콜라이더를 두고 입력은 Update에서 모아 FixedUpdate에서 MovePosition으로 옮긴다. 접지와 벽 판정은 SphereCast로 한다.</li></ul><h3>흔한 오해</h3><ul><li><strong>트리거끼리는 Rigidbody 없이도 이벤트가 온다</strong> — 오지 않는다. 트리거 SphereCollider만 붙은 두 오브젝트를 겹쳐도 조용하다. 한쪽에 Kinematic Rigidbody라도 붙여야 한다.</li><li><strong>MeshCollider가 정확하니 그냥 쓰면 된다</strong> — Convex를 켜야 다른 Rigidbody와 충돌하고(볼록 껍질로 근사, 기본 최대 255면), 그래도 기본 도형보다 훨씬 비싸다. 움직이는 물체는 도형 몇 개를 조합한다.</li><li><strong>FixedUpdate가 Update보다 자주 불린다</strong> — 기본 0.02초, 초당 50번이다. 60fps면 Update가 더 자주 돈다.</li></ul>
+<div class="refs"><h2>참고 자료</h2><ul><li><a href="https://docs.unity3d.com/Manual/CollidersOverview.html" target="_blank" rel="noopener">Unity 매뉴얼 – Introduction to collision</a></li><li><a href="https://docs.unity3d.com/Manual/RigidbodiesOverview.html" target="_blank" rel="noopener">Unity 매뉴얼 – Introduction to rigid body physics</a></li><li><a href="https://docs.unity3d.com/Manual/LayerBasedCollision.html" target="_blank" rel="noopener">Unity 매뉴얼 – Layer-based collision detection</a></li><li><a href="https://docs.unity3d.com/ScriptReference/Physics.SphereCast.html" target="_blank" rel="noopener">Unity 스크립팅 API – Physics.SphereCast</a></li></ul></div>
+</article>
+<div class="pager"><a href="02-06.html">← UI</a><a href="02-08.html">애니메이션·카메라·입력 →</a></div>
+<footer>정리 글은 Claude가 썼다. 틀린 내용이 있을 수 있으니 중요한 내용은 참고 자료 원문으로 확인한다.</footer>
+</main>
+</body>
+</html>

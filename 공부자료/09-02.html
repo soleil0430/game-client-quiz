@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TCP와 UDP · 네트워크</title>
+<style>
+  :root {
+    --bg:#f2f5f7; --card:#fff; --panel:#f7f9fb; --text:#3c3c3c; --muted:#7a8b93; --line:#e2e8ea;
+    --green:#58cc02; --green-d:#46a302; --blue:#1cb0f6; --blue-d:#1899d6; --blue-bg:#ddf4ff;
+    --purple:#ce82ff; --purple-d:#a855f7; --purple-bg:#f5e8ff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#131f24; --card:#1b2b32; --panel:#16252b; --text:#eaf2f6; --muted:#8fa7b2; --line:#2c4048;
+      --blue-bg:#12303d; --purple-bg:#2e2036; --purple-d:#c99bec; --blue-d:#58c4f7; --green-d:#7ddc2a; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
+  a { color: var(--blue-d); }
+  .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
+  .nav a { text-decoration: none; }
+  .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
+    padding: 4px 12px; font-size: .8rem; font-weight: 800; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
+  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
+  p, ul, ol { margin: 10px 0; }
+  li { margin: 5px 0; }
+  .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
+  .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
+  .card { background: var(--card); border: 2px solid var(--line); border-radius: 20px; padding: 20px; margin-bottom: 14px; }
+  .list { display: grid; gap: 10px; }
+  .list a { display: block; background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px;
+    border-radius: 18px; padding: 14px 16px; text-decoration: none; color: inherit; }
+  .list a:hover { border-color: var(--purple); }
+  .list strong { display: block; font-size: 1.02rem; font-weight: 800; }
+  .list span { color: var(--muted); font-size: .86rem; font-weight: 600; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em;
+    background: var(--panel); border: 1px solid var(--line); padding: 1px 6px; border-radius: 6px; font-weight: 700; }
+  pre { background: var(--panel); border: 2px solid var(--line); padding: 14px; border-radius: 14px; overflow-x: auto; line-height: 1.65; }
+  pre code { background: none; border: 0; padding: 0; }
+  table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; font-size: .94rem; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; }
+  th { background: var(--panel); }
+  .refs { border-top: 2px solid var(--line); margin-top: 24px; padding-top: 14px; }
+  .refs ul { padding-left: 20px; }
+  .pager { display: flex; justify-content: space-between; gap: 10px; margin-top: 16px; }
+  .pager a { background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px; border-radius: 16px;
+    padding: 12px 16px; text-decoration: none; color: inherit; font-weight: 800; font-size: .9rem; max-width: 48%; }
+  .pager a:hover { border-color: var(--blue); }
+  footer { color: var(--muted); font-size: .8rem; font-weight: 600; margin-top: 28px; }
+</style>
+</head>
+<body>
+<main>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="09.html" class="badge">네트워크 목차</a></div>
+<article class="card">
+<h1>TCP와 UDP</h1>
+<p class="lead">무엇을 기다리느라 느려지는지 알면 게임의 어느 데이터에 무엇을 쓸지 고를 수 있다</p>
+<h3>핵심 개념</h3><p>TCP와 UDP의 차이는 무엇을 보장하느냐보다 <strong>보장을 위해 무엇을 기다리느냐</strong>로 보면 정리된다. TCP는 바이트마다 순서 번호를 붙이고 받은 쪽이 ACK로 확인하며, 확인이 없으면 재전송한다. 순서까지 보장하므로 중간 한 조각이 빠지면 뒤에 이미 도착한 데이터도 응용으로 올라가지 못한다(head-of-line blocking). TCP에서 튀는 지연은 회선이 느려서가 아니라 <strong>빠진 조각을 기다리느라</strong> 생긴다.</p><p>UDP는 그 장치가 전부 없다. 주소만 적어 던지고 도착 여부도 순서도 중복 제거도 하지 않는 대신 지나간 값을 기다리지 않는다. 그래서 선택 기준은 '이 데이터가 늦게 도착해도 쓸모가 있는가'가 된다.</p><table><thead><tr><th>게임 데이터</th><th>고르는 쪽</th><th>이유</th></tr></thead><tbody><tr><td>캐릭터 위치·입력(초당 20~60회)</td><td>UDP</td><td>다음 값이 곧 오므로 잃은 값을 기다리는 것이 손해다</td></tr><tr><td>스킬 사용 확정, 아이템 획득, 채팅</td><td>TCP·UDP 신뢰 채널</td><td>놓치면 다음 패킷이 대신해 주지 못한다</td></tr><tr><td>로그인·결제·랭킹 조회</td><td>TCP(HTTPS)</td><td>유실이 허용되지 않고 빈도가 낮아 지연이 문제되지 않는다</td></tr></tbody></table><p>그래서 실시간 게임은 UDP를 깔고 <strong>필요한 만큼만 신뢰성을 직접 얹는다</strong>. 패킷마다 시퀀스 번호를 붙이고 ACK를 받으며, 제때 ACK가 없으면 재전송하고, 중복은 버리고 순서는 수신 버퍼에서 맞춘다. 모든 패킷에 이 규칙을 걸면 TCP를 다시 만든 꼴이라, 중요한 메시지만 신뢰 채널로 보내는 선택적 신뢰성이 실무 형태다.</p><p>TCP를 쓸 때 게임이 반드시 손대는 옵션이 네이글 알고리즘이다. 네이글은 앞서 보낸 데이터의 ACK가 올 때까지 작은 데이터를 모아 두었다가 묶어 보내 패킷 수를 줄인다. 대역폭에는 좋지만 입력 같은 작은 메시지가 수십 ms 늦게 나가므로 .NET에서는 <code>NoDelay</code>로 끈다. 꺼지는 것은 <strong>모아 보내기뿐</strong>이고 재전송과 순서 보장은 그대로 남는다.</p><pre><code>using System.Net.Sockets;
+
+public static class RealtimeSocket
+{
+    public static TcpClient ConnectForGame(string host, int port)
+    {
+        var client = new TcpClient();
+        client.Connect(host, port);
+        client.NoDelay = true;   // 네이글 끄기: 작은 입력 패킷을 모으지 않고 바로 내보낸다
+        return client;
+    }
+}</code></pre><p>패킷 크기는 MTU(한 번에 보낼 수 있는 상한, 이더넷은 보통 1500바이트)에 맞춘다. 넘으면 조각으로 나뉘는데 UDP는 조각 하나만 잃어도 원래 패킷 전체를 못 쓴다. 게임 패킷을 헤더 포함 1200바이트 안팎으로 맞추는 이유다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>TCP와 UDP의 차이와 게임에서의 선택 기준</strong> — TCP는 연결·순서·재전송을 보장하느라 손실이 나면 뒤 데이터가 밀리고, UDP는 보장이 없는 대신 기다리지 않는다. 최신 값만 의미 있는 위치·입력은 UDP, 유실이 안 되는 거래와 인증은 TCP나 HTTPS로 나눠 쓴다.</li><li><strong>3-way handshake와 2-way가 안 되는 이유</strong> — 클라이언트 SYN, 서버 SYN+ACK, 클라이언트 ACK다. 양쪽이 각자의 초기 순서 번호를 보내고 그것이 상대에게 닿았음을 확인해야 해서 세 번이 필요하다. 두 번이면 서버는 자기 순서 번호가 전달됐는지 알 수 없다.</li><li><strong>4-way handshake와 TIME_WAIT</strong> — FIN과 ACK를 양쪽이 주고받아 네 번 오간다. 먼저 닫은 쪽이 마지막 ACK 유실과 늦게 오는 패킷에 대비해 TIME_WAIT으로 머문다. 서버에 TIME_WAIT이 쌓이면 서버가 먼저 끊는 구조가 아닌지 의심한다.</li><li><strong>흐름 제어와 혼잡 제어</strong> — 흐름 제어는 수신자 버퍼에, 혼잡 제어는 중간 네트워크 상태에 맞춰 전송량을 조절한다. 실제 전송량은 두 윈도 중 작은 쪽으로 정해지고, 혼잡 제어는 손실을 혼잡 신호로 읽어 전송률을 낮춘다.</li><li><strong>상대가 갑자기 꺼졌을 때 알아채는 법</strong> — 비정상 종료에는 FIN이 오지 않아 다음 송신 전까지 알 수 없다. 응용에서 몇 초 주기로 하트비트를 주고받고 연속 몇 회 응답이 없으면 끊긴 것으로 처리한다. TCP keep-alive는 기본 주기가 분 단위라 게임에는 느리다.</li></ul><h3>흔한 오해</h3><ul><li><strong>UDP는 언제나 TCP보다 빠르다</strong> — 손실이 없으면 크게 다르지 않다. UDP의 이점은 잃은 패킷을 기다리지 않아 지연이 튀지 않는 것이지 회선이 빨라지는 것이 아니다.</li><li><strong>TCP_NODELAY를 켜면 신뢰성이 사라진다</strong> — 꺼지는 것은 작은 패킷 모아 보내기뿐이고 재전송·순서 보장은 그대로 동작한다.</li><li><strong>TIME_WAIT은 서버에 생긴다</strong> — 먼저 close한 쪽에 생긴다.</li><li><strong>Connected 속성으로 연결 상태를 알 수 있다</strong> — 마지막 통신 시점의 값이라 현재를 보장하지 않는다. 지금 살아 있는지는 하트비트로만 알 수 있다.</li></ul>
+<div class="refs"><h2>참고 자료</h2><ul><li><a href="https://www.rfc-editor.org/rfc/rfc9293.html" target="_blank" rel="noopener">RFC 9293 – Transmission Control Protocol (TCP)</a></li><li><a href="https://www.rfc-editor.org/rfc/rfc768.html" target="_blank" rel="noopener">RFC 768 – User Datagram Protocol</a></li><li><a href="https://learn.microsoft.com/ko-kr/dotnet/api/system.net.sockets.socket.nodelay" target="_blank" rel="noopener">Microsoft Learn – Socket.NoDelay 속성(네이글 알고리즘)</a></li></ul></div>
+</article>
+<div class="pager"><a href="09-01.html">← 계층 모델</a><a href="09-03.html">소켓과 HTTP →</a></div>
+<footer>정리 글은 Claude가 썼다. 틀린 내용이 있을 수 있으니 중요한 내용은 참고 자료 원문으로 확인한다.</footer>
+</main>
+</body>
+</html>

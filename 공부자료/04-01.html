@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>렌더링 파이프라인 · 그래픽스·렌더링</title>
+<style>
+  :root {
+    --bg:#f2f5f7; --card:#fff; --panel:#f7f9fb; --text:#3c3c3c; --muted:#7a8b93; --line:#e2e8ea;
+    --green:#58cc02; --green-d:#46a302; --blue:#1cb0f6; --blue-d:#1899d6; --blue-bg:#ddf4ff;
+    --purple:#ce82ff; --purple-d:#a855f7; --purple-bg:#f5e8ff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#131f24; --card:#1b2b32; --panel:#16252b; --text:#eaf2f6; --muted:#8fa7b2; --line:#2c4048;
+      --blue-bg:#12303d; --purple-bg:#2e2036; --purple-d:#c99bec; --blue-d:#58c4f7; --green-d:#7ddc2a; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
+  a { color: var(--blue-d); }
+  .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
+  .nav a { text-decoration: none; }
+  .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
+    padding: 4px 12px; font-size: .8rem; font-weight: 800; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
+  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
+  p, ul, ol { margin: 10px 0; }
+  li { margin: 5px 0; }
+  .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
+  .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
+  .card { background: var(--card); border: 2px solid var(--line); border-radius: 20px; padding: 20px; margin-bottom: 14px; }
+  .list { display: grid; gap: 10px; }
+  .list a { display: block; background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px;
+    border-radius: 18px; padding: 14px 16px; text-decoration: none; color: inherit; }
+  .list a:hover { border-color: var(--purple); }
+  .list strong { display: block; font-size: 1.02rem; font-weight: 800; }
+  .list span { color: var(--muted); font-size: .86rem; font-weight: 600; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em;
+    background: var(--panel); border: 1px solid var(--line); padding: 1px 6px; border-radius: 6px; font-weight: 700; }
+  pre { background: var(--panel); border: 2px solid var(--line); padding: 14px; border-radius: 14px; overflow-x: auto; line-height: 1.65; }
+  pre code { background: none; border: 0; padding: 0; }
+  table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; font-size: .94rem; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; }
+  th { background: var(--panel); }
+  .refs { border-top: 2px solid var(--line); margin-top: 24px; padding-top: 14px; }
+  .refs ul { padding-left: 20px; }
+  .pager { display: flex; justify-content: space-between; gap: 10px; margin-top: 16px; }
+  .pager a { background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px; border-radius: 16px;
+    padding: 12px 16px; text-decoration: none; color: inherit; font-weight: 800; font-size: .9rem; max-width: 48%; }
+  .pager a:hover { border-color: var(--blue); }
+  footer { color: var(--muted); font-size: .8rem; font-weight: 600; margin-top: 28px; }
+</style>
+</head>
+<body>
+<main>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="04.html" class="badge">그래픽스·렌더링 목차</a></div>
+<article class="card">
+<h1>렌더링 파이프라인</h1>
+<p class="lead">씬의 큐브 하나가 화면 픽셀이 되기까지 CPU와 GPU가 나눠 맡는 단계를 순서대로 꿴다</p>
+<h3>핵심 개념</h3><p>렌더링은 <strong>무엇을 그릴지 정하는 CPU</strong>와 <strong>실제로 칠하는 GPU</strong>의 분업이다. CPU는 컬링으로 목록을 추리고 정렬한 뒤 렌더 스테이트를 잡고 드로우 콜을 보낸다. 이후 GPU 쪽 순서는 <strong>버텍스 셰이더 → 클리핑·원근 나눗셈·뷰포트 변환 → 래스터화 → 프래그먼트 셰이더 → 깊이·스텐실 테스트와 블렌딩 → 프레임 버퍼</strong>다. 화면 좌표가 나와야 어떤 픽셀을 덮는지 알고, 조각이 나와야 색을 계산하고, 색이 나와야 기존 값과 섞으므로 이 순서는 뒤집히지 않는다.</p><table><thead><tr><th>변환</th><th>하는 일</th></tr></thead><tbody><tr><td>모델(로컬 → 월드)</td><td>오브젝트를 씬 좌표에 놓는다</td></tr><tr><td>뷰(월드 → 뷰)</td><td>카메라를 원점으로 옮긴다</td></tr><tr><td>투영(뷰 → 클립)</td><td>절두체를 정육면체로 펴 원근을 준비한다</td></tr><tr><td>원근 나눗셈(→ NDC)</td><td>w로 나눠 멀수록 작아지게 한다</td></tr><tr><td>뷰포트(→ 화면)</td><td>-1~1을 픽셀 좌표로 바꾼다</td></tr></tbody></table><p>셰이더는 우리가 코드를 쓰는 프로그래머블 단계이고, 래스터라이저와 깊이·스텐실 테스트, 블렌딩은 하드웨어가 하는 고정 기능 단계다. 고정 단계도 동작은 <code>Cull</code>, <code>ZWrite</code>, <code>Blend</code> 같은 렌더 스테이트로 고른다.</p><p>여기서 드로우 콜·패스·렌더 스테이트의 관계도 정리된다. 셰이더의 <strong>패스</strong>는 한 번 그리는 방법이고, <strong>렌더 스테이트</strong>는 그때 고정 기능 단계를 어떻게 설정할지이며, <strong>드로우 콜</strong>은 그 상태로 이 메시를 그리라는 CPU의 명령이다. 배칭은 같은 상태로 그릴 수 있는 것들을 묶어 이 명령 횟수를 줄이는 일이다.</p><p>정점의 UV·색이 삼각형 내부 픽셀에서 정해지는 것은 래스터라이저가 무게중심 좌표로, 그것도 원근 보정을 넣어 보간하기 때문이다. 실행 횟수는 프래그먼트가 정점보다 훨씬 많으므로 픽셀마다 같은 결과가 나오는 계산은 버텍스 셰이더로 올린다.</p><p>GPU가 빠른 것은 같은 명령을 수많은 데이터에 한꺼번에 적용하는 구조라서다. 단순한 코어를 대량으로 두고 정점·픽셀을 묶음(워프) 단위로 돌리며 메모리 대기는 다른 묶음으로 감춘다. 대가로 분기 예측과 큰 캐시를 포기해, 한 묶음 안에서 <code>if</code>가 갈리면 양쪽을 다 실행하고 필요 없는 결과를 버린다. 스킨드 메시는 정점에 담긴 본 인덱스와 가중치로 본 행렬을 섞어 정점을 옮긴다.</p><p><strong>모바일(타일 기반 GPU)</strong>은 지오메트리를 먼저 다 처리해 타일별로 나눠 담은 뒤(비닝) 타일 하나씩 칠한다. 색·깊이를 칩 안 타일 메모리에서 다뤄 대역폭이 싼 대신, 정점 처리 결과를 메모리에 적어 두므로 정점 수와 정점 속성 크기가 데스크톱보다 더 아프다. 프레임 도중 렌더 타겟을 바꾸거나 그린 화면을 다시 읽으면 타일을 내렸다 올리는 비용이 붙는다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>큐브 하나가 화면에 그려지기까지</strong> — CPU가 컬링·정렬을 거쳐 렌더 스테이트를 잡고 드로우 콜을 보내면, GPU가 정점을 클립 공간으로 옮기고 삼각형을 조각으로 래스터화한 뒤 조각마다 색을 계산하고, 깊이 테스트와 블렌딩을 거쳐 프레임 버퍼에 쓴다.</li><li><strong>세 단계의 역할</strong> — 버텍스 셰이더는 정점마다, 프래그먼트 셰이더는 조각마다 도는 우리 코드고, 그 사이의 래스터라이저는 삼각형이 덮는 조각을 만들고 정점 값을 보간하는 고정 기능이다.</li><li><strong>정점 사이 값은 어떻게 정해지나</strong> — 래스터라이저가 세 정점 값을 무게중심 좌표로, 원근 보정까지 넣어 보간해 넘긴다.</li><li><strong>GPU는 왜 빠른가</strong> — 같은 연산을 대량의 데이터에 동시에 적용하도록 단순 코어를 많이 둔 구조다. 대신 분기와 순차 의존이 큰 작업에는 약하다.</li></ul><h3>흔한 오해</h3><ul><li><strong>래스터라이저도 셰이더로 짠다</strong> — 래스터화·깊이 테스트·블렌딩은 고정 기능이고, 우리는 렌더 스테이트로 동작만 고른다.</li><li><strong>투영 변환을 하면 화면 좌표가 나온다</strong> — 투영은 클립 공간까지다. 원근 나눗셈과 뷰포트 변환이 남아 있다.</li><li><strong>깊이 테스트는 항상 픽셀 셰이더 뒤다</strong> — 셰이더가 깊이를 바꾸거나 <code>discard</code>하지 않으면 하드웨어가 먼저 테스트해 셰이딩을 건너뛴다(Early-Z).</li><li><strong>프래그먼트 셰이더는 보이는 픽셀만큼만 돈다</strong> — 가려진 조각도 실행될 수 있고, 미분값 때문에 2x2 묶음으로 돌아 가장자리에서는 버려지는 실행이 생긴다.</li></ul>
+<div class="refs"><h2>참고 자료</h2><ul><li><a href="https://docs.unity3d.com/Manual/render-pipelines.html" target="_blank" rel="noopener">Unity 매뉴얼 – Render pipelines</a></li><li><a href="https://docs.unity3d.com/Manual/writing-shader-writing-shader-programs-hlsl.html" target="_blank" rel="noopener">Unity 매뉴얼 – Writing HLSL shader programs</a></li><li><a href="https://learn.microsoft.com/ko-kr/windows/win32/direct3d11/overviews-direct3d-11-graphics-pipeline" target="_blank" rel="noopener">Microsoft Learn – 그래픽 파이프라인(Direct3D 11)</a></li><li><a href="https://docs.unity3d.com/Manual/class-SkinnedMeshRenderer.html" target="_blank" rel="noopener">Unity 매뉴얼 – Skinned Mesh Renderer component</a></li></ul></div>
+</article>
+<div class="pager"><span></span><a href="04-02.html">컬링과 가시성 →</a></div>
+<footer>정리 글은 Claude가 썼다. 틀린 내용이 있을 수 있으니 중요한 내용은 참고 자료 원문으로 확인한다.</footer>
+</main>
+</body>
+</html>

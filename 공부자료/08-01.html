@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>프로세스와 스레드 · 운영체제·동시성</title>
+<style>
+  :root {
+    --bg:#f2f5f7; --card:#fff; --panel:#f7f9fb; --text:#3c3c3c; --muted:#7a8b93; --line:#e2e8ea;
+    --green:#58cc02; --green-d:#46a302; --blue:#1cb0f6; --blue-d:#1899d6; --blue-bg:#ddf4ff;
+    --purple:#ce82ff; --purple-d:#a855f7; --purple-bg:#f5e8ff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#131f24; --card:#1b2b32; --panel:#16252b; --text:#eaf2f6; --muted:#8fa7b2; --line:#2c4048;
+      --blue-bg:#12303d; --purple-bg:#2e2036; --purple-d:#c99bec; --blue-d:#58c4f7; --green-d:#7ddc2a; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
+  a { color: var(--blue-d); }
+  .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
+  .nav a { text-decoration: none; }
+  .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
+    padding: 4px 12px; font-size: .8rem; font-weight: 800; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
+  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
+  p, ul, ol { margin: 10px 0; }
+  li { margin: 5px 0; }
+  .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
+  .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
+  .card { background: var(--card); border: 2px solid var(--line); border-radius: 20px; padding: 20px; margin-bottom: 14px; }
+  .list { display: grid; gap: 10px; }
+  .list a { display: block; background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px;
+    border-radius: 18px; padding: 14px 16px; text-decoration: none; color: inherit; }
+  .list a:hover { border-color: var(--purple); }
+  .list strong { display: block; font-size: 1.02rem; font-weight: 800; }
+  .list span { color: var(--muted); font-size: .86rem; font-weight: 600; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em;
+    background: var(--panel); border: 1px solid var(--line); padding: 1px 6px; border-radius: 6px; font-weight: 700; }
+  pre { background: var(--panel); border: 2px solid var(--line); padding: 14px; border-radius: 14px; overflow-x: auto; line-height: 1.65; }
+  pre code { background: none; border: 0; padding: 0; }
+  table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; font-size: .94rem; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; }
+  th { background: var(--panel); }
+  .refs { border-top: 2px solid var(--line); margin-top: 24px; padding-top: 14px; }
+  .refs ul { padding-left: 20px; }
+  .pager { display: flex; justify-content: space-between; gap: 10px; margin-top: 16px; }
+  .pager a { background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px; border-radius: 16px;
+    padding: 12px 16px; text-decoration: none; color: inherit; font-weight: 800; font-size: .9rem; max-width: 48%; }
+  .pager a:hover { border-color: var(--blue); }
+  footer { color: var(--muted); font-size: .8rem; font-weight: 600; margin-top: 28px; }
+</style>
+</head>
+<body>
+<main>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="08.html" class="badge">운영체제·동시성 목차</a></div>
+<article class="card">
+<h1>프로세스와 스레드</h1>
+<p class="lead">프로세스는 자원의 울타리, 스레드는 그 안의 실행 흐름이다. 무엇을 공유하는지가 전부다</p>
+<h3>핵심 개념</h3><p>운영체제가 메모리와 파일 핸들 같은 자원을 떼어 주는 단위가 <strong>프로세스</strong>이고, 그 자원 위에서 CPU를 받아 실제로 코드를 실행하는 흐름이 <strong>스레드</strong>다. 게임을 실행하면 프로세스 하나가 뜨고, 그 안에서 메인 스레드가 Update를 돌리는 동안 다른 스레드가 에셋을 읽는다. 프로그램은 아직 디스크에 있는 실행 파일이고, 그걸 올려 자원을 받은 순간부터 프로세스다. 둘을 가르는 기준은 하나다. <strong>주소 공간을 같이 쓰느냐</strong>.</p><table><thead><tr><th>영역</th><th>같은 프로세스의 스레드끼리</th><th>왜 그런가</th></tr></thead><tbody><tr><td>코드·전역 데이터·힙</td><td>공유</td><td>같은 프로그램이고, 객체를 주고받아야 한다</td></tr><tr><td>스택</td><td>각자</td><td>스레드마다 호출 관계와 지역 변수가 다르다</td></tr><tr><td>PC·레지스터</td><td>각자</td><td>지금 어느 줄을 실행 중인지가 다르다</td></tr><tr><td>파일 핸들·소켓</td><td>공유</td><td>프로세스 단위로 열린 자원이다</td></tr></tbody></table><p>커널은 프로세스마다 <strong>PCB</strong>(Process Control Block)를 하나씩 두고 ID, 상태, PC와 레지스터 값, 메모리·파일 정보를 담는다. 문맥 전환 때 돌던 값을 PCB에 저장했다가 다음 프로세스의 PCB에서 복원한다. 스레드에도 같은 역할의 TCB가 있는데 주소 공간 정보가 빠져 담을 것이 훨씬 적고, 그래서 스레드 전환이 프로세스 전환보다 싸다.</p><p>게임 클라이언트가 멀티프로세스 대신 멀티스레드를 쓰는 이유도 이 표에서 나온다. 메시를 백그라운드에서 파싱해 메인 스레드에 넘길 때, 프로세스끼리는 파이프나 공유 메모리 같은 IPC로 실어 보내야 하지만 스레드끼리는 같은 힙에 있는 배열을 그대로 가리키면 끝이다. 대가도 분명하다. 같은 메모리를 건드리니 경쟁 상태가 생기고, 한 스레드에서 터진 예외가 프로세스 전체를 내린다. 브라우저가 탭마다 프로세스를 쓰는 것은 그 반대 선택이다. 비싸지만 한 탭이 죽어도 나머지는 산다.</p><p>사용자 수준 스레드와 커널 수준 스레드도 같은 맥락이다. 사용자 수준 스레드는 라이브러리가 스케줄링해 커널을 거치지 않으니 생성·전환이 싸지만, 커널이 존재를 몰라서 하나가 블로킹 시스템 콜에 걸리면 프로세스 전체가 멈추고 코어 여러 개에 나눠 돌릴 수도 없다. 유니티 코루틴이 여기서 더 극단적인 쪽이다. 코루틴은 스레드가 아니라 메인 스레드가 프레임마다 이어서 돌려 주는 상태 기계라, 안에서 무거운 계산을 하면 그대로 프레임이 튄다. 진짜 병렬이 필요하면 커널 스레드 위에서 도는 Job System이나 <code>Thread</code>를 써야 한다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>프로그램·프로세스·스레드의 차이는</strong> — 프로그램은 디스크의 실행 파일, 프로세스는 그것을 메모리에 올려 자원을 할당받은 실행 단위, 스레드는 프로세스 안에서 CPU를 받아 도는 실행 흐름이다. 프로세스는 주소 공간이 독립이고 스레드는 그 주소 공간을 공유한다.</li><li><strong>왜 멀티프로세스가 아니라 멀티스레드인가</strong> — 게임은 로딩 결과나 경로 탐색 결과를 메인 스레드와 계속 주고받는데, 스레드는 같은 힙을 쓰니 복사 없이 넘길 수 있고 전환 비용도 싸다. 대신 동기화 비용과 장애 격리를 포기한 것이고, 격리가 더 중요하면 프로세스를 나눈다.</li><li><strong>스레드마다 스택과 PC를 따로 두는 이유는</strong> — 스레드마다 호출 경로와 지역 변수가 다르기 때문이다. 공유하면 한 스레드의 함수 반환이 다른 스레드의 호출 관계를 망가뜨린다. 반대로 코드·전역·힙은 같아도 되니 공유해 통신에 쓴다.</li><li><strong>IPC에는 어떤 것이 있나</strong> — 파이프, 공유 메모리, 메시지 큐, 소켓, 시그널이다. 공유 메모리는 복사가 없어 가장 빠른 대신 동기화를 직접 해야 하고, 소켓은 느린 만큼 다른 기기까지 확장된다.</li></ul><h3>흔한 오해</h3><ul><li><strong>주소만 알면 다른 프로세스의 변수를 읽을 수 있다</strong> — 프로세스마다 가상 주소 공간이 따로라 같은 숫자 주소가 서로 다른 물리 메모리를 가리킨다. 커널이 마련한 IPC를 거쳐야 한다.</li><li><strong>스레드는 메모리를 전부 공유한다</strong> — 스택은 스레드마다 따로다. 다른 스레드의 지역 변수를 가리키는 참조를 넘겨 쓰는 코드는 그래서 위험하다.</li><li><strong>코루틴은 스레드다</strong> — 유니티 코루틴은 메인 스레드에서 나눠 실행되는 상태 기계라 병렬이 아니다. 안에서 무거운 계산을 하면 프레임이 그대로 멈춘다.</li><li><strong>사용자 수준 스레드가 언제나 낫다</strong> — 전환은 싸지만 커널이 몰라서 블로킹 콜 하나에 프로세스 전체가 멈추고 멀티코어도 못 쓴다.</li></ul>
+<div class="refs"><h2>참고 자료</h2><ul><li><a href="https://learn.microsoft.com/ko-kr/dotnet/standard/threading/threads-and-threading" target="_blank" rel="noopener">Microsoft Learn – 스레드 및 스레드 처리(.NET)</a></li><li><a href="https://learn.microsoft.com/en-us/windows/win32/procthread/about-processes-and-threads" target="_blank" rel="noopener">Microsoft Learn – About Processes and Threads(Win32)</a></li><li><a href="https://docs.unity3d.com/Manual/job-system.html" target="_blank" rel="noopener">Unity 매뉴얼 – Write multithreaded code with the job system</a></li></ul></div>
+</article>
+<div class="pager"><span></span><a href="08-02.html">메모리 구조 →</a></div>
+<footer>정리 글은 Claude가 썼다. 틀린 내용이 있을 수 있으니 중요한 내용은 참고 자료 원문으로 확인한다.</footer>
+</main>
+</body>
+</html>

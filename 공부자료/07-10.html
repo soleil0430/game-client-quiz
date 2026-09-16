@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>코딩 테스트와 실기 유형 · 자료구조·알고리즘</title>
+<style>
+  :root {
+    --bg:#f2f5f7; --card:#fff; --panel:#f7f9fb; --text:#3c3c3c; --muted:#7a8b93; --line:#e2e8ea;
+    --green:#58cc02; --green-d:#46a302; --blue:#1cb0f6; --blue-d:#1899d6; --blue-bg:#ddf4ff;
+    --purple:#ce82ff; --purple-d:#a855f7; --purple-bg:#f5e8ff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#131f24; --card:#1b2b32; --panel:#16252b; --text:#eaf2f6; --muted:#8fa7b2; --line:#2c4048;
+      --blue-bg:#12303d; --purple-bg:#2e2036; --purple-d:#c99bec; --blue-d:#58c4f7; --green-d:#7ddc2a; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
+  a { color: var(--blue-d); }
+  .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
+  .nav a { text-decoration: none; }
+  .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
+    padding: 4px 12px; font-size: .8rem; font-weight: 800; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
+  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
+  p, ul, ol { margin: 10px 0; }
+  li { margin: 5px 0; }
+  .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
+  .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
+  .card { background: var(--card); border: 2px solid var(--line); border-radius: 20px; padding: 20px; margin-bottom: 14px; }
+  .list { display: grid; gap: 10px; }
+  .list a { display: block; background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px;
+    border-radius: 18px; padding: 14px 16px; text-decoration: none; color: inherit; }
+  .list a:hover { border-color: var(--purple); }
+  .list strong { display: block; font-size: 1.02rem; font-weight: 800; }
+  .list span { color: var(--muted); font-size: .86rem; font-weight: 600; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em;
+    background: var(--panel); border: 1px solid var(--line); padding: 1px 6px; border-radius: 6px; font-weight: 700; }
+  pre { background: var(--panel); border: 2px solid var(--line); padding: 14px; border-radius: 14px; overflow-x: auto; line-height: 1.65; }
+  pre code { background: none; border: 0; padding: 0; }
+  table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; font-size: .94rem; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; }
+  th { background: var(--panel); }
+  .refs { border-top: 2px solid var(--line); margin-top: 24px; padding-top: 14px; }
+  .refs ul { padding-left: 20px; }
+  .pager { display: flex; justify-content: space-between; gap: 10px; margin-top: 16px; }
+  .pager a { background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px; border-radius: 16px;
+    padding: 12px 16px; text-decoration: none; color: inherit; font-weight: 800; font-size: .9rem; max-width: 48%; }
+  .pager a:hover { border-color: var(--blue); }
+  footer { color: var(--muted); font-size: .8rem; font-weight: 600; margin-top: 28px; }
+</style>
+</head>
+<body>
+<main>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="07.html" class="badge">자료구조·알고리즘 목차</a></div>
+<article class="card">
+<h1>코딩 테스트와 실기 유형</h1>
+<p class="lead">라이브 코딩·코드 리뷰 과제에서 보는 것은 정답이 아니라 푸는 과정과 예외 처리다</p>
+<h3>핵심 개념</h3><p>실기는 세 가지로 나온다. 화면을 공유하며 기본 개념을 변형한 문제를 푸는 <strong>라이브 코딩</strong>, 제출한 풀이를 두고 "왜 이렇게 풀었나, 더 줄일 곳은 없나"를 묻는 <strong>풀이 리뷰</strong>, 일부러 버그를 심은 코드에서 문제를 찾는 <strong>코드 리뷰 과제</strong>다. 셋 다 최종 답보다 과정을 본다.</p><p>그래서 순서를 고정해 두면 흔들리지 않는다. 입력 크기와 값의 범위를 먼저 되묻고(N이 10만인지 10억인지에 따라 답이 달라진다), 빈 배열·원소 하나·중복·음수·오버플로 같은 예외 케이스를 입으로 짚고, 무식한 풀이를 복잡도와 함께 말한 뒤 개선안을 제안하고, 합의된 다음에 짠다. 다 짠 뒤에는 작은 입력을 손으로 돌려 본다. 말없이 10분 코딩하는 것이 가장 나쁜 답이다.</p><p>단골 문제는 정해져 있고 대부분 <strong>한 번만 훑고 추가 공간을 쓰지 않는</strong> 풀이를 기대한다. 1부터 N 중 빠진 수는 <code>N * (N + 1) / 2</code>에서 배열의 합을 빼면 되지만 N이 크면 합이 오버플로하므로 XOR이 더 안전하다. 중복 찾기는 <code>HashSet&lt;T&gt;</code> 한 번 훑기, 문자열 뒤집기는 양 끝에서 좁혀 오는 맞바꾸기, 행렬 90도 회전은 전치 뒤 각 행 뒤집기다. 라이브러리 없이 문자열을 정수로 바꾸는 문제는 부호·공백·잘못된 문자·오버플로를 어디까지 처리하는지가 평가 대상이고, 실무라면 <code>int.TryParse</code>로 실패를 값으로 받는다고 덧붙이면 좋다.</p><pre><code>public static class Puzzles
+{
+    // 1..n 중 하나가 빠진 배열에서 빠진 수. 합 공식과 달리 오버플로가 없다
+    public static int Missing(int[] a, int n)
+    {
+        int x = 0;
+        for (int i = 1; i &lt;= n; i++) x ^= i;
+        foreach (int v in a) x ^= v;           // 짝지어 상쇄되고 빠진 수만 남는다
+        return x;
+    }
+
+    // N×N 행렬을 제자리에서 시계 방향 90도 회전. 시간 O(N²), 공간 O(1)
+    public static void RotateClockwise(int[,] m)
+    {
+        int n = m.GetLength(0);
+        for (int i = 0; i &lt; n; i++)            // 전치: [i, j]와 [j, i]를 맞바꾼다
+            for (int j = i + 1; j &lt; n; j++)
+                (m[i, j], m[j, i]) = (m[j, i], m[i, j]);
+
+        for (int i = 0; i &lt; n; i++)            // 각 행을 좌우로 뒤집는다
+            for (int j = 0; j &lt; n / 2; j++)
+                (m[i, j], m[i, n - 1 - j]) = (m[i, n - 1 - j], m[i, j]);
+    }
+}</code></pre><p>코드 리뷰 과제에 심는 버그도 목록이 짧다. 배열 한 칸 초과(<code>i &lt;= n</code>), 대입과 비교 혼동, null 접근, 초기화하지 않은 변수, 해제하지 않는 자원이다. C#은 <code>if (x = 5)</code>가 컴파일 오류지만 bool 변수라면 <code>if (isReady = true)</code>가 그대로 통과한다. 클라이언트 면접이면 이벤트를 구독만 하고 해제하지 않아 객체가 살아남는 누수를 짚으면 가산점이 된다.</p><h3>면접에서 이렇게 답한다</h3><ul><li><strong>문제를 받으면 무엇부터 하나</strong> — 입력 크기와 값의 범위를 먼저 확인한다. N에 따라 O(N²)이 되는지가 갈리기 때문이다. 그다음 예외 케이스를 짚고, 무식한 풀이를 복잡도와 함께 말한 뒤 개선안을 제안하고 합의되면 짠다.</li><li><strong>빠진 수 하나 찾기</strong> — 1부터 N까지의 합에서 배열의 합을 빼면 O(N) 시간, O(1) 공간에 끝난다. 합이 오버플로할 것 같으면 1부터 N까지와 배열 원소를 모두 XOR해 같은 값을 얻는다.</li><li><strong>행렬 90도 회전</strong> — 전치한 뒤 각 행을 좌우로 뒤집으면 시계 방향, 전치 뒤 행 순서를 뒤집으면 반시계 방향이다. 맞바꾸기만 하므로 추가 배열 없이 O(N²)에 된다.</li><li><strong>이 코드의 문제는</strong> — 경계부터 본다. 조건이 <code>i &lt;= n</code>이면 마지막에 <code>arr[n]</code>을 읽는다. C#은 <code>IndexOutOfRangeException</code>으로 바로 티가 나지만 C/C++라면 조용히 엉뚱한 메모리를 읽어 더 찾기 어렵다.</li></ul><h3>흔한 오해</h3><ul><li><strong>답이 맞으면 통과다</strong> — 복잡도와 예외 케이스를 스스로 말하지 않으면 감점이다. 과정이 평가 대상이다.</li><li><strong>유효한 인덱스는 0부터 n까지다</strong> — <code>n - 1</code>까지다. 한 칸 초과가 가장 흔한 버그다.</li><li><strong>합 공식은 언제나 안전하다</strong> — N이 크면 합이 int 범위를 넘는다. long으로 올리거나 XOR을 쓴다.</li><li><strong>전치만 하면 회전이 된다</strong> — 전치는 대각선 대칭일 뿐이라 행을 뒤집어야 회전이 된다.</li><li><strong>막히면 조용히 생각하는 게 낫다</strong> — 화면에 아무것도 없으면 판단할 근거가 없다. 막힌 지점을 말하면 힌트가 나온다.</li></ul>
+<div class="refs"><h2>참고 자료</h2><ul><li><a href="https://learn.microsoft.com/ko-kr/dotnet/api/system.indexoutofrangeexception" target="_blank" rel="noopener">Microsoft Learn – IndexOutOfRangeException 클래스</a></li><li><a href="https://learn.microsoft.com/ko-kr/dotnet/csharp/language-reference/builtin-types/arrays" target="_blank" rel="noopener">Microsoft Learn – 배열(C# 참조)</a></li><li><a href="https://learn.microsoft.com/ko-kr/dotnet/api/system.int32.tryparse" target="_blank" rel="noopener">Microsoft Learn – Int32.TryParse 메서드</a></li></ul></div>
+</article>
+<div class="pager"><a href="07-09.html">← 풀이 기법</a><span></span></div>
+<footer>정리 글은 Claude가 썼다. 틀린 내용이 있을 수 있으니 중요한 내용은 참고 자료 원문으로 확인한다.</footer>
+</main>
+</body>
+</html>

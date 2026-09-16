@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>행렬과 좌표계 · 게임 수학·물리</title>
+<style>
+  :root {
+    --bg:#f2f5f7; --card:#fff; --panel:#f7f9fb; --text:#3c3c3c; --muted:#7a8b93; --line:#e2e8ea;
+    --green:#58cc02; --green-d:#46a302; --blue:#1cb0f6; --blue-d:#1899d6; --blue-bg:#ddf4ff;
+    --purple:#ce82ff; --purple-d:#a855f7; --purple-bg:#f5e8ff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#131f24; --card:#1b2b32; --panel:#16252b; --text:#eaf2f6; --muted:#8fa7b2; --line:#2c4048;
+      --blue-bg:#12303d; --purple-bg:#2e2036; --purple-d:#c99bec; --blue-d:#58c4f7; --green-d:#7ddc2a; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 600 16px/1.8 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif; }
+  main { max-width: 680px; margin: 0 auto; padding: 16px 16px 48px; }
+  a { color: var(--blue-d); }
+  .nav { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 14px; font-size: .9rem; font-weight: 800; }
+  .nav a { text-decoration: none; }
+  .badge { display: inline-block; background: var(--purple-bg); color: var(--purple-d); border-radius: 999px;
+    padding: 4px 12px; font-size: .8rem; font-weight: 800; }
+  h1 { font-size: 1.5rem; font-weight: 800; margin: 12px 0 6px; letter-spacing: -.02em; }
+  h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 6px; }
+  h3 { font-size: 1.05rem; font-weight: 800; margin: 26px 0 6px; }
+  p, ul, ol { margin: 10px 0; }
+  li { margin: 5px 0; }
+  .lead { color: var(--muted); font-weight: 700; margin: 0 0 18px; }
+  .muted { color: var(--muted); font-size: .9rem; font-weight: 600; }
+  .card { background: var(--card); border: 2px solid var(--line); border-radius: 20px; padding: 20px; margin-bottom: 14px; }
+  .list { display: grid; gap: 10px; }
+  .list a { display: block; background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px;
+    border-radius: 18px; padding: 14px 16px; text-decoration: none; color: inherit; }
+  .list a:hover { border-color: var(--purple); }
+  .list strong { display: block; font-size: 1.02rem; font-weight: 800; }
+  .list span { color: var(--muted); font-size: .86rem; font-weight: 600; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em;
+    background: var(--panel); border: 1px solid var(--line); padding: 1px 6px; border-radius: 6px; font-weight: 700; }
+  pre { background: var(--panel); border: 2px solid var(--line); padding: 14px; border-radius: 14px; overflow-x: auto; line-height: 1.65; }
+  pre code { background: none; border: 0; padding: 0; }
+  table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; font-size: .94rem; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; }
+  th { background: var(--panel); }
+  .refs { border-top: 2px solid var(--line); margin-top: 24px; padding-top: 14px; }
+  .refs ul { padding-left: 20px; }
+  .pager { display: flex; justify-content: space-between; gap: 10px; margin-top: 16px; }
+  .pager a { background: var(--card); border: 2px solid var(--line); border-bottom-width: 4px; border-radius: 16px;
+    padding: 12px 16px; text-decoration: none; color: inherit; font-weight: 800; font-size: .9rem; max-width: 48%; }
+  .pager a:hover { border-color: var(--blue); }
+  footer { color: var(--muted); font-size: .8rem; font-weight: 600; margin-top: 28px; }
+</style>
+</head>
+<body>
+<main>
+<div class="nav"><a href="../index.html#library">← 도서관</a><a href="05.html" class="badge">게임 수학·물리 목차</a></div>
+<article class="card">
+<h1>행렬과 좌표계</h1>
+<p class="lead">여러 변환을 곱해 하나로 합치는 도구다. 곱하는 순서와 규약이 결과를 바꾼다</p>
+<h3>핵심 개념</h3><p>변환 행렬은 <strong>좌표를 옮기는 규칙을 숫자 표에 적어 둔 것</strong>이다. 표로 적어 두면 여러 규칙을 미리 곱해 하나로 합쳐 정점 수만 개에 한 번만 적용할 수 있다. 3차원인데 4×4를 쓰는 이유는 <strong>이동</strong> 때문이다. 3×3은 원점을 반드시 원점으로 보내 평행 이동을 표현할 수 없고, 그러면 곱셈만으로 변환을 이어 붙일 수 없다. w를 더해 4×4(동차 좌표)로 만들면 원근 투영까지 곱 하나로 합쳐진다. 점은 w를 1, 방향 벡터는 0으로 둬 방향에 이동이 붙지 않게 하는데, Unity에서 <code>MultiplyPoint3x4</code>와 <code>MultiplyVector</code>가 나뉜 것이 이 구분이다.</p><p>곱하는 <strong>순서</strong>는 결과를 바꾼다. 행렬 곱에 교환법칙이 없어서다. 열 벡터 규약(v' = M × v)에서는 오른쪽부터 적용되므로 T × R × S가 "크기를 바꾸고, 회전하고, 옮긴다"가 된다. 크기 2배, Y축 90도, 이동 (10,0,0)을 점 (1,0,0)에 적용하면 T × R × S는 (10, 0, -2)를 주지만 뒤집은 S × R × T는 (0, 0, -22)를 준다. 이동을 먼저 하면 회전이 원점 기준으로 일어나기 때문이다.</p><p>완성된 행렬은 <strong>읽어낼</strong> 수도 있다. 이동은 마지막 열의 위 세 값이고, 왼쪽 위 3×3은 각 열의 길이가 그 축의 스케일, 그 길이로 나눈 방향이 회전된 축이다. Unity의 <code>Matrix4x4</code>도 이 규약을 쓴다고 문서에 명시돼 있다.</p><table><thead><tr><th>규약</th><th>적용</th><th>이동 성분</th><th>합성 순서</th></tr></thead><tbody><tr><td>열 벡터(Unity)</td><td>v' = M × v</td><td>마지막 열</td><td>T × R × S</td></tr><tr><td>행 벡터(DirectX 계열)</td><td>v' = v × M</td><td>마지막 행</td><td>S × R × T</td></tr></tbody></table><p><strong>좌표계</strong>는 무엇을 원점으로 보느냐의 차이다. <code>localPosition</code>은 부모 기준, <code>position</code>은 월드 기준이라, 부모가 (10,0,0)이고 회전·스케일이 기본값이면 로컬 (1,0,0)의 월드 좌표는 (11,0,0)이다. 부모에 회전이나 스케일이 있으면 더하기로는 안 되므로 <code>TransformPoint</code>와 <code>InverseTransformPoint</code>를 쓴다. 후자가 <strong>역행렬</strong>의 쓰임이고, 카메라 월드 변환을 뒤집은 것이 뷰 행렬이다. 정점은 오브젝트 → 월드 → 뷰 → 클립 공간 순으로 간 뒤 w로 나눠 NDC를 거쳐 화면 좌표가 된다. 셰이더의 MVP는 이 세 행렬을 미리 곱해 둔 것이다.</p><pre><code>// TRS는 T × R × S 순서로 행렬을 만든다
+Matrix4x4 m = Matrix4x4.TRS(new Vector3(10f, 0f, 0f), Quaternion.Euler(0f, 90f, 0f), Vector3.one * 2f);
+
+Vector3 p = m.MultiplyPoint3x4(new Vector3(1f, 0f, 0f)); // (10, 0, -2) : 이동이 적용된다
+Vector3 d = m.MultiplyVector(new Vector3(1f, 0f, 0f));   // (0, 0, -2)  : 방향에는 이동이 없다
+
+Vector3 t = m.GetColumn(3);                          // 마지막 열 = 이동 (10, 0, 0)
+float scaleX = ((Vector3)m.GetColumn(0)).magnitude;  // 열의 길이 = 스케일 2</code></pre><h3>면접에서 이렇게 답한다</h3><ul><li><strong>행렬 곱 순서가 왜 중요한가</strong> — 교환법칙이 없어 순서가 곧 적용 순서다. 열 벡터 규약에서는 오른쪽부터 적용되므로 T × R × S가 크기 → 회전 → 이동 순이고, 이동을 먼저 넣으면 회전이 원점 기준으로 일어나 엉뚱한 곳으로 간다.</li><li><strong>왜 4×4 동차 좌표를 쓰나</strong> — 3×3으로는 평행 이동을 표현할 수 없어 변환을 곱으로 이어 붙일 수 없다. w를 더하면 원근 투영까지 곱 하나에 담기고, 점은 w를 1, 방향은 0으로 둬 구분한다.</li><li><strong>로컬 좌표와 월드 좌표의 차이는</strong> — 기준 원점이 다르다. 부모에 회전이나 스케일이 있으면 단순 덧셈으로 변환되지 않으므로 TransformPoint와 InverseTransformPoint로 오간다.</li><li><strong>역행렬은 어디에 쓰나</strong> — 변환을 되돌릴 때다. 월드를 로컬로 가져오는 계산과 뷰 행렬이 대표적이고, 회전과 이동만 있으면 전치와 부호 반전으로 싸게 구한다.</li></ul><h3>흔한 오해</h3><ul><li><strong>이동과 회전은 순서를 바꿔도 결과가 같다</strong> — 위 예에서 (10, 0, -2)와 (0, 0, -22)로 갈린다.</li><li><strong>월드 좌표는 부모 position에 localPosition을 더한 값이다</strong> — 부모에 회전과 스케일이 없을 때만 우연히 맞는다.</li><li><strong>이동 성분은 마지막 행에 있다</strong> — 규약에 따라 다르다. Unity를 포함한 열 벡터 규약에서는 마지막 열이고, 섞으면 변환이 전치된 채로 계산된다.</li><li><strong>왼쪽 위 3×3은 곧 회전 행렬이다</strong> — 스케일이 섞여 있어 회전만 필요하면 각 열을 그 길이로 나눠 꺼낸다.</li></ul>
+<div class="refs"><h2>참고 자료</h2><ul><li><a href="https://docs.unity3d.com/ScriptReference/Matrix4x4.html" target="_blank" rel="noopener">Unity 스크립팅 API – Matrix4x4(열 우선 규약)</a></li><li><a href="https://docs.unity3d.com/ScriptReference/Matrix4x4.TRS.html" target="_blank" rel="noopener">Unity 스크립팅 API – Matrix4x4.TRS</a></li><li><a href="https://docs.unity3d.com/Manual/class-Transform.html" target="_blank" rel="noopener">Unity 매뉴얼 – Transforms(부모 자식과 로컬·월드)</a></li><li><a href="https://docs.unity3d.com/Manual/SL-UnityShaderVariables.html" target="_blank" rel="noopener">Unity 매뉴얼 – Built-in shader variables reference(MVP 행렬)</a></li></ul></div>
+</article>
+<div class="pager"><a href="05-01.html">← 벡터</a><a href="05-03.html">회전 →</a></div>
+<footer>정리 글은 Claude가 썼다. 틀린 내용이 있을 수 있으니 중요한 내용은 참고 자료 원문으로 확인한다.</footer>
+</main>
+</body>
+</html>
