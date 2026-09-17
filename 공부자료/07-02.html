@@ -69,10 +69,11 @@
 <p>인벤토리 목록을 매 프레임 훑는데 프레임이 튄다. 원소 수는 그대로인데 <code>List</code>로 담을 때와 <code>LinkedList</code>로 담을 때가 다르다. </p>
 <p>차이는 하나다. 원소를 <strong>메모리에 이어 붙였느냐, 흩어 놓고 참조로 이었느냐</strong>. </p>
 <h3>주소를 계산하느냐, 따라가느냐</h3>
-<p>배열은 같은 크기의 원소를 빈틈없이 이어 붙인다. i번째 주소는 시작 주소 + i &times; 원소 크기로 바로 나온다. 계산 한 번이니 임의 접근이 O(1)이다. </p>
-<p>대신 중간에 끼워 넣으려면 뒤쪽을 전부 한 칸씩 밀어야 해서 O(n)이 된다. 연결 리스트는 정반대다. 노드마다 다음 참조를 들고 흩어져 있어서 i번째에 닿으려면 처음부터 하나씩 따라가야 한다. </p>
+<p>배열은 같은 크기의 원소를 빈틈없이 이어 붙인다. i번째 주소는 시작 주소 + i &times; 원소 크기로 바로 나온다. 계산 한 번으로 접근해 끝나니 임의 접근이 O(1)이다. </p>
+<p>대신 앞이나 중간에 넣으면 뒤 원소를 전부 한 칸씩 밀어야 해서 O(n)이 된다. 연결 리스트는 정반대다. 노드마다 다음 참조를 들고 흩어져 있어서 i번째까지 처음부터 하나씩 따라가야 한다. </p>
 <svg viewBox="0 0 640 228" width="100%" role="img" aria-label="배열은 원소가 연속으로 놓여 캐시 라인 하나에 여러 개가 함께 실리고, 연결 리스트는 노드가 흩어져 참조를 따라가야 다음 노드에 닿는 것을 비교한 그림"><text x="8" y="20" font-size="13" fill="currentColor">배열 — 빈틈없이 이어 붙인다</text><rect x="16" y="28" width="48" height="32" fill="none" stroke="currentColor"/><text x="40" y="49" font-size="13" text-anchor="middle" fill="currentColor">0</text><rect x="64" y="28" width="48" height="32" fill="none" stroke="currentColor"/><text x="88" y="49" font-size="13" text-anchor="middle" fill="currentColor">1</text><rect x="112" y="28" width="48" height="32" fill="none" stroke="currentColor"/><text x="136" y="49" font-size="13" text-anchor="middle" fill="currentColor">2</text><rect x="160" y="28" width="48" height="32" fill="none" stroke="currentColor"/><text x="184" y="49" font-size="13" text-anchor="middle" fill="currentColor">3</text><rect x="208" y="28" width="48" height="32" fill="none" stroke="currentColor"/><text x="232" y="49" font-size="13" text-anchor="middle" fill="currentColor">4</text><rect x="256" y="28" width="48" height="32" fill="none" stroke="currentColor"/><text x="280" y="49" font-size="13" text-anchor="middle" fill="currentColor">5</text><rect x="304" y="28" width="48" height="32" fill="none" stroke="currentColor"/><text x="328" y="49" font-size="13" text-anchor="middle" fill="currentColor">6</text><rect x="352" y="28" width="48" height="32" fill="none" stroke="currentColor"/><text x="376" y="49" font-size="13" text-anchor="middle" fill="currentColor">7</text><polyline points="16,68 16,74 208,74 208,68" stroke="currentColor" fill="none"/><text x="16" y="92" font-size="13" fill="currentColor">캐시 라인 하나에 이만큼 함께 실려 온다</text><text x="412" y="48" font-size="13" fill="currentColor">주소를 바로 계산한다</text><text x="8" y="126" font-size="13" fill="currentColor">연결 리스트 — 흩어진 노드를 참조로 잇는다</text><rect x="16" y="150" width="58" height="32" fill="none" stroke="currentColor"/><text x="45" y="171" font-size="13" text-anchor="middle" fill="currentColor">n0</text><rect x="290" y="150" width="58" height="32" fill="none" stroke="currentColor"/><text x="319" y="171" font-size="13" text-anchor="middle" fill="currentColor">n1</text><rect x="150" y="150" width="58" height="32" fill="none" stroke="currentColor"/><text x="179" y="171" font-size="13" text-anchor="middle" fill="currentColor">n2</text><rect x="420" y="150" width="58" height="32" fill="none" stroke="currentColor"/><text x="449" y="171" font-size="13" text-anchor="middle" fill="currentColor">n3</text><path d="M74,152 C140,112 230,112 290,152" stroke="currentColor" fill="none"/><path d="M290,152 L279,141 L277,153 Z" fill="currentColor" stroke="none"/><path d="M290,180 C262,212 240,212 212,184" stroke="currentColor" fill="none"/><path d="M208,180 L220,184 L216,172 Z" fill="currentColor" stroke="none"/><path d="M208,152 C280,108 360,108 420,152" stroke="currentColor" fill="none"/><path d="M420,152 L409,141 L407,153 Z" fill="currentColor" stroke="none"/><text x="486" y="171" font-size="13" fill="currentColor">다음 주소는 읽어야 안다</text><text x="16" y="214" font-size="13" fill="currentColor">노드마다 캐시 라인을 새로 읽는다</text></svg>
-<p>그럼 삽입은 연결 리스트가 빠른가. 조건이 붙는다. 넣을 자리의 노드를 이미 손에 들고 있어야 참조 두 개만 고쳐 끝난다. 자리를 찾는 비용이 빠진 값이다. </p>
+<p>그럼 삽입은 연결 리스트가 빠른가. 조건이 붙는다. 넣을 자리의 노드를 이미 손에 들고 있어야 포인터만 바꿔 O(1)로 넣고 뺀다. </p>
+<p>자리를 찾는 비용이 빠진 값이라는 뜻이다. 순회는 둘 다 O(n)으로 같다. </p>
 <table><thead><tr><th>연산 </th><th>배열 · <code>List&lt;T&gt;</code> </th><th>연결 리스트 · <code>LinkedList&lt;T&gt;</code> </th></tr></thead><tbody>
 <tr><td>인덱스로 접근 </td><td>O(1) </td><td>O(n) </td></tr>
 <tr><td>맨 뒤에 추가 </td><td>O(1) 분할 상환 </td><td>O(1) </td></tr>
@@ -80,15 +81,15 @@
 <tr><td>순회 </td><td>O(n), 캐시에 유리 </td><td>O(n), 캐시 미스 잦음 </td></tr>
 <tr><td>원소당 메모리 </td><td>값만 </td><td>값 + 참조 2개 + 헤더 </td></tr></tbody></table>
 <h3>복잡도가 같은 순회에서 실측이 갈리는 이유</h3>
-<p>CPU는 메모리를 캐시 라인 단위로 읽는다. 보통 64바이트를 통째로 당겨 온다. 배열은 한 번 읽으면 바로 뒤에 쓸 원소까지 캐시에 딸려 온다. </p>
-<p>연결 리스트는 노드가 힙에 흩어져 있어 참조를 따라갈 때마다 새 라인을 읽는다. 게다가 주소를 읽어야 다음 주소를 아니 프리페처가 미리 당겨 오지도 못한다. </p>
-<p>같은 O(n) 순회인데 실측이 몇 배 벌어지는 이유가 여기 있다. </p>
+<p>CPU는 메모리를 캐시 라인 단위로 읽는다. 보통 64바이트를 통째로 당겨 온다. 배열은 원소가 메모리에 붙어 있어 한 번 읽으면 여러 원소가 딸려 오고, 하드웨어 프리페치도 잘 듣는다. </p>
+<p>연결 리스트는 노드가 힙에 흩어져 있어 참조를 따라갈 때마다 매번 캐시 미스가 나기 쉽다. 게다가 주소를 읽어야 다음 주소를 아니 미리 당겨 오지도 못한다. </p>
+<p>복잡도는 둘 다 O(n)인데 실측은 몇 배씩 갈리는 대표 사례이며, 원소가 연속해 있어 캐시 적중률이 높기 때문이다. 그래서 잦은 중간 삽입이 없다면 대체로 연결 리스트보다 배열 쪽이 낫다. </p>
 <h3><code>List&lt;T&gt;</code>는 사실 동적 배열이다</h3>
-<p>C#의 <code>List&lt;T&gt;</code>는 속에 <code>T[]</code> 하나를 들고 있다. <code>Add</code>로 채우다 용량이 차면 대개 두 배 크기의 새 배열을 잡아 전부 복사한다. 버려진 옛 배열은 가비지 컬렉션(GC) 대상이 된다. </p>
-<p>넣을 개수를 안다면 <code>new List&lt;T&gt;(capacity)</code>로 미리 잡아 둔다. 복사와 GC 할당이 한꺼번에 사라진다. </p>
+<p>C#의 <code>List&lt;T&gt;</code>는 속에 <code>T[]</code> 하나를 들고 있다. <code>Add</code>로 채우다 용량이 차면 대개 두 배로 늘린 새 배열에 기존 원소를 전부 복사한다. 버려진 옛 배열은 가비지 컬렉션(GC) 대상이 된다. </p>
+<p>그 순간은 O(n)이지만 확장이 드물게 일어나므로 <code>Add</code> 한 번의 분할 상환 비용은 O(1)이다. 넣을 개수를 미리 안다면 <code>new List&lt;T&gt;(capacity)</code>로 잡아 두어 복사와 GC 할당을 줄이는 것이 게임 코드에서 흔한 요령이다. </p>
 <p><code>LinkedList&lt;T&gt;</code>는 반대로 원소마다 노드 객체를 하나씩 할당한다. 중간 삽입이 아주 잦고 <strong>노드 참조를 이미 들고 있는</strong> 경우가 아니면 거의 언제나 <code>List&lt;T&gt;</code>가 낫다. </p>
 <h3>연결 리스트 뒤집기는 참조 세 개면 된다</h3>
-<p>단골 문제다. 노드를 새로 만들지 않고 링크 방향만 돌린다. 시간 O(n), 공간 O(1)로 끝나는 풀이다: </p>
+<p>단골 문제다. 노드를 새로 만들지 않고 이전&#183;현재&#183;다음 세 포인터로 링크 방향을 하나씩 바꾼다. 시간 O(n), 공간 O(1)로 끝나는 풀이다: </p>
 <pre><code>public static Node Reverse(Node head)
 {
     Node prev = null, curr = head;
@@ -101,7 +102,7 @@
     }
     return prev;                // 원래 꼬리가 새 머리다
 }</code></pre>
-<p><code>next</code>를 먼저 보관하는 한 줄이 전부다. 그 줄이 없으면 <code>curr.Next</code>를 덮는 순간 뒤쪽을 통째로 잃는다. </p>
+<p>세 변수를 두고 셋을 한 칸씩 전진시키는 일을 끝까지 반복한다. <code>next</code>를 미리 보관하지 않고 링크를 끊으면 뒤쪽 노드를 잃어버리는 것이 이 문제의 단골 실수다. </p>
 <h3>면접에서 이렇게 답한다</h3><ul>
 <li><strong>배열과 연결 리스트의 차이</strong> — 배열은 연속 메모리라 인덱스 접근이 O(1)이고 중간 삽입이 O(n)이다. 연결 리스트는 정반대로 접근이 O(n)이고 위치를 알면 삽입이 O(1)이다. 실전에서는 캐시 지역성 때문에 배열이 유리하다는 말까지 붙인다. </li>
 <li><strong>List와 LinkedList 중 무엇을 썼나</strong> — 거의 <code>List&lt;T&gt;</code>라고 답한다. 순회가 압도적으로 많고 노드 할당이 없어 GC에도 유리하다. <code>LinkedList&lt;T&gt;</code>는 노드 참조를 들고 재배치를 자주 하는 캐시 만료 목록 정도에 쓴다. </li>

@@ -71,7 +71,7 @@
 var a = new A();
 Debug.Log(a.S == null);     // True  - 참조 형식의 기본값은 null
 Debug.Log(a.D == null);     // False - 값 형식은 null이 될 수 없다
-Debug.Log(a.D == default);  // True  - "설정 안 됨"은 이렇게 본다</code></pre><p>함정은 두 번째 줄이 컴파일된다는 데 있다. <code>a.D == null</code>은 <code>DateTime?</code> 비교로 승격된다. 문법은 통과하지만 결과가 언제나 <code>False</code>라 컴파일러가 경고를 붙인다.</p><p>값이 들어왔는지를 정말 구분하려면 필드를 <code>DateTime?</code>로 선언한다. 참고로 <code>DateTime</code>의 기본값은 <code>DateTime.MinValue</code>다.</p><h3>정적 초기화는 타입을 처음 쓸 때 한 번만 돈다</h3><p>순서는 정해져 있다. 정적 필드 이니셜라이저, 정적 생성자, 인스턴스 필드 이니셜라이저, 인스턴스 생성자. 정적 쪽은 타입을 처음 쓸 때 한 번, 인스턴스 쪽은 객체를 만들 때마다 돈다.</p><p>네 자리에 로그를 심어 순서를 눈으로 본 코드다:</p><pre><code>class Counter
+Debug.Log(a.D == default);  // True  - "설정 안 됨"은 이렇게 본다</code></pre><p><code>string</code>은 참조 형식이라 초기화하지 않은 필드의 기본값이 null이므로 첫 줄은 True다. <code>DateTime</code>은 값 형식이라 기본값이 <code>DateTime.MinValue</code>이고 null이 될 수 없다.</p><p>함정은 두 번째 줄이 컴파일된다는 데 있다. 이때 비교는 <code>DateTime?</code>로 승격돼 컴파일은 되지만, 항상 false라는 경고와 함께 결과는 언제나 <code>False</code>다.</p><p>값 형식의 미설정 여부를 확인하려면 필드를 <code>DateTime?</code>로 쓰거나 <code>default</code>와 비교해야 한다.</p><h3>정적 초기화는 타입을 처음 쓸 때 한 번만 돈다</h3><p>순서는 정해져 있다. 정적 필드 이니셜라이저, 정적 생성자, 인스턴스 필드 이니셜라이저, 인스턴스 생성자. 정적 쪽은 타입을 처음 쓸 때 한 번, 인스턴스 쪽은 객체를 만들 때마다 돈다.</p><p>네 자리에 로그를 심어 순서를 눈으로 본 코드다:</p><pre><code>class Counter
 {
     static int total = Log("1 정적 필드 이니셜라이저");
     int id = Log("3 인스턴스 필드 이니셜라이저");

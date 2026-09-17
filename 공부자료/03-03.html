@@ -69,7 +69,7 @@
 <p>총알 1000발을 동시에 띄웠더니 프레임이 반으로 떨어졌다. 탄도 계산이 무거운 줄 알았는데, 프로파일러 맨 위에 올라온 것은 계산이 아니었다.</p>
 <p>매 프레임 도는 코드에서 정작 비싼 것은 무엇인가? 무언가를 찾는 비용과 엔진 경계를 넘는 비용이다. 둘 다 답이 정해져 있는데 매번 다시 하는 일이다.</p>
 <h3>참조는 한 번만 찾아 필드에 담는다</h3>
-<p><code>GetComponent</code>는 그 게임오브젝트의 컴포넌트 목록을 훑는 네이티브 호출이다. <code>GameObject.Find</code>는 한술 더 떠 씬 전체를 훑으며 이름을 비교한다. 결과가 바뀌지도 않는데 초당 예순 번 다시 찾을 이유가 없다.</p>
+<p><code>GetComponent</code>는 그 게임오브젝트의 컴포넌트 목록을 훑는 네이티브 호출이다. <code>GameObject.Find</code>는 한술 더 떠 씬의 오브젝트를 전부 훑어 이름을 비교하므로, 오브젝트가 많을수록 느려진다. 결과가 바뀌지도 않는데 초당 예순 번 다시 찾을 이유가 없다.</p>
 <p>총알이 자기 Rigidbody를 매 프레임 찾지 않게 하는 코드다:</p>
 <pre><code>Rigidbody _body;                          // 참조는 필드에 담아 둔다
 
@@ -77,10 +77,11 @@ void Awake()
 {
     _body = GetComponent&lt;Rigidbody&gt;();    // 탐색은 생길 때 한 번만
 }</code></pre>
-<p>가장 싼 방법은 아예 찾지 않는 것이다. 인스펙터로 미리 꽂아 두거나 생성한 쪽에서 넘겨 준다. 그럴 수 없을 때 <code>Awake</code>에서 한 번 찾는다.</p>
-<p><code>Find</code>에는 함정이 하나 더 있다. 비활성 오브젝트는 아예 못 찾는다. 껐다 켜며 쓰는 객체를 이름으로 찾다가 null을 받아 본 적이 있다면 범인이 이것이다. 이런 공용 객체는 매니저에 등록해 두고 조회한다.</p>
+<p>가장 싼 방법은 아예 찾지 않는 것이다. 인스펙터로 참조를 넣어 두거나 생성한 쪽에서 넘겨 주면 탐색 자체가 없다. 그럴 수 없으면 <code>Awake</code>나 <code>Start</code>에서 한 번 가져와 필드에 저장해 쓴다.</p>
+<p>반대로 매 프레임 반복하면 그만큼이 그대로 낭비다. 특히 <code>OnGUI</code>는 한 프레임에 여러 번 불릴 수 있어서, 거기에 탐색을 두면 같은 코드가 몇 배로 돈다.</p>
+<p><code>Find</code>에는 함정이 하나 더 있다. 비활성 오브젝트는 아예 못 찾는다. 껐다 켜며 쓰는 객체를 이름으로 찾다가 null을 받아 본 적이 있다면 범인이 이것이다. 이런 공용 객체는 매니저를 통해 등록하고 조회하는 방식도 흔히 쓴다.</p>
 <h3>Update 하나마다 엔진 경계를 한 번씩 넘는다</h3>
-<p><code>Update</code>가 달린 스크립트는 개수만큼 엔진(C++)에서 스크립트(C#)로 넘어오는 호출을 만든다. 스크립트가 1000개면 경계를 넘는 호출도 1000번이다. 이 <strong>비용은 본문이 비어 있어도 든다</strong>. 빈 Update를 지우라는 조언이 여기서 나온다.</p>
+<p><code>Update</code>가 달린 스크립트는 개수만큼 엔진(C++)에서 스크립트(C#)로 넘어오는 호출을 만든다. 네이티브에서 매니지드로 넘어오는 이 호출 비용이 스크립트 개수만큼 붙는다. 스크립트가 1000개면 경계를 넘는 호출도 1000번이다. 이 <strong>비용은 본문이 비어 있어도 든다</strong>. 빈 Update를 지우라는 조언이 여기서 나온다.</p>
 <svg viewBox="0 0 640 205" width="100%" role="img" aria-label="Update를 둔 스크립트 1000개는 엔진과 스크립트 경계를 1000번 넘고 매니저 하나는 한 번만 넘는다"><text x="0" y="16" font-size="13" fill="currentColor">엔진(C++)에서 스크립트(C#)로 몇 번 넘어오나</text><rect x="10" y="30" width="86" height="165" fill="none" stroke="currentColor"/><text x="26" y="58" font-size="13" fill="currentColor">엔진</text><text x="24" y="76" font-size="13" fill="currentColor">(C++)</text><rect x="500" y="30" width="130" height="165" fill="none" stroke="currentColor"/><text x="514" y="58" font-size="13" fill="currentColor">스크립트</text><text x="514" y="76" font-size="13" fill="currentColor">(C#)</text><text x="106" y="52" font-size="13" fill="currentColor">Update를 둔 스크립트 1000개</text><line x1="106" y1="66" x2="494" y2="66" stroke="currentColor"/><polyline points="486,61 495,66 486,71" fill="none" stroke="currentColor"/><line x1="106" y1="82" x2="494" y2="82" stroke="currentColor"/><polyline points="486,77 495,82 486,87" fill="none" stroke="currentColor"/><line x1="106" y1="98" x2="494" y2="98" stroke="currentColor"/><polyline points="486,93 495,98 486,103" fill="none" stroke="currentColor"/><text x="106" y="118" font-size="13" fill="currentColor">경계 1000번 — 본문이 비어도 든다</text><line x1="10" y1="132" x2="630" y2="132" stroke="currentColor" stroke-dasharray="4 4"/><text x="106" y="156" font-size="13" fill="currentColor">매니저 하나가 리스트를 순회</text><line x1="106" y1="170" x2="494" y2="170" stroke="currentColor"/><polyline points="486,165 495,170 486,175" fill="none" stroke="currentColor"/><text x="106" y="190" font-size="13" fill="currentColor">경계 1번 — 안에서는 연속 배열 순회</text></svg>
 <p>총알 1000개를 매니저 하나로 모은 코드다:</p>
 <pre><code>public class BulletManager : MonoBehaviour
@@ -94,12 +95,13 @@ void Awake()
             _list[i].Tick(dt);     // Bullet에는 Update가 없다. Tick만 있다
     }
 }</code></pre>
-<p>경계를 넘는 호출이 1000번에서 한 번으로 준다. 덤으로 데이터가 연속으로 놓여 캐시에도 유리하다.</p>
-<p>여기서 더 밀어붙일 카드는 둘이다. Job System과 Burst로 병렬화하거나, 갱신 주기를 프레임마다 나눈다.</p>
+<p>매니저 한 곳에서 배열이나 리스트를 순회하면 호출 비용이 한 번으로 줄고, 데이터도 연속으로 놓여 캐시에 유리하다. 목록을 돌며 일괄로 처리한다는 것이 요점이다.</p>
+<p>여기서 더 밀어붙일 카드는 둘이다. Job System과 Burst로 병렬화하거나, 매 프레임 볼 필요가 없는 대상은 여러 프레임에 나눠 처리한다. 화면 밖의 적을 열 프레임에 한 번만 갱신하는 식이다.</p>
 <h3>Canvas는 어디를 기준으로 나누나</h3>
-<p>UGUI는 Canvas 단위로 자식 메시를 하나로 합쳐 그린다. 요소 하나가 바뀌면 그 Canvas 전체의 레이아웃과 배치를 다시 만든다. 다시 만드는 범위가 Canvas 하나 통째라는 점이 요점이다.</p>
+<p>UGUI는 Canvas 단위로 요소의 메시를 하나로 합쳐 그리기 때문에, 요소 하나가 바뀌면 그 Canvas를 다시 배치하고 메시를 재구성한다. 다시 만드는 범위가 Canvas 하나 통째라는 점이 요점이다.</p>
 <p>매 프레임 숫자가 바뀌는 타이머가 정적인 HUD와 같은 Canvas에 있다고 하자. 가만히 있는 체력 바와 미니맵까지 매 프레임 함께 다시 만들어진다. 자주 바뀌는 요소를 별도 Canvas로 떼는 이유다.</p>
-<p>다만 Canvas가 늘면 그 경계에서 배칭이 끊겨 드로우 콜이 는다. 기준은 갱신 빈도지 요소 개수가 아니다.</p>
+<p>떼면 정적인 UI는 다시 만들지 않아도 된다. 자식 Canvas 안의 변화는 부모까지 번지지 않으니 중첩 Canvas도 같은 값을 한다. 계층을 그대로 두고 떼고 싶을 때 쓴다.</p>
+<p>다만 Canvas가 늘면 그 경계에서 배칭이 나뉘어 드로우 콜은 늘 수 있으므로 균형이 필요하다. 기준은 갱신 빈도지 요소 개수가 아니다.</p>
 <h3>면접에서 이렇게 답한다</h3>
 <ul><li><strong>GetComponent를 왜 캐싱하나</strong> — 컴포넌트를 찾는 탐색이 매 프레임 반복되기 때문이라고 말한다. 참조가 바뀌지 않으면 Awake에서 한 번 받아 필드에 두고 재사용한다.</li>
 <li><strong>GameObject.Find를 피하는 이유와 대안</strong> — 씬 전체를 훑고 이름을 비교해 오브젝트가 많을수록 느려진다. 비활성 오브젝트는 찾지도 못한다. 인스펙터 주입이 가장 싸고, 공용 객체는 매니저에 등록해 조회한다고 이어 간다.</li>

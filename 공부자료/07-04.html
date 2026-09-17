@@ -68,23 +68,27 @@
 <p class="lead">키를 숫자로 바꿔 자리를 정한다. 충돌 처리와 로드 팩터가 평균 O(1)을 떠받친다</p>
 <p>유닛 1만 개에서 ID로 하나를 찾는다고 하자. 목록을 처음부터 훑으면 평균 5천 번을 비교한다. 해시 테이블은 비교를 한 번도 하지 않고 자리를 계산해 찍는다. </p>
 <h3>비교하는 대신 자리를 계산한다</h3>
-<p>해시 테이블은 <strong>키에서 저장 위치를 계산으로 바로 얻는</strong> 구조다. 키를 해시 함수에 넣어 정수를 얻고, 그 값을 버킷 수로 나눈 나머지가 자리다. </p>
+<p>해시 테이블은 <strong>키를 해시 함수로 버킷 위치로 바꿔</strong> 평균 O(1)에 넣고 찾는 구조다. 키를 해시 함수에 넣어 정수를 얻고, 그 값을 버킷 수로 나눈 나머지가 자리다. </p>
 <p>찾을 때도 같은 계산을 하니 같은 자리가 나온다. 평균 O(1)의 정체는 이 계산 한 번이다. </p>
 <h3>충돌은 없앨 수 없고 처리하는 것이다</h3>
-<p>서로 다른 키가 같은 자리로 가는 일을 충돌이라 한다. 키의 가짓수가 버킷 수보다 많으니 아무리 좋은 해시 함수를 써도 원리상 없앨 수 없다. </p>
+<p>서로 다른 키가 같은 위치로 가는 일을 충돌이라 한다. 키 공간이 버킷 수보다 넓으므로 아무리 좋은 해시 함수를 써도 원리상 피할 수 없어서, 없애는 대신 처리한다. </p>
 <svg viewBox="0 0 640 206" width="100%" role="img" aria-label="키 세 개를 해시 함수에 넣어 버킷 번호를 얻고, 두 키가 같은 버킷 1로 가서 목록으로 매달리는 충돌 상황을 그린 그림"><text x="8" y="20" font-size="13" fill="currentColor">키</text><rect x="8" y="44" width="72" height="26" fill="none" stroke="currentColor"/><text x="44" y="62" font-size="13" text-anchor="middle" fill="currentColor">(3,7)</text><rect x="8" y="86" width="72" height="26" fill="none" stroke="currentColor"/><text x="44" y="104" font-size="13" text-anchor="middle" fill="currentColor">(8,2)</text><rect x="8" y="128" width="72" height="26" fill="none" stroke="currentColor"/><text x="44" y="146" font-size="13" text-anchor="middle" fill="currentColor">(5,5)</text><rect x="104" y="44" width="104" height="110" fill="none" stroke="currentColor"/><text x="156" y="92" font-size="13" text-anchor="middle" fill="currentColor">해시 함수</text><text x="156" y="114" font-size="13" text-anchor="middle" fill="currentColor">% 버킷 수</text><line x1="80" y1="57" x2="102" y2="80" stroke="currentColor" fill="none"/><line x1="80" y1="99" x2="102" y2="99" stroke="currentColor" fill="none"/><line x1="80" y1="141" x2="102" y2="118" stroke="currentColor" fill="none"/><line x1="208" y1="99" x2="240" y2="99" stroke="currentColor" fill="none"/><path d="M246,99 L238,94 L238,104 Z" fill="currentColor" stroke="none"/><text x="250" y="20" font-size="13" fill="currentColor">버킷</text><rect x="250" y="30" width="54" height="30" fill="none" stroke="currentColor"/><text x="277" y="50" font-size="13" text-anchor="middle" fill="currentColor">0</text><rect x="250" y="66" width="54" height="30" fill="none" stroke="currentColor"/><text x="277" y="86" font-size="13" text-anchor="middle" fill="currentColor">1</text><rect x="250" y="102" width="54" height="30" fill="none" stroke="currentColor"/><text x="277" y="122" font-size="13" text-anchor="middle" fill="currentColor">2</text><rect x="250" y="138" width="54" height="30" fill="none" stroke="currentColor"/><text x="277" y="158" font-size="13" text-anchor="middle" fill="currentColor">3</text><text x="330" y="50" font-size="13" fill="currentColor">버킷 1에 둘이 함께 들어갔다 — 충돌</text><line x1="304" y1="81" x2="322" y2="81" stroke="currentColor" fill="none"/><path d="M328,81 L320,76 L320,86 Z" fill="currentColor" stroke="none"/><rect x="330" y="66" width="86" height="30" fill="none" stroke="currentColor"/><text x="373" y="86" font-size="13" text-anchor="middle" fill="currentColor">(3,7)</text><line x1="416" y1="81" x2="438" y2="81" stroke="currentColor" fill="none"/><path d="M444,81 L436,76 L436,86 Z" fill="currentColor" stroke="none"/><rect x="446" y="66" width="86" height="30" fill="none" stroke="currentColor"/><text x="489" y="86" font-size="13" text-anchor="middle" fill="currentColor">(8,2)</text><line x1="304" y1="153" x2="322" y2="153" stroke="currentColor" fill="none"/><path d="M328,153 L320,148 L320,158 Z" fill="currentColor" stroke="none"/><rect x="330" y="138" width="86" height="30" fill="none" stroke="currentColor"/><text x="373" y="158" font-size="13" text-anchor="middle" fill="currentColor">(5,5)</text><text x="8" y="192" font-size="13" fill="currentColor">자리를 계산으로 얻는다</text><text x="330" y="192" font-size="13" fill="currentColor">같은 버킷이면 Equals로 진짜 같은 키인지 본다</text></svg>
-<p>해시 값이 같아도 키가 같다는 보장은 없다. 자리를 찾은 뒤 <code>Equals</code>로 한 번 더 확인하는 이유다. 해시는 후보를 좁힐 뿐이다. </p>
+<p>해시 값이 같아도 키가 같다는 보장은 없다. 자리를 찾은 뒤 <code>Equals</code>로 최종 비교를 한 번 더 하는 이유다. 해시는 후보를 좁힐 뿐이다. </p>
 <p>몰린 키를 어디에 두느냐에서 방식이 두 갈래로 갈린다. </p>
 <table><thead><tr><th>방식 </th><th>동작 </th><th>주의점 </th></tr></thead><tbody>
 <tr><td>체이닝 </td><td>같은 버킷에 목록으로 매단다 </td><td>한 버킷에 몰리면 훑어서 O(n) </td></tr>
 <tr><td>개방 주소법 </td><td>빈 칸을 탐사해 들어간다 </td><td>삭제 자리를 그냥 비우면 뒤에 밀려 들어간 원소를 잃는다 </td></tr></tbody></table>
+<p>체이닝은 같은 버킷에 연결 리스트로 원소를 매단다. 버킷마다 리스트를 하나 매달아 충돌한 것끼리 잇고, 찾을 때는 그 리스트만 훑는다. </p>
+<p>개방 주소법은 비어 있는 다른 칸을 찾아 들어간다. 다음 칸부터 차례로 보는 선형 탐사, 간격을 제곱으로 벌리는 이차 탐사, 두 번째 해시 함수로 간격을 정하는 이중 해싱이 있다. </p>
+<p>개방 주소법에서 삭제한 자리를 그냥 비우면 뒤에 탐사로 밀려 들어간 원소를 못 찾으므로, 지웠다는 표시(tombstone)를 남겨야 한다. 충돌을 체이닝 등으로 처리하고 나면 평균은 O(1)이지만, 한 버킷에 죄다 몰린 최악은 O(n)이다. </p>
 <p>.NET의 <code>Dictionary</code>는 체이닝 계열이다. 다만 버킷마다 노드를 할당하지 않고 엔트리 배열에 다음 인덱스를 적어 잇는다. 할당과 캐시 양쪽을 챙긴 절충이다. </p>
 <h3>로드 팩터가 넘으면 전부 다시 배치한다</h3>
-<p>로드 팩터는 원소 수를 버킷 수로 나눈 값이다. 커질수록 한 버킷에 여럿이 몰려 조회가 느려진다. 기준을 넘으면 버킷을 키우고 원소를 처음부터 다시 배치한다. </p>
-<p>버킷 수가 바뀌면 나머지 값이 달라진다. <strong>원소 위치가 유지되지 않는다</strong>는 뜻이다. 재배치 한 번은 O(N)이지만 드물게 일어나 평균 조회는 여전히 O(1)이다. </p>
-<p>담을 개수를 알면 <code>new Dictionary&lt;K, V&gt;(capacity)</code>로 잡아 재배치를 아예 없앤다. </p>
+<p>로드 팩터는 원소 수를 버킷 수로 나눈 값이고, 원소 수 대비 버킷 수가 모자랄수록 커진다. 한 버킷에 여럿이 몰리면 조회가 느려지므로, 충돌이 늘어난 시점에 리사이즈한다. 기준은 대개 0.7~1.0이다. </p>
+<p>기준을 넘으면 버킷 배열을 늘려 키운 뒤 모든 원소를 새 버킷으로 다시 넣는다. 버킷 수가 바뀌면 나머지 값이 달라져 인덱스가 바뀌므로 <strong>원소 위치가 유지되지 않는다</strong>. </p>
+<p>리사이즈는 O(N)이지만 드물게 일어나 평균 조회는 여전히 O(1)이며, 담을 개수를 미리 알면 <code>new Dictionary&lt;K, V&gt;(capacity)</code>로 잡아 리사이즈를 피한다. </p>
 <h3>어떤 타입이 키로 적합한가</h3>
-<p>좋은 해시 함수의 조건은 셋이다. 고르게 흩뿌릴 것, 계산이 쌀 것, 같은 키에 항상 같은 값을 줄 것. C#에서 <code>Equals</code>를 재정의하면 <code>GetHashCode</code>도 짝으로 재정의한다. </p>
+<p>좋은 해시 함수는 값을 버킷에 고르게 흩뿌리고, 계산이 빠르고, 같은 키에는 언제나 같은 값을 준다. 키가 조금만 달라도 값이 고르게 흩어져야 하고, 비슷한 키가 비슷한 값으로 몰리면 특정 버킷에 충돌이 쌓여 조회가 O(N)으로 떨어진다. </p>
+<p>C#에서는 <code>Equals</code>를 재정의하면 <code>GetHashCode</code>도 함께 재정의해야 한다. 둘이 어긋나면 같다고 판정되는 두 키가 서로 다른 버킷에 앉는다. </p>
 <p>구조체를 키로 쓸 때 <code>IEquatable&lt;T&gt;</code>가 없으면 비교마다 박싱이 일어난다. 매 프레임 도는 코드라면 매 프레임 할당이 생긴다는 말이다. 격자 좌표를 키로 쓰는 기본형은 이렇다: </p>
 <pre><code>public readonly struct GridCell : IEquatable&lt;GridCell&gt;
 {
@@ -95,7 +99,11 @@
     public override bool Equals(object obj) =&gt; obj is GridCell c &amp;&amp; Equals(c);
     public override int GetHashCode() =&gt; HashCode.Combine(X, Y);
 }</code></pre>
-<p>가변 필드를 키에 넣으면 사고가 난다. <code>Dictionary</code>에 넣어 둔 뒤 그 필드를 바꾸면 해시가 달라지고, 원래 버킷에서 다시 찾지 못한다. 키 타입은 불변이 안전하다. </p>
+<p>값이 바뀌는 가변 필드를 해시에 넣으면 사고가 난다. <code>Dictionary</code>에 넣어 둔 뒤 그 필드를 바꾸면 해시가 달라져, 넣어 둔 원소를 다시 못 찾게 된다. 키 타입은 불변이 안전하다. </p>
+<h3>키 순서대로 돌아야 한다면 해시가 아니다</h3>
+<p><code>Dictionary</code>는 해시 테이블이라 평균 O(1)이지만 순회 순서를 전혀 보장하지 않는다. 자리가 해시 값으로 정해지니 넣은 순서도 키 순서도 아니다. </p>
+<p><code>SortedDictionary</code>는 레드-블랙 트리 기반이라 키가 정렬된 채 유지되고 조회가 O(log N)이다. 삽입과 삭제가 모두 O(log N)이고, 키 순서대로 순회할 수 있고 범위로 잘라 읽는 것도 된다. </p>
+<p>정렬이 필요하면서 삽입이 드물다면 <code>SortedList</code>가 더 나을 수 있다. 배열 기반이라 메모리가 적고 인덱스 접근이 되는 대신, 중간 삽입이 O(N)으로 튄다. </p>
 <h3>면접에서 이렇게 답한다</h3><ul>
 <li><strong>해시 테이블은 어떻게 동작하나</strong> — 키를 해시 함수로 정수로 바꾸고, 버킷 수로 나눈 나머지를 자리로 써서 바로 접근한다. 해시가 같아도 키는 다를 수 있어 마지막에 <code>Equals</code>로 확인한다. 평균 O(1), 충돌이 한쪽에 몰리면 최악 O(n)이라고 마무리한다. </li>
 <li><strong>충돌은 어떻게 해결하나</strong> — 버킷에 목록으로 잇는 체이닝과, 빈 칸을 찾아 들어가는 개방 주소법이 있다. 개방 주소법은 캐시에 유리하지만 삭제 표시를 남기지 않으면 탐사가 끊겨 원소를 잃는다는 주의점까지 말한다. </li>
